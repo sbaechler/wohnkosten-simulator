@@ -1,0 +1,50 @@
+.diverging-trend {
+  background: #13132a;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+}
+
+.diverging-trend__title {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.diverging-trend__groups {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.diverging-trend__group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.diverging-trend__separator {
+  width: 1px;
+  background: #333;
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+.diverging-trend__arrow {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.diverging-trend__trend-label {
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.diverging-trend__group-name {
+  font-size: 10px;
+  color: #666;
+  margin-top: 2px;
+}

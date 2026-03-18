@@ -1,0 +1,23 @@
+.trend-arrow {
+  background: #13132a;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+}
+
+.trend-arrow__label {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.trend-arrow__icon {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.trend-arrow__text {
+  font-size: 12px;
+  margin-top: 4px;
+}
