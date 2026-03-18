@@ -32,11 +32,34 @@ function computeTrends(baseline: CityParams, modified: CityParams, context: City
   const priceLow = priceBase + (modified.mietrecht - baseline.mietrecht) * -0.1;
   const priceHigh = priceBase + (modified.mietrecht - baseline.mietrecht) * 0.05;
 
+  // Verdichtung: more densification when zoning/regulations/objection rights decrease
+  const verdichtungDelta =
+    -(modified.raumplanung - baseline.raumplanung) * 0.2 +
+    -(modified.bauvorschriften - baseline.bauvorschriften) * 0.15 +
+    -(modified.einspracherechte - baseline.einspracherechte) * 0.15 +
+    (modified.foerderungGemeinnuetzig - baseline.foerderungGemeinnuetzig) * 0.1;
+
+  // Umweltverschmutzung: up = more pollution (bad). Stricter energy/infrastructure reduce it.
+  const umweltDelta =
+    -(modified.energetischeVorgaben - baseline.energetischeVorgaben) * 0.25 +
+    -(modified.infrastruktur - baseline.infrastruktur) * 0.15 +
+    -(modified.raumplanung - baseline.raumplanung) * 0.05;
+
+  // Stadtbild: up = better preserved (good). Objection rights/building codes protect it.
+  const stadtbildDelta =
+    (modified.einspracherechte - baseline.einspracherechte) * 0.2 +
+    (modified.bauvorschriften - baseline.bauvorschriften) * 0.15 +
+    (modified.raumplanung - baseline.raumplanung) * 0.1 +
+    -(modified.foerderungGemeinnuetzig - baseline.foerderungGemeinnuetzig) * 0.05;
+
   return {
     supply: supplyDelta,
     demand: demandDelta,
     priceLow,
     priceHigh,
+    verdichtung: verdichtungDelta,
+    umwelt: umweltDelta,
+    stadtbild: stadtbildDelta,
   };
 }
 
@@ -54,12 +77,15 @@ export function WidgetGrid({ context, baseline, modified, diff }: Props) {
       <DivergingTrend
         title="Trend Wohnpreise"
         groups={[
-          { label: 'Geringverd.', value: trends.priceLow },
-          { label: 'Gutverd.', value: trends.priceHigh },
+          { label: 'Minderheit', value: trends.priceLow },
+          { label: 'Mehrheit', value: trends.priceHigh },
         ]}
       />
       <TrendArrow label="Trend Nachfrage" value={trends.demand} />
-      <TrendArrow label="Trend Angebot" value={trends.supply} />
+      <TrendArrow label="Trend Angebot" value={trends.supply} invertColors />
+      <TrendArrow label="Verdichtung" value={trends.verdichtung} invertColors />
+      <TrendArrow label="Umweltverschmutzung" value={trends.umwelt} />
+      <TrendArrow label="Stadtbild" value={trends.stadtbild} invertColors />
       <OwnershipDonut
         context={context}
         baseline={baseline}

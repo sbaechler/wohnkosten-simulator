@@ -3,6 +3,7 @@ import './TrendArrow.css';
 interface Props {
   label: string;
   value: number; // -1 to +1, 0 = neutral
+  invertColors?: boolean; // true = up is green (good), down is red (bad)
 }
 
 const ARROWS: Record<string, string> = {
@@ -17,10 +18,12 @@ function getDirection(value: number) {
   return 'flat';
 }
 
-function getColor(direction: string) {
-  if (direction === 'up') return '#ff6b6b';
-  if (direction === 'down') return '#51cf66';
-  return '#ffd43b';
+function getColor(direction: string, invertColors: boolean) {
+  if (direction === 'flat') return '#ffd43b';
+  if (invertColors) {
+    return direction === 'up' ? '#51cf66' : '#ff6b6b';
+  }
+  return direction === 'up' ? '#ff6b6b' : '#51cf66';
 }
 
 function getLabel(direction: string) {
@@ -29,9 +32,9 @@ function getLabel(direction: string) {
   return 'stabil';
 }
 
-export function TrendArrow({ label, value }: Props) {
+export function TrendArrow({ label, value, invertColors = false }: Props) {
   const direction = getDirection(value);
-  const color = getColor(direction);
+  const color = getColor(direction, invertColors);
 
   return (
     <div className="trend-arrow">

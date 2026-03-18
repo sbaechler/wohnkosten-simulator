@@ -31,7 +31,7 @@ function computeDemandShift(params: CityParams, context: CityContext): number {
   return taxes + attract + subsidy + migration + economy + population;
 }
 
-const MARGIN = { top: 20, right: 20, bottom: 40, left: 50 };
+const MARGIN = { top: 20, right: 110, bottom: 40, left: 50 };
 const WIDTH = 500;
 const HEIGHT = 200;
 
@@ -157,7 +157,7 @@ const qEq = (8 + 0.8 * 4 * (d - s)) / 1.6;
     }
 
     // Legend
-    const legend = g.append('g').attr('transform', `translate(${w - 120}, 0)`);
+    const legend = g.append('g').attr('transform', `translate(${w + 10}, 0)`);
     legend.append('line').attr('x1', 0).attr('y1', 0).attr('x2', 20).attr('y2', 0)
       .attr('stroke', '#ff6b6b').attr('stroke-width', 2);
     legend.append('text').attr('x', 25).attr('y', 4).attr('fill', '#ff6b6b').attr('font-size', 10).text('Nachfrage');
