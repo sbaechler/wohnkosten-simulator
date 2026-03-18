@@ -21,7 +21,7 @@ export function ParameterSlider({ meta, value, defaultValue, onChange }: Props) 
         max={2}
         step={1}
         value={value}
-        onChange={e => onChange(Number(e.target.value) as ParamValue)}
+        onChange={e => onChange(Math.min(2, Math.max(0, Number(e.target.value))) as ParamValue)}
         className="param-slider__input"
       />
       <div className="param-slider__levels">
