@@ -15,7 +15,7 @@
 .diverging-trend__groups {
   display: flex;
   justify-content: center;
-  gap: 16px;
+  gap: 20px;
   align-items: stretch;
 }
 
@@ -38,7 +38,7 @@
   line-height: 1;
 }
 
-.diverging-trend__trend-label {
+.diverging-trend__label {
   font-size: 11px;
   margin-top: 2px;
 }

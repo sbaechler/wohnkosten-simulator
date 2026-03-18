@@ -28,10 +28,16 @@ function getColor(direction: string) {
   return '#ffd43b';
 }
 
-function getPriceLabel(direction: string) {
-  if (direction === 'up') return '+teurer';
-  if (direction === 'down') return '-günstiger';
-  return 'stabil';
+function getTrendLabel(direction: string, isPrice: boolean) {
+  if (isPrice) {
+    if (direction === 'up') return '+teurer';
+    if (direction === 'down') return '-günstiger';
+    return 'stabil';
+  } else {
+    if (direction === 'up') return 'steigend';
+    if (direction === 'down') return 'sinkend';
+    return 'stabil';
+  }
 }
 
 export function DivergingTrend({ title, groups }: Props) {
@@ -46,8 +52,8 @@ export function DivergingTrend({ title, groups }: Props) {
             <div key={i} className="diverging-trend__group">
               {i > 0 && <div className="diverging-trend__separator" />}
               <div className="diverging-trend__arrow" style={{ color }}>{ARROWS[direction]}</div>
-              <div className="diverging-trend__trend-label" style={{ color }}>
-                {getPriceLabel(direction)}
+              <div className="diverging-trend__label" style={{ color }}>
+                {getTrendLabel(direction, true)}
               </div>
               <div className="diverging-trend__group-name">{group.label}</div>
             </div>
