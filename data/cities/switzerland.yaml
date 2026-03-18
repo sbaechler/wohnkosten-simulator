@@ -1,0 +1,56 @@
+- slug: zuerich
+  name: "Zürich"
+  context:
+    zinsniveau: -1
+    zuwanderungsdruck: 2
+    wirtschaftskraft: 2
+    bevoelkerungstrend: 2
+  params:
+    raumplanung: 2
+    bauvorschriften: 2
+    energetischeVorgaben: 1
+    mietrecht: 1
+    steuerpolitik: 2
+    foerderungGemeinnuetzig: 2
+    subventionen: 1
+    einspracherechte: 2
+    infrastruktur: 2
+    auslaendischeInvestitionen: 1
+
+- slug: bern
+  name: "Bern"
+  context:
+    zinsniveau: -1
+    zuwanderungsdruck: 1
+    wirtschaftskraft: 1
+    bevoelkerungstrend: 1
+  params:
+    raumplanung: 1
+    bauvorschriften: 1
+    energetischeVorgaben: 1
+    mietrecht: 1
+    steuerpolitik: 1
+    foerderungGemeinnuetzig: 1
+    subventionen: 1
+    einspracherechte: 1
+    infrastruktur: 1
+    auslaendischeInvestitionen: 1
+
+- slug: lugano
+  name: "Lugano"
+  context:
+    zinsniveau: -1
+    zuwanderungsdruck: 0
+    wirtschaftskraft: 0
+    bevoelkerungstrend: 0
+  params:
+    raumplanung: 1
+    bauvorschriften: 1
+    energetischeVorgaben: 0
+    mietrecht: 0
+    steuerpolitik: 0
+    foerderungGemeinnuetzig: 0
+    subventionen: 0
+    einspracherechte: 1
+    infrastruktur: 1
+    auslaendischeInvestitionen: 1
