@@ -1,13 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { CityParams, CityConfig, CityContext, ParamValue, ParamsDiff } from '../types';
 import { cities, cityBySlug } from '../generated/cities';
-import { computeDiff } from '../model/params';
+import { computeDiff, paramMeta } from '../model/params';
 
-const PARAM_KEYS = new Set<string>([
-  'raumplanung', 'bauvorschriften', 'energetischeVorgaben', 'mietrecht',
-  'steuerpolitik', 'foerderungGemeinnuetzig', 'subventionen',
-  'einspracherechte', 'infrastruktur', 'auslaendischeInvestitionen',
-]);
+// Derive PARAM_KEYS from paramMeta to avoid duplication with params.ts
+const PARAM_KEY_SET = new Set<string>(paramMeta.map(m => m.key));
 
 function clampParam(v: number): ParamValue {
   return Math.max(0, Math.min(2, Math.round(v))) as ParamValue;
@@ -18,7 +15,7 @@ export function parseUrl(pathname: string, search: string) {
   const overrides: Partial<CityParams> = {};
   const params = new URLSearchParams(search);
   for (const [key, val] of params.entries()) {
-    if (PARAM_KEYS.has(key)) {
+    if (PARAM_KEY_SET.has(key)) {
       const num = parseInt(val, 10);
       if (!isNaN(num)) {
         overrides[key as keyof CityParams] = clampParam(num);
@@ -29,8 +26,10 @@ export function parseUrl(pathname: string, search: string) {
 }
 
 export function buildUrl(citySlug: string, overrides: Partial<CityParams>): string {
-  const entries = Object.entries(overrides).filter(([, v]) => v !== undefined);
-  const query = entries.map(([k, v]) => `${k}=${v}`).join('&');
+  const entries = Object.entries(overrides)
+    .filter(([, v]) => v !== undefined)
+    .sort(([a], [b]) => a.localeCompare(b));
+  const query = new URLSearchParams(entries.map(([k, v]) => [k, String(v)])).toString();
   return query ? `/${citySlug}?${query}` : `/${citySlug}`;
 }
 
@@ -46,22 +45,28 @@ export interface UrlState {
 }
 
 export function useUrlState(): UrlState {
-  const [, forceUpdate] = useState(0);
-
-  const { citySlug, overrides } = parseUrl(
-    window.location.pathname,
-    window.location.search.replace(/^\?/, ''),
+  // Store URL as state so React can track changes with stable references
+  const [locationKey, setLocationKey] = useState(
+    () => window.location.pathname + window.location.search
   );
 
-  const city = cityBySlug.get(citySlug) || cities[0];
+  const { citySlug, overrides } = useMemo(
+    () => parseUrl(window.location.pathname, window.location.search),
+    [locationKey]
+  );
+
+  const city = useMemo(
+    () => cityBySlug.get(citySlug) || cities[0],
+    [citySlug]
+  );
   const baseline = city.params;
-  const modified = useMemo(() => ({ ...baseline, ...overrides }), [baseline, overrides]);
+  const modified = useMemo(() => ({ ...baseline, ...overrides }), [baseline, locationKey]);
   const diff = useMemo(() => computeDiff(baseline, modified), [baseline, modified]);
 
   const pushUrl = useCallback((slug: string, ov: Partial<CityParams>) => {
     const url = buildUrl(slug, ov);
     window.history.pushState(null, '', url);
-    forceUpdate(n => n + 1);
+    setLocationKey(window.location.pathname + window.location.search);
   }, []);
 
   const setParam = useCallback((key: keyof CityParams, value: ParamValue) => {
@@ -83,7 +88,7 @@ export function useUrlState(): UrlState {
   }, [city.slug, pushUrl]);
 
   useEffect(() => {
-    const onPop = () => forceUpdate(n => n + 1);
+    const onPop = () => setLocationKey(window.location.pathname + window.location.search);
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
