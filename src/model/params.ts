@@ -6,6 +6,15 @@ const PARAM_KEYS = [
   'einspracherechte', 'infrastruktur', 'auslaendischeInvestitionen',
 ] as const;
 
+// Compile-time check: PARAM_KEYS must cover all CityParams keys (and nothing extra)
+type _AssertAllParamKeys = typeof PARAM_KEYS[number] extends keyof CityParams
+  ? keyof CityParams extends typeof PARAM_KEYS[number]
+    ? true
+    : never
+  : never;
+const _check: _AssertAllParamKeys = true;
+void _check;
+
 export function computeDiff(baseline: CityParams, modified: CityParams): ParamsDiff {
   const diff: ParamsDiff = {};
   for (const key of PARAM_KEYS) {
