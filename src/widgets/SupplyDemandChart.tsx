@@ -128,8 +128,7 @@ export function SupplyDemandChart({ context, baseline, modified, diff }: Props) 
       // demand: p = 9 - (q - shift*4) * 0.8
       // set equal: 1 + (q + s*4)*0.8 = 9 - (q - d*4)*0.8
       const s = supplyShift, d = demandShift;
-      const q = (8 - 0.8 * s * 4 - 0.8 * d * 4) / 1.6 + (s * 4 + d * 4) / 2;
-      const qEq = (8 + 0.8 * 4 * (d - s)) / 1.6;
+const qEq = (8 + 0.8 * 4 * (d - s)) / 1.6;
       const pEq = 1 + (qEq + s * 4) * 0.8;
       return [Math.max(0, Math.min(10, qEq)), Math.max(0, Math.min(10, pEq))];
     }
