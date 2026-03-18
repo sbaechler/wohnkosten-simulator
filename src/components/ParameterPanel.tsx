@@ -1,6 +1,5 @@
 import type { CityParams, CityContext, ParamValue } from '../types';
-import { paramMeta } from '../model/params';
-import { hasChanges } from '../model/params';
+import { paramMeta, hasChanges } from '../model/params';
 import { ParameterSlider } from './ParameterSlider';
 import { ContextIndicators } from './ContextIndicators';
 import './ParameterPanel.css';
