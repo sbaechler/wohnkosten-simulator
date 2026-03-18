@@ -8,7 +8,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const yamlPath = resolve(__dirname, '../data/cities/switzerland.yaml');
 const outPath = resolve(__dirname, '../src/generated/cities.ts');
 
-const cities = load(readFileSync(yamlPath, 'utf-8'));
+const raw = load(readFileSync(yamlPath, 'utf-8'));
+
+if (!Array.isArray(raw)) {
+  throw new Error(`Expected YAML root to be an array, got ${typeof raw}`);
+}
+
+const cities = raw;
 
 mkdirSync(dirname(outPath), { recursive: true });
 
@@ -22,4 +28,4 @@ writeFileSync(outPath, [
   '',
 ].join('\n'));
 
-console.log(`Generated ${outPath} with ${(cities as any[]).length} cities.`);
+console.log(`Generated ${outPath} with ${cities.length} cities.`);
