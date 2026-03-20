@@ -60,6 +60,23 @@ Zwei-Spalten-Layout:
    - Innerer Ring (transparent): Ist-Zustand
    - Kategorien: Privat, Institutionell, Genossenschaften/Stiftungen, Oeffentliche Hand
 
+### Geplante Erweiterungs-Widgets
+
+Weitere Analyse-Widgets basierend auf dem Wirkungsmodell sind spezifiziert in:  
+→ **[widget-ideen.md](widget-ideen.md)**
+
+Priorität 1 (sofort umsetzbar, keine neuen Daten nötig):
+- **Gentrifizierungsindex** — Verdrängungsdruck im Szenario
+- **Zeit bis Marktwirkung** — Aggregiertes Zeitprofil aller Parameteränderungen
+- **Neubau-Hemmnisindex** — Regulatorische Bremse auf neuen Wohnraum
+- **Verdrängungsrisiko** — Schutz bestehender Mieter
+
+Priorität 2 (nächste Phase):
+- Lock-in-Effekt / Marktfriktion
+- Eigentumsquoten-Prognose
+- Gemeinnütziger Sektor-Anteil (langfristig)
+- Fiskalische Wirkung für die Stadt
+
 ### Veraenderungsdarstellung
 
 - Diagramme: Vorher (gestrichelt/transparent) + Nachher (farbig/solid) ueberlagert
