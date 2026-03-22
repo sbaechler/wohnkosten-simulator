@@ -1,0 +1,73 @@
+.eigentumsquoten-widget {
+  background: #13132a;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.eigentumsquoten-widget__title {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.eigentumsquoten-widget__main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.eigentumsquoten-widget__pct {
+  font-size: 32px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1;
+}
+
+.eigentumsquoten-widget__arrow {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.eigentumsquoten-widget__label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.eigentumsquoten-widget__bar-container {
+  margin-bottom: 8px;
+}
+
+.eigentumsquoten-widget__bar-bg {
+  position: relative;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.eigentumsquoten-widget__bar-marker {
+  position: absolute;
+  top: -4px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 8px solid #fff;
+  transform: translateX(-50%);
+  transition: left 0.4s ease;
+}
+
+.eigentumsquoten-widget__bar-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: #555;
+}
+
+.eigentumsquoten-widget__source {
+  font-size: 10px;
+  color: #555;
+  text-align: right;
+}

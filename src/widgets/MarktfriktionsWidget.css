@@ -1,0 +1,59 @@
+.marktfriktions-widget {
+  background: #13132a;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.marktfriktions-widget__title {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.marktfriktions-widget__bar-container {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.marktfriktions-widget__gradient-bar {
+  display: flex;
+  height: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.marktfriktions-widget__indicator {
+  position: absolute;
+  top: -4px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid #fff;
+  transform: translateX(-50%);
+  transition: left 0.4s ease;
+}
+
+.marktfriktions-widget__labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.marktfriktions-widget__value {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.marktfriktions-widget__description {
+  font-size: 11px;
+  color: #888;
+  text-align: center;
+  line-height: 1.4;
+}

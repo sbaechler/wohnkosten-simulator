@@ -1,0 +1,70 @@
+.gemeinnuetzig-widget {
+  background: #13132a;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.gemeinnuetzig-widget__title {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.gemeinnuetzig-widget__bar-container {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.gemeinnuetzig-widget__gradient-bar {
+  display: flex;
+  height: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.gemeinnuetzig-widget__indicator {
+  position: absolute;
+  top: -4px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid;
+  transform: translateX(-50%);
+  transition: left 0.4s ease, border-color 0.4s ease;
+}
+
+.gemeinnuetzig-widget__ref {
+  position: absolute;
+  top: 16px;
+  transform: translateX(-50%);
+}
+
+.gemeinnuetzig-widget__ref-line {
+  width: 1px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.gemeinnuetzig-widget__labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.gemeinnuetzig-widget__value {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.gemeinnuetzig-widget__refs {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: #555;
+}
