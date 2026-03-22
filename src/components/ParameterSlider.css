@@ -1,10 +1,18 @@
 .param-slider {
   margin-bottom: 20px;
+  position: relative;
+  padding-left: 12px; /* always reserve space to prevent layout shift */
 }
 
-.param-slider--changed {
-  border-left: 2px solid #ffd43b;
-  padding-left: 10px;
+.param-slider--changed::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #ffd43b;
+  border-radius: 1px;
 }
 
 .param-slider__label {
