@@ -1,15 +1,28 @@
 import { describe, it, expect } from 'vitest';
 import { parseUrl, buildUrl } from './useUrlState';
 
-describe('parseUrl', () => {
+describe('parseUrl (V2)', () => {
   it('parses city slug from pathname', () => {
     const result = parseUrl('/zuerich', '');
     expect(result.citySlug).toBe('zuerich');
   });
 
-  it('parses param overrides from query string', () => {
-    const result = parseUrl('/zuerich', 'raumplanung=0&mietrecht=2');
-    expect(result.overrides).toEqual({ raumplanung: 0, mietrecht: 2 });
+  it('parses V2 param overrides directly', () => {
+    const result = parseUrl('/zuerich', 'raumplanung_zonenreserve=0&mietrecht_kostenmiete=2');
+    expect(result.overrides).toEqual({
+      raumplanung_zonenreserve: 0,
+      mietrecht_kostenmiete: 2,
+    });
+  });
+
+  it('migrates V1 param overrides to multiple V2 keys', () => {
+    const result = parseUrl('/zuerich', 'raumplanung=0');
+    // raumplanung expands to 3 keys
+    expect(result.overrides).toEqual({
+      raumplanung_zonenreserve: 0,
+      raumplanung_verdichtung: 0,
+      raumplanung_ausnuetzungsziffer: 0,
+    });
   });
 
   it('returns empty slug for root path', () => {
@@ -18,22 +31,22 @@ describe('parseUrl', () => {
   });
 
   it('ignores invalid param names', () => {
-    const result = parseUrl('/zuerich', 'invalid=1&raumplanung=0');
-    expect(result.overrides).toEqual({ raumplanung: 0 });
+    const result = parseUrl('/zuerich', 'invalid=1&mietrecht_kostenmiete=0');
+    expect(result.overrides).toEqual({ mietrecht_kostenmiete: 0 });
   });
 
   it('clamps param values to 0-2', () => {
-    const result = parseUrl('/zuerich', 'raumplanung=5');
-    expect(result.overrides).toEqual({ raumplanung: 2 });
+    const result = parseUrl('/zuerich', 'mietrecht_kostenmiete=5');
+    expect(result.overrides).toEqual({ mietrecht_kostenmiete: 2 });
   });
 });
 
-describe('buildUrl', () => {
+describe('buildUrl (V2)', () => {
   it('returns slug path with no query when no overrides', () => {
     expect(buildUrl('zuerich', {})).toBe('/zuerich');
   });
 
   it('appends only changed params as query', () => {
-    expect(buildUrl('zuerich', { raumplanung: 0 })).toBe('/zuerich?raumplanung=0');
+    expect(buildUrl('zuerich', { raumplanung_zonenreserve: 0 })).toBe('/zuerich?raumplanung_zonenreserve=0');
   });
 });

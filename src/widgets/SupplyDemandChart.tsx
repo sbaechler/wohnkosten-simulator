@@ -1,41 +1,23 @@
 import { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
-import type { CityParams, CityContext, ParamsDiff } from '../types';
+import type { CityParams40, CityContext, ParamsDiff40, MarketState, DerivedIndicators } from '../types';
+import { computeMarketState, clampE1 } from '../model/market-state';
 import './SupplyDemandChart.css';
 
 interface Props {
   context: CityContext;
-  baseline: CityParams;
-  modified: CityParams;
-  diff: ParamsDiff;
-}
-
-// Simplified model: compute supply/demand curve shift factors
-function computeSupplyShift(params: CityParams, context: CityContext): number {
-  // Higher regulation = less supply (negative shift)
-  const regulation = -(params.raumplanung + params.bauvorschriften +
-    params.energetischeVorgaben + params.einspracherechte) / 8;
-  const promotion = (params.foerderungGemeinnuetzig + params.subventionen) / 4;
-  const investment = params.auslaendischeInvestitionen === 0 ? 0.1 : params.auslaendischeInvestitionen === 2 ? -0.1 : 0;
-  const interest = -context.zinsniveau * 0.05;
-  return regulation + promotion + investment + interest;
-}
-
-function computeDemandShift(params: CityParams, context: CityContext): number {
-  const taxes = -params.steuerpolitik * 0.1;
-  const attract = (params.infrastruktur - params.steuerpolitik) * 0.05;
-  const subsidy = params.subventionen * 0.05;
-  const migration = context.zuwanderungsdruck * 0.1;
-  const economy = context.wirtschaftskraft * 0.05;
-  const population = context.bevoelkerungstrend * 0.05;
-  return taxes + attract + subsidy + migration + economy + population;
+  baseline: CityParams40;
+  modified: CityParams40;
+  diff: ParamsDiff40;
+  state: MarketState;
+  derived: DerivedIndicators;
 }
 
 const MARGIN = { top: 20, right: 110, bottom: 40, left: 50 };
 const WIDTH = 500;
 const HEIGHT = 200;
 
-export function SupplyDemandChart({ context, baseline, modified, diff }: Props) {
+export function SupplyDemandChart({ context, baseline, modified, diff, state }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
@@ -70,20 +52,21 @@ export function SupplyDemandChart({ context, baseline, modified, diff }: Props) 
       .attr('text-anchor', 'middle').attr('fill', '#555').attr('font-size', 11)
       .text('Preis');
 
-    // Curve generators
     const line = d3.line<[number, number]>()
       .x(d => x(d[0])).y(d => y(d[1]))
       .curve(d3.curveBasis);
 
-    // Baseline shifts
-    const baseSupply = computeSupplyShift(baseline, context);
-    const baseDemand = computeDemandShift(baseline, context);
+    // Compute baseline E1 state (no changes = 0 shift)
+    const baselineState = clampE1(computeMarketState(context, baseline, baseline, {}));
 
-    // Modified shifts
-    const modSupply = computeSupplyShift(modified, context);
-    const modDemand = computeDemandShift(modified, context);
+    // Use E1 values for supply/demand shifts
+    // angebotspotenzial: negative = more supply, positive = less supply
+    // nachfragedruck: positive = more demand, negative = less demand
+    const baseSupply = baselineState.angebotspotenzial;
+    const baseDemand = baselineState.nachfragedruck;
+    const modSupply = state.angebotspotenzial;
+    const modDemand = state.nachfragedruck;
 
-    // Generate curve points: supply goes up-right, demand goes down-right
     function supplyCurve(shift: number): [number, number][] {
       return Array.from({ length: 50 }, (_, i) => {
         const q = (i / 49) * 10;
@@ -108,7 +91,8 @@ export function SupplyDemandChart({ context, baseline, modified, diff }: Props) 
       .attr('d', line).attr('fill', 'none')
       .attr('stroke', '#555').attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
 
-    // Modified curves (solid, animated)
+    const hasChanges = Object.keys(diff).length > 0;
+
     const supplyPath = g.append('path').datum(supplyCurve(modSupply))
       .attr('d', line).attr('fill', 'none')
       .attr('stroke', '#4dabf7').attr('stroke-width', 2).attr('opacity', 0);
@@ -116,19 +100,14 @@ export function SupplyDemandChart({ context, baseline, modified, diff }: Props) 
       .attr('d', line).attr('fill', 'none')
       .attr('stroke', '#ff6b6b').attr('stroke-width', 2).attr('opacity', 0);
 
-    const hasChanges = Object.keys(diff).length > 0;
     if (hasChanges) {
       supplyPath.transition().duration(600).attr('opacity', 1);
       demandPath.transition().duration(600).attr('opacity', 1);
     }
 
-    // Find equilibrium (approximate intersection)
     function findEquilibrium(supplyShift: number, demandShift: number): [number, number] {
-      // supply: p = 1 + (q + shift*4) * 0.8
-      // demand: p = 9 - (q - shift*4) * 0.8
-      // set equal: 1 + (q + s*4)*0.8 = 9 - (q - d*4)*0.8
       const s = supplyShift, d = demandShift;
-const qEq = (8 + 0.8 * 4 * (d - s)) / 1.6;
+      const qEq = (8 + 0.8 * 4 * (d - s)) / 1.6;
       const pEq = 1 + (qEq + s * 4) * 0.8;
       return [Math.max(0, Math.min(10, qEq)), Math.max(0, Math.min(10, pEq))];
     }
@@ -144,7 +123,6 @@ const qEq = (8 + 0.8 * 4 * (d - s)) / 1.6;
     g.append('circle').attr('cx', x(bq)).attr('cy', y(bp)).attr('r', 4).attr('fill', '#555');
 
     if (hasChanges) {
-      // Modified equilibrium
       g.append('line').attr('x1', x(mq)).attr('y1', y(mp)).attr('x2', x(mq)).attr('y2', y(0))
         .attr('stroke', '#ffd43b').attr('stroke-dasharray', '3').attr('stroke-width', 1)
         .attr('opacity', 0).transition().duration(600).attr('opacity', 1);
@@ -168,7 +146,7 @@ const qEq = (8 + 0.8 * 4 * (d - s)) / 1.6;
       .attr('stroke', '#555').attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
     legend.append('text').attr('x', 25).attr('y', 36).attr('fill', '#555').attr('font-size', 10).text('Ist-Zustand');
 
-  }, [context, baseline, modified, diff]);
+  }, [context, baseline, modified, diff, state]);
 
   return (
     <div className="supply-demand-chart">

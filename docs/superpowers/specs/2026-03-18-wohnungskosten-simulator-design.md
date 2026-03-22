@@ -255,6 +255,75 @@ scripts/
 - Bern: moderater Mix, moderate Wirtschaftskraft
 - Lugano: niedrige Steuern, weniger Regulierung, moderater Zuwanderungsdruck
 
+## DAG-Visualisierung
+
+### Library-Wahl: d3-dag
+
+**Empfohlen:** [`d3-dag`](https://github.com/erikbrinkman/d3-dag) (npm: `d3-dag`) — Layout-Algorithmen für DAG-Visualisierung.
+
+Begründung:
+- Sugiyama-Layout = optimiert für mehrstufige DAGs (E0 → E1 → E2)
+- Reine D3-Integration, kein zusätzliches Rendering-Framework
+- Aktiv maintained, sauberes API
+- Bereits auf npm (`d3-dag`, Version 1.1.0+)
+
+**Alternativen verworfen:**
+- *Cytoscape.js + cytoscape.js-elk*: Zu umfangreich (~800 KB), für 40 Nodes mit Edge-Highlighting Overkill
+- *elkjs*: Reiner Layout-Algorithmus ohne Rendering, müsste separat mit D3/SVG kombiniert werden
+- *react-d3-dag*: Letztmals published vor 2 Jahren, keine aktive Nutzung
+
+### Architektur: Single Source of Truth
+
+```
+src/model/graph.ts           ← SOURCE OF TRUTH
+  DAG_EDGES: Edge[]         ← alle Kanten mit sign/weight/time
+  NodeId: type union         ← alle Knoten (E0, E1, E2)
+  TIME_CLASS_MAP             ← Zeitklassen pro Parameter
+
+src/model/market-state.ts    ← berechnet E1 (MarketState) aus E0
+src/model/derived.ts         ← berechnet E2 (DerivedIndicators) aus E1
+
+src/components/DAGViz.tsx    ← visualisiert DAG mit d3-dag
+  - Importiert DAG_EDGES direkt aus model/graph.ts
+  - Sugiyama-Layout
+  - Highlighted aktive Pfade basierend auf diff
+  - Tooltips: Gewicht, Vorzeichen, Zeitklasse
+  - Knotenfarben nach Schicht (E0=grau, E1=blau, E2=orange)
+```
+
+**Kernprinzip:** `model/graph.ts` ist die einzige Datenquelle. Die DAGViz-Komponente importiert `DAG_EDGES` direkt — keine Kopie, kein JSON-Drift. Wenn sich die Spezifikation ändert, ändern sich Berechnung und Visualisierung zusammen.
+
+### Implementierungs-Details
+
+```typescript
+// model/graph.ts
+export interface Edge {
+  from: NodeId;
+  to:   NodeId;
+  sign:   +1 | -1;
+  weight: 0.5 | 1.0 | 1.5;
+  time:   TimeClass;
+}
+
+// DAGViz.tsx
+import { dagStratify, sugiyama } from 'd3-dag';
+import { DAG_EDGES } from '../model/graph';
+
+function buildDAG() {
+  const dag = dagStratify()(DAG_EDGES);
+  sugiyama()(dag);
+  return dag;
+}
+```
+
+### Features (DAGViz)
+
+- **Interaktiv:** Zoom, Pan, Node-Select
+- **Highlight:** Bei Parameter-Änderung (diff) werden die betroffenen Kanten eingefärbt (rot=negativ, grün=positiv)
+- **Tooltip:** Hover über Kante → sign, weight, time-Klasse
+- **Layer-Visualisierung:** E0 (Parameter) → E1 (Markt-Zustandsvariablen) → E2 (Abgeleitete Indikatoren) als horizontale Schichten
+- **Responsive:** Canvas oder SVG, passt sich der verfügbaren Breite an
+
 ## Nicht im Scope (Prototyp)
 
 - Wissenschaftlich fundiertes Berechnungsmodell (spaeter)

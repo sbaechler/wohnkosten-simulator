@@ -1,0 +1,51 @@
+.gentrifizierungs-widget {
+  background: #13132a;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.gentrifizierungs-widget__title {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.gentrifizierungs-widget__bar-container {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.gentrifizierungs-widget__gradient-bar {
+  display: flex;
+  height: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.gentrifizierungs-widget__indicator {
+  position: absolute;
+  top: -4px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid;
+  transform: translateX(-50%);
+  transition: left 0.4s ease, border-color 0.4s ease;
+}
+
+.gentrifizierungs-widget__labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.gentrifizierungs-widget__value {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 8px;
+}

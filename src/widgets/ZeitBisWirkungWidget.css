@@ -1,0 +1,70 @@
+.zeit-bis-wirkung-widget {
+  background: #13132a;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.zeit-bis-wirkung-widget__title {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 16px;
+}
+
+.zeit-bis-wirkung-widget__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.zeit-bis-wirkung-widget__group {
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.zeit-bis-wirkung-widget__group--dominant {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.zeit-bis-wirkung-widget__group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.zeit-bis-wirkung-widget__group-title {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.zeit-bis-wirkung-widget__count {
+  font-size: 12px;
+  color: #888;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.zeit-bis-wirkung-widget__bar-bg {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.zeit-bis-wirkung-widget__bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.zeit-bis-wirkung-widget__params {
+  font-size: 9px;
+  color: #555;
+  line-height: 1.4;
+  word-break: break-word;
+}

@@ -1,70 +1,48 @@
-import type { CityParams, CityContext, ParamsDiff } from '../types';
+import type { CityParams40, CityContext, ParamsDiff40 } from '../types';
+import { computeMarketState, clampE1 } from '../model/market-state';
+import { computeDerivedIndicators } from '../model/derived';
 import { SupplyDemandChart } from './SupplyDemandChart';
 import { TrendArrow } from './TrendArrow';
 import { DivergingTrend } from './DivergingTrend';
 import { OwnershipDonut } from './OwnershipDonut';
+import { GentrifizierungsWidget } from './GentrifizierungsWidget';
+import { ZeitBisWirkungWidget } from './ZeitBisWirkungWidget';
 
 interface Props {
   context: CityContext;
-  baseline: CityParams;
-  modified: CityParams;
-  diff: ParamsDiff;
-}
-
-// Simplified trend computation from params + context
-function computeTrends(baseline: CityParams, modified: CityParams, context: CityContext) {
-  const supplyDelta =
-    -(modified.raumplanung - baseline.raumplanung) * 0.15 +
-    -(modified.bauvorschriften - baseline.bauvorschriften) * 0.1 +
-    -(modified.energetischeVorgaben - baseline.energetischeVorgaben) * 0.1 +
-    -(modified.einspracherechte - baseline.einspracherechte) * 0.1 +
-    (modified.foerderungGemeinnuetzig - baseline.foerderungGemeinnuetzig) * 0.1 +
-    (modified.subventionen - baseline.subventionen) * 0.05;
-
-  const demandDelta =
-    -(modified.steuerpolitik - baseline.steuerpolitik) * 0.1 +
-    (modified.infrastruktur - baseline.infrastruktur) * 0.1 +
-    (modified.subventionen - baseline.subventionen) * 0.05 +
-    context.zuwanderungsdruck * 0.02;
-
-  // Price trend diverges by income group
-  const priceBase = -supplyDelta + demandDelta;
-  const priceLow = priceBase + (modified.mietrecht - baseline.mietrecht) * -0.1;
-  const priceHigh = priceBase + (modified.mietrecht - baseline.mietrecht) * 0.05;
-
-  // Verdichtung: more densification when zoning/regulations/objection rights decrease
-  const verdichtungDelta =
-    -(modified.raumplanung - baseline.raumplanung) * 0.2 +
-    -(modified.bauvorschriften - baseline.bauvorschriften) * 0.15 +
-    -(modified.einspracherechte - baseline.einspracherechte) * 0.15 +
-    (modified.foerderungGemeinnuetzig - baseline.foerderungGemeinnuetzig) * 0.1;
-
-  // Umweltverschmutzung: up = more pollution (bad). Stricter energy/infrastructure reduce it.
-  const umweltDelta =
-    -(modified.energetischeVorgaben - baseline.energetischeVorgaben) * 0.25 +
-    -(modified.infrastruktur - baseline.infrastruktur) * 0.15 +
-    -(modified.raumplanung - baseline.raumplanung) * 0.05;
-
-  // Stadtbild: up = better preserved (good). Objection rights/building codes protect it.
-  const stadtbildDelta =
-    (modified.einspracherechte - baseline.einspracherechte) * 0.2 +
-    (modified.bauvorschriften - baseline.bauvorschriften) * 0.15 +
-    (modified.raumplanung - baseline.raumplanung) * 0.1 +
-    -(modified.foerderungGemeinnuetzig - baseline.foerderungGemeinnuetzig) * 0.05;
-
-  return {
-    supply: supplyDelta,
-    demand: demandDelta,
-    priceLow,
-    priceHigh,
-    verdichtung: verdichtungDelta,
-    umwelt: umweltDelta,
-    stadtbild: stadtbildDelta,
-  };
+  baseline: CityParams40;
+  modified: CityParams40;
+  diff: ParamsDiff40;
 }
 
 export function WidgetGrid({ context, baseline, modified, diff }: Props) {
-  const trends = computeTrends(baseline, modified, context);
+  // E0 → E1
+  const state = clampE1(computeMarketState(context, baseline, modified, diff));
+
+  // E1 → E2
+  const derived = computeDerivedIndicators(state, context, diff);
+
+  // Abgeleitete Trends für Kompatibilitäts-Widgets
+  // E1(positive Werte) = angebotsreduzierend / preistreibend / verdrängend
+  // Supply: negatives angebotspotenzial = mehr Angebot
+  const supplyDelta = -state.angebotspotenzial;
+  // Nachfragedruck: positives nachfragedruck = mehr Nachfrage
+  const demandDelta = state.nachfragedruck;
+
+  // Preistrend: Angebot-Nachfrage-Differenz, modifiziert durch Mietschutz
+  const priceBase = -supplyDelta + demandDelta;
+  const priceLow = priceBase + state.mietpreis_schutzlevel * -0.1;  // Mieter profitieren weniger
+  const priceHigh = priceBase + state.mietpreis_schutzlevel * 0.05;
+
+  // Verdichtung: abgeleitet von angebotspotenzial (Druck, dichter zu bauen)
+  const verdichtungDelta = state.angebotspotenzial * -0.5 + state.nachfragedruck * 0.3;
+
+  // Stadtbild: Einspracherechte + Bauvorschriften schützen das Stadtbild
+  const stadtbildDelta =
+    (modified.bau_einspracherecht_dritte as number - baseline.bau_einspracherecht_dritte as number) * 0.2 +
+    (modified.bau_einspracherecht_suspensiv as number - baseline.bau_einspracherecht_suspensiv as number) * 0.15 +
+    (modified.bau_normenharmonisierung as number - baseline.bau_normenharmonisierung as number) * 0.1 -
+    (modified.gemeinnuetzig_mindestanteil as number - baseline.gemeinnuetzig_mindestanteil as number) * 0.05;
 
   return (
     <div className="widget-grid">
@@ -73,24 +51,33 @@ export function WidgetGrid({ context, baseline, modified, diff }: Props) {
         baseline={baseline}
         modified={modified}
         diff={diff}
+        state={state}
+        derived={derived}
       />
       <DivergingTrend
         title="Trend Wohnpreise"
         groups={[
-          { label: 'Minderheit', value: trends.priceLow },
-          { label: 'Mehrheit', value: trends.priceHigh },
+          { label: 'Minderheit (Schutz)', value: priceLow },
+          { label: 'Mehrheit', value: priceHigh },
         ]}
       />
-      <TrendArrow label="Trend Nachfrage" value={trends.demand} />
-      <TrendArrow label="Trend Angebot" value={trends.supply} invertColors />
-      <TrendArrow label="Verdichtung" value={trends.verdichtung} invertColors />
-      <TrendArrow label="Umweltverschmutzung" value={trends.umwelt} />
-      <TrendArrow label="Stadtbild" value={trends.stadtbild} invertColors />
+      <TrendArrow label="Nachfragedruck" value={demandDelta} />
+      <TrendArrow label="Angebotspotenzial" value={supplyDelta} invertColors />
+      <GentrifizierungsWidget derived={derived} />
+      <TrendArrow label="Neubau-Hemmnis" value={derived.neubau_hemmnisindex} />
+      <TrendArrow label="Verdichtungsdruck" value={verdichtungDelta} invertColors />
+      <TrendArrow label="Stadtbild" value={stadtbildDelta} invertColors />
       <OwnershipDonut
         context={context}
         baseline={baseline}
         modified={modified}
         diff={diff}
+        state={state}
+      />
+      <ZeitBisWirkungWidget
+        derived={derived}
+        modified={modified}
+        baseline={baseline}
       />
     </div>
   );
