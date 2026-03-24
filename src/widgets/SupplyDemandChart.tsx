@@ -73,7 +73,8 @@ export function SupplyDemandChart({ context, baseline, modified, diff, state }: 
     function supplyCurve(shift: number): [number, number][] {
       return Array.from({ length: 50 }, (_, i) => {
         const q = (i / 49) * 10;
-        const p = 1 + (q + shift * SHIFT_SCALE) * 0.8;
+        // Negate shift: positive shift = more supply = rightward = lower prices
+        const p = 1 + (q - shift * SHIFT_SCALE) * 0.8;
         return [q, Math.max(0, Math.min(10, p))] as [number, number];
       });
     }
