@@ -111,8 +111,8 @@ export function SupplyDemandChart({ context, baseline, modified, diff, state }: 
 
     function findEquilibrium(supplyShift: number, demandShift: number): [number, number] {
       const s = supplyShift, d = demandShift;
-      const qEq = (8 + 0.8 * SHIFT_SCALE * (d - s)) / 1.6;
-      const pEq = 1 + (qEq + s * SHIFT_SCALE) * 0.8;
+      const qEq = (8 + 0.8 * SHIFT_SCALE * (s + d)) / 1.6;
+      const pEq = 1 + (qEq - s * SHIFT_SCALE) * 0.8;
       return [Math.max(0, Math.min(10, qEq)), Math.max(0, Math.min(10, pEq))];
     }
 
