@@ -60,7 +60,8 @@ export function GroupTrendWidget({ title, groups }: Props) {
               <div className="group-trend__emoji">{item.group.emoji}</div>
               <div className="group-trend__info">
                 <div className="group-trend__group-name">{item.group.shortLabel}</div>
-                {isHovered && item.drivers.length > 0 && (
+                <div className="group-trend__details">
+                  <div className="group-trend__description">{item.group.description}</div>
                   <div className="group-trend__drivers">
                     {item.drivers.map((d, j) => (
                       <span key={j} className={`group-trend__driver group-trend__driver--${d.direction}`}>
@@ -68,10 +69,7 @@ export function GroupTrendWidget({ title, groups }: Props) {
                       </span>
                     ))}
                   </div>
-                )}
-                {!isHovered && (
-                  <div className="group-trend__description">{item.group.description}</div>
-                )}
+                </div>
               </div>
               <div className="group-trend__value-col">
                 <div className="group-trend__arrow" style={{ color }}>
@@ -80,11 +78,12 @@ export function GroupTrendWidget({ title, groups }: Props) {
                 <div className="group-trend__trend-label" style={{ color }}>
                   {getTrendLabel(dir)}
                 </div>
-                {isHovered && pct > 0 && (
-                  <div className="group-trend__pct" style={{ color }}>
-                    {pct}%
-                  </div>
-                )}
+                <div
+                  className="group-trend__pct"
+                  style={{ color, visibility: (isHovered && pct > 0) ? 'visible' : 'hidden' }}
+                >
+                  {pct > 0 ? pct + '%' : '0%'}
+                </div>
               </div>
             </div>
           );

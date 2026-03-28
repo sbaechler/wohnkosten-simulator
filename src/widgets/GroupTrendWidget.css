@@ -59,14 +59,37 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-top: 1px;
+}
+
+.group-trend__details {
+  display: grid;
+  margin-top: 2px;
+}
+
+.group-trend__description, .group-trend__drivers {
+  grid-area: 1 / 1;
+  transition: opacity 0.12s ease;
+}
+
+.group-trend__description {
+  opacity: 1;
+}
+
+.group-trend__row--hovered .group-trend__description {
+  opacity: 0;
 }
 
 .group-trend__drivers {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  margin-top: 3px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.group-trend__row--hovered .group-trend__drivers {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .group-trend__driver {
