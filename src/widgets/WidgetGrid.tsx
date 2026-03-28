@@ -45,6 +45,10 @@ export function WidgetGrid({ context, baseline, modified, diff }: Props) {
 
   return (
     <div className="widget-grid">
+      <GroupTrendWidget
+        title="Trend Wohnpreise"
+        groups={groupTrends}
+      />
       <SupplyDemandChart
         context={context}
         baseline={baseline}
@@ -52,10 +56,6 @@ export function WidgetGrid({ context, baseline, modified, diff }: Props) {
         diff={diff}
         state={state}
         derived={derived}
-      />
-      <GroupTrendWidget
-        title="Trend Wohnpreise"
-        groups={groupTrends}
       />
       <TrendArrow label="Nachfragedruck" value={demandDelta} />
       <TrendArrow label="Angebotspotenzial" value={supplyDelta} invertColors />

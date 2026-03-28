@@ -34,10 +34,15 @@ function getTrendLabel(direction: string): string {
 export function GroupTrendWidget({ title, groups }: Props) {
   const [hovered, setHovered] = useState<number | null>(null);
 
-  // Sortiere nach Trend-Stärke: sinkend zuerst, dann stabil, dann steigend
+  // Sortiere: sinkend → stabil → steigend; Glückspilze immer zuletzt
   const sorted = [...groups].sort((a, b) => {
-    const dirOrder = { down: 0, flat: 1, up: 2 } as const;
-    return dirOrder[getDirection(a.value)] - dirOrder[getDirection(b.value)];
+    const dirOrder: Record<string, number> = { down: 0, flat: 1, up: 2 };
+    const d = dirOrder[getDirection(a.value)] - dirOrder[getDirection(b.value)];
+    if (d !== 0) return d;
+    // Innerhalb derselben Richtung: Glückspilze ans Ende
+    if (a.group.id === 'glueckspilze') return 1;
+    if (b.group.id === 'glueckspilze') return -1;
+    return 0;
   });
 
   return (
