@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import type { ParamsDiff40, MarketState, DerivedIndicators, CityContext, CityParams40 } from '../types';
 import { computeMarketState, clampE1 } from '../model/market-state';
@@ -157,161 +157,169 @@ export function DAGVisualization({ context, baseline, modified, diff }: Props) {
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
   const [zoomed, setZoomed] = useState(1);
 
-  // Build param metadata map
-  const paramMeta40 = new Map<string, { label: string; group: string }>();
+  const { allNodes, nodeYMap, totalHeight } = useMemo(() => {
+    // Build param metadata map
+    const pm40 = new Map<string, { label: string; group: string }>();
 
-  // We need to import the metadata — we'll pass it through a hook or compute inline
-  // For now, build from known structure
-  const groupMap: Record<string, string> = {
-    raumplanung_zonenreserve: 'bodenrecht',
-    raumplanung_verdichtung: 'bodenrecht',
-    raumplanung_ausnuetzungsziffer: 'bodenrecht',
-    boden_vorkaufsrecht: 'bodenrecht',
-    boden_bauverpflichtung: 'bodenrecht',
-    boden_mehrwertabgabe: 'bodenrecht',
-    boden_bodeneigentumssteuer: 'bodenrecht',
-    bau_energievorgaben: 'bau',
-    bau_sanierungspflicht: 'bau',
-    bau_einspracherecht_dritte: 'bau',
-    bau_einspracherecht_suspensiv: 'bau',
-    bau_bewilligungsverfahren: 'bau',
-    bau_normenharmonisierung: 'bau',
-    gemeinnuetzig_mindestanteil: 'gemeinnuetzig',
-    gemeinnuetzig_foerderfonds: 'gemeinnuetzig',
-    gemeinnuetzig_baurecht: 'gemeinnuetzig',
-    gemeinnuetzig_belegungsvorschriften: 'gemeinnuetzig',
-    gemeinnuetzig_sozialmischung: 'gemeinnuetzig',
-    mietrecht_kostenmiete: 'mietrecht',
-    mietrecht_anfangsmiete: 'mietrecht',
-    mietrecht_mietzinstransparenz: 'mietrecht',
-    mietrecht_kuendigungsschutz: 'mietrecht',
-    mietrecht_mietzinsindex: 'mietrecht',
-    mietrecht_untervermietung: 'mietrecht',
-    steuer_grundstueckgewinn: 'steuern',
-    steuer_eigenmietwert: 'steuern',
-    steuer_leerstandsabgabe: 'steuern',
-    steuer_handaenderung: 'steuern',
-    steuer_kapitalgewinnprivatpersonen: 'steuern',
-    kapital_auslaendische_investoren: 'kapital',
-    kapital_institutionelle_regulierung: 'kapital',
-    kapital_hypothekarregulierung: 'kapital',
-    nutzung_kurzzeitvermietung: 'nutzung',
-    nutzung_umnutzungsverbot: 'nutzung',
-    nutzung_abbruchverbot: 'nutzung',
-    nutzung_zweitwohnungen: 'nutzung',
-    infra_oepnv: 'infrastruktur',
-    infra_schule_kita: 'infrastruktur',
-    infra_oeffentlicher_raum: 'infrastruktur',
-    infra_wirtschaftsansiedlung: 'infrastruktur',
-  };
+    // We need to import the metadata — we'll pass it through a hook or compute inline
+    // For now, build from known structure
+    const groupMap: Record<string, string> = {
+      raumplanung_zonenreserve: 'bodenrecht',
+      raumplanung_verdichtung: 'bodenrecht',
+      raumplanung_ausnuetzungsziffer: 'bodenrecht',
+      boden_vorkaufsrecht: 'bodenrecht',
+      boden_bauverpflichtung: 'bodenrecht',
+      boden_mehrwertabgabe: 'bodenrecht',
+      boden_bodeneigentumssteuer: 'bodenrecht',
+      bau_energievorgaben: 'bau',
+      bau_sanierungspflicht: 'bau',
+      bau_einspracherecht_dritte: 'bau',
+      bau_einspracherecht_suspensiv: 'bau',
+      bau_bewilligungsverfahren: 'bau',
+      bau_normenharmonisierung: 'bau',
+      gemeinnuetzig_mindestanteil: 'gemeinnuetzig',
+      gemeinnuetzig_foerderfonds: 'gemeinnuetzig',
+      gemeinnuetzig_baurecht: 'gemeinnuetzig',
+      gemeinnuetzig_belegungsvorschriften: 'gemeinnuetzig',
+      gemeinnuetzig_sozialmischung: 'gemeinnuetzig',
+      mietrecht_kostenmiete: 'mietrecht',
+      mietrecht_anfangsmiete: 'mietrecht',
+      mietrecht_mietzinstransparenz: 'mietrecht',
+      mietrecht_kuendigungsschutz: 'mietrecht',
+      mietrecht_mietzinsindex: 'mietrecht',
+      mietrecht_untervermietung: 'mietrecht',
+      steuer_grundstueckgewinn: 'steuern',
+      steuer_eigenmietwert: 'steuern',
+      steuer_leerstandsabgabe: 'steuern',
+      steuer_handaenderung: 'steuern',
+      steuer_kapitalgewinnprivatpersonen: 'steuern',
+      kapital_auslaendische_investoren: 'kapital',
+      kapital_institutionelle_regulierung: 'kapital',
+      kapital_hypothekarregulierung: 'kapital',
+      nutzung_kurzzeitvermietung: 'nutzung',
+      nutzung_umnutzungsverbot: 'nutzung',
+      nutzung_abbruchverbot: 'nutzung',
+      nutzung_zweitwohnungen: 'nutzung',
+      infra_oepnv: 'infrastruktur',
+      infra_schule_kita: 'infrastruktur',
+      infra_oeffentlicher_raum: 'infrastruktur',
+      infra_wirtschaftsansiedlung: 'infrastruktur',
+    };
 
-  const labelMap: Record<string, string> = {
-    raumplanung_zonenreserve: 'Zonenreserve',
-    raumplanung_verdichtung: 'Verdichtung',
-    raumplanung_ausnuetzungsziffer: 'Ausnützungsziffer',
-    boden_vorkaufsrecht: 'Vorkaufsrecht',
-    boden_bauverpflichtung: 'Bauverpflichtung',
-    boden_mehrwertabgabe: 'Mehrwertabgabe',
-    boden_bodeneigentumssteuer: 'Bodeneigentumssteuer',
-    bau_energievorgaben: 'Energievorgaben',
-    bau_sanierungspflicht: 'Sanierungspflicht',
-    bau_einspracherecht_dritte: 'Einsprache Dr.',
-    bau_einspracherecht_suspensiv: 'Einsprache Susp.',
-    bau_bewilligungsverfahren: 'Bewilligung',
-    bau_normenharmonisierung: 'Normenharmonis.',
-    gemeinnuetzig_mindestanteil: 'Mindestanteil',
-    gemeinnuetzig_foerderfonds: 'Förderfonds',
-    gemeinnuetzig_baurecht: 'Baurecht',
-    gemeinnuetzig_belegungsvorschriften: 'Belegungsvorschr.',
-    gemeinnuetzig_sozialmischung: 'Sozialmischung',
-    mietrecht_kostenmiete: 'Kostenmiete',
-    mietrecht_anfangsmiete: 'Anfangsmiete',
-    mietrecht_mietzinstransparenz: 'Mietspiegel',
-    mietrecht_kuendigungsschutz: 'Kündigungsschutz',
-    mietrecht_mietzinsindex: 'Mietzinsindex',
-    mietrecht_untervermietung: 'Untervermietung',
-    steuer_grundstueckgewinn: 'Grundstückgewinnst.',
-    steuer_eigenmietwert: 'Eigenmietwert',
-    steuer_leerstandsabgabe: 'Leerstandsabgabe',
-    steuer_handaenderung: 'Handänderungsst.',
-    steuer_kapitalgewinnprivatpersonen: 'Kapitalgewinnst.',
-    kapital_auslaendische_investoren: 'Ausländ. Invest.',
-    kapital_institutionelle_regulierung: 'Instit. Regulierung',
-    kapital_hypothekarregulierung: 'Hypothekarregul.',
-    nutzung_kurzzeitvermietung: 'Kurzzeitvermietung',
-    nutzung_umnutzungsverbot: 'Umnutzungsverbot',
-    nutzung_abbruchverbot: 'Abbruchverbot',
-    nutzung_zweitwohnungen: 'Zweitwohnungen',
-    infra_oepnv: 'ÖV',
-    infra_schule_kita: 'Schule/Kita',
-    infra_oeffentlicher_raum: 'Öfftl. Raum',
-    infra_wirtschaftsansiedlung: 'Wirtschaftsansiedl.',
-  };
+    const labelMap: Record<string, string> = {
+      raumplanung_zonenreserve: 'Zonenreserve',
+      raumplanung_verdichtung: 'Verdichtung',
+      raumplanung_ausnuetzungsziffer: 'Ausnützungsziffer',
+      boden_vorkaufsrecht: 'Vorkaufsrecht',
+      boden_bauverpflichtung: 'Bauverpflichtung',
+      boden_mehrwertabgabe: 'Mehrwertabgabe',
+      boden_bodeneigentumssteuer: 'Bodeneigentumssteuer',
+      bau_energievorgaben: 'Energievorgaben',
+      bau_sanierungspflicht: 'Sanierungspflicht',
+      bau_einspracherecht_dritte: 'Einsprache Dr.',
+      bau_einspracherecht_suspensiv: 'Einsprache Susp.',
+      bau_bewilligungsverfahren: 'Bewilligung',
+      bau_normenharmonisierung: 'Normenharmonis.',
+      gemeinnuetzig_mindestanteil: 'Mindestanteil',
+      gemeinnuetzig_foerderfonds: 'Förderfonds',
+      gemeinnuetzig_baurecht: 'Baurecht',
+      gemeinnuetzig_belegungsvorschriften: 'Belegungsvorschr.',
+      gemeinnuetzig_sozialmischung: 'Sozialmischung',
+      mietrecht_kostenmiete: 'Kostenmiete',
+      mietrecht_anfangsmiete: 'Anfangsmiete',
+      mietrecht_mietzinstransparenz: 'Mietspiegel',
+      mietrecht_kuendigungsschutz: 'Kündigungsschutz',
+      mietrecht_mietzinsindex: 'Mietzinsindex',
+      mietrecht_untervermietung: 'Untervermietung',
+      steuer_grundstueckgewinn: 'Grundstückgewinnst.',
+      steuer_eigenmietwert: 'Eigenmietwert',
+      steuer_leerstandsabgabe: 'Leerstandsabgabe',
+      steuer_handaenderung: 'Handänderungsst.',
+      steuer_kapitalgewinnprivatpersonen: 'Kapitalgewinnst.',
+      kapital_auslaendische_investoren: 'Ausländ. Invest.',
+      kapital_institutionelle_regulierung: 'Instit. Regulierung',
+      kapital_hypothekarregulierung: 'Hypothekarregul.',
+      nutzung_kurzzeitvermietung: 'Kurzzeitvermietung',
+      nutzung_umnutzungsverbot: 'Umnutzungsverbot',
+      nutzung_abbruchverbot: 'Abbruchverbot',
+      nutzung_zweitwohnungen: 'Zweitwohnungen',
+      infra_oepnv: 'ÖV',
+      infra_schule_kita: 'Schule/Kita',
+      infra_oeffentlicher_raum: 'Öfftl. Raum',
+      infra_wirtschaftsansiedlung: 'Wirtschaftsansiedl.',
+    };
 
-  for (const key of PARAM_KEYS_40) {
-    paramMeta40.set(key, {
-      label: labelMap[key] ?? key,
-      group: groupMap[key] ?? 'bodenrecht',
+    for (const key of PARAM_KEYS_40) {
+      pm40.set(key, {
+        label: labelMap[key] ?? key,
+        group: groupMap[key] ?? 'bodenrecht',
+      });
+    }
+
+    const nodes = buildNodes(pm40);
+
+    // Compute node positions: group by level, sort by group order
+    const groupOrder = ['bodenrecht', 'bau', 'gemeinnuetzig', 'mietrecht', 'steuern', 'kapital', 'nutzung', 'infrastruktur', 'ctx'];
+    const level0 = nodes.filter(n => n.level === 0).sort((a, b) => {
+      const ai = groupOrder.indexOf(a.group);
+      const bi = groupOrder.indexOf(b.group);
+      return ai - bi;
     });
-  }
+    const level1 = nodes.filter(n => n.level === 1);
+    const level2 = nodes.filter(n => n.level === 2);
 
-  const allNodes = buildNodes(paramMeta40);
+    // Assign Y positions
+    const ym = new Map<NodeId, number>();
 
-  // Compute node positions: group by level, sort by group order
-  const groupOrder = ['bodenrecht', 'bau', 'gemeinnuetzig', 'mietrecht', 'steuern', 'kapital', 'nutzung', 'infrastruktur', 'ctx'];
-  const level0 = allNodes.filter(n => n.level === 0).sort((a, b) => {
-    const ai = groupOrder.indexOf(a.group);
-    const bi = groupOrder.indexOf(b.group);
-    return ai - bi;
-  });
-  const level1 = allNodes.filter(n => n.level === 1);
-  const level2 = allNodes.filter(n => n.level === 2);
+    const th = Math.max(level0.length * (NODE_HEIGHT + GROUP_GAP), level1.length * (NODE_HEIGHT + GROUP_GAP), level2.length * (NODE_HEIGHT + GROUP_GAP)) + 80;
 
-  // Assign Y positions
-  const nodeYMap = new Map<NodeId, number>();
+    const headerOffset = COL_HEADER_GAP;
+    let y = headerOffset;
+    for (const node of level0) {
+      ym.set(node.id, y);
+      y += NODE_HEIGHT + GROUP_GAP;
+    }
 
-  const totalHeight = Math.max(level0.length * (NODE_HEIGHT + GROUP_GAP), level1.length * (NODE_HEIGHT + GROUP_GAP), level2.length * (NODE_HEIGHT + GROUP_GAP)) + 80;
+    y = headerOffset;
+    for (const node of level1) {
+      ym.set(node.id, y);
+      y += NODE_HEIGHT + GROUP_GAP;
+    }
 
-  const headerOffset = COL_HEADER_GAP;
-  let y = headerOffset;
-  for (const node of level0) {
-    nodeYMap.set(node.id, y);
-    y += NODE_HEIGHT + GROUP_GAP;
-  }
+    y = headerOffset;
+    for (const node of level2) {
+      ym.set(node.id, y);
+      y += NODE_HEIGHT + GROUP_GAP;
+    }
 
-  y = headerOffset;
-  for (const node of level1) {
-    nodeYMap.set(node.id, y);
-    y += NODE_HEIGHT + GROUP_GAP;
-  }
-
-  y = headerOffset;
-  for (const node of level2) {
-    nodeYMap.set(node.id, y);
-    y += NODE_HEIGHT + GROUP_GAP;
-  }
+    return { allNodes: nodes, nodeYMap: ym, totalHeight: th };
+  }, []);
 
   // Which nodes and edges are affected by diff?
-  const diffKeys = new Set(Object.keys(diff));
-  const affectedNodes = new Set<NodeId>();
-  const affectedEdges = new Set<Edge>();
+  const { affectedNodes, affectedEdges } = useMemo(() => {
+    const dk = new Set(Object.keys(diff));
+    const an = new Set<NodeId>();
+    const ae = new Set<Edge>();
 
-  // Pass 1: E0 -> E1
-  for (const edge of DAG_EDGES) {
-    if (diffKeys.has(edge.from)) {
-      affectedNodes.add(edge.from);
-      affectedNodes.add(edge.to);
-      affectedEdges.add(edge);
+    // Pass 1: E0 -> E1
+    for (const edge of DAG_EDGES) {
+      if (dk.has(edge.from)) {
+        an.add(edge.from);
+        an.add(edge.to);
+        ae.add(edge);
+      }
     }
-  }
 
-  // Pass 2: E1 -> E2
-  for (const edge of DAG_EDGES) {
-    if (affectedNodes.has(edge.from)) {
-      affectedNodes.add(edge.to);
-      affectedEdges.add(edge);
+    // Pass 2: E1 -> E2
+    for (const edge of DAG_EDGES) {
+      if (an.has(edge.from)) {
+        an.add(edge.to);
+        ae.add(edge);
+      }
     }
-  }
+
+    return { affectedNodes: an, affectedEdges: ae };
+  }, [diff]);
 
   // Compute edge highlight
   function isEdgeHighlighted(e: Edge): boolean {
@@ -572,7 +580,7 @@ export function DAGVisualization({ context, baseline, modified, diff }: Props) {
       nodeG.on('mouseleave', () => setTooltip(null));
     }
 
-  }, [allNodes, nodeYMap, diff, affectedNodes, paramMeta40]);
+  }, [diff, state, derived]);
 
   // ── Legend ─────────────────────────────────────────────────────────────
 
