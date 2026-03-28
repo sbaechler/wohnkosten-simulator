@@ -308,7 +308,8 @@ export function DAGVisualization({ diff }: Props) {
 
   // ── SVG Layout ─────────────────────────────────────────────────────────
 
-  const SVG_W = 660;
+  // E2 right edge = E2_X(540) + E2_WIDTH(140) = 680, + right margin = 720
+  const SVG_W = 720;
   const SVG_H = totalHeight + 20;
 
   // ── Arrow marker ───────────────────────────────────────────────────────

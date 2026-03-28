@@ -83,8 +83,7 @@ body {
 
 .app__content {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: auto;
 }
 
 .widget-grid {
