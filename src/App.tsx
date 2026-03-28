@@ -53,7 +53,12 @@ export default function App() {
               diff={diff}
             />
           ) : (
-            <DAGVisualization diff={diff} />
+            <DAGVisualization
+              context={context}
+              baseline={baseline}
+              modified={modified}
+              diff={diff}
+            />
           )}
         </div>
       </main>

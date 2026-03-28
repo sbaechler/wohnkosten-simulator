@@ -1,6 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
-import type { ParamsDiff40 } from '../types';
+import type { ParamsDiff40, MarketState, DerivedIndicators, CityContext, CityParams40 } from '../types';
+import { computeMarketState, clampE1 } from '../model/market-state';
+import { computeDerivedIndicators } from '../model/derived';
 import { DAG_EDGES, TIME_CLASS_MAP, type NodeId, type Edge } from '../model/graph';
 import { PARAM_KEYS_40 } from '../model/params';
 import './DAGVisualization.css';
@@ -133,6 +135,9 @@ function getNodeWidth(level: 0 | 1 | 2): number {
 // ── Main Component ─────────────────────────────────────────────────────────
 
 interface Props {
+  context: CityContext;
+  baseline: CityParams40;
+  modified: CityParams40;
   diff: ParamsDiff40;
 }
 
@@ -143,7 +148,10 @@ interface TooltipData {
   value?: number;
 }
 
-export function DAGVisualization({ diff }: Props) {
+export function DAGVisualization({ context, baseline, modified, diff }: Props) {
+  const state = clampE1(computeMarketState(context, baseline, modified, diff));
+  const derived = computeDerivedIndicators(state, context, diff);
+
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
@@ -283,19 +291,31 @@ export function DAGVisualization({ diff }: Props) {
     y += NODE_HEIGHT + GROUP_GAP;
   }
 
-  // Which nodes are affected by diff?
+  // Which nodes and edges are affected by diff?
   const diffKeys = new Set(Object.keys(diff));
   const affectedNodes = new Set<NodeId>();
+  const affectedEdges = new Set<Edge>();
+
+  // Pass 1: E0 -> E1
   for (const edge of DAG_EDGES) {
     if (diffKeys.has(edge.from)) {
       affectedNodes.add(edge.from);
       affectedNodes.add(edge.to);
+      affectedEdges.add(edge);
     }
   }
 
-  // Compute edge highlight: an edge is highlighted if it's on a path from a diff node
+  // Pass 2: E1 -> E2
+  for (const edge of DAG_EDGES) {
+    if (affectedNodes.has(edge.from)) {
+      affectedNodes.add(edge.to);
+      affectedEdges.add(edge);
+    }
+  }
+
+  // Compute edge highlight
   function isEdgeHighlighted(e: Edge): boolean {
-    return diffKeys.has(e.from);
+    return affectedEdges.has(e);
   }
 
   // Compute diff value for a node (for tooltip)
@@ -304,6 +324,16 @@ export function DAGVisualization({ diff }: Props) {
     const d = (diff as Record<string, { from: number; to: number }>)[nodeId];
     if (!d) return undefined;
     return d.to - d.from;
+  }
+
+  // Compute node value for E1/E2
+  function getNodeValue(nodeId: NodeId): number | string | undefined {
+    if (nodeId in state) return state[nodeId as keyof MarketState];
+    if (nodeId in derived) {
+      if (nodeId === 'zeit_bis_wirkung') return derived.zeit_bis_wirkung.dominanteKlasse;
+      return derived[nodeId as keyof Omit<DerivedIndicators, 'zeit_bis_wirkung'>] as number;
+    }
+    return undefined;
   }
 
   // ── SVG Layout ─────────────────────────────────────────────────────────
@@ -487,7 +517,7 @@ export function DAGVisualization({ diff }: Props) {
 
       // Diff badge for E0 nodes with changes
       const dv = getDiffValue(node.id);
-      if (dv !== undefined && dv !== 0) {
+      if (node.level === 0 && dv !== undefined && dv !== 0) {
         nodeG.append('rect')
           .attr('x', w - 20)
           .attr('y', 3)
@@ -506,6 +536,28 @@ export function DAGVisualization({ diff }: Props) {
           .text(dv > 0 ? '+' : '' + dv);
       }
 
+      // Value badge for E1/E2 nodes
+      const nv = getNodeValue(node.id);
+      if ((isE1 || isE2) && typeof nv === 'number' && nv !== 0) {
+        const pct = Math.round(nv * 100);
+        nodeG.append('text')
+          .attr('x', w - 8)
+          .attr('y', h / 2 + 1)
+          .attr('dominant-baseline', 'middle')
+          .attr('text-anchor', 'end')
+          .attr('fill', nv > 0 ? '#ff6b6b' : '#4dabf7')
+          .attr('font-size', 10)
+          .attr('font-weight', 700)
+          .text((nv > 0 ? '+' : '') + pct + '%');
+      } else if ((isE1 || isE2) && typeof nv === 'string') {
+        const timeColors: Record<string, string> = { kurzfristig: '#51cf66', mittelfristig: '#fab005', langfristig: '#ff6b6b' };
+        nodeG.append('circle')
+          .attr('cx', w - 12)
+          .attr('cy', h / 2)
+          .attr('r', 3)
+          .attr('fill', timeColors[nv] ?? '#555');
+      }
+
       // Tooltip interaction
       nodeG.on('mouseenter', (event) => {
         const rect = containerRef.current?.getBoundingClientRect();
@@ -514,7 +566,7 @@ export function DAGVisualization({ diff }: Props) {
           x: event.clientX - rect.left,
           y: event.clientY - rect.top,
           node,
-          value: dv,
+          value: node.level === 0 ? dv : (typeof nv === 'number' ? nv : undefined),
         });
       });
       nodeG.on('mouseleave', () => setTooltip(null));
@@ -585,17 +637,19 @@ export function DAGVisualization({ diff }: Props) {
                 )}
               </>
             )}
-            {tooltip.node.level === 1 && (
+            {(tooltip.node.level === 1 || tooltip.node.level === 2) && (
               <>
                 <div className="dag-viz__tooltip-row">
-                  Gewicht: <strong>Σ(sign × weight × input) / Σ|weight|</strong>
+                  {tooltip.node.level === 1 ? 'Markt-Variable' : 'Abgeleiteter Indikator'}
                 </div>
+                {tooltip.value !== undefined && (
+                  <div className="dag-viz__tooltip-row">
+                    Aktueller Wert: <strong style={{ color: tooltip.value > 0 ? '#ff6b6b' : '#4dabf7' }}>
+                      {tooltip.value > 0 ? '+' : ''}{Math.round(tooltip.value * 100)}%
+                    </strong>
+                  </div>
+                )}
               </>
-            )}
-            {tooltip.node.level === 2 && (
-              <div className="dag-viz__tooltip-row">
-                Abgeleiteter Indikator
-              </div>
             )}
           </div>
         )}
