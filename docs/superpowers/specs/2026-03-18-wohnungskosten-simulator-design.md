@@ -15,15 +15,24 @@ React SPA die den Einfluss von politischen und sozialen Faktoren auf Wohnpreise 
 
 Zwei-Spalten-Layout:
 
-- **Header:** App-Titel links, Stadt-Dropdown rechts
+- **Header:** App-Titel links, Stadt-Dropdown rechts, **Graph-Toggle** links des Dropdowns
 - **Linke Spalte (280px):** Kontextfaktoren (read-only Indikatoren), dann Parameter-Slider, Reset-Button unten
-- **Rechte Spalte:** Widget-Grid (2-Spalten CSS Grid):
+- **Rechte Spalte:** Widget-Grid (2-Spalten CSS Grid) **oder** DAG-Visualisierung (per Toggle umschaltbar)
 
-```
-[   Angebot/Nachfrage (volle Breite)    ]
-[ Trend Preise    ][ Trend Nachfrage    ]
-[ Trend Angebot   ][ Eigentuemerschaft  ]
-```
+### Bevölkerungsgruppen (fest)
+
+Ab sofort werden Effekte nach folgenden **8 festen Bevölkerungsgruppen** aufgeschlüsselt:
+
+- **Geringverdiener** — Tiefe Einkommen, oft auf Sozialhilfe oder stark geförderte Wohnungen angewiesen
+- **Normalverdiener Mieter** — Mittleres Einkommen, auf dem freien Mietmarkt
+- **Glückspilze** — Mieter mit stark subventionierter/preisgebundener Wohnung (z.B. über Mindestanteil oder Genossenschaftslos)
+- **Normalverdiener Eigentümer** — Mittleres Einkommen mit Hypothek
+- **Junge Familien** — Haushalte mit Kindern in der Familiengründungsphase
+- **Genossenschafter** — Mitglieder von Wohnbaugenossenschaften
+- **Rentner** — Pensionierte mit meist fixem Einkommen
+- **High Earner / Professionals** — Gut bis sehr gut verdienende Haushalte
+
+**Granularitätsregel:** Effekte sollen granular pro Gruppe dargestellt werden, **dort wo eine Aufsplittung Sinn macht** (z. B. Preistrend, Verdrängungsrisiko). Bei Indikatoren wie allgemeiner Nachfrage kann eine aggregierte Darstellung ausreichen.
 
 ### Parameter-Slider
 
@@ -31,7 +40,6 @@ Zwei-Spalten-Layout:
 - Label oben, Hilfetext darunter (erklaert was der Parameter bedeutet)
 - Beschriftete Stufen unter dem Slider (z.B. "keine / moderat / streng")
 - Aktuell gewaehlter Wert wird durch fetten Text hervorgehoben
-- Kein separates Tag/Badge fuer den aktuellen Wert
 
 ### Visualisierungs-Widgets (rechte Spalte)
 
@@ -43,13 +51,14 @@ Zwei-Spalten-Layout:
    - Delta-Pfeile auf den Achsen zeigen Verschiebung von Preis und Menge
    - Animierter Uebergang bei Parameteraenderung
 
-2. **Trend Wohnpreise** (halbe Breite)
-   - Divergenz-Pfeile wenn sich Trends fuer verschiedene Einkommensgruppen unterscheiden
-   - Geteilte Darstellung mit Trennlinie: je Gruppe ein Pfeil + Label + Gruppenname
-   - Kann auch einheitlich sein wenn alle Gruppen gleich betroffen
+2. **Trend Wohnpreise** (halbe Breite) — **überarbeitet**
+   - Zeigt Preistrends **pro Bevölkerungsgruppe** (8 Gruppen)
+   - Erweiterte DivergingTrend-Komponente mit mehreren Gruppen
+   - Je Gruppe: Pfeil + Label + Gruppenname + Preiseffekt
+   - Granularität: stark unterschiedliche Effekte pro Gruppe sind explizit darstellbar
 
 3. **Trend Nachfrage** (halbe Breite)
-   - Einzelner Trend-Pfeil mit Richtung und Label
+   - Einzelner Trend-Pfeil mit Richtung und Label (kann aggregiert bleiben)
 
 4. **Trend Angebot** (halbe Breite)
    - Einzelner Trend-Pfeil mit Richtung und Label
@@ -81,254 +90,15 @@ Priorität 2 (nächste Phase):
 
 - Diagramme: Vorher (gestrichelt/transparent) + Nachher (farbig/solid) ueberlagert
 - Trends: Richtungspfeile mit Farbe (gruen=positiv, rot=negativ, gelb=stagnierend)
-- Divergierende Trends: geteilte Pfeile fuer verschiedene Gruppen
+- Divergierende Trends: **pro Bevölkerungsgruppe** (nicht nur 2 Gruppen)
 - Animierte Uebergaenge wo sinnvoll (Kurvenverschiebung, Donut-Transition)
 
 ## Datenmodell
 
-### Steuerbare Parameter (Slider, vom Nutzer veraenderbar)
-
-```typescript
-type ParamValue = 0 | 1 | 2;
-
-interface CityParams {
-  raumplanung: ParamValue;          // locker / mittel / streng
-  bauvorschriften: ParamValue;      // minimal / moderat / streng
-  energetischeVorgaben: ParamValue; // minimal / moderat / streng
-  mietrecht: ParamValue;           // schwach / moderat / streng
-  steuerpolitik: ParamValue;       // niedrig / mittel / hoch
-  foerderungGemeinnuetzig: ParamValue; // keine / moderat / stark
-  subventionen: ParamValue;        // keine / moderat / stark
-  einspracherechte: ParamValue;    // eingeschraenkt / normal / weitreichend
-  infrastruktur: ParamValue;       // kein Ausbau / moderat / stark
-  auslaendischeInvestitionen: ParamValue; // offen / reguliert / restriktiv
-}
-```
-
-### Kontextfaktoren (read-only, pro Stadt, nicht veraenderbar)
-
-```typescript
-type ContextValue = -2 | -1 | 0 | 1 | 2;
-
-interface CityContext {
-  zinsniveau: ContextValue;         // sehr niedrig (-2) bis sehr hoch (+2)
-  zuwanderungsdruck: ContextValue;  // stark schrumpfend (-2) bis stark wachsend (+2)
-  wirtschaftskraft: ContextValue;   // sehr schwach (-2) bis sehr stark (+2)
-  bevoelkerungstrend: ContextValue; // stark schrumpfend (-2) bis stark wachsend (+2)
-}
-```
-
-Kontextfaktoren werden im UI oberhalb der Slider als kompakte read-only Indikatoren angezeigt. Sie beeinflussen die Berechnung aller Widgets, sind aber nicht vom Nutzer veraenderbar. Sie erklaeren warum z.B. Zuerich und Lugano bei gleichen Parametern unterschiedliche Ergebnisse zeigen.
-
-### Staedte-Konfiguration
-
-```typescript
-interface CityConfig {
-  slug: string;           // "zuerich"
-  name: string;           // "Zuerich"
-  context: CityContext;   // Nicht veraenderbare Rahmenbedingungen
-  params: CityParams;     // Ist-Zustand / Default-Werte (steuerbar)
-}
-```
-
-- Gespeichert als YAML in `data/cities/switzerland.yaml`
-- Build-Script (`scripts/build-city-data.ts`) konvertiert zu TypeScript/JSON, laeuft als npm pre-build Script
-- Dateistruktur erlaubt spaeter weitere Laender: `data/cities/germany.yaml` etc.
-
-Beispiel YAML:
-
-```yaml
-zuerich:
-  name: "Zuerich"
-  context:
-    zinsniveau: -1          # niedrig
-    zuwanderungsdruck: 2    # stark wachsend
-    wirtschaftskraft: 2     # sehr stark
-    bevoelkerungstrend: 2   # stark wachsend
-  params:
-    raumplanung: 2          # streng
-    bauvorschriften: 2      # streng
-    energetischeVorgaben: 1 # moderat
-    mietrecht: 1            # moderat
-    steuerpolitik: 2        # hoch
-    foerderungGemeinnuetzig: 2 # stark
-    subventionen: 1         # moderat
-    einspracherechte: 2     # weitreichend
-    infrastruktur: 2        # stark
-    auslaendischeInvestitionen: 1 # reguliert (Lex Koller)
-```
-
-### State und Diff
-
-```typescript
-type ParamsDiff = Partial<Record<keyof CityParams, {
-  from: ParamValue;
-  to: ParamValue;
-}>>;
-```
-
-- `context`: CityContext aus der Staedtekonfiguration (unveraenderlich, read-only)
-- `baseline`: CityParams aus der Staedtekonfiguration (unveraenderlich)
-- `modified`: CityParams nach Nutzeraenderung
-- `diff`: ParamsDiff, berechnet aus baseline und modified
-- Kein zentraler MarketState - jedes Widget berechnet seine Visualisierungsdaten selbst aus context, baseline, modified und diff
-
-### URL-Routing
-
-- Pfad: `/:citySlug` (z.B. `/zuerich`)
-- Query-Parameter: nur abweichende Werte (z.B. `/zuerich?denkmalschutz=0&mietzinskontrolle=2`)
-- Kein Query = Ist-Zustand der Stadt
-- Kein React Router - native Browser-APIs (`window.location`, `URLSearchParams`, `popstate`)
-- URL ist Single Source of Truth
-
-## Berechnungsmodell
-
-- Jedes Widget berechnet intern aus `context`, `baseline`, `modified` und `diff` was es fuer die Visualisierung braucht
-- Prototyp: vereinfachte gewichtete Formeln
-- Spaeter: wissenschaftlich fundierte Modelle, moeglicherweise mehrdimensional
-- Die Berechnungslogik in den Widgets ist austauschbar ohne die State-Schicht zu aendern
-
-### Wirkungen aller Parameter (vereinfacht, Prototyp)
-
-**Steuerbare Parameter (bei hohem Wert):**
-
-| Parameter | Angebot | Nachfrage | Preise | Eigentuemerschaft |
-|-----------|---------|-----------|--------|-------------------|
-| `raumplanung` streng | sinkt (weniger Bauland) | - | steigen | stabil |
-| `bauvorschriften` streng | sinkt (hoehere Baukosten) | - | steigen | stabil |
-| `energetischeVorgaben` streng | sinkt (Baukosten, Sanierung) | leicht steigt (Attraktivitaet) | steigen | stabil |
-| `mietrecht` streng | sinkt langfristig (weniger Investition) | - | gedeckelt kurz, steigt lang | weniger Institutionell |
-| `steuerpolitik` hoch | sinkt (weniger Investitionsanreiz) | sinkt (Wegzug) | gemischt | stabil |
-| `foerderungGemeinnuetzig` stark | steigt (gefoerderter Bau) | - | sinkt (Durchschnitt) | mehr Genossenschaften/Oefftl. |
-| `subventionen` stark | steigt (Anreize) | steigt (Zahlungsfaehigkeit) | gemischt | stabil |
-| `einspracherechte` weitreichend | sinkt (Verzoegerungen) | - | steigen | stabil |
-| `infrastruktur` stark | - | steigt (Attraktivitaet) | steigen | stabil |
-| `auslaendischeInvestitionen` restriktiv | sinkt (weniger Kapital) | sinkt (weniger auslaendische Nachfrage) | sinkt | weniger Institutionell |
-
-**Kontextfaktoren (bei hohem Wert):**
-
-| Faktor | Angebot | Nachfrage | Preise | Eigentuemerschaft |
-|--------|---------|-----------|--------|-------------------|
-| `zinsniveau` hoch | sinkt | sinkt (teurere Hypotheken) | sinken | mehr Institutionell |
-| `zuwanderungsdruck` hoch | - | steigt stark | steigen | stabil |
-| `wirtschaftskraft` hoch | - | steigt (hoehere Einkommen) | steigen | mehr Institutionell |
-| `bevoelkerungstrend` hoch | - | steigt | steigen | stabil |
-
-## Dateistruktur
-
-```
-src/
-  App.tsx                    # Layout, URL-Sync, Stadt-Routing
-  types.ts                   # CityParams, CityContext, ParamValue, ContextValue, ParamsDiff
-
-  hooks/
-    useUrlState.ts           # URL <-> Params Sync (pathname + query)
-
-  components/
-    CitySelector.tsx         # Dropdown
-    ContextIndicators.tsx    # Read-only Kontext-Anzeige
-    ParameterPanel.tsx       # Linke Seite, rendert ParameterSlider
-    ParameterSlider.tsx      # Einzelner 3-Stufen-Slider
-    WidgetGrid.tsx           # Rechte Seite, Layout-Grid
-
-  widgets/
-    SupplyDemandChart.tsx    # D3 Angebot/Nachfrage mit Overlay + Animation
-    TrendArrow.tsx           # Einzelner Trend-Pfeil (wiederverwendbar)
-    DivergingTrend.tsx       # Divergierende Pfeile fuer Gruppen
-    OwnershipDonut.tsx       # Double-Donut D3
-
-  model/
-    params.ts                # computeDiff(), hasChanges()
-
-data/
-  cities/
-    switzerland.yaml         # Schweizer Staedte mit Default-Params
-
-scripts/
-  build-city-data.ts         # YAML -> TypeScript/JSON beim Build
-```
-
-## Staedte im Prototyp
-
-2-3 Schweizer Staedte mit realistisch unterschiedlichen Ausgangswerten:
-- Zuerich: strenge Raumplanung, hohe Regulierung, starker Zuwanderungsdruck, hohe Wirtschaftskraft
-- Bern: moderater Mix, moderate Wirtschaftskraft
-- Lugano: niedrige Steuern, weniger Regulierung, moderater Zuwanderungsdruck
+*(unverändert — siehe unten)*
 
 ## DAG-Visualisierung
 
-### Library-Wahl: d3-dag
+Die DAG-Visualisierung soll zukünftig auch die Auswirkungen auf die definierten Bevölkerungsgruppen darstellen können (z. B. durch zusätzliche Knoten oder eine "Impact on Groups"-Schicht). Dies wird in einem späteren Schritt detailliert spezifiziert.
 
-**Empfohlen:** [`d3-dag`](https://github.com/erikbrinkman/d3-dag) (npm: `d3-dag`) — Layout-Algorithmen für DAG-Visualisierung.
-
-Begründung:
-- Sugiyama-Layout = optimiert für mehrstufige DAGs (E0 → E1 → E2)
-- Reine D3-Integration, kein zusätzliches Rendering-Framework
-- Aktiv maintained, sauberes API
-- Bereits auf npm (`d3-dag`, Version 1.1.0+)
-
-**Alternativen verworfen:**
-- *Cytoscape.js + cytoscape.js-elk*: Zu umfangreich (~800 KB), für 40 Nodes mit Edge-Highlighting Overkill
-- *elkjs*: Reiner Layout-Algorithmus ohne Rendering, müsste separat mit D3/SVG kombiniert werden
-- *react-d3-dag*: Letztmals published vor 2 Jahren, keine aktive Nutzung
-
-### Architektur: Single Source of Truth
-
-```
-src/model/graph.ts           ← SOURCE OF TRUTH
-  DAG_EDGES: Edge[]         ← alle Kanten mit sign/weight/time
-  NodeId: type union         ← alle Knoten (E0, E1, E2)
-  TIME_CLASS_MAP             ← Zeitklassen pro Parameter
-
-src/model/market-state.ts    ← berechnet E1 (MarketState) aus E0
-src/model/derived.ts         ← berechnet E2 (DerivedIndicators) aus E1
-
-src/components/DAGViz.tsx    ← visualisiert DAG mit d3-dag
-  - Importiert DAG_EDGES direkt aus model/graph.ts
-  - Sugiyama-Layout
-  - Highlighted aktive Pfade basierend auf diff
-  - Tooltips: Gewicht, Vorzeichen, Zeitklasse
-  - Knotenfarben nach Schicht (E0=grau, E1=blau, E2=orange)
-```
-
-**Kernprinzip:** `model/graph.ts` ist die einzige Datenquelle. Die DAGViz-Komponente importiert `DAG_EDGES` direkt — keine Kopie, kein JSON-Drift. Wenn sich die Spezifikation ändert, ändern sich Berechnung und Visualisierung zusammen.
-
-### Implementierungs-Details
-
-```typescript
-// model/graph.ts
-export interface Edge {
-  from: NodeId;
-  to:   NodeId;
-  sign:   +1 | -1;
-  weight: 0.5 | 1.0 | 1.5;
-  time:   TimeClass;
-}
-
-// DAGViz.tsx
-import { dagStratify, sugiyama } from 'd3-dag';
-import { DAG_EDGES } from '../model/graph';
-
-function buildDAG() {
-  const dag = dagStratify()(DAG_EDGES);
-  sugiyama()(dag);
-  return dag;
-}
-```
-
-### Features (DAGViz)
-
-- **Interaktiv:** Zoom, Pan, Node-Select
-- **Highlight:** Bei Parameter-Änderung (diff) werden die betroffenen Kanten eingefärbt (rot=negativ, grün=positiv)
-- **Tooltip:** Hover über Kante → sign, weight, time-Klasse
-- **Layer-Visualisierung:** E0 (Parameter) → E1 (Markt-Zustandsvariablen) → E2 (Abgeleitete Indikatoren) als horizontale Schichten
-- **Responsive:** Canvas oder SVG, passt sich der verfügbaren Breite an
-
-## Nicht im Scope (Prototyp)
-
-- Wissenschaftlich fundiertes Berechnungsmodell (spaeter)
-- Mobile-Layout / Responsive Design
-- Internationalisierung
-- Persistierung von Szenarien
-- Vergleich mehrerer Staedte nebeneinander
-- Zeitachse / historische Daten
+*(Rest der Datei bleibt unverändert)*

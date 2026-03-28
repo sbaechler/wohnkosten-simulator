@@ -1,9 +1,10 @@
 import type { CityParams40, CityContext, ParamsDiff40 } from '../types';
 import { computeMarketState, clampE1 } from '../model/market-state';
 import { computeDerivedIndicators } from '../model/derived';
+import { computeGroupTrends } from '../model/groups';
 import { SupplyDemandChart } from './SupplyDemandChart';
 import { TrendArrow } from './TrendArrow';
-import { DivergingTrend } from './DivergingTrend';
+import { GroupTrendWidget } from './GroupTrendWidget';
 import { OwnershipDonut } from './OwnershipDonut';
 import { GentrifizierungsWidget } from './GentrifizierungsWidget';
 import { ZeitBisWirkungWidget } from './ZeitBisWirkungWidget';
@@ -22,17 +23,15 @@ export function WidgetGrid({ context, baseline, modified, diff }: Props) {
   // E1 → E2
   const derived = computeDerivedIndicators(state, context, diff);
 
+  // Preistrends pro Bevölkerungsgruppe (8 Gruppen)
+  const groupTrends = computeGroupTrends(state, baseline, modified, diff);
+
   // Abgeleitete Trends für Kompatibilitäts-Widgets
   // E1(positive Werte) = angebotsreduzierend / preistreibend / verdrängend
   // Supply: negatives angebotspotenzial = mehr Angebot
   const supplyDelta = -state.angebotspotenzial;
   // Nachfragedruck: positives nachfragedruck = mehr Nachfrage
   const demandDelta = state.nachfragedruck;
-
-  // Preistrend: Angebot-Nachfrage-Differenz, modifiziert durch Mietschutz
-  const priceBase = -supplyDelta + demandDelta;
-  const priceLow = priceBase + state.mietpreis_schutzlevel * -0.1;  // Mieter profitieren weniger
-  const priceHigh = priceBase + state.mietpreis_schutzlevel * 0.05;
 
   // Verdichtung: abgeleitet von angebotspotenzial (Druck, dichter zu bauen)
   const verdichtungDelta = state.angebotspotenzial * -0.5 + state.nachfragedruck * 0.3;
@@ -54,12 +53,9 @@ export function WidgetGrid({ context, baseline, modified, diff }: Props) {
         state={state}
         derived={derived}
       />
-      <DivergingTrend
+      <GroupTrendWidget
         title="Trend Wohnpreise"
-        groups={[
-          { label: 'Minderheit (Schutz)', value: priceLow },
-          { label: 'Mehrheit', value: priceHigh },
-        ]}
+        groups={groupTrends}
       />
       <TrendArrow label="Nachfragedruck" value={demandDelta} />
       <TrendArrow label="Angebotspotenzial" value={supplyDelta} invertColors />
