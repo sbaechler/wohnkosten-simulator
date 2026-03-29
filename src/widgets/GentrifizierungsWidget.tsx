@@ -46,7 +46,7 @@ export function GentrifizierungsWidget({ derived }: Props) {
         </div>
         <div
           className="gentrifizierungs-widget__indicator"
-          style={{ left: `${percentage}%`, borderColor: color }}
+          style={{ left: `${percentage}%`, borderColor: color, background: '#fff', boxShadow: `0 0 8px ${color}` }}
         />
       </div>
 
