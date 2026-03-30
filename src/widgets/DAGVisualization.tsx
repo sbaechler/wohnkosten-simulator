@@ -523,8 +523,71 @@ export function DAGVisualization({ context, baseline, modified, diff }: Props) {
         .attr('marker-end', `url(#${markerId})`);
     }
 
-    // Draw E1→E2 edges (same loop handles all)
-    // Already drawn above
+    // ── Feedback / Rückkopplungs-Bögen (gestrichelt) ────────────────────────
+    // Zeigen Rückkopplungspfade, die im DAG nicht als Kanten existieren,
+    // aber real existieren. Gestrichelt, farbcodiert nach Wirkung.
+    // Quelle: abhaengigkeiten-und-iterationen.md, "Fehlende Rückkoppungen"
+
+    const FEEDBACK_EDGES: Array<{
+      from: NodeId;
+      to: NodeId;
+      sign: 1 | -1;
+      label: string;
+    }> = [
+      { from: 'gentrifizierungsindex',  to: 'nachfragedruck',          sign: +1, label: 'Aufwertung zieht Einkommensstärkere an' },
+      { from: 'gentrifizierungsindex',  to: 'angebotspotenzial',        sign: +1, label: 'Sanierungswelle → mehr Neubau' },
+      { from: 'investitionsattraktivitaet', to: 'angebotspotenzial',  sign: +1, label: 'Investoren → mehr Neubau' },
+      { from: 'angebotspotenzial',      to: 'nachfragedruck',          sign: -1, label: 'Angebot → dämpft Nachfrage' },
+      { from: 'nachfragedruck',         to: 'investitionsattraktivitaet', sign: +1, label: 'Hohe Nachfrage → attraktiver Markt' },
+      { from: 'gentrifizierungsindex',  to: 'mietrecht_kuendigungsschutz', sign: +1, label: 'Politische Gegenreaktion' },
+      { from: 'angebotspotenzial',      to: 'eigentumsquoten_trend',    sign: -1, label: 'Mehr Angebot → weniger Kaufdruck' },
+      { from: 'aufwertungsdruck',        to: 'spekulationshemmung',      sign: -1, label: 'Aufwertung → mehr Bodenhortung' },
+    ];
+
+    const FEEDBACK_Y_OFFSET = -40; // Bögen gehen über die Knoten drüber
+
+    // Pre-create feedback arrow markers once
+    const defs2 = svg.select<SVGDefsElement>('defs');
+    for (const fb of FEEDBACK_EDGES) {
+      defs2.append('marker')
+        .attr('id', `fb-arrow-${fb.from}-${fb.to}`)
+        .attr('viewBox', '0 0 10 10')
+        .attr('refX', 8)
+        .attr('refY', 5)
+        .attr('markerWidth', 4)
+        .attr('markerHeight', 4)
+        .attr('orient', 'auto-start-reverse')
+        .append('path')
+        .attr('d', 'M 0 0 L 10 5 L 0 10 z')
+        .attr('fill', fb.sign > 0 ? '#74c0fc' : '#ffd43b');
+    }
+
+    // Draw feedback arcs
+    for (const fb of FEEDBACK_EDGES) {
+      const fromNode = allNodes.find(n => n.id === fb.from);
+      const toNode = allNodes.find(n => n.id === fb.to);
+      if (!fromNode || !toNode) continue;
+
+      const fromY = nodeYMap.get(fb.from)! + NODE_HEIGHT / 2;
+      const toY = nodeYMap.get(fb.to)! + NODE_HEIGHT / 2;
+      const fromX = getNodeX(fromNode.level) + getNodeWidth(fromNode.level);
+      const toX = getNodeX(toNode.level);
+
+      // Arc goes UP and BACKWARDS above the nodes
+      const arcY = Math.min(fromY, toY) + FEEDBACK_Y_OFFSET;
+      const cpY = arcY - 20;
+
+      const pathD = `M ${fromX} ${fromY} C ${fromX} ${cpY}, ${toX} ${cpY}, ${toX} ${toY}`;
+
+      g.append('path')
+        .attr('d', pathD)
+        .attr('fill', 'none')
+        .attr('stroke', fb.sign > 0 ? '#74c0fc' : '#ffd43b')
+        .attr('stroke-width', 1)
+        .attr('opacity', 0.45)
+        .attr('stroke-dasharray', '4,3')
+        .attr('marker-end', `url(#fb-arrow-${fb.from}-${fb.to})`);
+    }
 
     // Draw nodes
     for (const node of allNodes) {
@@ -745,6 +808,14 @@ export function DAGVisualization({ context, baseline, modified, diff }: Props) {
         <span className="dag-viz__legend-item">
           <span className="dag-viz__legend-line" style={{ background: '#3d5a80' }} />
           <span className="dag-viz__legend-label">+/−</span>
+        </span>
+        <span className="dag-viz__legend-item">
+          <span className="dag-viz__legend-line dag-viz__legend-line--dashed" style={{ borderColor: '#74c0fc' }} />
+          <span className="dag-viz__legend-label">Rückkopplung+</span>
+        </span>
+        <span className="dag-viz__legend-item">
+          <span className="dag-viz__legend-line dag-viz__legend-line--dashed" style={{ borderColor: '#ffd43b' }} />
+          <span className="dag-viz__legend-label">Rückkopplung−</span>
         </span>
       </div>
     </div>

@@ -103,6 +103,14 @@
   flex-shrink: 0;
 }
 
+.dag-viz__legend-line--dashed {
+  width: 16px;
+  height: 0;
+  border-top: 2px dashed;
+  border-radius: 0;
+  flex-shrink: 0;
+}
+
 .dag-viz__legend-label {
   font-size: 9px;
   color: #666;
