@@ -22,18 +22,6 @@ function getDirection(value: number) {
   return 'flat';
 }
 
-function getColor(direction: string): string {
-  if (direction === 'up') return '#ff6b6b';
-  if (direction === 'down') return '#51cf66';
-  return '#ffd43b';
-}
-
-function getTrendLabel(direction: string): string {
-  if (direction === 'up') return '+teuer';
-  if (direction === 'down') return '-günstig';
-  return 'stabil';
-}
-
 const PHASE_COLORS = ['#ff6b6b', '#ffd43b', '#4dabf7'];
 const PHASE_NAMES = ['P1', 'P2', 'P3'];
 
@@ -60,10 +48,10 @@ export function GroupTrendWidget({ title, phases, computeGroupTrendsForPhase }: 
     <div className="group-trend">
       <div className="group-trend__title">{title}</div>
 
-      {/* Phase header */}
-      <div className="group-trend__phase-header">
-        <div className="group-trend__phase-header-spacer" />
-        <div className="group-trend__phase-labels">
+      <div className="group-trend__grid">
+        {/* Phase header row */}
+        <div className="group-trend__header-row">
+          <div className="group-trend__header-spacer" />
           {phases.map((phase, i) => (
             <div key={phase.phase} className="group-trend__phase-label" style={{ color: PHASE_COLORS[i] }}>
               {PHASE_NAMES[i]}
@@ -71,11 +59,9 @@ export function GroupTrendWidget({ title, phases, computeGroupTrendsForPhase }: 
             </div>
           ))}
         </div>
-      </div>
 
-      <div className="group-trend__list">
+        {/* Rows */}
         {sorted.map((item, i) => {
-          const dir = getDirection(item.value);
           const isHovered = hovered === i;
 
           return (
@@ -100,22 +86,20 @@ export function GroupTrendWidget({ title, phases, computeGroupTrendsForPhase }: 
                 </div>
               </div>
 
-              {/* Phase columns */}
-              <div className="group-trend__phase-cols">
-                {allTrends.map((trends, phaseIdx) => {
-                  const phaseItem = trends.find(t => t.group.id === item.group.id);
-                  if (!phaseItem) return null;
-                  const phaseDir = getDirection(phaseItem.value);
-                  const phaseColor = PHASE_COLORS[phaseIdx];
-                  return (
-                    <div key={phaseIdx} className="group-trend__phase-cell">
-                      <div className="group-trend__arrow" style={{ color: phaseColor }}>
-                        {ARROWS[phaseDir]}
-                      </div>
+              {/* Phase cells */}
+              {allTrends.map((trends, phaseIdx) => {
+                const phaseItem = trends.find(t => t.group.id === item.group.id);
+                if (!phaseItem) return <div key={phaseIdx} className="group-trend__phase-cell" />;
+                const phaseDir = getDirection(phaseItem.value);
+                const phaseColor = PHASE_COLORS[phaseIdx];
+                return (
+                  <div key={phaseIdx} className="group-trend__phase-cell">
+                    <div className="group-trend__arrow" style={{ color: phaseColor }}>
+                      {ARROWS[phaseDir]}
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
             </div>
           );
         })}

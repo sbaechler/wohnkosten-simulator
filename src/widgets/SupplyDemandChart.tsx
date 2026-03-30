@@ -1,6 +1,6 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
-import type { CityParams40, CityContext, ParamsDiff40, MarketState, DerivedIndicators } from '../types';
+import type { CityParams40, CityContext, ParamsDiff40 } from '../types';
 import type { PhaseResult } from '../model/phases';
 import { computeMarketState, clampE1 } from '../model/market-state';
 import './SupplyDemandChart.css';
@@ -15,23 +15,20 @@ interface Props {
 
 const MARGIN = { top: 20, right: 110, bottom: 40, left: 50 };
 const WIDTH = 500;
-const HEIGHT = 200;
+const HEIGHT = 240; // Increased height to accommodate phase selector
 
-// Phase styling: P1=bold solid, P2=medium, P3=faded dashed
-const PHASE_STYLES = [
-  { strokeWidth: 2.5, opacity: 1.0, dashArray: null },   // P1: bold solid
-  { strokeWidth: 2.0, opacity: 0.8, dashArray: null },   // P2: medium solid
-  { strokeWidth: 1.5, opacity: 0.5, dashArray: '5,4' },  // P3: faded dashed
-];
+const PHASE_NAMES = ['P1', 'P2', 'P3'];
 
-const PHASE_COLORS = {
-  supply: ['#4dabf7', '#74c0fc', '#a5d8ff'],
-  demand: ['#ff6b6b', '#ff8787', '#ffa8a8'],
-  equilibrium: ['#ffd43b', '#ffe066', '#fff3bf'],
+const COLORS = {
+  supply: '#4dabf7',
+  demand: '#ff6b6b',
+  equilibrium: '#ffd43b',
+  baseline: '#555',
 };
 
 export function SupplyDemandChart({ context, baseline, modified, diff, phases }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const [activePhaseIndex, setActivePhaseIndex] = useState(2); // Default to P3
 
   useEffect(() => {
     if (!svgRef.current || !phases || phases.length === 0) return;
@@ -43,13 +40,13 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases }:
     const h = HEIGHT - MARGIN.top - MARGIN.bottom;
 
     const g = svg.append('g')
-      .attr('transform', `translate(${MARGIN.left},${MARGIN.top})`);
+      .attr('transform', `translate(${MARGIN.left},${MARGIN.top + 40})`); // Shifted down for selector
 
     const x = d3.scaleLinear().domain([0, 10]).range([0, w]);
-    const y = d3.scaleLinear().domain([0, 10]).range([h, 0]);
+    const y = d3.scaleLinear().domain([0, 10]).range([h - 40, 0]);
 
     // Axes
-    g.append('g').attr('transform', `translate(0,${h})`)
+    g.append('g').attr('transform', `translate(0,${h - 40})`)
       .call(d3.axisBottom(x).ticks(0))
       .selectAll('text').remove();
     g.append('g')
@@ -57,20 +54,17 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases }:
       .selectAll('text').remove();
 
     // Axis labels
-    g.append('text').attr('x', w / 2).attr('y', h + 30)
-      .attr('text-anchor', 'middle').attr('fill', '#555').attr('font-size', 11)
+    g.append('text').attr('x', w / 2).attr('y', h - 10)
+      .attr('text-anchor', 'middle').attr('fill', '#888').attr('font-size', 11)
       .text('Menge');
     g.append('text').attr('transform', 'rotate(-90)')
-      .attr('x', -h / 2).attr('y', -35)
-      .attr('text-anchor', 'middle').attr('fill', '#555').attr('font-size', 11)
+      .attr('x', -(h - 40) / 2).attr('y', -25)
+      .attr('text-anchor', 'middle').attr('fill', '#888').attr('font-size', 11)
       .text('Preis');
 
     const line = d3.line<[number, number]>()
       .x(d => x(d[0])).y(d => y(d[1]))
       .curve(d3.curveBasis);
-
-    // Compute baseline E1 state (no changes = 0 shift)
-    const baselineState = clampE1(computeMarketState(context, baseline, baseline, {}));
 
     const SHIFT_SCALE = 7;
 
@@ -97,91 +91,103 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases }:
       return [Math.max(0, Math.min(10, qEq)), Math.max(0, Math.min(10, pEq))];
     }
 
-    const hasChanges = Object.keys(diff).length > 0;
+    // Baseline E1 state
+    const baselineState = clampE1(computeMarketState(context, baseline, baseline, {}));
+    const [bq, bp] = findEquilibrium(baselineState.angebotspotenzial, baselineState.nachfragedruck);
 
-    // Draw baseline curves (dashed, grey)
-    const baseSupply = baselineState.angebotspotenzial;
-    const baseDemand = baselineState.nachfragedruck;
-    g.append('path').datum(supplyCurve(baseSupply))
+    // Draw baseline curves
+    g.append('path').datum(supplyCurve(baselineState.angebotspotenzial))
       .attr('d', line).attr('fill', 'none')
-      .attr('stroke', '#555').attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
-    g.append('path').datum(demandCurve(baseDemand))
+      .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
+    g.append('path').datum(demandCurve(baselineState.nachfragedruck))
       .attr('d', line).attr('fill', 'none')
-      .attr('stroke', '#555').attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
+      .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
 
     // Baseline equilibrium
-    const [bq, bp] = findEquilibrium(baseSupply, baseDemand);
     g.append('line').attr('x1', x(bq)).attr('y1', y(bp)).attr('x2', x(bq)).attr('y2', y(0))
-      .attr('stroke', '#555').attr('stroke-dasharray', '3').attr('stroke-width', 1);
+      .attr('stroke', COLORS.baseline).attr('stroke-dasharray', '3').attr('stroke-width', 1);
     g.append('line').attr('x1', 0).attr('y1', y(bp)).attr('x2', x(bq)).attr('y2', y(bp))
-      .attr('stroke', '#555').attr('stroke-dasharray', '3').attr('stroke-width', 1);
-    g.append('circle').attr('cx', x(bq)).attr('cy', y(bp)).attr('r', 3).attr('fill', '#555');
+      .attr('stroke', COLORS.baseline).attr('stroke-dasharray', '3').attr('stroke-width', 1);
+    g.append('circle').attr('cx', x(bq)).attr('cy', y(bp)).attr('r', 3).attr('fill', COLORS.baseline);
 
-    // Draw each phase
+    // Draw phases
     phases.forEach((phase, idx) => {
-      const style = PHASE_STYLES[idx];
+      const isActive = idx === activePhaseIndex;
       const state = phase.marketState;
-
-      const supplyPath = g.append('path').datum(supplyCurve(state.angebotspotenzial))
-        .attr('d', line).attr('fill', 'none')
-        .attr('stroke', PHASE_COLORS.supply[idx])
-        .attr('stroke-width', style.strokeWidth)
-        .attr('opacity', 0)
-        .attr('stroke-dasharray', style.dashArray ?? null);
-
-      const demandPath = g.append('path').datum(demandCurve(state.nachfragedruck))
-        .attr('d', line).attr('fill', 'none')
-        .attr('stroke', PHASE_COLORS.demand[idx])
-        .attr('stroke-width', style.strokeWidth)
-        .attr('opacity', 0)
-        .attr('stroke-dasharray', style.dashArray ?? null);
-
-      if (hasChanges) {
-        supplyPath.transition().duration(600 + idx * 150).attr('opacity', style.opacity);
-        demandPath.transition().duration(600 + idx * 150).attr('opacity', style.opacity);
-      }
-
-      // Equilibrium dot for this phase
       const [pq, pp] = findEquilibrium(state.angebotspotenzial, state.nachfragedruck);
-      const eqRadius = 4 + (2 - idx); // P1 largest, P3 smallest
 
+      // Supply curve
+      g.append('path').datum(supplyCurve(state.angebotspotenzial))
+        .attr('d', line).attr('fill', 'none')
+        .attr('stroke', COLORS.supply)
+        .attr('stroke-width', isActive ? 2.5 : 1)
+        .attr('opacity', isActive ? 1 : 0.15);
+
+      // Demand curve
+      g.append('path').datum(demandCurve(state.nachfragedruck))
+        .attr('d', line).attr('fill', 'none')
+        .attr('stroke', COLORS.demand)
+        .attr('stroke-width', isActive ? 2.5 : 1)
+        .attr('opacity', isActive ? 1 : 0.15);
+
+      // Equilibrium dot
       g.append('circle')
-        .attr('cx', x(pq)).attr('cy', y(pp)).attr('r', 0)
-        .attr('fill', PHASE_COLORS.equilibrium[idx])
-        .attr('opacity', 0)
-        .transition().duration(600 + idx * 150).attr('opacity', style.opacity)
-        .transition().duration(200).attr('r', eqRadius);
+        .attr('cx', x(pq)).attr('cy', y(pp))
+        .attr('r', isActive ? 6 : 3)
+        .attr('fill', isActive ? COLORS.equilibrium : '#666')
+        .attr('stroke', isActive ? '#fff' : 'none')
+        .attr('stroke-width', 2)
+        .attr('opacity', isActive ? 1 : 0.4);
+
+      if (isActive) {
+        // Guideline for active equilibrium
+        g.append('line').attr('x1', x(pq)).attr('y1', y(pp)).attr('x2', x(pq)).attr('y2', y(0))
+          .attr('stroke', COLORS.equilibrium).attr('stroke-dasharray', '2').attr('stroke-width', 1);
+        g.append('line').attr('x1', 0).attr('y1', y(pp)).attr('x2', x(pq)).attr('y2', y(pp))
+          .attr('stroke', COLORS.equilibrium).attr('stroke-dasharray', '2').attr('stroke-width', 1);
+      }
     });
 
-    // Legend — all phases
+    // Legend
     const legend = g.append('g').attr('transform', `translate(${w + 10}, 0)`);
+    
+    legend.append('line').attr('x1', 0).attr('y1', 0).attr('x2', 20).attr('y2', 0)
+      .attr('stroke', COLORS.demand).attr('stroke-width', 2.5);
+    legend.append('text').attr('x', 25).attr('y', 4).attr('fill', '#ccc').attr('font-size', 11).text('Nachfrage');
 
-    phases.forEach((phase, idx) => {
-      const style = PHASE_STYLES[idx];
-      const yOff = idx * 20;
-      legend.append('line')
-        .attr('x1', 0).attr('y1', yOff).attr('x2', 20).attr('y2', yOff)
-        .attr('stroke', PHASE_COLORS.demand[idx])
-        .attr('stroke-width', style.strokeWidth)
-        .attr('opacity', style.opacity)
-        .attr('stroke-dasharray', style.dashArray ?? null);
-      legend.append('text')
-        .attr('x', 25).attr('y', yOff + 4)
-        .attr('fill', '#ccc').attr('font-size', 10)
-        .attr('opacity', style.opacity)
-        .text(`Nachfrage ${phase.yearsLabel}`);
-    });
+    legend.append('line').attr('x1', 0).attr('y1', 20).attr('x2', 20).attr('y2', 20)
+      .attr('stroke', COLORS.supply).attr('stroke-width', 2.5);
+    legend.append('text').attr('x', 25).attr('y', 24).attr('fill', '#ccc').attr('font-size', 11).text('Angebot');
 
-    legend.append('line').attr('x1', 0).attr('y1', 68).attr('x2', 20).attr('y2', 68)
-      .attr('stroke', '#555').attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
-    legend.append('text').attr('x', 25).attr('y', 72)
-      .attr('fill', '#555').attr('font-size', 10).text('Ist-Zustand');
+    legend.append('line').attr('x1', 0).attr('y1', 40).attr('x2', 20).attr('y2', 40)
+      .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
+    legend.append('text').attr('x', 25).attr('y', 44).attr('fill', '#888').attr('font-size', 11).text('Ist-Zustand');
 
-  }, [context, baseline, modified, diff, phases]);
+    legend.append('circle').attr('cx', 10).attr('cy', 64).attr('r', 5).attr('fill', COLORS.equilibrium).attr('stroke', '#fff').attr('stroke-width', 1);
+    legend.append('text').attr('x', 25).attr('y', 68).attr('fill', '#ccc').attr('font-size', 11).text('Gleichgewicht');
+
+  }, [context, baseline, modified, diff, phases, activePhaseIndex]);
 
   return (
     <div className="supply-demand-chart">
-      <svg ref={svgRef} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="xMidYMid meet" />
+      <div className="supply-demand-chart__title">Preis-Mengen-Diagramm</div>
+      
+      <div className="supply-demand-chart__phase-selector">
+        {phases.map((p, i) => (
+          <button
+            key={p.phase}
+            className={`supply-demand-chart__phase-btn ${i === activePhaseIndex ? 'supply-demand-chart__phase-btn--active' : ''}`}
+            onClick={() => setActivePhaseIndex(i)}
+          >
+            {PHASE_NAMES[i]}
+            <span className="supply-demand-chart__phase-years">{p.yearsLabel}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="supply-demand-chart__svg-container">
+        <svg ref={svgRef} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="xMidYMid meet" />
+      </div>
     </div>
   );
 }

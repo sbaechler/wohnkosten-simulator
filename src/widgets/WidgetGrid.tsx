@@ -22,22 +22,11 @@ export function WidgetGrid({ context, baseline, modified, diff }: Props) {
   // Latest phase for single-value widgets
   const latest = phases[phases.length - 1]!;
   const state = latest.marketState;
-  const derived = latest.derived;
 
   // Helper: compute group trends for a specific phase
   function computeGroupTrendsForPhase(phase: PhaseResult) {
     return computeGroupTrends(phase.marketState, baseline, modified, diff);
   }
-
-  // Supply/demand deltas for TrendArrow (derived from latest phase state)
-  const supplyDelta = -state.angebotspotenzial;
-  const demandDelta = state.nachfragedruck;
-  const verdichtungDelta = state.angebotspotenzial * -0.5 + state.nachfragedruck * 0.3;
-  const stadtbildDelta =
-    ((modified.bau_einspracherecht_dritte as number) - (baseline.bau_einspracherecht_dritte as number)) * 0.2 +
-    ((modified.bau_einspracherecht_suspensiv as number) - (baseline.bau_einspracherecht_suspensiv as number)) * 0.15 +
-    ((modified.bau_normenharmonisierung as number) - (baseline.bau_normenharmonisierung as number)) * 0.1 -
-    ((modified.gemeinnuetzig_mindestanteil as number) - (baseline.gemeinnuetzig_mindestanteil as number)) * 0.05;
 
   return (
     <div className="widget-grid">
@@ -81,7 +70,7 @@ export function WidgetGrid({ context, baseline, modified, diff }: Props) {
         label="Stadtbild"
         phases={phases}
         invertColors
-        getValue={p => {
+        getValue={_p => {
           // Recompute stadtbild delta for this phase's modified state
           const m = modified;
           const b = baseline;
