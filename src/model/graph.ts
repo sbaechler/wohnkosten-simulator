@@ -5,8 +5,6 @@
 
 // ── Node IDs ─────────────────────────────────────────────────────────────────
 
-export type TimeClass = 'short' | 'medium' | 'long';
-
 /** Alle Knoten im Graph (E0 Parameter + E0 Kontext + E1 + E2) */
 export type NodeId =
   // E0 — steuerbare Parameter
@@ -32,16 +30,16 @@ export type NodeId =
   | 'eigentumsquoten_trend' | 'aufwertungsdruck' | 'investitionsattraktivitaet'
   // E2 — abgeleitete Indikatoren
   | 'gentrifizierungsindex' | 'neubau_hemmnisindex' | 'verdraengungsrisiko_index'
-  | 'fiskalische_wirkung' | 'zeit_bis_wirkung';
+  | 'fiskalische_wirkung';
 
-// ── Edge ────────────────────────────────────────────────────────────────────
+// ── Edge (original, used by market-state.ts) ─────────────────────────────────
 
 export interface Edge {
   from: NodeId;
   to:   NodeId;
   sign:   1 | -1;
   weight: 0.5 | 1 | 1.5;
-  time:   TimeClass;
+  time:   'short' | 'medium' | 'long';
 }
 
 // ── DAG Edges ───────────────────────────────────────────────────────────────
@@ -170,78 +168,6 @@ type _AssertAllKeys = typeof DAG_EDGES[number] extends Edge
   : never;
 const _checkEdges: _AssertAllKeys = true;
 void _checkEdges;
-
-// ── TIME_CLASS_MAP ──────────────────────────────────────────────────────────
-
-/**
- * Zeitklasse für jeden der 40 Parameter und 4 Kontextfaktoren.
- * short  = < 1 Jahr
- * medium = 1–7 Jahre
- * long   = > 7 Jahre
- */
-export const TIME_CLASS_MAP: Record<string, TimeClass> = {
-  // ── Kontextfaktoren ───────────────────────────────────────────────────────
-  'ctx:zinsniveau':          'short',
-  'ctx:zuwanderungsdruck':   'short',
-  'ctx:wirtschaftskraft':   'medium',
-  'ctx:bevoelkerungstrend':  'long',
-
-  // ── 1. Bodenrecht & Landnutzung ──────────────────────────────────────────
-  raumplanung_zonenreserve:          'long',
-  raumplanung_verdichtung:           'medium',
-  raumplanung_ausnuetzungsziffer:   'medium',
-  boden_vorkaufsrecht:               'long',
-  boden_bauverpflichtung:            'medium',
-  boden_mehrwertabgabe:              'long',
-  boden_bodeneigentumssteuer:        'medium',
-
-  // ── 2. Bau & Bewilligung ──────────────────────────────────────────────────
-  bau_energievorgaben:               'short',  // Kosten sofort; Baueffekt medium
-  bau_sanierungspflicht:             'short',
-  bau_einspracherecht_dritte:        'short',
-  bau_einspracherecht_suspensiv:     'short',
-  bau_bewilligungsverfahren:         'medium',
-  bau_normenharmonisierung:          'long',
-
-  // ── 3. Gemeinnütziger Wohnungsbau ─────────────────────────────────────────
-  gemeinnuetzig_mindestanteil:       'long',
-  gemeinnuetzig_foerderfonds:        'long',
-  gemeinnuetzig_baurecht:            'long',
-  gemeinnuetzig_belegungsvorschriften:'medium',
-  gemeinnuetzig_sozialmischung:      'long',
-
-  // ── 4. Mietrecht ──────────────────────────────────────────────────────────
-  mietrecht_kostenmiete:             'short',
-  mietrecht_anfangsmiete:            'short',
-  mietrecht_mietzinstransparenz:     'short',
-  mietrecht_kuendigungsschutz:       'short',
-  mietrecht_mietzinsindex:           'short',
-  mietrecht_untervermietung:         'short',
-
-  // ── 5. Steuern & Abgaben ──────────────────────────────────────────────────
-  steuer_grundstueckgewinn:          'medium',
-  steuer_eigenmietwert:              'medium',
-  steuer_leerstandsabgabe:           'medium',
-  steuer_handaenderung:              'short',
-  steuer_kapitalgewinnprivatpersonen:'short',
-
-  // ── 6. Kapital & Investitionen ────────────────────────────────────────────
-  kapital_auslaendische_investoren:  'medium',
-  kapital_institutionelle_regulierung:'medium',
-  kapital_hypothekarregulierung:     'short',
-
-  // ── 7. Nutzungsregulierung ────────────────────────────────────────────────
-  nutzung_kurzzeitvermietung:        'short',
-  nutzung_umnutzungsverbot:          'short',
-  nutzung_abbruchverbot:            'short',
-  nutzung_zweitwohnungen:            'long',
-
-  // ── 8. Infrastruktur & Standortqualität ────────────────────────────────────
-  infra_oepnv:                       'long',
-  infra_schule_kita:                'long',  // Attraktivitätswirkung langfristig
-  infra_oeffentlicher_raum:          'long',
-  infra_wirtschaftsansiedlung:        'long',
-};
 
 // ── Helper: E1 knoten bezogen auf einen Zielknoten ─────────────────────────
 

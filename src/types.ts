@@ -152,19 +152,9 @@ export interface MarketState {
 
 // ── E2: Abgeleitete Indikatoren ──────────────────────────────────────────────
 
-export type ZeitKlasse = 'kurzfristig' | 'mittelfristig' | 'langfristig';
-
-export interface Zeitprofil {
-  kurzfristig: string[];
-  mittelfristig: string[];
-  langfristig: string[];
-  dominanteKlasse: ZeitKlasse;
-}
-
 export interface DerivedIndicators {
   gentrifizierungsindex: number;    // –1 … +1
   neubau_hemmnisindex: number;      // –1 … +1 (invertiert von angebotspotenzial)
   verdraengungsrisiko_index: number; // –1 … +1
   fiskalische_wirkung: number;      // –1 … +1
-  zeit_bis_wirkung: Zeitprofil;
 }

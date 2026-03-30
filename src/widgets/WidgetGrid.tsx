@@ -7,7 +7,6 @@ import { TrendArrow } from './TrendArrow';
 import { GroupTrendWidget } from './GroupTrendWidget';
 import { OwnershipDonut } from './OwnershipDonut';
 import { GentrifizierungsWidget } from './GentrifizierungsWidget';
-import { ZeitBisWirkungWidget } from './ZeitBisWirkungWidget';
 
 interface Props {
   context: CityContext;
@@ -69,11 +68,6 @@ export function WidgetGrid({ context, baseline, modified, diff }: Props) {
         modified={modified}
         diff={diff}
         state={state}
-      />
-      <ZeitBisWirkungWidget
-        derived={derived}
-        modified={modified}
-        baseline={baseline}
       />
     </div>
   );

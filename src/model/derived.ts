@@ -1,46 +1,9 @@
 // ============================================================
 // derived.ts — E1 → E2 computation
-// Berechnet die 5 abgeleiteten Indikatoren aus E1 + zeit_bis_wirkung aus E0
+// Berechnet die 4 abgeleiteten Indikatoren aus E1
 // ============================================================
 
-import type { MarketState, DerivedIndicators, ParamsDiff40, Zeitprofil, ZeitKlasse } from '../types';
-import { TIME_CLASS_MAP } from './graph';
-
-// ── zeit_bis_wirkung ─────────────────────────────────────────────────────────
-
-/**
- * Aggregiert die Zeitklassen der geänderten Parameter (E0 → zeit_bis_wirkung).
- * Kein Edge-Eintrag — berechnet sich direkt aus diff + TIME_CLASS_MAP.
- */
-export function computeZeitprofil(diff: ParamsDiff40): Zeitprofil {
-  const kurzfristig: string[] = [];
-  const mittelfristig: string[] = [];
-  const langfristig: string[] = [];
-
-  for (const key of Object.keys(diff) as (keyof ParamsDiff40)[]) {
-    const timeClass = TIME_CLASS_MAP[key as string];
-    if (!timeClass) continue;
-
-    if (timeClass === 'short') {
-      kurzfristig.push(key as string);
-    } else if (timeClass === 'medium') {
-      mittelfristig.push(key as string);
-    } else {
-      langfristig.push(key as string);
-    }
-  }
-
-  // Dominante Klasse: die mit den meisten geänderten Parametern
-  const counts: Record<ZeitKlasse, number> = {
-    kurzfristig: kurzfristig.length,
-    mittelfristig: mittelfristig.length,
-    langfristig: langfristig.length,
-  };
-  const dominanteKlasse = (Object.entries(counts) as [ZeitKlasse, number][])
-    .sort(([, a], [, b]) => b - a)[0][0];
-
-  return { kurzfristig, mittelfristig, langfristig, dominanteKlasse };
-}
+import type { MarketState, DerivedIndicators, ParamsDiff40 } from '../types';
 
 // ── Hilfsfunktion: clamp ──────────────────────────────────────────────────────
 
@@ -70,7 +33,7 @@ function clamp(v: number, lo = -1, hi = 1): number {
 export function computeDerivedIndicators(
   state: MarketState,
   _context: unknown,
-  diff: ParamsDiff40,
+  _diff: ParamsDiff40,
 ): DerivedIndicators {
   // ── gentrifizierungsindex ─────────────────────────────────────────────────
   // Gewichte: aufwertungsdruck=1.5, (1-mietpreis_schutzlevel)=1.5,
@@ -100,14 +63,10 @@ export function computeDerivedIndicators(
   const fw_denominator = 1.5 + 1.0 + 1.0;
   const fiskalische_wirkung = clamp(fw_numerator / fw_denominator);
 
-  // ── zeit_bis_wirkung ──────────────────────────────────────────────────────
-  const zeit_bis_wirkung = computeZeitprofil(diff);
-
   return {
     gentrifizierungsindex,
     neubau_hemmnisindex,
     verdraengungsrisiko_index,
     fiskalische_wirkung,
-    zeit_bis_wirkung,
   };
 }

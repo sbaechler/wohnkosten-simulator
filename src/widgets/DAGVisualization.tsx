@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import type { ParamsDiff40, MarketState, DerivedIndicators, CityContext, CityParams40 } from '../types';
 import { computeMarketState, clampE1 } from '../model/market-state';
 import { computeDerivedIndicators } from '../model/derived';
-import { DAG_EDGES, TIME_CLASS_MAP, type NodeId, type Edge } from '../model/graph';
+import { DAG_EDGES, type NodeId, type Edge } from '../model/graph';
 import { PARAM_KEYS_40 } from '../model/params';
 import './DAGVisualization.css';
 
@@ -48,6 +48,66 @@ const GROUP_LABELS: Record<string, string> = {
   ctx:            'Kontext',
 };
 
+// ── Time classes (local, replaces graph.ts TIME_CLASS_MAP) ───────────────────
+
+type TimeClassLocal = 'short' | 'medium' | 'long';
+
+const TIME_CLASS_MAP_LOCAL: Record<string, TimeClassLocal> = {
+  // Context
+  'ctx:zinsniveau':          'short',
+  'ctx:zuwanderungsdruck':   'short',
+  'ctx:wirtschaftskraft':    'medium',
+  'ctx:bevoelkerungstrend':  'long',
+  // Bodenrecht
+  raumplanung_zonenreserve:          'long',
+  raumplanung_verdichtung:           'medium',
+  raumplanung_ausnuetzungsziffer:   'medium',
+  boden_vorkaufsrecht:               'long',
+  boden_bauverpflichtung:            'medium',
+  boden_mehrwertabgabe:              'long',
+  boden_bodeneigentumssteuer:        'medium',
+  // Bau
+  bau_energievorgaben:               'short',
+  bau_sanierungspflicht:             'short',
+  bau_einspracherecht_dritte:        'short',
+  bau_einspracherecht_suspensiv:     'short',
+  bau_bewilligungsverfahren:         'medium',
+  bau_normenharmonisierung:          'long',
+  // Gemeinnützig
+  gemeinnuetzig_mindestanteil:       'long',
+  gemeinnuetzig_foerderfonds:        'long',
+  gemeinnuetzig_baurecht:            'long',
+  gemeinnuetzig_belegungsvorschriften:'medium',
+  gemeinnuetzig_sozialmischung:      'long',
+  // Mietrecht
+  mietrecht_kostenmiete:             'short',
+  mietrecht_anfangsmiete:            'short',
+  mietrecht_mietzinstransparenz:     'short',
+  mietrecht_kuendigungsschutz:       'short',
+  mietrecht_mietzinsindex:           'short',
+  mietrecht_untervermietung:         'short',
+  // Steuern
+  steuer_grundstueckgewinn:          'medium',
+  steuer_eigenmietwert:              'medium',
+  steuer_leerstandsabgabe:           'medium',
+  steuer_handaenderung:              'short',
+  steuer_kapitalgewinnprivatpersonen:'short',
+  // Kapital
+  kapital_auslaendische_investoren:  'medium',
+  kapital_institutionelle_regulierung:'medium',
+  kapital_hypothekarregulierung:     'short',
+  // Nutzung
+  nutzung_kurzzeitvermietung:        'short',
+  nutzung_umnutzungsverbot:          'short',
+  nutzung_abbruchverbot:            'short',
+  nutzung_zweitwohnungen:            'long',
+  // Infrastruktur
+  infra_oepnv:                       'long',
+  infra_schule_kita:                'long',
+  infra_oeffentlicher_raum:          'long',
+  infra_wirtschaftsansiedlung:        'long',
+};
+
 // ── Node metadata ─────────────────────────────────────────────────────────
 
 interface NodeMeta {
@@ -70,7 +130,7 @@ function buildNodes(paramMeta40: Map<string, { label: string; group: string }>):
       label: meta?.label ?? key,
       group: meta?.group ?? 'bodenrecht',
       level: 0,
-      time: TIME_CLASS_MAP[key] ?? 'medium',
+      time: TIME_CLASS_MAP_LOCAL[key] ?? 'medium',
       paramKey: key,
     });
   }
@@ -83,7 +143,7 @@ function buildNodes(paramMeta40: Map<string, { label: string; group: string }>):
     { id: 'ctx:bevoelkerungstrend',   label: 'Bevölkerungstrend'  },
   ];
   for (const ctx of ctxKeys) {
-    nodes.push({ ...ctx, group: 'ctx', level: 0, time: TIME_CLASS_MAP[ctx.id] ?? 'short' });
+    nodes.push({ ...ctx, group: 'ctx', level: 0, time: TIME_CLASS_MAP_LOCAL[ctx.id] ?? 'short' });
   }
 
   // E1 nodes
@@ -109,7 +169,6 @@ function buildNodes(paramMeta40: Map<string, { label: string; group: string }>):
     { id: 'neubau_hemmnisindex',        label: 'Neubau-Hemmnis'     },
     { id: 'verdraengungsrisiko_index',  label: 'Verdrängung (Idx)'  },
     { id: 'fiskalische_wirkung',        label: 'Fiskal. Wirkung'    },
-    { id: 'zeit_bis_wirkung',          label: 'Zeit bis Wirkung'   },
   ];
   for (const e2 of e2Keys) {
     nodes.push({ ...e2, group: 'e2', level: 2 });
@@ -338,8 +397,7 @@ export function DAGVisualization({ context, baseline, modified, diff }: Props) {
   function getNodeValue(nodeId: NodeId): number | string | undefined {
     if (nodeId in state) return state[nodeId as keyof MarketState];
     if (nodeId in derived) {
-      if (nodeId === 'zeit_bis_wirkung') return derived.zeit_bis_wirkung.dominanteKlasse;
-      return derived[nodeId as keyof Omit<DerivedIndicators, 'zeit_bis_wirkung'>] as number;
+      return derived[nodeId as keyof DerivedIndicators] as number;
     }
     return undefined;
   }
