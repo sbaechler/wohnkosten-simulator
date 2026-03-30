@@ -1,9 +1,12 @@
+import type { PhaseResult } from '../model/phases';
 import './TrendArrow.css';
 
 interface Props {
   label: string;
-  value: number; // -1 to +1, 0 = neutral
-  invertColors?: boolean; // true = up is green (good), down is red (bad)
+  phases: PhaseResult[];
+  invertColors?: boolean;
+  /** Selector function to extract the value from a PhaseResult's derived indicators */
+  getValue: (phase: PhaseResult) => number;
 }
 
 const ARROWS: Record<string, string> = {
@@ -32,15 +35,42 @@ function getLabel(direction: string) {
   return 'stabil';
 }
 
-export function TrendArrow({ label, value, invertColors = false }: Props) {
-  const direction = getDirection(value);
-  const color = getColor(direction, invertColors);
+export function TrendArrow({ label, phases, invertColors = false, getValue }: Props) {
+  if (!phases || phases.length === 0) return null;
+
+  // Main direction (from last phase)
+  const mainPhase = phases[phases.length - 1];
+  const mainValue = getValue(mainPhase);
+  const mainDirection = getDirection(mainValue);
+  const mainColor = getColor(mainDirection, invertColors);
+
+  // Phase arrow colors
+  const phaseDirections = phases.map(p => ({
+    dir: getDirection(getValue(p)),
+    color: getColor(getDirection(getValue(p)), invertColors),
+  }));
 
   return (
     <div className="trend-arrow">
       <div className="trend-arrow__label">{label}</div>
-      <div className="trend-arrow__icon" style={{ color }}>{ARROWS[direction]}</div>
-      <div className="trend-arrow__text" style={{ color }}>{getLabel(direction)}</div>
+      <div className="trend-arrow__mini-arrows">
+        {phaseDirections.map((pd, i) => {
+          // Arrow size decreases per phase: P1 biggest, P3 smallest
+          const size = 32 - i * 6;
+          return (
+            <span
+              key={i}
+              className="trend-arrow__mini-arrow"
+              style={{ color: pd.color, fontSize: `${size}px`, opacity: 1 - i * 0.2 }}
+            >
+              {ARROWS[pd.dir]}
+            </span>
+          );
+        })}
+      </div>
+      <div className="trend-arrow__text" style={{ color: mainColor }}>
+        {getLabel(mainDirection)}
+      </div>
     </div>
   );
 }

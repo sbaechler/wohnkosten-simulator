@@ -1,7 +1,7 @@
 import type { CityParams40, CityContext, ParamsDiff40 } from '../types';
-import { computeMarketState, clampE1 } from '../model/market-state';
-import { computeDerivedIndicators } from '../model/derived';
+import { computePhasesCached } from '../model/compute-phases';
 import { computeGroupTrends } from '../model/groups';
+import type { PhaseResult } from '../model/phases';
 import { SupplyDemandChart } from './SupplyDemandChart';
 import { TrendArrow } from './TrendArrow';
 import { GroupTrendWidget } from './GroupTrendWidget';
@@ -16,52 +16,83 @@ interface Props {
 }
 
 export function WidgetGrid({ context, baseline, modified, diff }: Props) {
-  // E0 → E1
-  const state = clampE1(computeMarketState(context, baseline, modified, diff));
+  // Multi-phase pipeline: [P1, P2, P3]
+  const phases = computePhasesCached(context, modified, diff);
 
-  // E1 → E2
-  const derived = computeDerivedIndicators(state, context, diff);
+  // Latest phase for single-value widgets
+  const latest = phases[phases.length - 1]!;
+  const state = latest.marketState;
+  const derived = latest.derived;
 
-  // Preistrends pro Bevölkerungsgruppe (8 Gruppen)
-  const groupTrends = computeGroupTrends(state, baseline, modified, diff);
+  // Helper: compute group trends for a specific phase
+  function computeGroupTrendsForPhase(phase: PhaseResult) {
+    return computeGroupTrends(phase.marketState, baseline, modified, diff);
+  }
 
-  // Abgeleitete Trends für Kompatibilitäts-Widgets
-  // E1(positive Werte) = angebotsreduzierend / preistreibend / verdrängend
-  // Supply: negatives angebotspotenzial = mehr Angebot
+  // Supply/demand deltas for TrendArrow (derived from latest phase state)
   const supplyDelta = -state.angebotspotenzial;
-  // Nachfragedruck: positives nachfragedruck = mehr Nachfrage
   const demandDelta = state.nachfragedruck;
-
-  // Verdichtung: abgeleitet von angebotspotenzial (Druck, dichter zu bauen)
   const verdichtungDelta = state.angebotspotenzial * -0.5 + state.nachfragedruck * 0.3;
-
-  // Stadtbild: Einspracherechte + Bauvorschriften schützen das Stadtbild
   const stadtbildDelta =
-    (modified.bau_einspracherecht_dritte as number - baseline.bau_einspracherecht_dritte as number) * 0.2 +
-    (modified.bau_einspracherecht_suspensiv as number - baseline.bau_einspracherecht_suspensiv as number) * 0.15 +
-    (modified.bau_normenharmonisierung as number - baseline.bau_normenharmonisierung as number) * 0.1 -
-    (modified.gemeinnuetzig_mindestanteil as number - baseline.gemeinnuetzig_mindestanteil as number) * 0.05;
+    ((modified.bau_einspracherecht_dritte as number) - (baseline.bau_einspracherecht_dritte as number)) * 0.2 +
+    ((modified.bau_einspracherecht_suspensiv as number) - (baseline.bau_einspracherecht_suspensiv as number)) * 0.15 +
+    ((modified.bau_normenharmonisierung as number) - (baseline.bau_normenharmonisierung as number)) * 0.1 -
+    ((modified.gemeinnuetzig_mindestanteil as number) - (baseline.gemeinnuetzig_mindestanteil as number)) * 0.05;
 
   return (
     <div className="widget-grid">
       <GroupTrendWidget
         title="Trend Wohnpreise"
-        groups={groupTrends}
+        phases={phases}
+        computeGroupTrendsForPhase={computeGroupTrendsForPhase}
       />
       <SupplyDemandChart
         context={context}
         baseline={baseline}
         modified={modified}
         diff={diff}
-        state={state}
-        derived={derived}
+        phases={phases}
       />
-      <TrendArrow label="Nachfragedruck" value={demandDelta} />
-      <TrendArrow label="Angebotspotenzial" value={supplyDelta} invertColors />
-      <GentrifizierungsWidget derived={derived} />
-      <TrendArrow label="Neubau-Hemmnis" value={derived.neubau_hemmnisindex} />
-      <TrendArrow label="Verdichtungsdruck" value={verdichtungDelta} invertColors />
-      <TrendArrow label="Stadtbild" value={stadtbildDelta} invertColors />
+      <TrendArrow
+        label="Nachfragedruck"
+        phases={phases}
+        getValue={p => p.marketState.nachfragedruck}
+      />
+      <TrendArrow
+        label="Angebotspotenzial"
+        phases={phases}
+        invertColors
+        getValue={p => -p.marketState.angebotspotenzial}
+      />
+      <GentrifizierungsWidget phases={phases} />
+      <TrendArrow
+        label="Neubau-Hemmnis"
+        phases={phases}
+        invertColors
+        getValue={p => p.derived.neubau_hemmnisindex}
+      />
+      <TrendArrow
+        label="Verdichtungsdruck"
+        phases={phases}
+        invertColors
+        getValue={p => p.marketState.angebotspotenzial * -0.5 + p.marketState.nachfragedruck * 0.3}
+      />
+      <TrendArrow
+        label="Stadtbild"
+        phases={phases}
+        invertColors
+        getValue={p => {
+          // Recompute stadtbild delta for this phase's modified state
+          const m = modified;
+          const b = baseline;
+          return (
+            ((m.bau_einspracherecht_dritte as number) - (b.bau_einspracherecht_dritte as number)) * 0.2 +
+            ((m.bau_einspracherecht_suspensiv as number) - (b.bau_einspracherecht_suspensiv as number)) * 0.15 +
+            ((m.bau_normenharmonisierung as number) - (b.bau_normenharmonisierung as number)) * 0.1 -
+            ((m.gemeinnuetzig_mindestanteil as number) - (b.gemeinnuetzig_mindestanteil as number)) * 0.05
+          );
+        }}
+      />
       <OwnershipDonut
         context={context}
         baseline={baseline}

@@ -9,11 +9,26 @@
   font-size: 13px;
   color: #ccc;
   margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gentrifizierungs-widget__phase-note {
+  display: flex;
+  gap: 3px;
+  margin-left: 4px;
+}
+
+.gentrifizierungs-widget__phase-dot {
+  font-size: 8px;
+  color: #fff;
 }
 
 .gentrifizierungs-widget__bar-container {
   position: relative;
   margin-bottom: 8px;
+  height: 24px;
 }
 
 .gentrifizierungs-widget__gradient-bar {
@@ -21,11 +36,12 @@
   height: 16px;
   border-radius: 8px;
   overflow: hidden;
+  margin-top: 4px;
 }
 
 .gentrifizierungs-widget__indicator {
   position: absolute;
-  top: -6px;
+  top: 0;
   width: 12px;
   height: 12px;
   background: #fff;
@@ -34,6 +50,18 @@
   transform: translateX(-50%);
   transition: left 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+}
+
+.gentrifizierungs-widget__ghost-marker {
+  position: absolute;
+  top: 2px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  transition: left 0.4s ease;
+  z-index: 1;
 }
 
 .gentrifizierungs-widget__labels {
@@ -49,4 +77,13 @@
   font-size: 14px;
   font-weight: 500;
   margin-top: 8px;
+}
+
+.gentrifizierungs-widget__phase-path {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 10px;
+  color: #888;
 }

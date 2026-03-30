@@ -12,9 +12,17 @@
   margin-bottom: 12px;
 }
 
-.trend-arrow__icon {
-  font-size: 36px;
+.trend-arrow__mini-arrows {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
+}
+
+.trend-arrow__mini-arrow {
   line-height: 1;
+  transition: color 0.3s ease;
 }
 
 .trend-arrow__text {

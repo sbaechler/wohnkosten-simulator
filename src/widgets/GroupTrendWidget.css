@@ -12,6 +12,36 @@
   margin-bottom: 12px;
 }
 
+.group-trend__phase-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  padding: 0 8px;
+}
+
+.group-trend__phase-header-spacer {
+  flex: 1;
+}
+
+.group-trend__phase-labels {
+  display: flex;
+  gap: 8px;
+}
+
+.group-trend__phase-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  min-width: 56px;
+}
+
+.group-trend__phase-years {
+  display: block;
+  font-size: 9px;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
 .group-trend__list {
   display: flex;
   flex-direction: column;
@@ -110,26 +140,20 @@
   border: 1px solid #69db7c44;
 }
 
-.group-trend__value-col {
+.group-trend__phase-cols {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
+  gap: 4px;
   flex-shrink: 0;
-  min-width: 64px;
+}
+
+.group-trend__phase-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
 }
 
 .group-trend__arrow {
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1;
-}
-
-.group-trend__trend-label {
-  font-size: 9px;
-  font-weight: 500;
-}
-
-.group-trend__pct {
-  font-size: 8px;
-  opacity: 0.7;
 }
