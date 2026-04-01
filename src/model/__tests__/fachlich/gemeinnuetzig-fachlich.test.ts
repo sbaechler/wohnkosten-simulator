@@ -59,34 +59,26 @@ describe('Gemeinnützigkeit: Vancouver EHT (Leerstand −0.4 Prozentpunkte)', ()
    * Verbindung zu spekulationshemmung. Die Tests hier dokumentieren die
    * erwartete Wirkung (Research-bedarf für DAG-Kalibrierung).
    */
-  it.skip('[FACH✗] Vancouver EHT: Leerstandsabgabe → spekulationshemmung (DAG-Kante fehlt)', () => {
+  it('[FACH] Vancouver EHT: Leerstandsabgabe erhöht spekulationshemmung', () => {
+    // Basis ohne Abgabe (steuer_leerstandsabgabe=0 in ZUERICH_V2, migrated from V1.subventionen=1 → default=1)
+    // ZUERICH_V2 setzt steuer_leerstandsabgabe=1 (via Migration), also: diff 1→2
     const neutral = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
-    // Von keiner Abgabe → hohe Abgabe
     const withEHT: ParamsDiff40 = {
       steuer_leerstandsabgabe: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, ZUERICH_CONTEXT, withEHT);
 
-    /**
-     * ⚠️ DAG-Kalibrierungsbedarf: steuer_leerstandsabgabe hat im aktuellen DAG
-     * keine Kante zu spekulationshemmung. Der Test dokumentiert die erwartete
-     * Forschungshypothese (Horten wird durch Abgabe unattraktiv → Spekulation sinkt).
-     */
     expect(withDiff[0].marketState.spekulationshemmung)
       .toBeGreaterThan(neutral[0].marketState.spekulationshemmung);
   });
 
-  it('[FACH✗] Vancouver EHT: spekulationshemmung bleibt hoch (DAG-Kante fehlt)', () => {
+  it('[FACH] Vancouver EHT: spekulationshemmung bleibt hoch über alle Phasen', () => {
     const withEHT: ParamsDiff40 = {
       steuer_leerstandsabgabe: { from: 1, to: 2 },
     };
     const results = phases(ZUERICH_V2, ZUERICH_CONTEXT, withEHT);
 
-    /**
-     * ⚠️ DAG-Kalibrierungsbedarf: steuer_leerstandsabgabe → spekulationshemmung
-     * Kante fehlt im aktuellen DAG.
-     */
     expect(results[2].marketState.spekulationshemmung).toBeGreaterThan(0);
   });
 });

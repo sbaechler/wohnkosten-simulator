@@ -291,6 +291,15 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     weights: [0.7, 1.0, 0.9],
     // Kurzfristig moderat; mittelfristig voller Effekt wenn Konjunktur Mietniveaus antreibt.
   },
+  {
+    from: 'nutzung_kurzzeitvermietung',
+    to: 'verdraengungsrisiko',
+    sign: -1,
+    weights: [0.9, 0.8, 0.7],
+    // NYC LL18: 90% Airbnb-Inserate-Rückgang nach Regulierung.
+    // Weniger Konkurrenz durch Ferienwohnungen → weniger Verdrängung von Mietern.
+    // Sofortiger Effekt; langfristig passt sich der Markt an.
+  },
 
   // ═══════════════════════════════════════════════════════════════════
   // E0 → spekulationshemmung (8 edges)
@@ -358,6 +367,15 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     weights: [0.8, 0.9, 0.8],
     // Unterbindet Kurzzeit-Vermietung als Spekulationskanal;
     // mittelfristig stärkster Effekt wenn Vollzug greift.
+  },
+  {
+    from: 'steuer_leerstandsabgabe',
+    to: 'spekulationshemmung',
+    sign: +1,
+    weights: [0.7, 0.8, 0.9],
+    // Vancouver EHT (Leerstand 0.9%→0.49%, 20k Einheiten zum Mietmarkt).
+    // Leerstandsabgabe macht Horten direkt unrentabel → Spekulation sinkt.
+    // Kurzfristig Vollzugsverzögerung; langfristig stärkster Effekt.
   },
 
   // ═══════════════════════════════════════════════════════════════════
@@ -664,6 +682,15 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     weights: [1.0, 1.0, 0.9],
     // Zinsniveau fundamental für Renditeerwartungen;
     // sofortiger und nachhaltiger Effekt.
+  },
+  {
+    from: 'nutzung_kurzzeitvermietung',
+    to: 'investitionsattraktivitaet',
+    sign: -1,
+    weights: [0.8, 0.7, 0.6],
+    // Barcelona Paradox: Airbnb-Regulierung → +1.9% Miete, +4.6% Kaufpreise.
+    // Vermieter weichen auf Kaufmarkt aus → Renditeerwartungen sinken.
+    // Sofortiger Effekt auf Investoren-Pool; langfristig Markt-Anpassung.
   },
 
   // ═══════════════════════════════════════════════════════════════════
