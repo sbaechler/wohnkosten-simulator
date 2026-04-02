@@ -70,7 +70,7 @@ export function WidgetGrid({ context, baseline, modified, diff }: Props) {
         label="Stadtbild"
         phases={phases}
         invertColors
-        getValue={_p => {
+        getValue={() => {
           // Recompute stadtbild delta for this phase's modified state
           const m = modified;
           const b = baseline;

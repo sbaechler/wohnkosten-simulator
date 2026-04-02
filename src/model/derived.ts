@@ -35,6 +35,9 @@ export function computeDerivedIndicators(
   _context: unknown,
   _diff: ParamsDiff40,
 ): DerivedIndicators {
+  // NOTE: _context and _diff are part of the shared compute-function signature
+  void _context;
+  void _diff;
   // ── gentrifizierungsindex ─────────────────────────────────────────────────
   // Gewichte: aufwertungsdruck=1.5, (1-mietpreis_schutzlevel)=1.5,
   //           verdraengungsrisiko=1.5, (1-gemeinnuetzig_kraft)=1.0

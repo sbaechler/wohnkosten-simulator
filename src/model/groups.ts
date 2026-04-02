@@ -328,6 +328,7 @@ export function computeGroupTrends(
   modified: CityParams40,
   _diff: ParamsDiff40,
 ): GroupPriceTrend[] {
+  void _diff; // part of shared compute-function signature
   return GROUPS.map(group => {
     const { trend } = basePriceTrend(state, group.id);
     const drivers = computeDrivers(state, baseline, modified, group.id);

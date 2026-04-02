@@ -65,8 +65,10 @@ export function computeMarketState(
   context: CityContext,
   baseline: CityParams40,
   modified: CityParams40,
-  _diff: ParamsDiff40, // wird hier nicht direkt benötigt, aber Teil der Signatur
+  _diff: ParamsDiff40,
 ): MarketState {
+   
+  void _diff;
   // Diff-Callback für Parameter — key ist ein NodeId-String (nicht nur CityParams40-Key)
   const paramDiff = (key: string): number => {
     if (key.startsWith('ctx:')) return 0; // ctx-Keys werden separat behandelt

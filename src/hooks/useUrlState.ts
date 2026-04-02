@@ -46,6 +46,7 @@ export function useUrlState(): UrlState {
 
   const { citySlug, overrides } = useMemo(
     () => parseUrl(window.location.pathname, window.location.search),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [locationKey],
   );
 
@@ -54,7 +55,7 @@ export function useUrlState(): UrlState {
     [citySlug],
   );
   const baseline = city.params;
-  const modified = useMemo(() => ({ ...baseline, ...overrides }), [baseline, overrides, locationKey]);
+  const modified = useMemo(() => ({ ...baseline, ...overrides }), [baseline, overrides]);
   const diff = useMemo(() => computeDiff40(baseline, modified), [baseline, modified]);
 
   const pushUrl = useCallback((slug: string, ov: Partial<CityParams40>) => {

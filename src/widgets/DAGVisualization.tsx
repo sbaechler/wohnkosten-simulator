@@ -462,8 +462,6 @@ export function DAGVisualization({ context, baseline, modified, diff }: Props) {
   const SVG_W = 720;
   const SVG_H = totalHeight + 20;
 
-  // ── Arrow markers + rendering ────────────────────────────────────────────
-
   useEffect(() => {
     if (!svgRef.current) return;
     const svg = d3.select(svgRef.current);
@@ -713,7 +711,7 @@ export function DAGVisualization({ context, baseline, modified, diff }: Props) {
       });
       nodeG.on('mouseleave', () => setTooltip(null));
     }
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [diff, state, derived, nodeLayoutMap, nodeLayouts]);
 
   // ── Legend ─────────────────────────────────────────────────────────────

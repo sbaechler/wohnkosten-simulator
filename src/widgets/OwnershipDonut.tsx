@@ -105,7 +105,8 @@ function computeOwnership(params: CityParams40, context: CityContext): Ownership
  * - investitionsattraktivitaet: positive = mehr Institutionelle
  */
 function computeModifiedOwnership(baseShares: OwnershipShares, state: MarketState): OwnershipShares {
-  let { privat, institutionell, genossenschaft, oeffentlich } = baseShares;
+  let { privat, institutionell, genossenschaft } = baseShares;
+  const { oeffentlich } = baseShares;
 
   // E1-Signale anwenden (skaliert für sichtbare Effekte)
   const eigentumShift = state.eigentumsquoten_trend * 0.15;
