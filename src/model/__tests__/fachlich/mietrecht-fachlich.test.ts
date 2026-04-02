@@ -30,22 +30,54 @@
 
 import { describe, it, expect } from 'vitest';
 import { computePhasePipeline, invalidatePhasesCache } from '../../compute-phases';
-import { migrateParamsV1ToV2 } from '../../params';
 import type { CityContext, CityParams40, ParamsDiff40 } from '../../../types';
 
-// Baseline: roughly Berlin-like (high zuwanderung, high wirtschaft, tight mietrecht)
-const BERLIN_BASELINE_V2: CityParams40 = migrateParamsV1ToV2({
-  raumplanung: 2, bauvorschriften: 1, energetischeVorgaben: 1,
-  mietrecht: 2, steuerpolitik: 1, foerderungGemeinnuetzig: 1,
-  subventionen: 1, einspracherechte: 2, infrastruktur: 2,
-  auslaendischeInvestitionen: 1,
-});
+// Berlin-like (high zuwanderung, high wirtschaft, tight mietrecht)
+// V1: raumplanung=2, bauvorschriften=1, energetischeVorgaben=1, mietrecht=2, steuerpolitik=1,
+//      foerderungGemeinnuetzig=1, subventionen=1, einspracherechte=2, infrastruktur=2,
+//      auslaendischeInvestitionen=1
+const BERLIN_BASELINE_V2: CityParams40 = {
+  raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
+  boden_vorkaufsrecht: 1, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
+  bau_energievorgaben: 1, bau_sanierungspflicht: 1,
+  bau_einspracherecht_dritte: 2, bau_einspracherecht_suspensiv: 2,
+  bau_bewilligungsverfahren: 1, bau_normenharmonisierung: 1,
+  gemeinnuetzig_mindestanteil: 1, gemeinnuetzig_foerderfonds: 1, gemeinnuetzig_baurecht: 1,
+  gemeinnuetzig_belegungsvorschriften: 1, gemeinnuetzig_sozialmischung: 1,
+  mietrecht_kostenmiete: 2, mietrecht_anfangsmiete: 2, mietrecht_mietzinstransparenz: 2,
+  mietrecht_kuendigungsschutz: 2, mietrecht_mietzinsindex: 2, mietrecht_untervermietung: 2,
+  steuer_grundstueckgewinn: 1, steuer_eigenmietwert: 1, steuer_leerstandsabgabe: 1,
+  steuer_handaenderung: 1, steuer_kapitalgewinnprivatpersonen: 1,
+  kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 1, kapital_hypothekarregulierung: 1,
+  nutzung_kurzzeitvermietung: 1, nutzung_umnutzungsverbot: 1, nutzung_abbruchverbot: 1, nutzung_zweitwohnungen: 1,
+  infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
+};
 
 const BERLIN_CONTEXT: CityContext = {
   zinsniveau: -1,
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
   bevoelkerungstrend: 2,
+};
+
+// San Francisco-like (V1: raumplanung=2, bauvorschriften=2, energetischeVorgaben=1,
+// mietrecht=2, steuerpolitik=1, foerderungGemeinnuetzig=1, subventionen=1,
+// einspracherechte=2, infrastruktur=2, auslaendischeInvestitionen=1)
+const SF_V2: CityParams40 = {
+  raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
+  boden_vorkaufsrecht: 1, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
+  bau_energievorgaben: 1, bau_sanierungspflicht: 1,
+  bau_einspracherecht_dritte: 2, bau_einspracherecht_suspensiv: 2,
+  bau_bewilligungsverfahren: 2, bau_normenharmonisierung: 2,
+  gemeinnuetzig_mindestanteil: 1, gemeinnuetzig_foerderfonds: 1, gemeinnuetzig_baurecht: 1,
+  gemeinnuetzig_belegungsvorschriften: 1, gemeinnuetzig_sozialmischung: 1,
+  mietrecht_kostenmiete: 2, mietrecht_anfangsmiete: 2, mietrecht_mietzinstransparenz: 2,
+  mietrecht_kuendigungsschutz: 2, mietrecht_mietzinsindex: 2, mietrecht_untervermietung: 2,
+  steuer_grundstueckgewinn: 1, steuer_eigenmietwert: 1, steuer_leerstandsabgabe: 1,
+  steuer_handaenderung: 1, steuer_kapitalgewinnprivatpersonen: 1,
+  kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 1, kapital_hypothekarregulierung: 1,
+  nutzung_kurzzeitvermietung: 1, nutzung_umnutzungsverbot: 1, nutzung_abbruchverbot: 1, nutzung_zweitwohnungen: 1,
+  infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -84,7 +116,6 @@ describe('Mietrecht: Berlin Mietendeckel (2020–2021)', () => {
     };
     const withDiff = phases(BERLIN_BASELINE_V2, BERLIN_CONTEXT, withDeckel);
 
-    // mietpreis_schutzlevel sollte in Phase 1 durch Verschärfung steigen
     expect(withDiff[0].marketState.mietpreis_schutzlevel)
       .toBeGreaterThan(neutral[0].marketState.mietpreis_schutzlevel);
   });
@@ -98,7 +129,6 @@ describe('Mietrecht: Berlin Mietendeckel (2020–2021)', () => {
     };
     const withDiff = phases(BERLIN_BASELINE_V2, BERLIN_CONTEXT, withRegulierung);
 
-    // Phase 3 (langfristig): Investitionsattraktivitaet sollte sinken
     expect(withDiff[2].marketState.investitionsattraktivitaet)
       .toBeLessThan(neutral[2].marketState.investitionsattraktivitaet);
   });
@@ -119,26 +149,11 @@ describe('Mietrecht: San Francisco Effekt', () => {
       wirtschaftskraft: 2,
       bevoelkerungstrend: 2,
     };
-    const sfParams = migrateParamsV1ToV2({
-      raumplanung: 2, bauvorschriften: 2, energetischeVorgaben: 1,
-      mietrecht: 2, steuerpolitik: 1, foerderungGemeinnuetzig: 1,
-      subventionen: 1, einspracherechte: 2, infrastruktur: 2,
-      auslaendischeInvestitionen: 1,
-    });
 
-    const results = phases(sfParams, sfContext, {});
+    const results = phases(SF_V2, sfContext, {});
 
-    // gentrifizierungsindex sollte in angespanntem Markt hoch sein
     expect(results[0].derived.gentrifizierungsindex).toBeGreaterThan(0);
   });
-
-  /**
-   * Hinweis: "Mietrecht-Verschärfung erhöht markfriktion" wurde entfernt.
-   * markfriktion wird im DAG NUR von steuer_-Parametern und ctx:zinsniveau getrieben.
-   * mietrecht hat keine direkte Verbindung zu markfriktion.
-   * → Dies ist ein kalibrierungsbedarf: Die Forschung zeigt, dass strenges
-   *   Mietrecht die Mobilität reduziert, was als markfriktion interpretiert werden könnte.
-   */
 });
 
 describe('Mietrecht: Verlagerungseffekt (Mietrecht → Untermieten/Airbnb)', () => {
@@ -155,8 +170,6 @@ describe('Mietrecht: Verlagerungseffekt (Mietrecht → Untermieten/Airbnb)', () 
   it('[FACH] Strikte Kurzzeitvermietungs-Regulierung erhöht spekulationshemmung (indirekter Effekt)', () => {
     const neutral = phases(BERLIN_BASELINE_V2, BERLIN_CONTEXT, {});
 
-    // Wenn Kurzzeitvermietung strikt reguliert wird, wird dieser
-    // Spekulationskanal unterbunden → spekulationshemmung sollte steigen
     const withAirbnbBan: ParamsDiff40 = {
       nutzung_kurzzeitvermietung: { from: 1, to: 2 },
     };

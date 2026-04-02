@@ -10,7 +10,7 @@ export type ContextValue = -2 | -1 | 0 | 1 | 2;
 
 // ── E0: Rohparameter ─────────────────────────────────────────────────────────
 
-/** 40 atomare Parameter (neu, ab V2) */
+/** 40 atomare Parameter */
 export type CityParams40 = {
   // 1. Bodenrecht & Landnutzung
   raumplanung_zonenreserve: ParamValue;
@@ -62,20 +62,6 @@ export type CityParams40 = {
   infra_wirtschaftsansiedlung: ParamValue;
 };
 
-/** 10 alte Parameter (V1 — für Migration) */
-export interface CityParams {
-  raumplanung: ParamValue;
-  bauvorschriften: ParamValue;
-  energetischeVorgaben: ParamValue;
-  mietrecht: ParamValue;
-  steuerpolitik: ParamValue;
-  foerderungGemeinnuetzig: ParamValue;
-  subventionen: ParamValue;
-  einspracherechte: ParamValue;
-  infrastruktur: ParamValue;
-  auslaendischeInvestitionen: ParamValue;
-}
-
 export interface CityContext {
   zinsniveau: ContextValue;
   zuwanderungsdruck: ContextValue;
@@ -93,11 +79,6 @@ export interface CityConfig {
 // ── Diffs ───────────────────────────────────────────────────────────────────
 
 export type ParamsDiff40 = Partial<Record<keyof CityParams40, {
-  from: ParamValue;
-  to: ParamValue;
-}>>;
-
-export type ParamsDiff = Partial<Record<keyof CityParams, {
   from: ParamValue;
   to: ParamValue;
 }>>;
@@ -120,13 +101,6 @@ export interface ParamMeta40 {
   helpText: string;
   levels: [string, string, string];
   group: ParamGroup;
-}
-
-export interface ParamMeta {
-  key: keyof CityParams;
-  label: string;
-  helpText: string;
-  levels: [string, string, string];
 }
 
 export interface ContextMeta {

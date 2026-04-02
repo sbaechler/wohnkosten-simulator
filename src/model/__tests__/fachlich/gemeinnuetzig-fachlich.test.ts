@@ -26,15 +26,28 @@
 
 import { describe, it, expect } from 'vitest';
 import { computePhasePipeline, invalidatePhasesCache } from '../../compute-phases';
-import { migrateParamsV1ToV2 } from '../../params';
 import type { CityContext, CityParams40, ParamsDiff40 } from '../../../types';
 
-const ZUERICH_V2: CityParams40 = migrateParamsV1ToV2({
-  raumplanung: 2, bauvorschriften: 2, energetischeVorgaben: 1,
-  mietrecht: 1, steuerpolitik: 2, foerderungGemeinnuetzig: 2,
-  subventionen: 1, einspracherechte: 2, infrastruktur: 2,
-  auslaendischeInvestitionen: 1,
-});
+// Zürich-like baseline
+// V1: raumplanung=2, bauvorschriften=2, energetischeVorgaben=1, mietrecht=1, steuerpolitik=2,
+//      foerderungGemeinnuetzig=2, subventionen=1, einspracherechte=2, infrastruktur=2,
+//      auslaendischeInvestitionen=1
+const ZUERICH_V2: CityParams40 = {
+  raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
+  boden_vorkaufsrecht: 1, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
+  bau_energievorgaben: 1, bau_sanierungspflicht: 1,
+  bau_einspracherecht_dritte: 2, bau_einspracherecht_suspensiv: 2,
+  bau_bewilligungsverfahren: 2, bau_normenharmonisierung: 2,
+  gemeinnuetzig_mindestanteil: 2, gemeinnuetzig_foerderfonds: 2, gemeinnuetzig_baurecht: 2,
+  gemeinnuetzig_belegungsvorschriften: 1, gemeinnuetzig_sozialmischung: 1,
+  mietrecht_kostenmiete: 1, mietrecht_anfangsmiete: 1, mietrecht_mietzinstransparenz: 1,
+  mietrecht_kuendigungsschutz: 1, mietrecht_mietzinsindex: 1, mietrecht_untervermietung: 1,
+  steuer_grundstueckgewinn: 2, steuer_eigenmietwert: 2, steuer_leerstandsabgabe: 1,
+  steuer_handaenderung: 2, steuer_kapitalgewinnprivatpersonen: 1,
+  kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 1, kapital_hypothekarregulierung: 1,
+  nutzung_kurzzeitvermietung: 1, nutzung_umnutzungsverbot: 1, nutzung_abbruchverbot: 1, nutzung_zweitwohnungen: 1,
+  infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
+};
 
 const ZUERICH_CONTEXT: CityContext = {
   zinsniveau: -1,
@@ -57,11 +70,9 @@ describe('Gemeinnützigkeit: Vancouver EHT (Leerstand −0.4 Prozentpunkte)', ()
    *
    * Hinweis: steuer_leerstandsabgabe hat im aktuellen DAG keine direkte
    * Verbindung zu spekulationshemmung. Die Tests hier dokumentieren die
-   * erwartete Wirkung (Research-bedarf für DAG-Kalibrierung).
+   * erwartete Wirkung (Research-Bedarf für DAG-Kalibrierung).
    */
   it('[FACH] Vancouver EHT: Leerstandsabgabe erhöht spekulationshemmung', () => {
-    // Basis ohne Abgabe (steuer_leerstandsabgabe=0 in ZUERICH_V2, migrated from V1.subventionen=1 → default=1)
-    // ZUERICH_V2 setzt steuer_leerstandsabgabe=1 (via Migration), also: diff 1→2
     const neutral = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
     const withEHT: ParamsDiff40 = {
@@ -101,7 +112,7 @@ describe('Gemeinnützigkeit: NYC LL18 (90% Inserate-Rückgang)', () => {
     const withDiff = phases(ZUERICH_V2, ZUERICH_CONTEXT, withLL18);
 
     /**
-     * ⚠️ DAG-Kalibrierungsbedarf: nutzung_kurzzeitvermietung → verdraengungsrisiko
+     * DAG-Kalibrierungsbedarf: nutzung_kurzzeitvermietung → verdraengungsrisiko
      * Kante fehlt im aktuellen DAG.
      */
     expect(withDiff[0].marketState.verdraengungsrisiko)
@@ -126,9 +137,8 @@ describe('Gemeinnützigkeit: Barcelona Airbnb-Regulierung Paradox', () => {
     const withDiff = phases(ZUERICH_V2, ZUERICH_CONTEXT, withBarcelona);
 
     /**
-     * ⚠️ DAG-Kalibrierungsbedarf: nutzung_kurzzeitvermietung → investitionsattraktivitaet
-     * Kante fehlt im aktuellen DAG. Wenn Vermieter Airbnb nicht mehr nutzen können,
-     * investieren sie möglicherweise woanders → Investitionsattraktivitaet sinkt.
+     * DAG-Kalibrierungsbedarf: nutzung_kurzzeitvermietung → investitionsattraktivitaet
+     * Kante fehlt im aktuellen DAG.
      */
     expect(withDiff[0].marketState.investitionsattraktivitaet)
       .toBeLessThan(neutral[0].marketState.investitionsattraktivitaet);
@@ -143,11 +153,8 @@ describe('Gemeinnütziger Wohnungsbau: Mindestanteil + Baurecht', () => {
    *
    * Im Modell:
    * - gemeinnuetzig_mindestanteil ↑ → gemeinnuetzig_kraft ↑ → gentrifizierungsindex ↓
-   *
-   * Korrekte Teststruktur: Basis mit quot=0, dann Reform (diff: 0→2)
    */
   it('[FACH] Hoher Mindestanteil senkt Gentrifizierungsindex (im Vergleich zu keinem Mindestanteil)', () => {
-    // Basis mit quot=0 (restrictive)
     const restrictiveBasis: CityParams40 = {
       ...ZUERICH_V2,
       gemeinnuetzig_mindestanteil: 0,
@@ -155,10 +162,8 @@ describe('Gemeinnütziger Wohnungsbau: Mindestanteil + Baurecht', () => {
       gemeinnuetzig_baurecht: 0,
     };
 
-    // Ohne Reform: keine Änderung
     const ohneReform = phases(restrictiveBasis, ZUERICH_CONTEXT, {});
 
-    // Reform: quot 0→2
     const reformDiff: ParamsDiff40 = {
       gemeinnuetzig_mindestanteil: { from: 0, to: 2 },
       gemeinnuetzig_foerderfonds:  { from: 0, to: 2 },
@@ -166,17 +171,11 @@ describe('Gemeinnütziger Wohnungsbau: Mindestanteil + Baurecht', () => {
     };
     const mitReform = phases(restrictiveBasis, ZUERICH_CONTEXT, reformDiff);
 
-    // gentrifizierungsindex sollte mit Reform tiefer sein
     expect(mitReform[0].derived.gentrifizierungsindex)
       .toBeLessThan(ohneReform[0].derived.gentrifizierungsindex);
   });
 
   it('[FACH] Hoher Mindestanteil erhöht angebotspotenzial über den Foerderfonds-Kanal', () => {
-    // Test: Foerderfonds (ohne Mindestanteil) → angebotspotenzial
-    // Der Effekt ist indirekt und braucht PERSISTENCE-Carry-over.
-    // Der Test zeigt: die DAG-Kante foerderfonds→angebotspotenzial existiert
-    // (Gewicht P1=0.1, P2=0.5, P3=0.8), aber der Effekt ist aufgrund der
-    // many-to-one-Verteilung auf 16 Edges relatively schwach.
     const ohneFonds: CityParams40 = {
       ...ZUERICH_V2,
       gemeinnuetzig_foerderfonds: 0,
@@ -188,8 +187,6 @@ describe('Gemeinnütziger Wohnungsbau: Mindestanteil + Baurecht', () => {
     };
     const mitReform = phases(ohneFonds, ZUERICH_CONTEXT, reformDiff);
 
-    // Phase 3 (langfristig, Gewicht=0.8): Reform sollte Angebotspotenzial erhöhen
-    // Der Effekt ist klein (nur 1/16tel der Gesamtgewichtung), aber messbar
     expect(mitReform[2].marketState.angebotspotenzial)
       .toBeGreaterThan(ohneReform[2].marketState.angebotspotenzial);
   });

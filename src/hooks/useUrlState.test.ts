@@ -15,15 +15,7 @@ describe('parseUrl (V2)', () => {
     });
   });
 
-  it('migrates V1 param overrides to multiple V2 keys', () => {
-    const result = parseUrl('/zuerich', 'raumplanung=0');
-    // raumplanung expands to 3 keys
-    expect(result.overrides).toEqual({
-      raumplanung_zonenreserve: 0,
-      raumplanung_verdichtung: 0,
-      raumplanung_ausnuetzungsziffer: 0,
-    });
-  });
+
 
   it('returns empty slug for root path', () => {
     const result = parseUrl('/', '');

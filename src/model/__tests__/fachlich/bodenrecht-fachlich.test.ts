@@ -26,15 +26,36 @@
 
 import { describe, it, expect } from 'vitest';
 import { computePhasePipeline, invalidatePhasesCache } from '../../compute-phases';
-import { migrateParamsV1ToV2 } from '../../params';
 import type { CityContext, CityParams40, ParamsDiff40 } from '../../../types';
 
-const ZUERICH_V2: CityParams40 = migrateParamsV1ToV2({
-  raumplanung: 2, bauvorschriften: 2, energetischeVorgaben: 1,
-  mietrecht: 1, steuerpolitik: 2, foerderungGemeinnuetzig: 2,
-  subventionen: 1, einspracherechte: 2, infrastruktur: 2,
-  auslaendischeInvestitionen: 1,
-});
+// Zürich-like baseline
+// V1: raumplanung=2, bauvorschriften=2, energetischeVorgaben=1, mietrecht=1, steuerpolitik=2,
+//      foerderungGemeinnuetzig=2, subventionen=1, einspracherechte=2, infrastruktur=2,
+//      auslaendischeInvestitionen=1
+const ZUERICH_V2: CityParams40 = {
+  raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
+  boden_vorkaufsrecht: 1, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
+  bau_energievorgaben: 1, bau_sanierungspflicht: 1,
+  bau_einspracherecht_dritte: 2, bau_einspracherecht_suspensiv: 2,
+  bau_bewilligungsverfahren: 2, bau_normenharmonisierung: 2,
+  gemeinnuetzig_mindestanteil: 2, gemeinnuetzig_foerderfonds: 2, gemeinnuetzig_baurecht: 2,
+  gemeinnuetzig_belegungsvorschriften: 1, gemeinnuetzig_sozialmischung: 1,
+  mietrecht_kostenmiete: 1, mietrecht_anfangsmiete: 1, mietrecht_mietzinstransparenz: 1,
+  mietrecht_kuendigungsschutz: 1, mietrecht_mietzinsindex: 1, mietrecht_untervermietung: 1,
+  steuer_grundstueckgewinn: 2, steuer_eigenmietwert: 2, steuer_leerstandsabgabe: 1,
+  steuer_handaenderung: 2, steuer_kapitalgewinnprivatpersonen: 1,
+  kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 1, kapital_hypothekarregulierung: 1,
+  nutzung_kurzzeitvermietung: 1, nutzung_umnutzungsverbot: 1, nutzung_abbruchverbot: 1, nutzung_zweitwohnungen: 1,
+  infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
+};
+
+// Lockere Baseline (lockere Zonen: AZ=0, Verdichtung=0)
+const LOCKERE_BASIS: CityParams40 = {
+  ...ZUERICH_V2,
+  raumplanung_ausnuetzungsziffer: 0,
+  raumplanung_verdichtung: 0,
+  bau_bewilligungsverfahren: 0,
+};
 
 const ZUERICH_CONTEXT: CityContext = {
   zinsniveau: -1,
@@ -70,62 +91,38 @@ describe('Bodenrecht: Minneapolis 2040 Upzoning (−16–34% Preise nach 5 Jahre
    *   langfristig gedämpft wenn Angebot tatsächlich kommt
    */
   it('[FACH] Upzoning (AZ 0→2): angebotspotenzial in Phase 3 höher als ohne Reform', () => {
-    // Basis-Stadt mit lockeren Zonen (AZ=0, Verdichtung=0)
-    const lockereBasis: CityParams40 = {
-      ...ZUERICH_V2,
-      raumplanung_ausnuetzungsziffer: 0,
-      raumplanung_verdichtung: 0,
-    };
+    const ohneReform = phases(LOCKERE_BASIS, ZUERICH_CONTEXT, {});
 
-    const ohneReform = phases(lockereBasis, ZUERICH_CONTEXT, {});
-
-    // Reform: Aufzoning von locker (0) → dicht (2)
     const upzoningDiff: ParamsDiff40 = {
       raumplanung_ausnuetzungsziffer: { from: 0, to: 2 },
       raumplanung_verdichtung:         { from: 0, to: 2 },
     };
-    const mitReform = phases(lockereBasis, ZUERICH_CONTEXT, upzoningDiff);
+    const mitReform = phases(LOCKERE_BASIS, ZUERICH_CONTEXT, upzoningDiff);
 
-    // Phase 3 (langfristig): Mit Reform sollte angebotspotenzial höher sein
     expect(mitReform[2].marketState.angebotspotenzial)
       .toBeGreaterThan(ohneReform[2].marketState.angebotspotenzial);
   });
 
   it('[FACH] Upzoning: neubau_hemmnisindex sinkt langfristig (mehr Angebot = weniger Hemnis)', () => {
-    const lockereBasis: CityParams40 = {
-      ...ZUERICH_V2,
-      raumplanung_ausnuetzungsziffer: 0,
-      raumplanung_verdichtung: 0,
-    };
-
-    const ohneReform = phases(lockereBasis, ZUERICH_CONTEXT, {});
+    const ohneReform = phases(LOCKERE_BASIS, ZUERICH_CONTEXT, {});
     const upzoningDiff: ParamsDiff40 = {
       raumplanung_ausnuetzungsziffer: { from: 0, to: 2 },
       raumplanung_verdichtung:         { from: 0, to: 2 },
     };
-    const mitReform = phases(lockereBasis, ZUERICH_CONTEXT, upzoningDiff);
+    const mitReform = phases(LOCKERE_BASIS, ZUERICH_CONTEXT, upzoningDiff);
 
-    // neubau_hemmnisindex = -angebotspotenzial
-    // Mit Reform: höheres Angebot → tieferer Hemmnisindex
     expect(mitReform[2].derived.neubau_hemmnisindex)
       .toBeLessThan(ohneReform[2].derived.neubau_hemmnisindex);
   });
 
   it('[FACH] Upzoning: aufwertungsdruck steigt durch AZ-Erhöhung (kurzfristig)', () => {
-    const lockereBasis: CityParams40 = {
-      ...ZUERICH_V2,
-      raumplanung_ausnuetzungsziffer: 0,
-      raumplanung_verdichtung: 0,
-    };
-
-    const ohneReform = phases(lockereBasis, ZUERICH_CONTEXT, {});
+    const ohneReform = phases(LOCKERE_BASIS, ZUERICH_CONTEXT, {});
     const upzoningDiff: ParamsDiff40 = {
       raumplanung_ausnuetzungsziffer: { from: 0, to: 2 },
       raumplanung_verdichtung:         { from: 0, to: 2 },
     };
-    const mitReform = phases(lockereBasis, ZUERICH_CONTEXT, upzoningDiff);
+    const mitReform = phases(LOCKERE_BASIS, ZUERICH_CONTEXT, upzoningDiff);
 
-    // Aufwertungsdruck steigt durch höhere AZ (Bodenpreiserwartungen)
     expect(mitReform[0].marketState.aufwertungsdruck)
       .toBeGreaterThan(ohneReform[0].marketState.aufwertungsdruck);
   });
@@ -193,7 +190,6 @@ describe('Bau: Auckland Unitary Plan (−14–35% Mieten, 3–7 Jahre)', () => {
     };
     const mitReform = phases(lockedBasis, ZUERICH_CONTEXT, aucklandDiff);
 
-    // Phase 3 (langfristig): Reform sollte Angebotspotenzial erhöhen
     expect(mitReform[2].marketState.angebotspotenzial)
       .toBeGreaterThan(ohneReform[2].marketState.angebotspotenzial);
   });
@@ -232,7 +228,6 @@ describe('Bau: Einspracherechte verzögern Angebot (Forschungs-Befund)', () => {
     const dritte  = phases(ZUERICH_V2, ZUERICH_CONTEXT, withDritte);
     const susp    = phases(ZUERICH_V2, ZUERICH_CONTEXT, withSuspensiv);
 
-    // Suspensiveffekt sollte stärker hemmen als nur Dritte-Einsprache
     expect(susp[0].marketState.angebotspotenzial)
       .toBeLessThan(dritte[0].marketState.angebotspotenzial);
   });

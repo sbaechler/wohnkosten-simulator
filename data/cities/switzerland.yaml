@@ -6,16 +6,56 @@
     wirtschaftskraft: 2
     bevoelkerungstrend: 2
   params:
-    raumplanung: 2
-    bauvorschriften: 2
-    energetischeVorgaben: 1
-    mietrecht: 1
-    steuerpolitik: 2
-    foerderungGemeinnuetzig: 2
-    subventionen: 1
-    einspracherechte: 2
-    infrastruktur: 2
-    auslaendischeInvestitionen: 1
+    # raumplanung=2 → 3 V2-Felder
+    raumplanung_zonenreserve: 2
+    raumplanung_verdichtung: 2
+    raumplanung_ausnuetzungsziffer: 2
+    # 4 neue Boden-Parameter (Baseline)
+    boden_vorkaufsrecht: 1
+    boden_bauverpflichtung: 1
+    boden_mehrwertabgabe: 1
+    boden_bodeneigentumssteuer: 1
+    # bauvorschriften=2 → 2 V2-Felder
+    bau_energievorgaben: 1
+    bau_sanierungspflicht: 1
+    bau_einspracherecht_dritte: 2
+    bau_einspracherecht_suspensiv: 2
+    bau_bewilligungsverfahren: 2
+    bau_normenharmonisierung: 2
+    # foerderungGemeinnuetzig=2 → 3 V2-Felder
+    gemeinnuetzig_mindestanteil: 2
+    gemeinnuetzig_foerderfonds: 2
+    gemeinnuetzig_baurecht: 2
+    # subventionen=1 → 2 V2-Felder
+    gemeinnuetzig_belegungsvorschriften: 1
+    gemeinnuetzig_sozialmischung: 1
+    # mietrecht=1 → 6 V2-Felder
+    mietrecht_kostenmiete: 1
+    mietrecht_anfangsmiete: 1
+    mietrecht_mietzinstransparenz: 1
+    mietrecht_kuendigungsschutz: 1
+    mietrecht_mietzinsindex: 1
+    mietrecht_untervermietung: 1
+    # steuerpolitik=2 → 3 V2-Felder + 2 neue
+    steuer_grundstueckgewinn: 2
+    steuer_eigenmietwert: 2
+    steuer_leerstandsabgabe: 1
+    steuer_handaenderung: 2
+    steuer_kapitalgewinnprivatpersonen: 1
+    # auslaendischeInvestitionen=1 → 2 V2-Felder + 1 neu
+    kapital_auslaendische_investoren: 1
+    kapital_institutionelle_regulierung: 1
+    kapital_hypothekarregulierung: 1
+    # 4 neue Nutzungs-Parameter (Baseline)
+    nutzung_kurzzeitvermietung: 1
+    nutzung_umnutzungsverbot: 1
+    nutzung_abbruchverbot: 1
+    nutzung_zweitwohnungen: 1
+    # infrastruktur=2 → 4 V2-Felder
+    infra_oepnv: 2
+    infra_schule_kita: 2
+    infra_oeffentlicher_raum: 2
+    infra_wirtschaftsansiedlung: 2
 
 - slug: bern
   name: "Bern"
@@ -25,16 +65,56 @@
     wirtschaftskraft: 1
     bevoelkerungstrend: 1
   params:
-    raumplanung: 1
-    bauvorschriften: 1
-    energetischeVorgaben: 1
-    mietrecht: 1
-    steuerpolitik: 1
-    foerderungGemeinnuetzig: 1
-    subventionen: 1
-    einspracherechte: 1
-    infrastruktur: 1
-    auslaendischeInvestitionen: 1
+    # raumplanung=1 → 3 V2-Felder
+    raumplanung_zonenreserve: 1
+    raumplanung_verdichtung: 1
+    raumplanung_ausnuetzungsziffer: 1
+    # 4 neue Boden-Parameter (Baseline)
+    boden_vorkaufsrecht: 1
+    boden_bauverpflichtung: 1
+    boden_mehrwertabgabe: 1
+    boden_bodeneigentumssteuer: 1
+    # bauvorschriften=1 → 2 V2-Felder
+    bau_energievorgaben: 1
+    bau_sanierungspflicht: 1
+    bau_einspracherecht_dritte: 1
+    bau_einspracherecht_suspensiv: 1
+    bau_bewilligungsverfahren: 1
+    bau_normenharmonisierung: 1
+    # foerderungGemeinnuetzig=1 → 3 V2-Felder
+    gemeinnuetzig_mindestanteil: 1
+    gemeinnuetzig_foerderfonds: 1
+    gemeinnuetzig_baurecht: 1
+    # subventionen=1 → 2 V2-Felder
+    gemeinnuetzig_belegungsvorschriften: 1
+    gemeinnuetzig_sozialmischung: 1
+    # mietrecht=1 → 6 V2-Felder
+    mietrecht_kostenmiete: 1
+    mietrecht_anfangsmiete: 1
+    mietrecht_mietzinstransparenz: 1
+    mietrecht_kuendigungsschutz: 1
+    mietrecht_mietzinsindex: 1
+    mietrecht_untervermietung: 1
+    # steuerpolitik=1 → 3 V2-Felder + 2 neue
+    steuer_grundstueckgewinn: 1
+    steuer_eigenmietwert: 1
+    steuer_leerstandsabgabe: 1
+    steuer_handaenderung: 1
+    steuer_kapitalgewinnprivatpersonen: 1
+    # auslaendischeInvestitionen=1 → 2 V2-Felder + 1 neu
+    kapital_auslaendische_investoren: 1
+    kapital_institutionelle_regulierung: 1
+    kapital_hypothekarregulierung: 1
+    # 4 neue Nutzungs-Parameter (Baseline)
+    nutzung_kurzzeitvermietung: 1
+    nutzung_umnutzungsverbot: 1
+    nutzung_abbruchverbot: 1
+    nutzung_zweitwohnungen: 1
+    # infrastruktur=1 → 4 V2-Felder
+    infra_oepnv: 1
+    infra_schule_kita: 1
+    infra_oeffentlicher_raum: 1
+    infra_wirtschaftsansiedlung: 1
 
 - slug: lugano
   name: "Lugano"
@@ -44,13 +124,54 @@
     wirtschaftskraft: 0
     bevoelkerungstrend: 0
   params:
-    raumplanung: 1
-    bauvorschriften: 1
-    energetischeVorgaben: 0
-    mietrecht: 0
-    steuerpolitik: 0
-    foerderungGemeinnuetzig: 0
-    subventionen: 0
-    einspracherechte: 1
-    infrastruktur: 1
-    auslaendischeInvestitionen: 1
+    # raumplanung=1 → 3 V2-Felder
+    raumplanung_zonenreserve: 1
+    raumplanung_verdichtung: 1
+    raumplanung_ausnuetzungsziffer: 1
+    # 4 neue Boden-Parameter (Baseline)
+    boden_vorkaufsrecht: 1
+    boden_bauverpflichtung: 1
+    boden_mehrwertabgabe: 1
+    boden_bodeneigentumssteuer: 1
+    # bauvorschriften=1 → 2 V2-Felder
+    # energetischeVorgaben=0 → 2 V2-Felder
+    bau_energievorgaben: 0
+    bau_sanierungspflicht: 0
+    bau_einspracherecht_dritte: 1
+    bau_einspracherecht_suspensiv: 1
+    bau_bewilligungsverfahren: 1
+    bau_normenharmonisierung: 1
+    # foerderungGemeinnuetzig=0 → 3 V2-Felder
+    gemeinnuetzig_mindestanteil: 0
+    gemeinnuetzig_foerderfonds: 0
+    gemeinnuetzig_baurecht: 0
+    # subventionen=0 → 2 V2-Felder
+    gemeinnuetzig_belegungsvorschriften: 0
+    gemeinnuetzig_sozialmischung: 0
+    # mietrecht=0 → 6 V2-Felder
+    mietrecht_kostenmiete: 0
+    mietrecht_anfangsmiete: 0
+    mietrecht_mietzinstransparenz: 0
+    mietrecht_kuendigungsschutz: 0
+    mietrecht_mietzinsindex: 0
+    mietrecht_untervermietung: 0
+    # steuerpolitik=0 → 3 V2-Felder + 2 neue
+    steuer_grundstueckgewinn: 0
+    steuer_eigenmietwert: 0
+    steuer_leerstandsabgabe: 1
+    steuer_handaenderung: 0
+    steuer_kapitalgewinnprivatpersonen: 1
+    # auslaendischeInvestitionen=1 → 2 V2-Felder + 1 neu
+    kapital_auslaendische_investoren: 1
+    kapital_institutionelle_regulierung: 1
+    kapital_hypothekarregulierung: 1
+    # 4 neue Nutzungs-Parameter (Baseline)
+    nutzung_kurzzeitvermietung: 1
+    nutzung_umnutzungsverbot: 1
+    nutzung_abbruchverbot: 1
+    nutzung_zweitwohnungen: 1
+    # infrastruktur=1 → 4 V2-Felder
+    infra_oepnv: 1
+    infra_schule_kita: 1
+    infra_oeffentlicher_raum: 1
+    infra_wirtschaftsansiedlung: 1

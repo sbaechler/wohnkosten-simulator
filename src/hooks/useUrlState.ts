@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { CityParams, CityParams40, CityConfig, CityContext, ParamValue, ParamsDiff40 } from '../types';
+import type { CityParams40, CityConfig, CityContext, ParamValue, ParamsDiff40 } from '../types';
 import { cities, cityBySlug } from '../generated/cities';
-import { computeDiff40, PARAM_KEYS_OLD, migrateSingleV1ToV2 } from '../model/params';
+import { computeDiff40 } from '../model/params';
 import { clampParam, PARAM_KEYS_40_SET } from '../model/url-helpers';
 
 export function parseUrl(pathname: string, search: string) {
@@ -12,18 +12,8 @@ export function parseUrl(pathname: string, search: string) {
   for (const [key, val] of params.entries()) {
     const num = parseInt(val, 10);
     if (isNaN(num)) continue;
-
-    // V2 keys first (40 atomic params)
     if (PARAM_KEYS_40_SET.has(key)) {
       (overrides as Record<string, number>)[key] = clampParam(num);
-      continue;
-    }
-
-    // Fallback: V1 key → expand to V2 keys (backward compat)
-    if ((PARAM_KEYS_OLD as string[]).includes(key)) {
-      const v1Value = clampParam(num);
-      const v2Partial = migrateSingleV1ToV2(key as keyof CityParams, v1Value);
-      Object.assign(overrides, v2Partial);
     }
   }
 

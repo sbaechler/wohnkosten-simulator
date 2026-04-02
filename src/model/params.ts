@@ -1,23 +1,19 @@
 // ============================================================
-// params.ts — Parameter-Metadaten, Diff-Funktionen, Migration
-// V1 → V2: 10 alte Parameter → 40 neue atomare Parameter
+// params.ts — Parameter-Metadaten & Diff-Funktionen
+// V2: 40 atomare Parameter
 // ============================================================
 
 import type {
-  CityParams,
   CityParams40,
-  ParamsDiff,
   ParamsDiff40,
-  ParamMeta,
   ParamMeta40,
   ParamGroup,
-  ParamValue,
   ContextMeta,
 } from '../types';
 
-// ── Key-Arrays ───────────────────────────────────────────────────────────────
+// ── Key-Array ────────────────────────────────────────────────────────────────
 
-/** Die 40 atomaren Parameter-Keys (V2) */
+/** Die 40 atomaren Parameter-Keys */
 export const PARAM_KEYS_40 = [
   // 1. Bodenrecht & Landnutzung
   'raumplanung_zonenreserve',
@@ -78,109 +74,7 @@ type _AssertAllKeys40 = typeof PARAM_KEYS_40[number] extends keyof CityParams40
 const _check40: _AssertAllKeys40 = true;
 void _check40;
 
-/** Die 10 alten Parameter-Keys (V1) */
-export const PARAM_KEYS_OLD: (keyof CityParams)[] = [
-  'raumplanung', 'bauvorschriften', 'energetischeVorgaben',
-  'mietrecht', 'steuerpolitik', 'foerderungGemeinnuetzig',
-  'subventionen', 'einspracherechte', 'infrastruktur', 'auslaendischeInvestitionen',
-];
-
-// ── Migration: V1 → V2 ───────────────────────────────────────────────────────
-
-/**
- * Wandelt die 10 alten Parameter (V1) auf die 40 neuen Parameter (V2) um.
- * Wird für die Städte-Baselines verwendet ( cities.ts ).
- *
- * Strategie: Jeder alte Parameter wird auf die am ehesten entsprechenden
- * neuen Teilparameter abgebildet. Die Werte werden 1:1 übernommen (skaliert
- * auf die gleiche 0/1/2-Skala, was für die meisten聚 eine sinnvolle Näherung ist).
- *
- * Nicht gemappte neue Parameter erhalten den Baseline-Wert 1 (Mittelwert).
- */
-export function migrateParamsV1ToV2(v1: CityParams): CityParams40 {
-  return {
-    // ── raumplanung → ───────────────────────────────────────────────────────
-    raumplanung_zonenreserve:         v1.raumplanung,   // knapp = hohes Niveau
-    raumplanung_verdichtung:          v1.raumplanung,
-    raumplanung_ausnuetzungsziffer:   v1.raumplanung,
-    // ── bodenvorkaufsrecht, bauverpflichtung, mehrwertabgabe, bodensteuer → neu ──
-    boden_vorkaufsrecht:               1,
-    boden_bauverpflichtung:            1,
-    boden_mehrwertabgabe:              1,
-    boden_bodeneigentumssteuer:        1,
-    // ── bauvorschriften → ───────────────────────────────────────────────────
-    bau_bewilligungsverfahren:         v1.bauvorschriften,
-    bau_normenharmonisierung:          v1.bauvorschriften,
-    // ── energetischeVorgaben → ──────────────────────────────────────────────
-    bau_energievorgaben:              v1.energetischeVorgaben,
-    bau_sanierungspflicht:             v1.energetischeVorgaben,
-    // ── einspracherechte → ──────────────────────────────────────────────────
-    bau_einspracherecht_dritte:        v1.einspracherechte,
-    bau_einspracherecht_suspensiv:     v1.einspracherechte,
-    // ── mietrecht → ────────────────────────────────────────────────────────
-    mietrecht_kostenmiete:            v1.mietrecht,
-    mietrecht_anfangsmiete:           v1.mietrecht,
-    mietrecht_mietzinstransparenz:    v1.mietrecht,
-    mietrecht_kuendigungsschutz:      v1.mietrecht,
-    mietrecht_mietzinsindex:          v1.mietrecht,
-    mietrecht_untervermietung:        v1.mietrecht,
-    // ── steuerpolitik → ────────────────────────────────────────────────────
-    steuer_grundstueckgewinn:         v1.steuerpolitik,
-    steuer_eigenmietwert:             v1.steuerpolitik,
-    steuer_leerstandsabgabe:          1,
-    steuer_handaenderung:             v1.steuerpolitik,
-    steuer_kapitalgewinnprivatpersonen: 1,
-    // ── foerderungGemeinnuetzig → ────────────────────────────────────────────
-    gemeinnuetzig_mindestanteil:      v1.foerderungGemeinnuetzig,
-    gemeinnuetzig_foerderfonds:       v1.foerderungGemeinnuetzig,
-    gemeinnuetzig_baurecht:           v1.foerderungGemeinnuetzig,
-    // ── subventionen → ──────────────────────────────────────────────────────
-    gemeinnuetzig_belegungsvorschriften: v1.subventionen,
-    gemeinnuetzig_sozialmischung:     v1.subventionen,
-    // ── infrastruktur → ────────────────────────────────────────────────────
-    infra_oepnv:                      v1.infrastruktur,
-    infra_schule_kita:                v1.infrastruktur,
-    infra_oeffentlicher_raum:         v1.infrastruktur,
-    infra_wirtschaftsansiedlung:       v1.infrastruktur,
-    // ── auslaendischeInvestitionen → ─────────────────────────────────────────
-    kapital_auslaendische_investoren:  v1.auslaendischeInvestitionen,
-    kapital_institutionelle_regulierung: v1.auslaendischeInvestitionen,
-    // ── kapital_hypothekarregulierung → neu ─────────────────────────────────
-    kapital_hypothekarregulierung:     1,
-    // ── Nutzung → neu ───────────────────────────────────────────────────────
-    nutzung_kurzzeitvermietung:       1,
-    nutzung_umnutzungsverbot:         1,
-    nutzung_abbruchverbot:            1,
-    nutzung_zweitwohnungen:           1,
-  };
-}
-
-/**
- * Wandelt einen einzelnen V1-Parameter-Wert auf den/die passenden V2-Key(s) um.
- * Für URL-Rückwärtskompatibilität: parse ?raumplanung=1 → alle raumplanung_* = 1
- */
-export function migrateSingleV1ToV2(
-  v1Key: keyof CityParams,
-  v1Value: ParamValue,
-): Partial<CityParams40> {
-  const mapping: Record<keyof CityParams, (keyof CityParams40)[]> = {
-    raumplanung:              ['raumplanung_zonenreserve', 'raumplanung_verdichtung', 'raumplanung_ausnuetzungsziffer'],
-    bauvorschriften:          ['bau_bewilligungsverfahren', 'bau_normenharmonisierung'],
-    energetischeVorgaben:     ['bau_energievorgaben', 'bau_sanierungspflicht'],
-    mietrecht:                ['mietrecht_kostenmiete', 'mietrecht_anfangsmiete', 'mietrecht_mietzinstransparenz', 'mietrecht_kuendigungsschutz', 'mietrecht_mietzinsindex', 'mietrecht_untervermietung'],
-    steuerpolitik:            ['steuer_grundstueckgewinn', 'steuer_eigenmietwert', 'steuer_handaenderung'],
-    foerderungGemeinnuetzig:  ['gemeinnuetzig_mindestanteil', 'gemeinnuetzig_foerderfonds', 'gemeinnuetzig_baurecht'],
-    subventionen:             ['gemeinnuetzig_belegungsvorschriften', 'gemeinnuetzig_sozialmischung'],
-    einspracherechte:          ['bau_einspracherecht_dritte', 'bau_einspracherecht_suspensiv'],
-    infrastruktur:            ['infra_oepnv', 'infra_schule_kita', 'infra_oeffentlicher_raum', 'infra_wirtschaftsansiedlung'],
-    auslaendischeInvestitionen:['kapital_auslaendische_investoren', 'kapital_institutionelle_regulierung'],
-  };
-
-  const keys = mapping[v1Key] ?? [];
-  return Object.fromEntries(keys.map(k => [k, v1Value])) as Partial<CityParams40>;
-}
-
-// ── Metadaten: V2 (40 Parameter) ────────────────────────────────────────────
+// ── Metadaten: 40 Parameter ─────────────────────────────────────────────────
 
 export const paramMeta40: ParamMeta40[] = [
   // ── 1. Bodenrecht & Landnutzung ──────────────────────────────────────────
@@ -480,21 +374,6 @@ export const paramMeta40: ParamMeta40[] = [
   },
 ];
 
-// ── Metadaten: V1 (10 Parameter — für Migration/Retrokompatibilität) ───────
-
-export const paramMeta: ParamMeta[] = [
-  { key: 'raumplanung', label: 'Raumplanung', helpText: 'Zonenpläne, Bauzonen, Ausnützungsziffern', levels: ['locker', 'mittel', 'streng'] },
-  { key: 'bauvorschriften', label: 'Bauvorschriften', helpText: 'Brandschutz, Lärmschutz, Parkplatzvorgaben', levels: ['minimal', 'moderat', 'streng'] },
-  { key: 'energetischeVorgaben', label: 'Energetische Vorgaben', helpText: 'Dämmung, Heizsysteme, Sanierungspflichten', levels: ['minimal', 'moderat', 'streng'] },
-  { key: 'mietrecht', label: 'Mietrecht', helpText: 'Mietpreisbremse, Kündigungsschutz, Renditedeckelung', levels: ['schwach', 'moderat', 'streng'] },
-  { key: 'steuerpolitik', label: 'Steuerpolitik', helpText: 'Grundsteuer, Handänderungssteuer, Eigenmietwert', levels: ['niedrig', 'mittel', 'hoch'] },
-  { key: 'foerderungGemeinnuetzig', label: 'Förderung Gemeinnützig', helpText: 'Genossenschaften, Baurecht-Vergabe, Vorkaufsrechte', levels: ['keine', 'moderat', 'stark'] },
-  { key: 'subventionen', label: 'Subventionen', helpText: 'Wohneigentum, Sanierungszuschüsse, Wohngeld', levels: ['keine', 'moderat', 'stark'] },
-  { key: 'einspracherechte', label: 'Einspracherechte', helpText: 'Rekursmöglichkeiten gegen Bauprojekte', levels: ['eingeschränkt', 'normal', 'weitreichend'] },
-  { key: 'infrastruktur', label: 'Infrastruktur', helpText: 'ÖV-Ausbau, Strassenanbindung, öffentliche Einrichtungen', levels: ['kein Ausbau', 'moderat', 'stark'] },
-  { key: 'auslaendischeInvestitionen', label: 'Ausländische Investitionen', helpText: 'Regulierung von ausländischem Kapital (Lex Koller)', levels: ['offen', 'reguliert', 'restriktiv'] },
-];
-
 export const contextMeta: ContextMeta[] = [
   { key: 'zinsniveau', label: 'Zinsniveau', levels: ['sehr niedrig', 'niedrig', 'neutral', 'hoch', 'sehr hoch'] },
   { key: 'zuwanderungsdruck', label: 'Zuwanderung', levels: ['stark sinkend', 'sinkend', 'stabil', 'wachsend', 'stark wachsend'] },
@@ -503,20 +382,6 @@ export const contextMeta: ContextMeta[] = [
 ];
 
 // ── Diff-Funktionen ──────────────────────────────────────────────────────────
-
-export function computeDiff(baseline: CityParams, modified: CityParams): ParamsDiff {
-  const diff: ParamsDiff = {};
-  for (const key of PARAM_KEYS_OLD) {
-    if (baseline[key] !== modified[key]) {
-      diff[key] = { from: baseline[key], to: modified[key] };
-    }
-  }
-  return diff;
-}
-
-export function hasChanges(baseline: CityParams, modified: CityParams): boolean {
-  return PARAM_KEYS_OLD.some(key => baseline[key] !== modified[key]);
-}
 
 export function computeDiff40(baseline: CityParams40, modified: CityParams40): ParamsDiff40 {
   const diff: ParamsDiff40 = {};
