@@ -334,10 +334,12 @@ function computeLayout(allNodes: NodeMeta[]): { nodeLayouts: NodeLayout[]; total
     const nodeId = node.data as NodeId;
     const meta = nodeMetaMap.get(nodeId);
     if (!meta) continue;
-    layerNodes.get(meta.level)!.push({ node: meta, dagY: node.y ?? 0 });
+    // node.x = position within layer (crossing-minimized order)
+    // node.y = layer depth (same for all nodes in the same layer)
+    layerNodes.get(meta.level)!.push({ node: meta, dagY: node.x ?? 0 });
   }
 
-  // Sort each layer by d3-dag's y position to preserve crossing-minimized order
+  // Sort each layer by d3-dag's x position (within-layer order) to preserve crossing-minimized order
   for (const level of [0, 1, 2]) {
     layerNodes.get(level)!.sort((a, b) => a.dagY - b.dagY);
   }
@@ -347,17 +349,11 @@ function computeLayout(allNodes: NodeMeta[]): { nodeLayouts: NodeLayout[]; total
   // X: fixed per level
   for (const level of [0, 1, 2]) {
     const nodesInLayer = layerNodes.get(level)!;
-    // Normalize dagY to start from COL_HEADER_GAP
-    const dagYs = nodesInLayer.map(n => n.dagY);
-    const minDagY = Math.min(...dagYs);
-    const maxDagY = Math.max(...dagYs);
-    const dagRange = maxDagY - minDagY || 1;
-
     for (let i = 0; i < nodesInLayer.length; i++) {
       const { node } = nodesInLayer[i];
-      // Normalize y within layer, then scale to pixel coords
-      const normalizedY = (nodesInLayer[i].dagY - minDagY) / dagRange;
-      const svgY = COL_HEADER_GAP + normalizedY * (nodesInLayer.length * (NODE_HEIGHT + NODE_V_GAP) - NODE_V_GAP + 40);
+      // Use index i for evenly-spaced Y positions (d3-dag order preserved by sort above)
+      // This avoids overlaps when multiple nodes share the same d3-dag x coordinate
+      const svgY = COL_HEADER_GAP + i * (NODE_HEIGHT + NODE_V_GAP);
       const svgX = LAYER_X[level] + LAYER_WIDTH[level] / 2; // center in column
 
       layouts.push({
