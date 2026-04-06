@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import type { CityParams40, CityContext, ParamsDiff40 } from '../types';
 import { computePhasesCached } from '../model/compute-phases';
 import { computeGroupTrends } from '../model/groups';
@@ -7,6 +8,7 @@ import { TrendArrow } from './TrendArrow';
 import { GroupTrendWidget } from './GroupTrendWidget';
 import { OwnershipDonut } from './OwnershipDonut';
 import { GentrifizierungsWidget } from './GentrifizierungsWidget';
+import './WidgetGrid.css';
 
 interface Props {
   context: CityContext;
@@ -16,79 +18,93 @@ interface Props {
 }
 
 export function WidgetGrid({ context, baseline, modified, diff }: Props) {
-  // Multi-phase pipeline: [P1, P2, P3]
-  const phases = computePhasesCached(context, modified, diff);
+  const hasChanges = Object.keys(diff).length > 0;
+
+  // Phases for modified params (current behavior)
+  const modifiedPhases = computePhasesCached(context, modified, diff);
+
+  // Phases for baseline ("Heutige Situation") — empty diff means no changes
+  const emptyDiff: ParamsDiff40 = useMemo(() => ({}), []);
+  const baselinePhases = computePhasesCached(context, baseline, emptyDiff);
 
   // Latest phase for single-value widgets
-  const latest = phases[phases.length - 1]!;
-  const state = latest.marketState;
+  const latestModified = modifiedPhases[modifiedPhases.length - 1]!;
+  const latestBaseline = baselinePhases[baselinePhases.length - 1]!;
 
-  // Helper: compute group trends for a specific phase
-  function computeGroupTrendsForPhase(phase: PhaseResult) {
+  // Group trends helper
+  function computeModifiedGroupTrends(phase: PhaseResult) {
     return computeGroupTrends(phase.marketState, baseline, modified, diff);
   }
+  function computeBaselineGroupTrends(phase: PhaseResult) {
+    return computeGroupTrends(phase.marketState, baseline, baseline, emptyDiff);
+  }
+
+  // Stadtbild getValue helper
+  const stadtbildGetter = (m: CityParams40, b: CityParams40) => () =>
+    ((m.bau_einspracherecht_dritte as number) - (b.bau_einspracherecht_dritte as number)) * 0.2 +
+    ((m.bau_einspracherecht_suspensiv as number) - (b.bau_einspracherecht_suspensiv as number)) * 0.15 +
+    ((m.bau_normenharmonisierung as number) - (b.bau_normenharmonisierung as number)) * 0.1 -
+    ((m.gemeinnuetzig_mindestanteil as number) - (b.gemeinnuetzig_mindestanteil as number)) * 0.05;
 
   return (
     <div className="widget-grid">
+      {/* -- GroupTrendWidget: full-width, shows both columns internally -- */}
       <GroupTrendWidget
         title="Trend Wohnpreise"
-        phases={phases}
-        computeGroupTrendsForPhase={computeGroupTrendsForPhase}
+        phases={modifiedPhases}
+        baselinePhases={hasChanges ? baselinePhases : undefined}
+        computeGroupTrendsForPhase={computeModifiedGroupTrends}
+        computeBaselineGroupTrendsForPhase={hasChanges ? computeBaselineGroupTrends : undefined}
       />
+
+      {/* -- SupplyDemandChart: full-width, 2 rows of phase buttons when hasChanges -- */}
       <SupplyDemandChart
         context={context}
         baseline={baseline}
         modified={modified}
         diff={diff}
-        phases={phases}
+        phases={modifiedPhases}
+        baselinePhases={hasChanges ? baselinePhases : undefined}
       />
-      <TrendArrow
-        label="Nachfragedruck"
-        phases={phases}
-        getValue={p => p.marketState.nachfragedruck}
-      />
-      <TrendArrow
-        label="Angebotspotenzial"
-        phases={phases}
-        invertColors
-        getValue={p => -p.marketState.angebotspotenzial}
-      />
-      <GentrifizierungsWidget phases={phases} />
-      <TrendArrow
-        label="Neubau-Hemmnis"
-        phases={phases}
-        invertColors
-        getValue={p => p.derived.neubau_hemmnisindex}
-      />
-      <TrendArrow
-        label="Verdichtungsdruck"
-        phases={phases}
-        invertColors
-        getValue={p => p.marketState.angebotspotenzial * -0.5 + p.marketState.nachfragedruck * 0.3}
-      />
-      <TrendArrow
-        label="Stadtbild"
-        phases={phases}
-        invertColors
-        getValue={() => {
-          // Recompute stadtbild delta for this phase's modified state
-          const m = modified;
-          const b = baseline;
-          return (
-            ((m.bau_einspracherecht_dritte as number) - (b.bau_einspracherecht_dritte as number)) * 0.2 +
-            ((m.bau_einspracherecht_suspensiv as number) - (b.bau_einspracherecht_suspensiv as number)) * 0.15 +
-            ((m.bau_normenharmonisierung as number) - (b.bau_normenharmonisierung as number)) * 0.1 -
-            ((m.gemeinnuetzig_mindestanteil as number) - (b.gemeinnuetzig_mindestanteil as number)) * 0.05
-          );
-        }}
-      />
-      <OwnershipDonut
-        context={context}
-        baseline={baseline}
-        modified={modified}
-        diff={diff}
-        state={state}
-      />
+
+      {/* -- Remaining widgets: side-by-side when hasChanges -- */}
+      {hasChanges ? (
+        <>
+          {/* -- TrendArrows: baseline | modified -- */}
+          <div className="widget-grid__comparison">
+            <div className="widget-grid__comparison-col">
+              <div className="widget-grid__comparison-header">Heutige Situation</div>
+              <TrendArrow label="Nachfragedruck" phases={baselinePhases} getValue={p => p.marketState.nachfragedruck} />
+              <TrendArrow label="Angebotspotenzial" phases={baselinePhases} invertColors getValue={p => -p.marketState.angebotspotenzial} />
+              <GentrifizierungsWidget phases={baselinePhases} />
+              <TrendArrow label="Neubau-Hemmnis" phases={baselinePhases} invertColors getValue={p => p.derived.neubau_hemmnisindex} />
+              <TrendArrow label="Verdichtungsdruck" phases={baselinePhases} invertColors getValue={p => p.marketState.angebotspotenzial * -0.5 + p.marketState.nachfragedruck * 0.3} />
+              <TrendArrow label="Stadtbild" phases={baselinePhases} invertColors getValue={stadtbildGetter(baseline, baseline)} />
+              <OwnershipDonut context={context} baseline={baseline} modified={baseline} diff={emptyDiff} state={latestBaseline.marketState} />
+            </div>
+            <div className="widget-grid__comparison-col">
+              <div className="widget-grid__comparison-header widget-grid__comparison-header--modified">Simulierte Anpassungen</div>
+              <TrendArrow label="Nachfragedruck" phases={modifiedPhases} getValue={p => p.marketState.nachfragedruck} />
+              <TrendArrow label="Angebotspotenzial" phases={modifiedPhases} invertColors getValue={p => -p.marketState.angebotspotenzial} />
+              <GentrifizierungsWidget phases={modifiedPhases} />
+              <TrendArrow label="Neubau-Hemmnis" phases={modifiedPhases} invertColors getValue={p => p.derived.neubau_hemmnisindex} />
+              <TrendArrow label="Verdichtungsdruck" phases={modifiedPhases} invertColors getValue={p => p.marketState.angebotspotenzial * -0.5 + p.marketState.nachfragedruck * 0.3} />
+              <TrendArrow label="Stadtbild" phases={modifiedPhases} invertColors getValue={stadtbildGetter(modified, baseline)} />
+              <OwnershipDonut context={context} baseline={baseline} modified={modified} diff={diff} state={latestModified.marketState} />
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <TrendArrow label="Nachfragedruck" phases={modifiedPhases} getValue={p => p.marketState.nachfragedruck} />
+          <TrendArrow label="Angebotspotenzial" phases={modifiedPhases} invertColors getValue={p => -p.marketState.angebotspotenzial} />
+          <GentrifizierungsWidget phases={modifiedPhases} />
+          <TrendArrow label="Neubau-Hemmnis" phases={modifiedPhases} invertColors getValue={p => p.derived.neubau_hemmnisindex} />
+          <TrendArrow label="Verdichtungsdruck" phases={modifiedPhases} invertColors getValue={p => p.marketState.angebotspotenzial * -0.5 + p.marketState.nachfragedruck * 0.3} />
+          <TrendArrow label="Stadtbild" phases={modifiedPhases} invertColors getValue={stadtbildGetter(modified, baseline)} />
+          <OwnershipDonut context={context} baseline={baseline} modified={modified} diff={diff} state={latestModified.marketState} />
+        </>
+      )}
     </div>
   );
 }

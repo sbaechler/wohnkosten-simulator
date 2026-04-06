@@ -6,8 +6,12 @@ import './GroupTrendWidget.css';
 interface Props {
   title: string;
   phases: PhaseResult[];
+  /** Baseline phases for "Heutige Situation" column (shown when defined) */
+  baselinePhases?: PhaseResult[];
   /** Compute group trends per phase — passed as prop to avoid circular deps */
   computeGroupTrendsForPhase: (phase: PhaseResult) => GroupPriceTrend[];
+  /** Compute baseline group trends (required when baselinePhases is set) */
+  computeBaselineGroupTrendsForPhase?: (phase: PhaseResult) => GroupPriceTrend[];
 }
 
 const ARROWS: Record<string, string> = {
@@ -25,11 +29,17 @@ function getDirection(value: number) {
 const PHASE_COLORS = ['#ff6b6b', '#ffd43b', '#4dabf7'];
 const PHASE_NAMES = ['P1', 'P2', 'P3'];
 
-export function GroupTrendWidget({ title, phases, computeGroupTrendsForPhase }: Props) {
+const BASELINE_PHASE_COLORS = ['#666', '#888', '#aaa'];
+
+export function GroupTrendWidget({ title, phases, baselinePhases, computeGroupTrendsForPhase, computeBaselineGroupTrendsForPhase }: Props) {
   const [hovered, setHovered] = useState<number | null>(null);
+  const hasComparison = baselinePhases && computeBaselineGroupTrendsForPhase;
 
   // Compute trends for each phase
   const allTrends = phases.map(phase => computeGroupTrendsForPhase(phase));
+  const allBaselineTrends = hasComparison
+    ? baselinePhases.map(phase => computeBaselineGroupTrendsForPhase(phase))
+    : null;
 
   // Use Phase 2 (index 1) as primary for driver display
   const primaryTrends = allTrends[1] ?? allTrends[0] ?? [];
@@ -52,6 +62,23 @@ export function GroupTrendWidget({ title, phases, computeGroupTrendsForPhase }: 
         {/* Phase header row */}
         <div className="group-trend__header-row">
           <div className="group-trend__header-spacer" />
+          {hasComparison && (
+            <>
+              <div className="group-trend__section-label" style={{ gridColumn: `span 3`, color: '#888', fontSize: 10, textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Heute</div>
+            </>
+          )}
+          {hasComparison && (
+            <div className="group-trend__section-label" style={{ gridColumn: `span 3`, color: '#4dabf7', fontSize: 10, textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Simuliert</div>
+          )}
+        </div>
+        <div className="group-trend__header-row">
+          <div className="group-trend__header-spacer" />
+          {hasComparison && baselinePhases.map((phase, i) => (
+            <div key={`bl-${phase.phase}`} className="group-trend__phase-label" style={{ color: BASELINE_PHASE_COLORS[i] }}>
+              {PHASE_NAMES[i]}
+              <span className="group-trend__phase-years">{phase.yearsLabel}</span>
+            </div>
+          ))}
           {phases.map((phase, i) => (
             <div key={phase.phase} className="group-trend__phase-label" style={{ color: PHASE_COLORS[i] }}>
               {PHASE_NAMES[i]}
@@ -86,7 +113,20 @@ export function GroupTrendWidget({ title, phases, computeGroupTrendsForPhase }: 
                 </div>
               </div>
 
-              {/* Phase cells */}
+              {/* Baseline phase cells (when comparison active) */}
+              {hasComparison && allBaselineTrends!.map((trends, phaseIdx) => {
+                const phaseItem = trends.find(t => t.group.id === item.group.id);
+                if (!phaseItem) return <div key={`bl-${phaseIdx}`} className="group-trend__phase-cell" />;
+                const phaseDir = getDirection(phaseItem.value);
+                return (
+                  <div key={`bl-${phaseIdx}`} className="group-trend__phase-cell">
+                    <div className="group-trend__arrow" style={{ color: BASELINE_PHASE_COLORS[phaseIdx] }}>
+                      {ARROWS[phaseDir]}
+                    </div>
+                  </div>
+                );
+              })}
+              {/* Modified phase cells */}
               {allTrends.map((trends, phaseIdx) => {
                 const phaseItem = trends.find(t => t.group.id === item.group.id);
                 if (!phaseItem) return <div key={phaseIdx} className="group-trend__phase-cell" />;

@@ -59,3 +59,35 @@
   width: 100%;
   height: auto;
 }
+
+.supply-demand-chart__phase-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.supply-demand-chart__phase-row-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #666;
+  min-width: 120px;
+  white-space: nowrap;
+}
+
+.supply-demand-chart__phase-row-label--modified {
+  color: #4dabf7;
+}
+
+.supply-demand-chart__phase-btn--baseline {
+  border-color: #333;
+  color: #666;
+}
+
+.supply-demand-chart__phase-btn--active-baseline {
+  background: #2a2a3a;
+  border-color: #888;
+  color: #ccc;
+}
