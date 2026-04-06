@@ -3,9 +3,13 @@ import type { GroupPriceTrend } from '../model/groups';
 import type { PhaseResult } from '../model/phases';
 import './GroupTrendWidget.css';
 
+type ViewMode = 'simuliert' | 'heutig' | 'vergleich';
+
 interface Props {
   title: string;
   phases: PhaseResult[];
+  baselinePhases: PhaseResult[];
+  viewMode: ViewMode;
   /** Compute group trends per phase — passed as prop to avoid circular deps */
   computeGroupTrendsForPhase: (phase: PhaseResult) => GroupPriceTrend[];
 }
@@ -25,11 +29,12 @@ function getDirection(value: number) {
 const PHASE_COLORS = ['#ff6b6b', '#ffd43b', '#4dabf7'];
 const PHASE_NAMES = ['P1', 'P2', 'P3'];
 
-export function GroupTrendWidget({ title, phases, computeGroupTrendsForPhase }: Props) {
+export function GroupTrendWidget({ title, phases, baselinePhases, viewMode, computeGroupTrendsForPhase }: Props) {
   const [hovered, setHovered] = useState<number | null>(null);
 
   // Compute trends for each phase
   const allTrends = phases.map(phase => computeGroupTrendsForPhase(phase));
+  const baselineTrends = baselinePhases.map(phase => computeGroupTrendsForPhase(phase));
 
   // Use Phase 2 (index 1) as primary for driver display
   const primaryTrends = allTrends[1] ?? allTrends[0] ?? [];
@@ -44,6 +49,133 @@ export function GroupTrendWidget({ title, phases, computeGroupTrendsForPhase }: 
     return 0;
   });
 
+  // In "vergleich" mode, render side-by-side
+  if (viewMode === 'vergleich') {
+    return (
+      <div className="group-trend group-trend--vergleich">
+        <div className="group-trend__title">{title}</div>
+
+        <div className="group-trend__vergleich-container">
+          {/* Left: Baseline */}
+          <div className="group-trend__vergleich-col">
+            <div className="group-trend__vergleich-col-header">Heutige Situation</div>
+            <div className="group-trend__grid group-trend__grid--baseline">
+              {/* Phase header row */}
+              <div className="group-trend__header-row">
+                <div className="group-trend__header-spacer" />
+                {baselinePhases.map((phase, i) => (
+                  <div key={phase.phase} className="group-trend__phase-label" style={{ color: '#888' }}>
+                    {PHASE_NAMES[i]}
+                    <span className="group-trend__phase-years">{phase.yearsLabel}</span>
+                  </div>
+                ))}
+              </div>
+
+              {sorted.map((item, i) => {
+                const isHovered = hovered === i;
+                return (
+                  <div
+                    key={item.group.id}
+                    className={`group-trend__row ${isHovered ? 'group-trend__row--hovered' : ''}`}
+                    onMouseEnter={() => setHovered(i)}
+                    onMouseLeave={() => setHovered(null)}
+                  >
+                    <div className="group-trend__emoji">{item.group.emoji}</div>
+                    <div className="group-trend__info">
+                      <div className="group-trend__group-name">{item.group.shortLabel}</div>
+                      <div className="group-trend__details">
+                        <div className="group-trend__description">{item.group.description}</div>
+                        <div className="group-trend__drivers">
+                          {item.drivers.map((d, j) => (
+                            <span key={j} className={`group-trend__driver group-trend__driver--${d.direction}`}>
+                              {d.direction === 'up' ? '↑' : '↓'} {d.label}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {baselineTrends.map((trends, phaseIdx) => {
+                      const phaseItem = trends.find(t => t.group.id === item.group.id);
+                      if (!phaseItem) return <div key={phaseIdx} className="group-trend__phase-cell" />;
+                      const phaseDir = getDirection(phaseItem.value);
+                      return (
+                        <div key={phaseIdx} className="group-trend__phase-cell">
+                          <div className="group-trend__arrow" style={{ color: '#888', opacity: 0.6 }}>
+                            {ARROWS[phaseDir]}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Right: Modified */}
+          <div className="group-trend__vergleich-col">
+            <div className="group-trend__vergleich-col-header">Simulierte Anpassungen</div>
+            <div className="group-trend__grid">
+              {/* Phase header row */}
+              <div className="group-trend__header-row">
+                <div className="group-trend__header-spacer" />
+                {phases.map((phase, i) => (
+                  <div key={phase.phase} className="group-trend__phase-label" style={{ color: PHASE_COLORS[i] }}>
+                    {PHASE_NAMES[i]}
+                    <span className="group-trend__phase-years">{phase.yearsLabel}</span>
+                  </div>
+                ))}
+              </div>
+
+              {sorted.map((item, i) => {
+                const isHovered = hovered === i;
+                return (
+                  <div
+                    key={item.group.id}
+                    className={`group-trend__row ${isHovered ? 'group-trend__row--hovered' : ''}`}
+                    onMouseEnter={() => setHovered(i)}
+                    onMouseLeave={() => setHovered(null)}
+                  >
+                    <div className="group-trend__emoji">{item.group.emoji}</div>
+                    <div className="group-trend__info">
+                      <div className="group-trend__group-name">{item.group.shortLabel}</div>
+                      <div className="group-trend__details">
+                        <div className="group-trend__description">{item.group.description}</div>
+                        <div className="group-trend__drivers">
+                          {item.drivers.map((d, j) => (
+                            <span key={j} className={`group-trend__driver group-trend__driver--${d.direction}`}>
+                              {d.direction === 'up' ? '↑' : '↓'} {d.label}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {allTrends.map((trends, phaseIdx) => {
+                      const phaseItem = trends.find(t => t.group.id === item.group.id);
+                      if (!phaseItem) return <div key={phaseIdx} className="group-trend__phase-cell" />;
+                      const phaseDir = getDirection(phaseItem.value);
+                      const phaseColor = PHASE_COLORS[phaseIdx];
+                      return (
+                        <div key={phaseIdx} className="group-trend__phase-cell">
+                          <div className="group-trend__arrow" style={{ color: phaseColor }}>
+                            {ARROWS[phaseDir]}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Standard view (simuliert or heutig)
   return (
     <div className="group-trend">
       <div className="group-trend__title">{title}</div>

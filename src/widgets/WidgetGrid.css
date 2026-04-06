@@ -1,0 +1,83 @@
+/* WidgetGrid — View Mode Selector */
+.widget-grid__view-selector {
+  display: flex;
+  gap: 4px;
+  padding: 8px 0 16px 0;
+  border-bottom: 1px solid #222;
+  margin-bottom: 16px;
+}
+
+.widget-grid__view-btn {
+  background: #1e1e3a;
+  border: 1px solid #333;
+  color: #888;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.widget-grid__view-btn:hover {
+  background: #2a2a4a;
+  border-color: #444;
+  color: #ccc;
+}
+
+.widget-grid__view-btn--active {
+  background: #363666;
+  border-color: #4dabf7;
+  color: #fff;
+  border-bottom: 2px solid #4dabf7;
+  border-radius: 6px 6px 0 0;
+}
+
+/* Vergleiche-mode: 2-column grid for side-by-side widgets */
+.widget-grid--vergleich {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.widget-grid--vergleich > .widget-grid__col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.widget-grid__col-header {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.widget-grid__col-header--baseline {
+  background: #1e1e3a;
+  color: #888;
+  border: 1px solid #333;
+}
+
+.widget-grid__col-header--modified {
+  background: #1e2a3a;
+  color: #4dabf7;
+  border: 1px solid #4dabf744;
+}
+
+/* Spanning elements in vergleiche mode */
+.widget-grid--vergleich .group-trend,
+.widget-grid--vergleich .supply-demand-chart {
+  grid-column: 1 / -1;
+}
+
+/* Neutral grey styling for baseline in widgets */
+.widget-grid--vergleich .trend-arrow--baseline .trend-arrow__mini-arrow,
+.widget-grid--vergleich .trend-arrow--baseline .trend-arrow__text {
+  opacity: 0.5;
+}
+
+.widget-grid--vergleich .group-trend--baseline .group-trend__arrow {
+  opacity: 0.5;
+}

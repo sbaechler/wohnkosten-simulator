@@ -29,3 +29,33 @@
   font-size: 12px;
   margin-top: 4px;
 }
+
+/* Vergleiche mode */
+.trend-arrow__vergleich-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.trend-arrow__vergleich-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.trend-arrow__vergleich-label {
+  font-size: 9px;
+  color: #666;
+  width: 50px;
+  text-align: right;
+}
+
+.trend-arrow__vergleich-arrow {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.trend-arrow__vergleich-text {
+  font-size: 10px;
+  margin-top: 0;
+}

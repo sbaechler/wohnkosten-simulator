@@ -3,12 +3,15 @@ import * as d3 from 'd3';
 import type { CityParams40, CityContext, ParamsDiff40, MarketState } from '../types';
 import './OwnershipDonut.css';
 
+type ViewMode = 'simuliert' | 'heutig' | 'vergleich';
+
 interface Props {
   context: CityContext;
   baseline: CityParams40;
   modified: CityParams40;
   diff: ParamsDiff40;
   state: MarketState;
+  viewMode: ViewMode;
 }
 
 interface OwnershipShares {
@@ -132,7 +135,7 @@ function computeModifiedOwnership(baseShares: OwnershipShares, state: MarketStat
 
 const SIZE = 180;
 
-export function OwnershipDonut({ context, baseline, modified, diff, state }: Props) {
+export function OwnershipDonut({ context, baseline, modified, diff, state, viewMode }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
@@ -150,6 +153,28 @@ export function OwnershipDonut({ context, baseline, modified, diff, state }: Pro
     const keys = ['privat', 'institutionell', 'genossenschaft', 'oeffentlich'] as const;
 
     const pie = d3.pie<number>().sort(null);
+
+    // In "heutig" mode, show only baseline (inner ring)
+    if (viewMode === 'heutig') {
+      const innerArc = d3.arc<d3.PieArcDatum<number>>()
+        .innerRadius(25).outerRadius(55);
+      const baseData = keys.map(k => baseShares[k]);
+      g.selectAll('.inner')
+        .data(pie(baseData))
+        .join('path')
+        .attr('d', innerArc)
+        .attr('fill', (_, i) => COLORS[keys[i]])
+        .attr('opacity', 0.8);
+
+      // Center text for heutig mode
+      g.append('text').attr('text-anchor', 'middle').attr('y', 0)
+        .attr('fill', '#888').attr('font-size', 9).attr('font-weight', '600')
+        .text('Heutige');
+      g.append('text').attr('text-anchor', 'middle').attr('y', 12)
+        .attr('fill', '#888').attr('font-size', 9).attr('font-weight', '600')
+        .text('Situation');
+      return;
+    }
 
     // Inner ring: baseline
     const innerArc = d3.arc<d3.PieArcDatum<number>>()
@@ -184,7 +209,7 @@ export function OwnershipDonut({ context, baseline, modified, diff, state }: Pro
         .attr('fill', '#555').attr('font-size', 8).text('innen: ist');
     }
 
-  }, [context, baseline, modified, diff, state]);
+  }, [context, baseline, modified, diff, state, viewMode]);
 
   return (
     <div className="ownership-donut">
