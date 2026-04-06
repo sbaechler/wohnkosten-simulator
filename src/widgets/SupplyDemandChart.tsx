@@ -5,16 +5,12 @@ import type { PhaseResult } from '../model/phases';
 import { computeMarketState, clampE1 } from '../model/market-state';
 import './SupplyDemandChart.css';
 
-type ViewMode = 'simuliert' | 'heutig' | 'vergleich';
-
 interface Props {
   context: CityContext;
   baseline: CityParams40;
   modified: CityParams40;
   diff: ParamsDiff40;
   phases: PhaseResult[];
-  baselinePhases: PhaseResult[];
-  viewMode: ViewMode;
 }
 
 const MARGIN = { top: 20, right: 110, bottom: 40, left: 50 };
@@ -30,16 +26,12 @@ const COLORS = {
   baseline: '#555',
 };
 
-export function SupplyDemandChart({ context, baseline, modified, diff, phases, baselinePhases, viewMode }: Props) {
+export function SupplyDemandChart({ context, baseline, modified, diff, phases }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [activePhaseIndex, setActivePhaseIndex] = useState(2); // Default to P3
 
-  // Determine which phases to use for the selector
-  const selectorPhases = viewMode === 'heutig' ? baselinePhases : phases;
-  const effectivePhases = viewMode === 'heutig' ? baselinePhases : phases;
-
   useEffect(() => {
-    if (!svgRef.current || effectivePhases.length === 0) return;
+    if (!svgRef.current || !phases || phases.length === 0) return;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
@@ -103,43 +95,23 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
     const baselineState = clampE1(computeMarketState(context, baseline, baseline, {}));
     const [bq, bp] = findEquilibrium(baselineState.angebotspotenzial, baselineState.nachfragedruck);
 
-    // In "heutig" mode, only show baseline curves
-    const showBaseline = viewMode !== 'simuliert' || Object.keys(diff).length > 0;
+    // Draw baseline curves
+    g.append('path').datum(supplyCurve(baselineState.angebotspotenzial))
+      .attr('d', line).attr('fill', 'none')
+      .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
+    g.append('path').datum(demandCurve(baselineState.nachfragedruck))
+      .attr('d', line).attr('fill', 'none')
+      .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
 
-    if (showBaseline) {
-      // Draw baseline curves
-      g.append('path').datum(supplyCurve(baselineState.angebotspotenzial))
-        .attr('d', line).attr('fill', 'none')
-        .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
-      g.append('path').datum(demandCurve(baselineState.nachfragedruck))
-        .attr('d', line).attr('fill', 'none')
-        .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
+    // Baseline equilibrium
+    g.append('line').attr('x1', x(bq)).attr('y1', y(bp)).attr('x2', x(bq)).attr('y2', y(0))
+      .attr('stroke', COLORS.baseline).attr('stroke-dasharray', '3').attr('stroke-width', 1);
+    g.append('line').attr('x1', 0).attr('y1', y(bp)).attr('x2', x(bq)).attr('y2', y(bp))
+      .attr('stroke', COLORS.baseline).attr('stroke-dasharray', '3').attr('stroke-width', 1);
+    g.append('circle').attr('cx', x(bq)).attr('cy', y(bp)).attr('r', 3).attr('fill', COLORS.baseline);
 
-      // Baseline equilibrium
-      g.append('line').attr('x1', x(bq)).attr('y1', y(bp)).attr('x2', x(bq)).attr('y2', y(0))
-        .attr('stroke', COLORS.baseline).attr('stroke-dasharray', '3').attr('stroke-width', 1);
-      g.append('line').attr('x1', 0).attr('y1', y(bp)).attr('x2', x(bq)).attr('y2', y(bp))
-        .attr('stroke', COLORS.baseline).attr('stroke-dasharray', '3').attr('stroke-width', 1);
-      g.append('circle').attr('cx', x(bq)).attr('cy', y(bp)).attr('r', 3).attr('fill', COLORS.baseline);
-    }
-
-    // In "heutig" mode, stop here (no modified curves)
-    if (viewMode === 'heutig') {
-      // Legend for heutig mode
-      const legend = g.append('g').attr('transform', `translate(${w + 10}, 0)`);
-
-      legend.append('line').attr('x1', 0).attr('y1', 0).attr('x2', 20).attr('y2', 0)
-        .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
-      legend.append('text').attr('x', 25).attr('y', 4).attr('fill', '#888').attr('font-size', 11).text('Heutige Situation');
-
-      legend.append('circle').attr('cx', 10).attr('cy', 20).attr('r', 3).attr('fill', COLORS.baseline);
-      legend.append('text').attr('x', 25).attr('y', 24).attr('fill', '#888').attr('font-size', 11).text('Gleichgewicht');
-
-      return;
-    }
-
-    // Draw modified phases
-    effectivePhases.forEach((phase, idx) => {
+    // Draw phases
+    phases.forEach((phase, idx) => {
       const isActive = idx === activePhaseIndex;
       const state = phase.marketState;
       const [pq, pp] = findEquilibrium(state.angebotspotenzial, state.nachfragedruck);
@@ -189,19 +161,19 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
 
     legend.append('line').attr('x1', 0).attr('y1', 40).attr('x2', 20).attr('y2', 40)
       .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
-    legend.append('text').attr('x', 25).attr('y', 44).attr('fill', '#888').attr('font-size', 11).text('Heutige Situation');
+    legend.append('text').attr('x', 25).attr('y', 44).attr('fill', '#888').attr('font-size', 11).text('Ist-Zustand');
 
     legend.append('circle').attr('cx', 10).attr('cy', 64).attr('r', 5).attr('fill', COLORS.equilibrium).attr('stroke', '#fff').attr('stroke-width', 1);
     legend.append('text').attr('x', 25).attr('y', 68).attr('fill', '#ccc').attr('font-size', 11).text('Gleichgewicht');
 
-  }, [context, baseline, modified, diff, effectivePhases, activePhaseIndex, viewMode]);
+  }, [context, baseline, modified, diff, phases, activePhaseIndex]);
 
   return (
     <div className="supply-demand-chart">
       <div className="supply-demand-chart__title">Preis-Mengen-Diagramm</div>
       
       <div className="supply-demand-chart__phase-selector">
-        {selectorPhases.map((p, i) => (
+        {phases.map((p, i) => (
           <button
             key={p.phase}
             className={`supply-demand-chart__phase-btn ${i === activePhaseIndex ? 'supply-demand-chart__phase-btn--active' : ''}`}

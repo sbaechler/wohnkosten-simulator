@@ -1,14 +1,10 @@
 import type { PhaseResult } from '../model/phases';
 import './TrendArrow.css';
 
-type ViewMode = 'simuliert' | 'heutig' | 'vergleich';
-
 interface Props {
   label: string;
   phases: PhaseResult[];
   invertColors?: boolean;
-  baselineValue?: number;
-  viewMode?: ViewMode;
   /** Selector function to extract the value from a PhaseResult's derived indicators */
   getValue: (phase: PhaseResult) => number;
 }
@@ -39,7 +35,7 @@ function getLabel(direction: string) {
   return 'stabil';
 }
 
-export function TrendArrow({ label, phases, invertColors = false, baselineValue, viewMode, getValue }: Props) {
+export function TrendArrow({ label, phases, invertColors = false, getValue }: Props) {
   if (!phases || phases.length === 0) return null;
 
   // Main direction (from last phase)
@@ -54,50 +50,6 @@ export function TrendArrow({ label, phases, invertColors = false, baselineValue,
     color: getColor(getDirection(getValue(p)), invertColors),
   }));
 
-  // In "vergleich" mode with baselineValue, show both baseline and modified
-  if (viewMode === 'vergleich' && baselineValue !== undefined) {
-    const baselineDir = getDirection(baselineValue);
-    const baselineColor = getColor(baselineDir, invertColors);
-    
-    return (
-      <div className="trend-arrow">
-        <div className="trend-arrow__label">{label}</div>
-        <div className="trend-arrow__vergleich-container">
-          <div className="trend-arrow__vergleich-row">
-            <span className="trend-arrow__vergleich-label">Heutige:</span>
-            <span className="trend-arrow__vergleich-arrow" style={{ color: baselineColor }}>
-              {ARROWS[baselineDir]}
-            </span>
-            <span className="trend-arrow__vergleich-text" style={{ color: baselineColor }}>
-              {getLabel(baselineDir)}
-            </span>
-          </div>
-          <div className="trend-arrow__vergleich-row">
-            <span className="trend-arrow__vergleich-label">Simuliert:</span>
-            <span className="trend-arrow__mini-arrows">
-              {phaseDirections.map((pd, i) => {
-                const size = 28 - i * 5;
-                return (
-                  <span
-                    key={i}
-                    className="trend-arrow__mini-arrow"
-                    style={{ color: pd.color, fontSize: `${size}px`, opacity: 1 - i * 0.15 }}
-                  >
-                    {ARROWS[pd.dir]}
-                  </span>
-                );
-              })}
-            </span>
-            <span className="trend-arrow__vergleich-text" style={{ color: mainColor }}>
-              {getLabel(mainDirection)}
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Standard view
   return (
     <div className="trend-arrow">
       <div className="trend-arrow__label">{label}</div>
