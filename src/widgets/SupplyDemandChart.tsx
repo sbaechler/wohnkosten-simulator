@@ -31,7 +31,11 @@ const COLORS = {
 export function SupplyDemandChart({ context, baseline, modified, diff, phases, baselinePhases }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [activePhaseIndex, setActivePhaseIndex] = useState(2); // Default to P3
-  const [activeBaselinePhaseIndex, setActiveBaselinePhaseIndex] = useState(2);
+  // Toggle: 'simuliert' (default) | 'heutig'
+  const [viewMode, setViewMode] = useState<'simuliert' | 'heutig'>('simuliert');
+
+  // Active phases depend on toggle
+  const activePhasesForChart = (baselinePhases && viewMode === 'heutig') ? baselinePhases : phases;
 
   useEffect(() => {
     if (!svgRef.current || !phases || phases.length === 0) return;
@@ -94,11 +98,8 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
       return [Math.max(0, Math.min(10, qEq)), Math.max(0, Math.min(10, pEq))];
     }
 
-    // Baseline curves: use baselinePhases if available, otherwise compute from baseline params
-    const blPhaseState = baselinePhases
-      ? baselinePhases[activeBaselinePhaseIndex]?.marketState
-      : null;
-    const baselineState = blPhaseState || clampE1(computeMarketState(context, baseline, baseline, {}));
+    // Baseline curves: always use baseline params for the dashed reference line
+    const baselineState = clampE1(computeMarketState(context, baseline, baseline, {}));
     const [bq, bp] = findEquilibrium(baselineState.angebotspotenzial, baselineState.nachfragedruck);
 
     // Draw baseline curves (dashed)
@@ -116,8 +117,8 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
       .attr('stroke', COLORS.baseline).attr('stroke-dasharray', '3').attr('stroke-width', 1);
     g.append('circle').attr('cx', x(bq)).attr('cy', y(bp)).attr('r', 3).attr('fill', COLORS.baseline);
 
-    // Draw phases
-    phases.forEach((phase, idx) => {
+    // Draw phases (use activePhasesForChart based on toggle)
+    activePhasesForChart.forEach((phase, idx) => {
       const isActive = idx === activePhaseIndex;
       const state = phase.marketState;
       const [pq, pp] = findEquilibrium(state.angebotspotenzial, state.nachfragedruck);
@@ -172,43 +173,42 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
     legend.append('circle').attr('cx', 10).attr('cy', 64).attr('r', 5).attr('fill', COLORS.equilibrium).attr('stroke', '#fff').attr('stroke-width', 1);
     legend.append('text').attr('x', 25).attr('y', 68).attr('fill', '#ccc').attr('font-size', 11).text('Gleichgewicht');
 
-  }, [context, baseline, modified, diff, phases, activePhaseIndex, baselinePhases, activeBaselinePhaseIndex]);
+  }, [context, baseline, modified, diff, phases, activePhaseIndex, baselinePhases, viewMode, activePhasesForChart]);
 
   return (
     <div className="supply-demand-chart">
       <div className="supply-demand-chart__title">Preis-Mengen-Diagramm</div>
       
+      {/* Toggle: nur sichtbar wenn Parameter geändert */}
       {baselinePhases && (
-        <div className="supply-demand-chart__phase-row">
-          <span className="supply-demand-chart__phase-row-label">Heutige Situation</span>
-          <div className="supply-demand-chart__phase-selector">
-            {baselinePhases.map((p, i) => (
-              <button
-                key={`bl-${p.phase}`}
-                className={`supply-demand-chart__phase-btn supply-demand-chart__phase-btn--baseline ${i === activeBaselinePhaseIndex ? 'supply-demand-chart__phase-btn--active-baseline' : ''}`}
-                onClick={() => setActiveBaselinePhaseIndex(i)}
-              >
-                {PHASE_NAMES[i]}
-                <span className="supply-demand-chart__phase-years">{p.yearsLabel}</span>
-              </button>
-            ))}
-          </div>
+        <div className="supply-demand-chart__toggle-row">
+          <button
+            className={`supply-demand-chart__toggle-btn ${viewMode === 'heutig' ? 'supply-demand-chart__toggle-btn--active' : ''}`}
+            onClick={() => setViewMode('heutig')}
+          >
+            Heutige Situation
+          </button>
+          <button
+            className={`supply-demand-chart__toggle-btn ${viewMode === 'simuliert' ? 'supply-demand-chart__toggle-btn--active' : ''}`}
+            onClick={() => setViewMode('simuliert')}
+          >
+            Simulierte Anpassungen
+          </button>
         </div>
       )}
-      <div className="supply-demand-chart__phase-row">
-        {baselinePhases && <span className="supply-demand-chart__phase-row-label supply-demand-chart__phase-row-label--modified">Simulierte Anpassungen</span>}
-        <div className="supply-demand-chart__phase-selector">
-          {phases.map((p, i) => (
-            <button
-              key={p.phase}
-              className={`supply-demand-chart__phase-btn ${i === activePhaseIndex ? 'supply-demand-chart__phase-btn--active' : ''}`}
-              onClick={() => setActivePhaseIndex(i)}
-            >
-              {PHASE_NAMES[i]}
-              <span className="supply-demand-chart__phase-years">{p.yearsLabel}</span>
-            </button>
-          ))}
-        </div>
+
+      {/* Eine Reihe Phase-Buttons */}
+      <div className="supply-demand-chart__phase-selector">
+        {activePhasesForChart.map((p, i) => (
+          <button
+            key={i}
+            className={`supply-demand-chart__phase-btn ${i === activePhaseIndex ? 'supply-demand-chart__phase-btn--active' : ''}`}
+            onClick={() => setActivePhaseIndex(i)}
+          >
+            {PHASE_NAMES[i]}
+            <span className="supply-demand-chart__phase-years">{p.yearsLabel}</span>
+          </button>
+        ))}
       </div>
 
       <div className="supply-demand-chart__svg-container">
