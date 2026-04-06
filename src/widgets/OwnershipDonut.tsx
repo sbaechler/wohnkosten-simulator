@@ -9,6 +9,8 @@ interface Props {
   modified: CityParams40;
   diff: ParamsDiff40;
   state: MarketState;
+  /** When set, show baseline donut alongside modified for comparison */
+  baselineState?: MarketState;
 }
 
 interface OwnershipShares {
@@ -132,7 +134,7 @@ function computeModifiedOwnership(baseShares: OwnershipShares, state: MarketStat
 
 const SIZE = 180;
 
-export function OwnershipDonut({ context, baseline, modified, diff, state }: Props) {
+export function OwnershipDonut({ context, baseline, modified, diff, state, baselineState }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {

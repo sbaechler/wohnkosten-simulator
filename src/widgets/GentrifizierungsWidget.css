@@ -87,3 +87,27 @@
   font-size: 10px;
   color: #888;
 }
+
+.gentrifizierungs-widget__comparison {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.gentrifizierungs-widget__section {
+  flex: 1;
+}
+
+.gentrifizierungs-widget__section-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.gentrifizierungs-widget__divider {
+  width: 1px;
+  background: #333;
+}

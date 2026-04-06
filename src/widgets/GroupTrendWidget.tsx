@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import type { GroupPriceTrend } from '../model/groups';
 import type { PhaseResult } from '../model/phases';
 import './GroupTrendWidget.css';
@@ -6,11 +6,8 @@ import './GroupTrendWidget.css';
 interface Props {
   title: string;
   phases: PhaseResult[];
-  /** Baseline phases for "Heutige Situation" column (shown when defined) */
   baselinePhases?: PhaseResult[];
-  /** Compute group trends per phase — passed as prop to avoid circular deps */
   computeGroupTrendsForPhase: (phase: PhaseResult) => GroupPriceTrend[];
-  /** Compute baseline group trends (required when baselinePhases is set) */
   computeBaselineGroupTrendsForPhase?: (phase: PhaseResult) => GroupPriceTrend[];
 }
 
@@ -27,70 +24,69 @@ function getDirection(value: number) {
 }
 
 const PHASE_COLORS = ['#ff6b6b', '#ffd43b', '#4dabf7'];
+const BASELINE_PHASE_COLORS = ['#555', '#777', '#999'];
 const PHASE_NAMES = ['P1', 'P2', 'P3'];
-
-const BASELINE_PHASE_COLORS = ['#666', '#888', '#aaa'];
 
 export function GroupTrendWidget({ title, phases, baselinePhases, computeGroupTrendsForPhase, computeBaselineGroupTrendsForPhase }: Props) {
   const [hovered, setHovered] = useState<number | null>(null);
-  const hasComparison = baselinePhases && computeBaselineGroupTrendsForPhase;
+  const hasComparison = !!(baselinePhases && computeBaselineGroupTrendsForPhase);
 
-  // Compute trends for each phase
   const allTrends = phases.map(phase => computeGroupTrendsForPhase(phase));
   const allBaselineTrends = hasComparison
-    ? baselinePhases.map(phase => computeBaselineGroupTrendsForPhase(phase))
+    ? baselinePhases!.map(phase => computeBaselineGroupTrendsForPhase!(phase))
     : null;
 
-  // Use Phase 2 (index 1) as primary for driver display
+  // Use Phase 2 (index 1) as primary for driver display — stable sort order
   const primaryTrends = allTrends[1] ?? allTrends[0] ?? [];
-
-  // Sort: sinkend → stabil → steigend; Glückspilze immer zuletzt
-  const sorted = [...primaryTrends].sort((a, b) => {
-    const dirOrder: Record<string, number> = { down: 0, flat: 1, up: 2 };
-    const d = dirOrder[getDirection(a.value)] - dirOrder[getDirection(b.value)];
-    if (d !== 0) return d;
-    if (a.group.id === 'glueckspilze') return 1;
-    if (b.group.id === 'glueckspilze') return -1;
-    return 0;
-  });
+  const sorted = useMemo(() => {
+    const items = [...primaryTrends];
+    // Sort once and keep stable — don't re-sort when values change
+    items.sort((a, b) => {
+      if (a.group.id === 'glueckspilze') return 1;
+      if (b.group.id === 'glueckspilze') return -1;
+      return a.group.shortLabel.localeCompare(b.group.shortLabel);
+    });
+    return items;
+    // Only re-sort when group identity changes, not values
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [primaryTrends.map(t => t.group.id).join(',')]);
 
   return (
     <div className="group-trend">
       <div className="group-trend__title">{title}</div>
 
-      <div className="group-trend__grid">
-        {/* Phase header row */}
+      <div className={`group-trend__grid ${hasComparison ? 'group-trend__grid--comparison' : ''}`}>
+        {/* Section header row (only in comparison mode) */}
+        {hasComparison && (
+          <div className="group-trend__header-row">
+            <div className="group-trend__header-spacer" />
+            <div className="group-trend__section-label group-trend__section-label--baseline">Heutige Situation</div>
+            <div className="group-trend__section-divider" />
+            <div className="group-trend__section-label group-trend__section-label--modified">Simulierte Anpassungen</div>
+          </div>
+        )}
+
+        {/* Phase labels row */}
         <div className="group-trend__header-row">
           <div className="group-trend__header-spacer" />
-          {hasComparison && (
-            <>
-              <div className="group-trend__section-label" style={{ gridColumn: `span 3`, color: '#888', fontSize: 10, textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Heute</div>
-            </>
-          )}
-          {hasComparison && (
-            <div className="group-trend__section-label" style={{ gridColumn: `span 3`, color: '#4dabf7', fontSize: 10, textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Simuliert</div>
-          )}
-        </div>
-        <div className="group-trend__header-row">
-          <div className="group-trend__header-spacer" />
-          {hasComparison && baselinePhases.map((phase, i) => (
-            <div key={`bl-${phase.phase}`} className="group-trend__phase-label" style={{ color: BASELINE_PHASE_COLORS[i] }}>
+          {hasComparison && baselinePhases!.map((_p, i) => (
+            <div key={`bl-${i}`} className="group-trend__phase-label" style={{ color: BASELINE_PHASE_COLORS[i] }}>
               {PHASE_NAMES[i]}
-              <span className="group-trend__phase-years">{phase.yearsLabel}</span>
+              <span className="group-trend__phase-years">{_p.yearsLabel}</span>
             </div>
           ))}
-          {phases.map((phase, i) => (
-            <div key={phase.phase} className="group-trend__phase-label" style={{ color: PHASE_COLORS[i] }}>
+          {hasComparison && <div className="group-trend__section-divider" />}
+          {phases.map((p, i) => (
+            <div key={i} className="group-trend__phase-label" style={{ color: PHASE_COLORS[i] }}>
               {PHASE_NAMES[i]}
-              <span className="group-trend__phase-years">{phase.yearsLabel}</span>
+              <span className="group-trend__phase-years">{p.yearsLabel}</span>
             </div>
           ))}
         </div>
 
-        {/* Rows */}
+        {/* Data rows */}
         {sorted.map((item, i) => {
           const isHovered = hovered === i;
-
           return (
             <div
               key={item.group.id}
@@ -113,29 +109,30 @@ export function GroupTrendWidget({ title, phases, baselinePhases, computeGroupTr
                 </div>
               </div>
 
-              {/* Baseline phase cells (when comparison active) */}
+              {/* Baseline phase cells */}
               {hasComparison && allBaselineTrends!.map((trends, phaseIdx) => {
                 const phaseItem = trends.find(t => t.group.id === item.group.id);
                 if (!phaseItem) return <div key={`bl-${phaseIdx}`} className="group-trend__phase-cell" />;
-                const phaseDir = getDirection(phaseItem.value);
                 return (
                   <div key={`bl-${phaseIdx}`} className="group-trend__phase-cell">
                     <div className="group-trend__arrow" style={{ color: BASELINE_PHASE_COLORS[phaseIdx] }}>
-                      {ARROWS[phaseDir]}
+                      {ARROWS[getDirection(phaseItem.value)]}
                     </div>
                   </div>
                 );
               })}
+
+              {/* Divider */}
+              {hasComparison && <div className="group-trend__section-divider" />}
+
               {/* Modified phase cells */}
               {allTrends.map((trends, phaseIdx) => {
                 const phaseItem = trends.find(t => t.group.id === item.group.id);
                 if (!phaseItem) return <div key={phaseIdx} className="group-trend__phase-cell" />;
-                const phaseDir = getDirection(phaseItem.value);
-                const phaseColor = PHASE_COLORS[phaseIdx];
                 return (
                   <div key={phaseIdx} className="group-trend__phase-cell">
-                    <div className="group-trend__arrow" style={{ color: phaseColor }}>
-                      {ARROWS[phaseDir]}
+                    <div className="group-trend__arrow" style={{ color: PHASE_COLORS[phaseIdx] }}>
+                      {ARROWS[getDirection(phaseItem.value)]}
                     </div>
                   </div>
                 );

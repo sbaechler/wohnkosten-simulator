@@ -18,6 +18,35 @@
   gap: 4px;
 }
 
+.group-trend__grid--comparison {
+  grid-template-columns: 24px 1fr 48px 48px 48px 4px 48px 48px 48px;
+}
+
+.group-trend__section-divider {
+  width: 1px;
+  background: #333;
+  min-height: 100%;
+  justify-self: center;
+}
+
+.group-trend__section-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+.group-trend__section-label--baseline {
+  grid-column: span 3;
+  color: #666;
+}
+
+.group-trend__section-label--modified {
+  grid-column: span 3;
+  color: #4dabf7;
+}
+
 .group-trend__header-row {
   display: grid;
   grid-template-columns: subgrid;

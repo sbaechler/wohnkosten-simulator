@@ -3,6 +3,7 @@ import './GentrifizierungsWidget.css';
 
 interface Props {
   phases: PhaseResult[];
+  baselinePhases?: PhaseResult[];
 }
 
 function getLevelAndColor(value: number): { level: string; color: string } {
@@ -35,28 +36,15 @@ const GHOST_STYLES = [
   { size: 12, opacity: 1.0, borderWidth: 2 },   // P3 (main): full size
 ];
 
-export function GentrifizierungsWidget({ phases }: Props) {
-  if (!phases || phases.length === 0) return null;
-
-  // Main indicator = Phase 3 (last / longest term)
+function GentrifizierungsBar({ phases, label }: { phases: PhaseResult[]; label?: string }) {
   const mainPhase = phases[phases.length - 1];
   const { level, color } = getLevelAndColor(mainPhase.derived.gentrifizierungsindex);
   const normalized = (mainPhase.derived.gentrifizierungsindex + 1) / 2;
   const percentage = Math.round(normalized * 100);
 
   return (
-    <div className="gentrifizierungs-widget">
-      <div className="gentrifizierungs-widget__title">
-        Gentrifizierungsindex
-        <span className="gentrifizierungs-widget__phase-note">
-          {phases.map((p, i) => (
-            <span key={p.phase} className="gentrifizierungs-widget__phase-dot"
-              style={{ opacity: i === phases.length - 1 ? 1 : 0.4, color: GHOST_STYLES[i]?.borderWidth ? '#fff' : undefined }}
-            >●</span>
-          ))}
-        </span>
-      </div>
-
+    <div className="gentrifizierungs-widget__section">
+      {label && <div className="gentrifizierungs-widget__section-label" style={{ color: label === 'Simuliert' ? '#4dabf7' : '#555' }}>{label}</div>}
       <div className="gentrifizierungs-widget__bar-container">
         <div className="gentrifizierungs-widget__gradient-bar">
           {getGradientStops().map((stop, i) => (
@@ -64,7 +52,6 @@ export function GentrifizierungsWidget({ phases }: Props) {
           ))}
         </div>
 
-        {/* Ghost markers: P1, P2 (if phases.length >= 2) */}
         {phases.slice(0, -1).map((phase, i) => {
           const pct = Math.round(((phase.derived.gentrifizierungsindex + 1) / 2) * 100);
           const ghost = GHOST_STYLES[i];
@@ -83,7 +70,6 @@ export function GentrifizierungsWidget({ phases }: Props) {
           );
         })}
 
-        {/* Main indicator: P3 */}
         <div
           className="gentrifizierungs-widget__indicator"
           style={{
@@ -105,22 +91,24 @@ export function GentrifizierungsWidget({ phases }: Props) {
       <div className="gentrifizierungs-widget__value" style={{ color }}>
         {level} ({percentage}%)
       </div>
+    </div>
+  );
+}
 
-      {/* Phase path */}
-      {phases.length >= 2 && (
-        <div className="gentrifizierungs-widget__phase-path">
-          {phases.map((phase, i) => {
-            const pct = Math.round(((phase.derived.gentrifizierungsindex + 1) / 2) * 100);
-            const ghost = GHOST_STYLES[i];
-            return (
-              <span key={phase.phase} className="gentrifizierungs-widget__phase-info">
-                <span style={{ color: GHOST_STYLES[i] ? `rgba(255,255,255,${ghost.opacity})` : '#fff' }}>
-                  P{phase.phase}: {pct}%
-                </span>
-              </span>
-            );
-          })}
+export function GentrifizierungsWidget({ phases, baselinePhases }: Props) {
+  if (!phases || phases.length === 0) return null;
+
+  return (
+    <div className="gentrifizierungs-widget">
+      <div className="gentrifizierungs-widget__title">Gentrifizierungsindex</div>
+      {baselinePhases ? (
+        <div className="gentrifizierungs-widget__comparison">
+          <GentrifizierungsBar phases={baselinePhases} label="Heute" />
+          <div className="gentrifizierungs-widget__divider" />
+          <GentrifizierungsBar phases={phases} label="Simuliert" />
         </div>
+      ) : (
+        <GentrifizierungsBar phases={phases} />
       )}
     </div>
   );

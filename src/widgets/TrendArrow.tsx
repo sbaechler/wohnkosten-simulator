@@ -4,8 +4,9 @@ import './TrendArrow.css';
 interface Props {
   label: string;
   phases: PhaseResult[];
+  /** Baseline phases — when set, show "Heute | Simuliert" side by side */
+  baselinePhases?: PhaseResult[];
   invertColors?: boolean;
-  /** Selector function to extract the value from a PhaseResult's derived indicators */
   getValue: (phase: PhaseResult) => number;
 }
 
@@ -35,33 +36,32 @@ function getLabel(direction: string) {
   return 'stabil';
 }
 
-export function TrendArrow({ label, phases, invertColors = false, getValue }: Props) {
-  if (!phases || phases.length === 0) return null;
-
-  // Main direction (from last phase)
+function ArrowGroup({ phases, invertColors, getValue, muted }: {
+  phases: PhaseResult[];
+  invertColors: boolean;
+  getValue: (p: PhaseResult) => number;
+  muted?: boolean;
+}) {
   const mainPhase = phases[phases.length - 1];
   const mainValue = getValue(mainPhase);
   const mainDirection = getDirection(mainValue);
-  const mainColor = getColor(mainDirection, invertColors);
+  const mainColor = muted ? '#888' : getColor(mainDirection, invertColors);
 
-  // Phase arrow colors
   const phaseDirections = phases.map(p => ({
     dir: getDirection(getValue(p)),
-    color: getColor(getDirection(getValue(p)), invertColors),
+    color: muted ? '#666' : getColor(getDirection(getValue(p)), invertColors),
   }));
 
   return (
-    <div className="trend-arrow">
-      <div className="trend-arrow__label">{label}</div>
+    <div className="trend-arrow__group">
       <div className="trend-arrow__mini-arrows">
         {phaseDirections.map((pd, i) => {
-          // Arrow size decreases per phase: P1 biggest, P3 smallest
           const size = 32 - i * 6;
           return (
             <span
               key={i}
               className="trend-arrow__mini-arrow"
-              style={{ color: pd.color, fontSize: `${size}px`, opacity: 1 - i * 0.2 }}
+              style={{ color: pd.color, fontSize: `${size}px`, opacity: muted ? 0.5 : 1 - i * 0.2 }}
             >
               {ARROWS[pd.dir]}
             </span>
@@ -71,6 +71,31 @@ export function TrendArrow({ label, phases, invertColors = false, getValue }: Pr
       <div className="trend-arrow__text" style={{ color: mainColor }}>
         {getLabel(mainDirection)}
       </div>
+    </div>
+  );
+}
+
+export function TrendArrow({ label, phases, baselinePhases, invertColors = false, getValue }: Props) {
+  if (!phases || phases.length === 0) return null;
+
+  return (
+    <div className="trend-arrow">
+      <div className="trend-arrow__label">{label}</div>
+      {baselinePhases ? (
+        <div className="trend-arrow__comparison">
+          <div className="trend-arrow__comparison-section">
+            <div className="trend-arrow__section-label">Heute</div>
+            <ArrowGroup phases={baselinePhases} invertColors={invertColors} getValue={getValue} muted />
+          </div>
+          <div className="trend-arrow__comparison-divider" />
+          <div className="trend-arrow__comparison-section">
+            <div className="trend-arrow__section-label trend-arrow__section-label--modified">Simuliert</div>
+            <ArrowGroup phases={phases} invertColors={invertColors} getValue={getValue} />
+          </div>
+        </div>
+      ) : (
+        <ArrowGroup phases={phases} invertColors={invertColors} getValue={getValue} />
+      )}
     </div>
   );
 }
