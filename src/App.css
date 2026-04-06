@@ -81,6 +81,14 @@ body {
   overflow: hidden;
 }
 
+.app__footer {
+  text-align: center;
+  padding: 12px;
+  font-size: 11px;
+  color: #444;
+  border-top: 1px solid #1a1a2e;
+}
+
 .app__content {
   flex: 1;
   overflow: auto;

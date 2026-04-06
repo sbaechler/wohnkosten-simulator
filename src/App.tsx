@@ -62,6 +62,7 @@ export default function App() {
           )}
         </div>
       </main>
+      <footer className="app__footer">©2026 Simon Bächler</footer>
     </div>
   );
 }
