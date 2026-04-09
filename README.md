@@ -1,73 +1,106 @@
-# React + TypeScript + Vite
+# Wohnkosten-Simulator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> Simuliere die Auswirkungen von Wohnbaupolitik auf Mietpreise, Eigentumsquoten und Verdrängungsdynamik in Schweizer Städten.
 
-Currently, two official plugins are available:
+**Live:** [wohnkosten-simulator.b-254.workers.dev](https://wohnkosten-simulator.b-254.workers.dev/)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Was ist das?
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Ein interaktiver Policy-Simulator für den Schweizer Wohnungsmarkt. Du wählst eine Stadt (Zürich, Genf, Bern, Basel, Lausanne), ajustierst 40 wohnungspolitische Parameter in drei Stufen (schwach → mittel → stark) und siehst sofort, wie sich die Indikatoren verändern:
 
-## Expanding the ESLint configuration
+- **E1 — Markt-Zustand:** Angebpotenzial, Nachfragedruck, Mietpreisschutz, Verdrängungsrisiko, Spekulationshemmung, Marktfriktion, gemeinnützige Kraft, Eigentumsquoten-Trend, Aufwertungsdruck, Investitionsattraktivität
+- **E2 — Abgeleitete Indikatoren:** Gentrifizierungsindex, Neubau-Hemmnis, Verdrängungsrisiko-Index, Fiskalische Wirkung
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Die Berechnung läuft über ein DAG-Modell (Directed Acyclic Graph) mit Phase-Weighting im Browser.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Für wen?
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- **Stadtplaner & Politikexperten** — Auswirkungen von Massnahmen快速 abschätzen
+- **Medien & Journalist:innen** — Datenbasierte Visualisierungen für Berichte
+- **Wähler:innen & Verbände** — Argumentation für wohnungspolitische Vorstösse untermauern
+- **Studierende** — Wohnungsmarkt-Dynamik interaktiv lernen
+
+---
+
+## 40 Parameter in 8 Kategorien
+
+| Kategorie | Themen |
+|---|---|
+| **Bodenrecht & Landnutzung** | Zonenreserve, Verdichtung, Ausnützungsziffer, Vorkaufsrecht, Bauverpflichtung, Mehrwertabgabe, Bodeneigentumssteuer |
+| **Bau & Bewilligung** | Energievorgaben, Sanierungspflicht, Einspracherecht Dritte/Suspensiv, Bewilligungsverfahren, Normenharmonisierung |
+| **Gemeinnütziger Wohnungsbau** | Mindestanteil, Förderfonds, Baurecht, Belegungsvorschriften, Sozialmischung |
+| **Mietrecht** | Kostenmiete, Anfangsmiete, Mietzinstransparenz, Kündigungsschutz, Mietzinsindex, Untervermietung |
+| **Steuern & Abgaben** | Grundstückgewinnsteuer, Eigenmietwert, Leerstandsabgabe, Handänderungssteuer, Kapitalgewinnsteuer |
+| **Kapital & Investitionen** | Ausländische Investoren, Institutionelle Regulierung, Hypothekarregulierung |
+| **Nutzungsregulierung** | Kurzzeitvermietung, Umnutzungsverbot, Abbruchverbot, Zweitwohnungen |
+| **Infrastruktur & Standortqualität** | ÖPNV, Schule/Kita, Öffentlicher Raum, Wirtschaftsansiedlung |
+
+---
+
+## Tech-Stack
+
+- **React 19** + **TypeScript**
+- **Vite** — Build-Tool
+- **D3.js** — Diagramme (OwnershipDonut, SupplyDemandChart, DivergingTrend, TrendArrow)
+- **URL-State** — Alle Parameter serialisieren sich in die URL (share-fähig)
+- **Cloudflare Workers** — Deployment (Workers + Pages)
+- **AGPL-3.0** — Open Source
+
+---
+
+## Lokal entwickeln
+
+```bash
+git clone git@github.com:sbaechler/wohnkosten-simulator.git
+cd wohnkosten-simulator
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Build für Produktion:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run build
 ```
+
+---
+
+## Architektur
+
+```
+src/
+├── model/
+│   ├── params.ts        # 40 Parameter + Metadaten
+│   ├── phases.ts        # Phasen (roh → E1 → E2)
+│   ├── phase-weights.ts # Gewichtungsmatrix
+│   ├── graph.ts         # DAG-Struktur
+│   └── derived.ts       # E2-Berechnung
+├── components/
+│   ├── CitySelector.tsx
+│   └── ParameterPanel.tsx
+├── widgets/
+│   ├── WidgetGrid.tsx    # 2×4 Widget-Layout
+│   ├── DAGVisualization.tsx
+│   └── *.tsx            # Einzelne Widgets
+└── hooks/
+    └── useUrlState.ts   # URL ↔ State Sync
+```
+
+---
+
+## Städte
+
+- Zürich
+- Genf
+- Bern
+- Basel
+- Lausanne
+
+---
+
+Lizenz: **AGPL-3.0** (siehe LICENSE.txt)
+Repository: [github.com/sbaechler/wohnkosten-simulator](https://github.com/sbaechler/wohnkosten-simulator)
