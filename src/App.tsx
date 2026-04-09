@@ -62,7 +62,10 @@ export default function App() {
           )}
         </div>
       </main>
-      <footer className="app__footer">©2026 Simon Bächler</footer>
+      <footer className="app__footer">
+        <span>©2026 Simon Bächler</span>
+        <a href="https://github.com/sbaechler/wohnkosten-simulator/blob/main/docs/datenschutzerklaerung.md" target="_blank">Datenschutzerklärung</a>
+      </footer>
     </div>
   );
 }

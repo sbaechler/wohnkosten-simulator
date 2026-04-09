@@ -82,11 +82,16 @@ body {
 }
 
 .app__footer {
-  text-align: center;
+  display: flex;
+  gap: 12px;
   padding: 12px;
   font-size: 11px;
-  color: #444;
+  color: #888;
   border-top: 1px solid #1a1a2e;
+
+  > a {
+    color: currentColor;
+  }
 }
 
 .app__content {
