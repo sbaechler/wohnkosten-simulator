@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
+    "typecheck": "tsc --noEmit",
     "build:data": "npx tsx scripts/build-city-data.ts",
     "prebuild": "npm run build:data",
     "predev": "npm run build:data"

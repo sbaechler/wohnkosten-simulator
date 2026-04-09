@@ -134,7 +134,7 @@ function computeModifiedOwnership(baseShares: OwnershipShares, state: MarketStat
 
 const SIZE = 180;
 
-export function OwnershipDonut({ context, baseline, modified, diff, state, baselineState }: Props) {
+export function OwnershipDonut({ context, baseline, modified, diff, state }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
