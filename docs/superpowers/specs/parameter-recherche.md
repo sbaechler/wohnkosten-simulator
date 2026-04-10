@@ -95,12 +95,29 @@ Diese sind politisch steuerbar (durch Gesetz, Initiative, Verordnung, Zonenplan)
 - Historisch: Mietrechtsrevision 2006 gescheitert, Diskussion über Indexmiete vs. Kostenmiete  
 **Wirkung:** Nachfrage (keine Spekulation), Preise ↓ kurzfristig, Angebot ↓ langfristig (weniger Investitionsanreiz)
 
+**Quantitative Evidenz (FHNW-Studie Ters/Kholodilin 2025, Genf 1994–2022):**
+- Mietpreisregulierung (Preisrestriktion): Rückgang institutioneller Neubauinvestitionen **−100 Mio. CHF** (statistisch schwach); kein klarer Effekt bei privaten Investoren
+- Kurzfristig (+1–5 Jahre): private Renovationen steigen um ca. **+150 Mio. CHF** (Kapital fliesst in Bestandserneuerung statt Neubau)
+- Sobald keine weiteren Aufwertungen möglich sind, die eine höhere Miete rechtfertigen: **Renovationsanreize erlöschen** (kein langfristiger Effekt)
+- Leerstände reagieren **nicht** auf Mietpreisregulierung (Leerstände unverändert)
+- **Preisspreizung Bestandsmieter vs. Neumieter:** In Genf zahlen Neumieter im Schnitt **~30% mehr** pro m² als Bestandsmieter; Zürich (kein Mietpreisdeckel): nur ~18% Differenz
+- Genf hat mit **372 CHF/m²/Jahr** die höchsten Angebotsmieten aller 5 grössten Schweizer Städte — ein Hinweis auf systemischen Marktdruck trotz (und wegen) strenger Regulierung
+- Fazit: Mietpreisregulierung schützt Bestandsmieter, schadet aber Neumietern (Junge, Zuzügler, Migrant:innen) durch höhere Einstiegsmieten und reduziertes Angebot
+- *Quelle: Prof. Dr. Kristyna Ters (FHNW) & Konstantin Kholodilin (DIW Berlin), «Restrictive rental policies and a tough trade off: Lower rents vs. less construction in Geneva», Nov. 2025*
+
 #### `kuendigungsschutz` — schwach / moderat / stark
 **Was:** Stärke des Schutzes gegen Kündigung für Modernisierung/Sanierung/Eigennutzung. Massnahmen gegen «Renovierungen als Vorwand» für Mieterhöhungen.  
 **Politische Verankerung:**
 - Motion Dandrès 24.4371: «Renovierungen sollen nicht als Vorwand für missbräuchliche Mieten dienen»
 - Motion Sommaruga 24.4337: Vorabprüfung bei Massenkündigungen  
 **Wirkung:** Nachfrage (weniger Verdrängung), Preise ↓ kurzfristig, Angebot ↓ langfristig (Eigentümer investieren weniger)
+
+**Quantitative Evidenz (Basel-Stadt Wohnschutz-Initiative, SVIT/HEV/Swiss Real Estate Institute 2025):**
+- Basel Wohnschutzverordnung (in Kraft Mai 2022): Abriss, Ersatzneubau und Sanierungen bewilligungspflichtig + Mietzinsobergrenzen
+- Geplante Wohneinheiten eingebrochen: **1078 (2018) → 67 (2023) = −95%**; Baugesuche −76% (784 → 190) im Vergleich zu Referenzstädten
+- Zürich im selben Zeitraum: **+20%** mehr Baugesuche; Basel-Landschaft, Bern, Winterthur, Luzern: −2% bis −35% (Zinseffekt), aber Basel-Stadt −76% ist deutlich stärker
+- **Zielkonflikt Klimaschutz:** Regierung Basel-Stadt (2023): «Abnahme der Sanierungstätigkeit erfasst alle Wohnungen, nicht nur Rendite-Sanierungen» — energetische Sanierungen erfolgen meist als Totalsanierungen, deshalb Konflikt mit Netto-Null-Ziel 2037
+- *Quelle: SVIT, HEV, Swiss Real Estate Institute, «Auswirkungen der Wohnschutzinitiative im Kanton Basel-Stadt», Jan. 2025*
 
 ---
 
@@ -116,11 +133,23 @@ Diese sind politisch steuerbar (durch Gesetz, Initiative, Verordnung, Zonenplan)
 **Wirkung:** Angebot ↑ (Wohnraum bleibt im Mietmarkt), Preise ↓ (langfristig in touristischen Lagen)
 
 #### `umnutzungsverbot` — keine / kantonales / striktes
-**Was:** Verbot der Umnutzung von Wohnraum zu Büros, Hotels oder anderen kommerziellen Zwecken in angespannten Märkten.  
+**Was:** Verbot der Umnutzung von Wohnraum zu Büros, Hotels oder anderen kommerziellen Zwecken in angespannten Märkten. Umfasst auch Abbruchverbot und Rationierungsregeln (Bewilligungspflicht für Abriss/Ersatzneubau).  
 **Politische Verankerung:**
 - Einzelne Kantone und Städte haben Umnutzungsvorschriften
-- Grundlage: kantonale Baugesetze (insbesondere in Wohnzonen)  
-**Wirkung:** Angebot ↑ (Wohnraum bleibt), Preise ↓
+- Grundlage: kantonale Baugesetze (insbesondere in Wohnzonen)
+- Genf LDTR (seit 1983, totalrevidiert 1996): Abrisse, Umbauten und Renovationen bewilligungspflichtig; Ersatzvorgaben, Mietobergrenzen, Umsiedlungspflichten
+- Basel Wohnschutzverordnung (2022): direktes Pendant zum Genfer Modell für die Schweiz  
+**Wirkung:** Bestandsschutz ↑ (Wohnraum bleibt Mietmarkt), aber **Neubau ↓↓** (stärkste Bremswirkung aller Regulierungstypen)
+
+**Quantitative Evidenz — Wohnungsrationierung (FHNW-Studie Ters/Kholodilin 2025, Genf 1994–2022):**
+- **Wichtigste Erkenntnis:** Wohnungsrationierung (Mengenrestriktion) bremst Investitionen **deutlich stärker** als Mietpreisregulierung (Preisrestriktion)
+- Aggregierter Rückgang der Bauinvestitionen nach Rationierungsschocks: **−600 Mio. CHF** (≈ 11% der Genfer Bauausgaben, ≈ 1% des Genfer BIP)
+- Institutionelle Investoren überdurchschnittlich betroffen: Neubaurückgang **−400 Mio. CHF** (höhere Bewilligungsrisiken, längere Projektlaufzeiten, gedrückte Bodenwerte)
+- Private Investoren: kurzfristig Renovation ↑ (**+200 Mio. CHF**, Jahre 1–3), dann Rückgang
+- **Leerstände sinken** nach Rationierungsschocks (Granger-Kausalität belegt) → politisch induzierte Verknappung
+- Aktivität verlagert sich von Neubau zu bestandserhaltenden Renovationen → mittelfristig sinkende Marktrotation, weniger freie Wohnungen
+- **Renovationsrückstand:** Genf 83% der Gebäude >40 Jahre nie umfassend modernisiert; Basel 48%; Zürich 41%
+- *Quelle: Prof. Dr. Kristyna Ters (FHNW) & Konstantin Kholodilin (DIW Berlin), Nov. 2025*
 
 #### `verdichtungsforderung` — optional / empfohlen / verpflichtend
 **Was:** Pflicht zur Innenverdichtung (Aufstockung, Aufzonierung) statt Neuüberbauung auf der grünen Wiese. Erhöht Ausnützungsziffer, fördert Hochhäuser und dichte Bauformen.  
@@ -255,4 +284,4 @@ Die 10 bisherigen Parameter könnten als Überkategorien dienen, darunter jeweil
 
 ---
 
-*Quellen: BWO (Bundesamt für Wohnungswesen), MV (Mieterinnen- und Mieterverband), HEV Schweiz, WBG Schweiz, SP Zürich, Realit, SRF, NZZ, Tagesanzeiger, watson.ch, i-rem.ch, SAB (Nov. 2024), ARE (2026)*
+*Quellen: BWO (Bundesamt für Wohnungswesen), MV (Mieterinnen- und Mieterverband), HEV Schweiz, WBG Schweiz, SP Zürich, Realit, SRF, NZZ, Tagesanzeiger, watson.ch, i-rem.ch, SAB (Nov. 2024), ARE (2026), FHNW/Ters/Kholodilin (Nov. 2025), SVIT/HEV/Swiss Real Estate Institute (Jan. 2025), wohn-initiativen-nein.ch*

@@ -59,8 +59,8 @@ export const DAG_EDGES: Edge[] = [
   { from: 'bau_normenharmonisierung',             to: 'angebotspotenzial',          sign: +1, weight: 0.5, time: 'long'   },
   { from: 'gemeinnuetzig_mindestanteil',          to: 'angebotspotenzial',          sign: -1, weight: 1.0, time: 'short'  },
   { from: 'gemeinnuetzig_foerderfonds',           to: 'angebotspotenzial',          sign: +1, weight: 1.0, time: 'medium' },
-  { from: 'nutzung_abbruchverbot',                to: 'angebotspotenzial',          sign: +1, weight: 1.0, time: 'short'  },
-  { from: 'nutzung_umnutzungsverbot',             to: 'angebotspotenzial',          sign: +1, weight: 0.5, time: 'short'  },
+  { from: 'nutzung_abbruchverbot',                to: 'angebotspotenzial',          sign: -1, weight: 1.0, time: 'medium' },
+  { from: 'nutzung_umnutzungsverbot',             to: 'angebotspotenzial',          sign: -1, weight: 0.5, time: 'medium' },
   { from: 'ctx:zinsniveau',                       to: 'angebotspotenzial',          sign: -1, weight: 1.5, time: 'medium' },
   { from: 'ctx:wirtschaftskraft',                 to: 'angebotspotenzial',          sign: +1, weight: 1.0, time: 'long'   },
 
@@ -107,6 +107,8 @@ export const DAG_EDGES: Edge[] = [
   { from: 'steuer_handaenderung',                to: 'markfriktion',               sign: +1, weight: 1.0, time: 'short'  },
   { from: 'steuer_kapitalgewinnprivatpersonen', to: 'markfriktion',               sign: +1, weight: 1.0, time: 'short'  },
   { from: 'ctx:zinsniveau',                      to: 'markfriktion',               sign: +1, weight: 1.0, time: 'short'  },
+  { from: 'mietrecht_kostenmiete',               to: 'markfriktion',               sign: +1, weight: 1.0, time: 'long'   },
+  { from: 'mietrecht_kuendigungsschutz',         to: 'markfriktion',               sign: +1, weight: 0.5, time: 'long'   },
 
   // ─── E0 → gemeinnuetzig_kraft ─────────────────────────────────────────────
   { from: 'gemeinnuetzig_mindestanteil',        to: 'gemeinnuetzig_kraft',        sign: +1, weight: 1.5, time: 'long'   },
@@ -142,6 +144,8 @@ export const DAG_EDGES: Edge[] = [
   { from: 'steuer_handaenderung',                to: 'investitionsattraktivitaet', sign: -1, weight: 0.5, time: 'short'  },
   { from: 'ctx:wirtschaftskraft',                to: 'investitionsattraktivitaet', sign: +1, weight: 1.5, time: 'long'   },
   { from: 'ctx:zinsniveau',                      to: 'investitionsattraktivitaet', sign: -1, weight: 1.0, time: 'short'  },
+  { from: 'nutzung_abbruchverbot',               to: 'investitionsattraktivitaet', sign: -1, weight: 1.0, time: 'long'   },
+  { from: 'nutzung_umnutzungsverbot',            to: 'investitionsattraktivitaet', sign: -1, weight: 0.5, time: 'long'   },
 
   // ─── E1 → E2 ─────────────────────────────────────────────────────────────
   { from: 'aufwertungsdruck',                    to: 'gentrifizierungsindex',      sign: +1, weight: 1.5, time: 'long'   },

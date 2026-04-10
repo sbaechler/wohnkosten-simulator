@@ -212,7 +212,17 @@ describe('Nutzungsregulierung: Abbruchverbot schützt Bestand', () => {
       .toBeLessThan(neutral[0].marketState.verdraengungsrisiko);
   });
 
-  it('[FACH] Abbruchverbot erhöht Angebotspotenzial (Bestand bleibt)', () => {
+  it('[FACH] Abbruchverbot senkt Angebotspotenzial (FHNW: Neubau-Bremse dominiert Bestandsschutz)', () => {
+    /**
+     * Ursprünglich: Abbruchverbot → angebotspotenzial ↑ (Bestand bleibt)
+     *
+     * Korrektur per FHNW-Studie (Ters/Kholodilin 2025, Genf 1994–2022):
+     * Die Wohnungsrationierung (Abbruch-/Umnutzungsverbot) ist die SCHADLICHSTE
+     * aller Regulierungsformen für das Angebot:
+     * −600 Mio. CHF Bauinvestitionen aggregiert; −400 Mio. CHF institutionelle Neubauinvestitionen.
+     * Basel: Baugesuche −76%, geplante Wohneinheiten −95% (1078→67).
+     * Dominanter Effekt: Neubau-Verhinderung überwiegt Bestandserhalt bei weitem.
+     */
     const neutral = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
     const withBan: ParamsDiff40 = {
@@ -221,6 +231,6 @@ describe('Nutzungsregulierung: Abbruchverbot schützt Bestand', () => {
     const withDiff = phases(ZUERICH_V2, ZUERICH_CONTEXT, withBan);
 
     expect(withDiff[0].marketState.angebotspotenzial)
-      .toBeGreaterThan(neutral[0].marketState.angebotspotenzial);
+      .toBeLessThan(neutral[0].marketState.angebotspotenzial);
   });
 });

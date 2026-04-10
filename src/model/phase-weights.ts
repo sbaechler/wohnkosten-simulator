@@ -124,16 +124,21 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   {
     from: 'nutzung_abbruchverbot',
     to: 'angebotspotenzial',
-    sign: +1,
+    sign: -1,
     weights: [0.5, 0.7, 0.6],
-    // Verbot bindet Bestand; kurzfristig Angebotserhalt, mittelfristig leicht positive Wirkung
+    // FHNW-Studie (Ters/Kholodilin 2025, Genf): Wohnungsrationierung = stärkste Angebotsbremse.
+    // Abbruchverbot verhindert Ersatzneubau → institutionelle Investoren stornieren Projekte.
+    // Basel: Baugesuche −76%, geplante Wohneinheiten −95% (1078→67) nach Wohnschutz-Initiative.
+    // Dominanter Effekt: Neubau-Verhinderung > Bestandsschutz.
+    // P2 peak: Max. Projektstornierungen; P3 leicht abnehmend wenn Markt sich angepasst hat.
   },
   {
     from: 'nutzung_umnutzungsverbot',
     to: 'angebotspotenzial',
-    sign: +1,
+    sign: -1,
     weights: [0.4, 0.7, 0.6],
-    // Verbot schützt Wohnraum; mittelfristig stabilisierende Wirkung
+    // Umnutzungsverbot verhindert Neuentwicklung (Industrie→Wohnen, Aufstockung).
+    // Gleicher Mechanismus wie Abbruchverbot, etwas schwächer da weniger Neubau-Anteil.
   },
   {
     from: 'ctx:zinsniveau',
@@ -379,8 +384,8 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → markfriktion (4 edges)
-  // Research: RESULT-agent2-weights.md
+  // E0 → markfriktion (6 edges)
+  // Research: RESULT-agent2-weights.md + FHNW-Studie (Ters/Kholodilin 2025)
   // ═══════════════════════════════════════════════════════════════════
 
   {
@@ -413,6 +418,25 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     weights: [1.0, 1.0, 0.9],
     // Zinsniveau ist fundamentaler Markttreiber;
     // kaum abschwächend über Zeit da strukturelle Determinante.
+  },
+  {
+    from: 'mietrecht_kostenmiete',
+    to: 'markfriktion',
+    sign: +1,
+    weights: [0.6, 0.8, 0.9],
+    // FHNW: In stark regulierten Märkten wie Genf sinkt die Marktrotation drastisch.
+    // Bestandsmieter bleiben durchschnittlich 13.7 Jahre (vs. ~6 J. in weniger regulierten Märkten).
+    // Neumieter zahlen ~30% mehr als Bestandsmieter (Genf), vs. ~18% in Zürich.
+    // Kostenmiete = rigideste Form → maximale Marktstarrheit, wächst über Zeit.
+  },
+  {
+    from: 'mietrecht_kuendigungsschutz',
+    to: 'markfriktion',
+    sign: +1,
+    weights: [0.5, 0.7, 0.8],
+    // Starker Kündigungsschutz reduziert Fluktuation → Marktstarrheit steigt.
+    // Mieter bleiben in Wohnungen, die nicht mehr zum Lebensstil passen.
+    // Kumulative Wirkung nimmt über Zeit zu (P3 stärker als P1).
   },
 
   // ═══════════════════════════════════════════════════════════════════
@@ -615,8 +639,8 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → investitionsattraktivitaet (8 edges)
-  // Research: RESULT-agent2-weights.md
+  // E0 → investitionsattraktivitaet (10 edges)
+  // Research: RESULT-agent2-weights.md + FHNW-Studie (Ters/Kholodilin 2025)
   // ═══════════════════════════════════════════════════════════════════
 
   {
@@ -691,6 +715,24 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     // Barcelona Paradox: Airbnb-Regulierung → +1.9% Miete, +4.6% Kaufpreise.
     // Vermieter weichen auf Kaufmarkt aus → Renditeerwartungen sinken.
     // Sofortiger Effekt auf Investoren-Pool; langfristig Markt-Anpassung.
+  },
+  {
+    from: 'nutzung_abbruchverbot',
+    to: 'investitionsattraktivitaet',
+    sign: -1,
+    weights: [0.5, 0.7, 0.8],
+    // FHNW-Studie (Genf 1994–2022): Rationierungsschocks → institutionelle Neubauinvestitionen −400 Mio. CHF.
+    // Bewilligungsrisiken steigen, Projektlaufzeiten verlängern sich, Bodenwerte sinken →
+    // grossflächige Ersatzneubauten werden unattraktiv.
+    // Langfristig stärkster Effekt (P3=0.8) da Investoren Markt dauerhaft meiden.
+  },
+  {
+    from: 'nutzung_umnutzungsverbot',
+    to: 'investitionsattraktivitaet',
+    sign: -1,
+    weights: [0.4, 0.6, 0.7],
+    // Ergänzend zu Abbruchverbot: Umnutzungsverbot verhindert Redevelopment-Projekte.
+    // Etwas schwächerer Effekt, da Umnutzungen seltener sind als Ersatzneubauten.
   },
 
   // ═══════════════════════════════════════════════════════════════════
