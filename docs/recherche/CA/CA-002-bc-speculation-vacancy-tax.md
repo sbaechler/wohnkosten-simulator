@@ -8,7 +8,7 @@ type: "government-report"
 language: "en"
 url: "https://news.gov.bc.ca/releases/2025FIN0047-001277"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["steuer_leerstandsabgabe", "kapital_auslaendische_investoren", "angebotspotenzial", "spekulationshemmung"]
 dag_edges_confirmed:
   - { from: "steuer_leerstandsabgabe", to: "angebotspotenzial", sign: 1, note: "20.000 condos in Metro Vancouver zwischen 2018 und 2020 dem Mietmarkt zugeführt" }

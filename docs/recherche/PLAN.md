@@ -46,7 +46,7 @@ type: "peer-reviewed" | "working-paper" | "government-report" | "meta-study" | "
 language: "de"
 url: "https://..."
 doi: "10.xxxx/xxxxx"
-status: "found" | "reading" | "evaluated" | "integrated"
+status: "evaluated" | "reading" | "evaluated" | "integrated"
 dag_nodes: ["mietrecht_kostenmiete", "angebotspotenzial"]
 dag_edges_confirmed: []
 dag_edges_challenged: []

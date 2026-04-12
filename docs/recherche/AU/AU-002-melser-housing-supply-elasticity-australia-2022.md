@@ -8,7 +8,7 @@ type: "peer-reviewed"
 language: "en"
 url: "https://www.sciencedirect.com/journal/cities"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["raumplanung_zonenreserve", "raumplanung_verdichtung", "angebotspotenzial", "neubau_hemmnisindex"]
 dag_edges_confirmed: ["raumplanung_zonenreserve → angebotspotenzial (sign: -1)"]
 dag_edges_challenged: []

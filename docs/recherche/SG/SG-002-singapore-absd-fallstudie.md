@@ -8,7 +8,7 @@ type: "government-report"
 language: "en"
 url: "https://www.mas.gov.sg"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["kapital_auslaendische_investoren", "steuer_handaenderung", "spekulationshemmung"]
 dag_edges_confirmed:
   - { from: "kapital_auslaendische_investoren", to: "nachfragedruck", sign: -1, note: "Nach drei ABSD-Erhöhungen: signifikant verändertes Käuferprofil — Ausländeranteil sank" }

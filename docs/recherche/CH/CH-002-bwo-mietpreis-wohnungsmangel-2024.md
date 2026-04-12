@@ -8,7 +8,7 @@ type: "government-report"
 language: "de"
 url: "https://www.bwo.admin.ch/dam/de/sd-web/ABfhh1N055cg/Bericht%20BR%20D.pdf"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes:
   - "ctx:zuwanderungsdruck"
   - "raumplanung_zonenreserve"

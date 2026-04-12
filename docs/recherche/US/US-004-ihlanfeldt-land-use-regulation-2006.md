@@ -8,7 +8,7 @@ type: "peer-reviewed"
 language: "en"
 url: "https://www.huduser.gov/periodicals/cityscpe/vol8num1/ch3.pdf"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["raumplanung_zonenreserve", "raumplanung_verdichtung", "angebotspotenzial"]
 dag_edges_confirmed:
   - { from: "raumplanung_zonenreserve", to: "angebotspotenzial", sign: -1, note: "Strengere Regulierung erhöht Hauspreise signifikant" }

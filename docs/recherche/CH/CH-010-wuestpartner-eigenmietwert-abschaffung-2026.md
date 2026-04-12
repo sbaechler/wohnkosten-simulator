@@ -8,7 +8,7 @@ type: "working-paper"
 language: "de"
 url: "https://www.wuestpartner.com"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["steuer_eigenmietwert", "angebotspotenzial", "nachfragedruck"]
 dag_edges_confirmed: []
 dag_edges_challenged: []

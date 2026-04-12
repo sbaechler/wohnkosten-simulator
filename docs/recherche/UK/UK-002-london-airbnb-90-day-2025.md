@@ -8,7 +8,7 @@ type: "peer-reviewed"
 language: "en"
 url: "https://www.sciencedirect.com/science/article/abs/pii/S0261517725000743"
 doi: "10.1016/j.regsci.2025.XXXXX"
-status: "found"
+status: "evaluated"
 dag_nodes: ["nutzung_kurzzeitvermietung", "nachfragedruck", "aufwertungsdruck"]
 dag_edges_confirmed:
   - { from: "nutzung_kurzzeitvermietung", to: "nachfragedruck", sign: 1, note: "90-Tage-Regel dient als natürliches Experiment; direkte und räumliche Spillover-Effekte auf Wohnungspreise identifiziert" }

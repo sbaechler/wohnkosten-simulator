@@ -8,7 +8,7 @@ type: "working-paper"
 language: "en"
 url: "https://cepr.org/voxeu/columns/effects-transaction-taxes-housing-markets"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["steuer_handaenderung", "markfriktion"]
 dag_edges_confirmed:
   - { from: "steuer_handaenderung", to: "markfriktion", sign: -1, note: "Transaktionssteuern reduzieren Mobilität und Transaktionsvolumen" }

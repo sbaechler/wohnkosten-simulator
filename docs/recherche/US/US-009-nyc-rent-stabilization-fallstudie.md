@@ -8,7 +8,7 @@ type: "government-report"
 language: "en"
 url: null
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["mietrecht_kuendigungsschutz", "mietrecht_anfangsmiete", "verdraengungsrisiko", "angebotspotenzial"]
 dag_edges_confirmed:
   - { from: "mietrecht_kuendigungsschutz", to: "angebotspotenzial", sign: -1, note: "Jährlicher Nettoverlust ~15.000-20.000 stabilisierte Einheiten durch Deregulierung" }

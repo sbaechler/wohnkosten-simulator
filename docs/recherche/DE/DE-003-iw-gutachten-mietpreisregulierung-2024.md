@@ -8,7 +8,7 @@ type: "government-report"
 language: "de"
 url: "https://www.iwkoeln.de/fileadmin/user_upload/Studien/Gutachten/PDF/2024/IW_Gutachten_Mietpreisregulierung-2024.pdf"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["mietrecht_kostenmiete", "mietrecht_anfangsmiete", "investitionsattraktivitaet", "angebotspotenzial"]
 dag_edges_confirmed:
   - { from: "mietrecht_anfangsmiete", to: "angebotspotenzial", sign: -1, note: "Strenge Regulierungen wie Mietendeckel reduzieren Angebot signifikant" }

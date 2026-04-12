@@ -8,7 +8,7 @@ type: "government-report"
 language: "en"
 url: "https://treasury.gov.au/policy-topics/housing/increasing-housing-supply"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["raumplanung_verdichtung", "raumplanung_zonenreserve", "angebotspotenzial", "bau_bewilligungsverfahren"]
 dag_edges_confirmed: []
 dag_edges_challenged: []

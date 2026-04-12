@@ -8,7 +8,7 @@ type: "government-report"
 language: "de"
 url: "https://www.sachverstaendigenrat-wirtschaft.de/fileadmin/dateiablage/Arbeitspapiere/Arbeitspapier_07_2018.pdf"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["mietrecht_anfangsmiete", "mietrecht_kuendigungsschutz", "angebotspotenzial"]
 dag_edges_confirmed:
   - { from: "mietrecht_anfangsmiete", to: "angebotspotenzial", sign: -1, note: "Verlagerung in nicht-regulierte Segmente (möblierte Wohnungen, Ferienwohnungen)" }

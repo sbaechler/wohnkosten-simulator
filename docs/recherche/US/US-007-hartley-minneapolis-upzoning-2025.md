@@ -8,7 +8,7 @@ type: "working-paper"
 language: "en"
 url: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5395203"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["raumplanung_ausnuetzungsziffer", "angebotspotenzial"]
 dag_edges_confirmed:
   - { from: "raumplanung_ausnuetzungsziffer", to: "angebotspotenzial", sign: 1, note: "Erhöhung der Housing Supply nachgewiesen" }

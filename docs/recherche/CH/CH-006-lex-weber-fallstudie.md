@@ -8,7 +8,7 @@ type: "peer-reviewed"
 language: "de"
 url: "https://sjes.springeropen.com/articles/10.1186/s41937-022-00087-3"
 doi: "10.1186/s41937-022-00087-3"
-status: "found"
+status: "evaluated"
 dag_nodes: ["nutzung_zweitwohnungen", "angebotspotenzial", "nachfragedruck"]
 dag_edges_confirmed:
   - { from: "nutzung_zweitwohnungen", to: "angebotspotenzial", sign: -1, note: "Lex Weber hat paradoxerweise den Bau von Mietwohnungen in betroffenen Gemeinden eingeschränkt" }

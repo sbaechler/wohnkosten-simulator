@@ -8,7 +8,7 @@ type: "working-paper"
 language: "en"
 url: "https://www.researchgate.net/publication/311665231_An_international_comparison_on_public_value_capture_instruments_and_how_they_work_within_public_and_private_urban_land_policies"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["boden_mehrwertabgabe", "fiskalische_wirkung"]
 dag_edges_confirmed: []
 dag_edges_challenged: []

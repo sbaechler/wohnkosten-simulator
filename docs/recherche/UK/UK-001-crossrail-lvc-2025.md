@@ -8,7 +8,7 @@ type: "peer-reviewed"
 language: "en"
 url: "https://www.sciencedirect.com/science/article/pii/S0264837725001528"
 doi: "10.1016/j.landusepol.2025.107XXX"
-status: "found"
+status: "evaluated"
 dag_nodes: ["boden_mehrwertabgabe", "infra_oepnv", "fiskalische_wirkung"]
 dag_edges_confirmed:
   - { from: "infra_oepnv", to: "aufwertungsdruck", sign: 1, note: "Crossrail (London): signifikanter Wertzuwachs für umliegende Grundstücke dokumentiert" }

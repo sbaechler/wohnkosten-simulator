@@ -8,7 +8,7 @@ type: "government-report"
 language: "de"
 url: "https://www.bwo.admin.ch/bwo/de/home/Wohnungsmarkt/studien-und-publikationen/wohnkosten.html"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["raumplanung_zonenreserve", "bau_bewilligungsverfahren", "angebotspotenzial", "nachfragedruck"]
 dag_edges_confirmed:
   - { from: "raumplanung_zonenreserve", to: "angebotspotenzial", sign: -1, note: "In Regionen mit mehr Bauland steigen Kosten bei Nachfrageanstieg weniger stark" }

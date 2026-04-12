@@ -8,7 +8,7 @@ type: "peer-reviewed"
 language: "en"
 url: "https://www.sciencedirect.com/science/article/abs/pii/S0166046221000272"
 doi: "10.1016/j.iref.2021.XXXXX"
-status: "found"
+status: "evaluated"
 dag_nodes: ["nutzung_kurzzeitvermietung", "nachfragedruck", "aufwertungsdruck"]
 dag_edges_confirmed:
   - { from: "nutzung_kurzzeitvermietung", to: "aufwertungsdruck", sign: 1, note: "Erhöhung des Airbnb-Marktanteils um 1 Prozentpunkt erhöhte Wohnungspreise um 3.7%" }

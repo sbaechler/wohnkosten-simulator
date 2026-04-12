@@ -8,7 +8,7 @@ type: "peer-reviewed"
 language: "en"
 url: "https://www.sciencedirect.com/science/article/pii/S0160738323000786"
 doi: "10.1016/j.tourman.2023.XXXXX"
-status: "found"
+status: "evaluated"
 dag_nodes: ["nutzung_kurzzeitvermietung", "nachfragedruck"]
 dag_edges_confirmed:
   - { from: "nutzung_kurzzeitvermietung", to: "nachfragedruck", sign: 1, note: "Regulierungen in Barcelona und Paris wirksam bei der Eindämmung des Airbnb-Angebots" }

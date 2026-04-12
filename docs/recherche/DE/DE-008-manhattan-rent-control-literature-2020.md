@@ -8,7 +8,7 @@ type: "meta-study"
 language: "en"
 url: "https://manhattan.institute/article/issues-2020-rent-control-does-not-make-housing-more-affordable"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["mietrecht_kuendigungsschutz", "mietrecht_anfangsmiete", "angebotspotenzial"]
 dag_edges_confirmed:
   - { from: "mietrecht_anfangsmiete", to: "angebotspotenzial", sign: -1, note: "San Francisco: -6% gesamtes Mietwohnungsangebot durch Rent Control → +5,1% Mieten gesamtstädtisch" }

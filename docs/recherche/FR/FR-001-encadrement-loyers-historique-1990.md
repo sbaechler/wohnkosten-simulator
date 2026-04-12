@@ -7,7 +7,7 @@ institution: "INSEE / French Government"
 type: "government-report"
 language: "fr"
 url: "https://www.insee.fr"
-status: "found"
+status: "evaluated"
 dag_nodes:
   - "mietrecht_kostenmiete"
   - "mietrecht_kuendigungsschutz"

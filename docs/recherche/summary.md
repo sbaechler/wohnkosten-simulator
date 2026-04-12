@@ -1,6 +1,6 @@
 # Recherche-Synthese Wohnkosten-Simulator
 
-**Stand:** 2026-04-12 (aktualisiert nach Gap-Filling-Recherche)
+**Stand:** 2026-04-12 (Phase 3 vollständig abgeschlossen — alle 104 Studien ausgewertet)
 **Status:** aktualisiert (Gap-Filling Phase 2, 2026-04-12)
 
 ---
@@ -101,7 +101,7 @@
 
 ---
 
-## Evidenzlücken (Critical Gaps) — Stand nach Gap-Filling 2026-04-12
+## Evidenzlücken (Critical Gaps) — Stand nach vollständiger Auswertung (Phase 3 abgeschlossen) 2026-04-12
 
 | Lücke | Qualität | Priorität | Status nach Gap-Filling |
 |-------|----------|-----------|-------------------------|

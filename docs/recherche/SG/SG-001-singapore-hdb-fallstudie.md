@@ -8,7 +8,7 @@ type: "working-paper"
 language: "en"
 url: "https://www.adb.org/sites/default/files/publication/181599/adbi-wp559.pdf"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["gemeinnuetzig_mindestanteil", "gemeinnuetzig_foerderfonds", "boden_vorkaufsrecht", "angebotspotenzial"]
 dag_edges_confirmed:
   - { from: "boden_vorkaufsrecht", to: "angebotspotenzial", sign: 1, note: "Government Land Acquisition ermöglichte HDB, Grundstücke weit unter Marktpreisen zu erwerben" }

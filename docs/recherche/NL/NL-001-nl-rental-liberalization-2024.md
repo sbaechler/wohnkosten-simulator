@@ -8,7 +8,7 @@ type: "peer-reviewed"
 language: "en"
 url: "https://link.springer.com/article/10.1007/s10645-024-09445-3"
 doi: "10.1007/s10645-024-09445-3"
-status: "found"
+status: "evaluated"
 dag_nodes: ["mietrecht_kuendigungsschutz", "mietrecht_anfangsmiete", "markfriktion"]
 dag_edges_confirmed:
   - { from: "mietrecht_kuendigungsschutz", to: "markfriktion", sign: -1, note: "Anteil befristeter Mietverträge stieg von 17.7% (2017) auf 36.6% (2021) nach Liberalisierung" }

@@ -8,7 +8,7 @@ type: "peer-reviewed"
 language: "en"
 url: "https://ideas.repec.org/a/sae/pubfin/v26y1998i6p523-547.html"
 doi: "10.1177/109114219802600603"
-status: "found"
+status: "evaluated"
 dag_nodes: ["infra_wirtschaftsansiedlung", "fiskalische_wirkung", "aufwertungsdruck"]
 dag_edges_confirmed:
   - { from: "infra_wirtschaftsansiedlung", to: "aufwertungsdruck", sign: 1, note: "TIF-Programme erhöhten median home value um 11% relativ zu Nicht-TIF Kommunen" }

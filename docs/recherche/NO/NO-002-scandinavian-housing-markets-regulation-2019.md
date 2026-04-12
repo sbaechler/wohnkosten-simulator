@@ -8,7 +8,7 @@ type: "book-chapter"
 language: "en"
 url: "https://link.springer.com/chapter/10.1007/978-3-030-11674-3_11"
 doi: "10.1007/978-3-030-11674-3_11"
-status: "found"
+status: "evaluated"
 dag_nodes: ["raumplanung_zonenreserve", "kapital_hypothekarregulierung", "nachfragedruck", "angebotspotenzial"]
 dag_edges_confirmed: ["kapital_hypothekarregulierung → nachfragedruck (sign: -1)"]
 dag_edges_challenged: []

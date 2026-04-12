@@ -8,7 +8,7 @@ type: "meta-study"
 language: "en"
 url: "https://www.lincolninst.edu/app/uploads/legacy-files/pubfiles/land-value-taxation-chp.pdf"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["steuer_eigenmietwert", "boden_bodeneigentumssteuer", "angebotspotenzial"]
 dag_edges_confirmed: []
 dag_edges_challenged: []

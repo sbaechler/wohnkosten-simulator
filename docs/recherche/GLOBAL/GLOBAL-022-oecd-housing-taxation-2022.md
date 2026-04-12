@@ -8,7 +8,7 @@ type: "working-paper"
 language: "en"
 url: "https://www.oecd.org/content/dam/oecd/en/publications/reports/2022/01/measuring-effective-taxation-of-housing_e4d0fbd0/0a7e36f2-en.pdf"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["steuer_eigenmietwert", "steuer_handaenderung", "fiskalische_wirkung"]
 dag_edges_confirmed: []
 dag_edges_challenged: []

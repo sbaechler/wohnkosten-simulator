@@ -8,7 +8,7 @@ type: "peer-reviewed"
 language: "en"
 url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC8604831/"
 doi: "10.1186/s12939-021-01572-6"
-status: "found"
+status: "evaluated"
 dag_nodes: ["mietrecht_kuendigungsschutz", "markfriktion"]
 dag_edges_confirmed:
   - { from: "mietrecht_kuendigungsschutz", to: "markfriktion", sign: -1, note: "Schweiz hat trotz jahrzehntelanger Mietregulierung höchste Mieterquoten Europas in städtischen Kantonen" }

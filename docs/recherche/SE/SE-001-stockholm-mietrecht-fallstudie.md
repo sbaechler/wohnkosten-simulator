@@ -8,7 +8,7 @@ type: "peer-reviewed"
 language: "en"
 url: null
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["mietrecht_kuendigungsschutz", "mietrecht_anfangsmiete", "gemeinnuetzig_kraft", "markfriktion"]
 dag_edges_confirmed:
   - { from: "mietrecht_kuendigungsschutz", to: "markfriktion", sign: -1, note: "Lange Wartelisten für Mietwohnungen (10-20 Jahre); Schwarzmärkttische Untervermietung" }

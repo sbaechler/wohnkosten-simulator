@@ -8,7 +8,7 @@ type: "working-paper"
 language: "en"
 url: "https://abfer.org/media/abfer-events-2023/annual-conference/papers-realestate/AC23P6023-Frictional-and-Speculative-Vacancies-The-Effects-of-an-Empty-Homes-Tax.pdf"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["steuer_leerstandsabgabe", "spekulationshemmung", "angebotspotenzial"]
 dag_edges_confirmed:
   - { from: "steuer_leerstandsabgabe", to: "angebotspotenzial", sign: 1, note: "Bei 3% Steuersatz (Vancouver-Modell) werden spekulative Leerstände effektiv adressiert" }

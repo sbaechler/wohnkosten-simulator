@@ -8,7 +8,7 @@ type: "peer-reviewed"
 language: "en"
 url: "https://link.springer.com/article/10.1007/s00168-024-01353-3"
 doi: "10.1007/s00168-024-01353-3"
-status: "found"
+status: "evaluated"
 dag_nodes: ["steuer_eigenmietwert", "boden_bodeneigentumssteuer", "fiskalische_wirkung"]
 dag_edges_confirmed:
   - { from: "steuer_eigenmietwert", to: "fiskalische_wirkung", sign: 1, note: "Empirische Evidenz: LVT verbessert wirtschaftliche Performance und soziale Wohlfahrt" }

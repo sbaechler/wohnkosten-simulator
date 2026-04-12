@@ -8,7 +8,7 @@ type: "government-report"
 language: "en"
 url: "https://www.nyc.gov/site/specialenforcement/registration-law/registration.page"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["nutzung_kurzzeitvermietung", "angebotspotenzial", "nachfragedruck"]
 dag_edges_confirmed:
   - { from: "nutzung_kurzzeitvermietung", to: "angebotspotenzial", sign: 1, note: "Über 90% Rückgang der Airbnb-Inserate nach Inkrafttreten (von ~22.000 auf ~4.000 im Mai 2024)" }

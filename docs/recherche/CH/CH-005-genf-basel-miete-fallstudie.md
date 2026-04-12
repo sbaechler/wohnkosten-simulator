@@ -8,7 +8,7 @@ type: "government-report"
 language: "de"
 url: "https://www.wuestpartner.com"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["mietrecht_kuendigungsschutz", "mietrecht_anfangsmiete", "markfriktion"]
 dag_edges_confirmed:
   - { from: "mietrecht_kuendigungsschutz", to: "markfriktion", sign: -1, note: "Genf: Durchschnittliche Mietdauer 13.7 Jahre (Extremwert als Indikator für geringe Fluktuation)" }

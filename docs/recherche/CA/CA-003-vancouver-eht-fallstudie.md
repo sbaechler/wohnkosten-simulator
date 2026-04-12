@@ -8,7 +8,7 @@ type: "government-report"
 language: "en"
 url: "https://vancouver.ca/files/cov/empty-homes-tax-annual-report-2023.pdf"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["steuer_leerstandsabgabe", "angebotspotenzial", "spekulationshemmung"]
 dag_edges_confirmed:
   - { from: "steuer_leerstandsabgabe", to: "angebotspotenzial", sign: 1, note: "Leerstandsrate: 0.90% (2017) → 0.49% (2024); ~2.900 Leerstandswohnungen dem Markt zugeführt" }

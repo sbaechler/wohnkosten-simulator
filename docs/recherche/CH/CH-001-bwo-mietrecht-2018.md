@@ -8,7 +8,7 @@ type: "government-report"
 language: "de"
 url: "https://www.bwo.admin.ch/bwo/de/home/Wohnungsmarkt/studien-und-publikationen/Angebotsmieten.html"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes:
   - "mietrecht_kostenmiete"
   - "mietrecht_anfangsmiete"

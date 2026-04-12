@@ -8,7 +8,7 @@ type: "working-paper"
 language: "en"
 url: "https://www.csef.it/WP/wp444.pdf"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["steuer_eigenmietwert", "nachfragedruck"]
 dag_edges_confirmed:
   - { from: "steuer_eigenmietwert", to: "nachfragedruck", sign: -1, note: "Negative Beziehung zwischen Immobiliensteuern und Hauspreisen, robust gegenüber Kontrolle für andere zyklische Determinanten" }

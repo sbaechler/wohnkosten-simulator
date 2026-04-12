@@ -8,7 +8,7 @@ type: "peer-reviewed"
 language: "en"
 url: "https://sui-generis.ch/article/view/4274/3106"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["mietrecht_anfangsmiete", "mietrecht_mietzinstransparenz"]
 dag_edges_confirmed:
   - { from: "mietrecht_anfangsmiete", to: "nachfragedruck", sign: 0, note: "Kein messbarer Effekt auf das Niveau der Neuvertragsmieten nach Einführung des Anfechtungsrechts" }

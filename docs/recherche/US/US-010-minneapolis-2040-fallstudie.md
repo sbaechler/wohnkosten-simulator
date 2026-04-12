@@ -8,7 +8,7 @@ type: "government-report"
 language: "en"
 url: "https://www.minneapolisfed.org/article/2024/minneapolis-2040-plan-data-tool-prepared-to-measure-impacts"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["raumplanung_ausnuetzungsziffer", "raumplanung_verdichtung", "angebotspotenzial", "aufwertungsdruck"]
 dag_edges_confirmed:
   - { from: "raumplanung_ausnuetzungsziffer", to: "angebotspotenzial", sign: 1, note: "2019: Rekordzahl 4.800 genehmigte Wohneinheiten vs. Ø 3.000 in den 3 Jahren davor" }

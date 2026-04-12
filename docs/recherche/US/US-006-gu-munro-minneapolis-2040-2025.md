@@ -8,7 +8,7 @@ type: "working-paper"
 language: "en"
 url: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5347083"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["raumplanung_ausnuetzungsziffer", "raumplanung_verdichtung", "angebotspotenzial", "nachfragedruck"]
 dag_edges_confirmed:
   - { from: "raumplanung_ausnuetzungsziffer", to: "angebotspotenzial", sign: 1, note: "Reform senkte Housing-Cost-Wachstum signifikant" }

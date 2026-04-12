@@ -8,7 +8,7 @@ type: "book-chapter"
 language: "en"
 url: "https://scholar.harvard.edu/files/glaeser/files/rethinking_federal_housing_policy.pdf"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes:
   - "raumplanung_verdichtung"
   - "gemeinnuetzig_mindestanteil"

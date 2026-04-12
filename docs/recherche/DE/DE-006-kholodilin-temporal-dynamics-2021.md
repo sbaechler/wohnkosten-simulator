@@ -8,7 +8,7 @@ type: "peer-reviewed"
 language: "en"
 url: "https://www.sciencedirect.com/science/article/abs/pii/S0166046221000971"
 doi: "10.1016/j.jhe.2021.101693"
-status: "found"
+status: "evaluated"
 dag_nodes: ["mietrecht_mietzinstransparenz", "mietrecht_anfangsmiete"]
 dag_edges_confirmed:
   - { from: "mietrecht_mietzinstransparenz", to: "nachfragedruck", sign: 0, note: "Mietspiegel als Instrument der Mietzinstransparenz hat begrenzte, aber nachweisbare preismodernde Wirkung" }

@@ -8,7 +8,7 @@ type: "peer-reviewed"
 language: "en"
 url: "https://link.springer.com/article/10.1007/s00168-024-01274-1"
 doi: "10.1007/s00168-024-01274-1"
-status: "found"
+status: "evaluated"
 dag_nodes: ["kapital_hypothekarregulierung", "angebotspotenzial", "nachfragedruck", "raumplanung_verdichtung"]
 dag_edges_confirmed: []
 dag_edges_challenged: []

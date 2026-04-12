@@ -8,7 +8,7 @@ type: "peer-reviewed"
 language: "en"
 url: "https://www.sciencedirect.com/science/article/abs/pii/S105113772500004X"
 doi: "10.1016/j.jhe.2025.101003"
-status: "found"
+status: "evaluated"
 dag_nodes: ["mietrecht_kuendigungsschutz", "mietrecht_anfangsmiete", "angebotspotenzial", "markfriktion"]
 dag_edges_confirmed: []
 dag_edges_challenged: []

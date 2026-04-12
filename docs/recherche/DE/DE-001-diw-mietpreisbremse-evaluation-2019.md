@@ -8,7 +8,7 @@ type: "government-report"
 language: "de"
 url: "https://www.bmjv.de/SharedDocs/Downloads/DE/Fachpublikationen/MPB_Gutachten_DIW.pdf"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["mietrecht_mietzinstransparenz", "mietrecht_anfangsmiete", "markfriktion"]
 dag_edges_confirmed:
   - { from: "mietrecht_anfangsmiete", to: "angebotspotenzial", sign: -1, note: "Mietpreisbremse zeigt positive Effekte auf Neubau in Kommunen mit Regulierung" }

@@ -7,7 +7,7 @@ institution: "Australian Housing and Urban Research Institute (AHURI)"
 type: "government-report"
 language: "en"
 url: "https://www.ahuri.edu.au/research/final-reports/101"
-status: "found"
+status: "evaluated"
 dag_nodes:
   - "steuer_kapitalgewinnprivatpersonen"
   - "kapital_auslaendische_investoren"

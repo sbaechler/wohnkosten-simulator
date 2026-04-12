@@ -8,7 +8,7 @@ type: "government-report"
 language: "en"
 url: "https://www.theguardian.com/lifeandstyle/2024/jan/10/the-social-housing-secret-how-vienna-became-the-worlds-most-livable-city"
 doi: null
-status: "found"
+status: "evaluated"
 dag_nodes: ["gemeinnuetzig_mindestanteil", "gemeinnuetzig_foerderfonds", "gemeinnuetzig_kraft", "mietpreis_schutzlevel"]
 dag_edges_confirmed:
   - { from: "gemeinnuetzig_kraft", to: "mietpreis_schutzlevel", sign: 1, note: "Ø Miete/㎡ 2023: €10.50 (Inner London: >3× höher); 60% aller Wiener Wohnungen sozial gefördert oder gemeinnützig" }

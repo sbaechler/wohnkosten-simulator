@@ -8,7 +8,7 @@ type: "peer-reviewed"
 language: "en"
 url: "https://www.sciencedirect.com/science/article/pii/S0264275123000641"
 doi: "10.1016/j.cities.2023.XXXXX"
-status: "found"
+status: "evaluated"
 dag_nodes: ["nutzung_kurzzeitvermietung", "nachfragedruck", "aufwertungsdruck"]
 dag_edges_confirmed:
   - { from: "nutzung_kurzzeitvermietung", to: "nachfragedruck", sign: 1, note: "In Amsterdam manifests sich Airbnb primär als Mietpreisanstieg" }
