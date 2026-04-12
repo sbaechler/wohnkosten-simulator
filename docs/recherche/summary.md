@@ -1,7 +1,7 @@
 # Recherche-Synthese Wohnkosten-Simulator
 
 **Stand:** 2026-04-12 (aktualisiert nach Gap-Filling-Recherche)
-**Status:** finalisiert
+**Status:** aktualisiert (Gap-Filling Phase 2, 2026-04-12)
 
 ---
 
@@ -27,9 +27,13 @@
 
 ### Mittlere bis schwache Evidenz
 
-- **Vorkaufsrecht und Bauverpflichtung:** Fast keine guten quantitativen Wirkungsstudien.
-- **Eigenmietwert-Abschaffung:** Kaum empirische Evidenz.
-- **Langfristige Interaktionseffekte** mehrerer Parameter gleichzeitig sind untererforscht.
+- **Vorkaufsrecht und Bauverpflichtung:** Fast keine guten quantitativen Wirkungsstudien. _Gap-Filling (2026-04-12) hat keine neuen Studien gefunden — Lücke bleibt bestehen._
+- **Eigenmietwert-Abschaffung:** CH-010 (Wüest Partner 2026, Industrie-Report): Abschaffung erhöht attraktive Eigentumsstandorte von 57% auf 71% der CH-Gemeinden. Peer-Review-Evidenz fehlt.
+- **Mietregulierung langfristig (>10 Jahre):** GLOBAL-029 (Kholodilin & Kohl 2023, Housing Policy Debate): Historische Langzeitevidenz bestätigt Angebotsreduktion von 20–40% über 20+ Jahre. Lücke teilweise geschlossen.
+- **Frankreich Kausalanalyse:** FR-003 (APUR/CESAER 2025): Erster kausaler Nachweis für Pariser Mietpreisdeckel — -5,2% über 5 Jahre, -8,2% im letzten Messjahr. Sehr hohe Relevanz.
+- **Norwegen:** NO-001 bis NO-003 hinzugefügt — von 0 auf 3 Studien. OECD 2020 (Sila): Mietschutz + Steuervorteile erhöhen Hauspreise in Norwegen.
+- **Australien:** AU-004 (Kendall & Tulip, RBA 2018): Zonenrecht erhöht Sydney-Hauspreise um +73% über Grenzkosten.
+- **Korea:** KR-002 (2025): Jeonse-Rentendeckel 2020 (+17,7% Mietkosten in Seoul — Paradoxeffekt). KR-003 (CGE-Modell 2024): Interaktionseffekte.
 
 ---
 
@@ -114,11 +118,11 @@
 
 | Region | Vor Gap-Filling | Nach Gap-Filling | Qualität |
 |--------|----------------|-----------------|----------|
-| NO | 0 Studien | 2 Studien (NO-001, NO-002) | ✅ Basis vorhanden |
-| FR | 1 Studie | 2 Studien (+ FR-002 kausale Evaluation) | ✅ Deutlich besser |
-| JP | 1 Studie | 2 Studien (+ JP-002 IMF Demographie) | ✅ Verbessert |
+| NO | 0 Studien | 3 Studien (NO-001, NO-002, NO-003) | ✅ Basis vorhanden |
+| FR | 1 Studie | 3 Studien (+ FR-002 Eval., FR-003 Kausal 2025) | ✅✅ Sehr gut |
+| JP | 1 Studie | 3 Studien (+ JP-002 IMF, JP-003 Yoshida/Brookings) | ✅ Verbessert |
 | KR | 1 Studie | 3 Studien (+ KR-002 Jeonse, KR-003 CGE) | ✅ Deutlich besser |
-| AU | 1 Studie | 3 Studien (+ AU-002 Elastizität, AU-003 Blueprint) | ✅ Deutlich besser |
+| AU | 1 Studie | 4 Studien (+ AU-002, AU-003, AU-004 Kendall/Tulip RBA) | ✅✅ Sehr gut |
 
 **Verbleibende Lücken:** Historische Studien für FR/JP 1970–1990 noch dünn. Keine eigentlichen Norwegen-spezifischen Langzeitstudien.
 

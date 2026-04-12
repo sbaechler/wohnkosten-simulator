@@ -1,9 +1,9 @@
 ---
 generated: "2026-04-12"
-total_studies: 80
+total_studies: 89
 status_counts:
-  found: 60
-  evaluated: 20
+  found: 67
+  evaluated: 22
   reading: 0
   integrated: 0
 ---
@@ -164,12 +164,14 @@ status_counts:
 | ID | Titel | Jahr | Typ | Status | DAG-Relevanz |
 |----|-------|------|-----|--------|--------------|
 | FR-002 | Évaluation d'impact de l'encadrement des loyers à Paris (2019–2022) | 2024 | government-report | evaluated | mietrecht_anfangsmiete, mietpreis_schutzlevel |
+| FR-003 | Impact de l'encadrement des loyers à Paris en 2024 — Actualisation (APUR/CESAER, -5.2% Kausalstudie) | 2025 | government-report | evaluated | mietrecht_anfangsmiete, mietrecht_kostenmiete, angebotspotenzial |
 
 ## JP — Japan (Ergänzungen)
 
 | ID | Titel | Jahr | Typ | Status | DAG-Relevanz |
 |----|-------|------|-----|--------|--------------|
 | JP-002 | Demographics and the Housing Market: Japan's Disappearing Cities (IMF WP/20/200) | 2020 | working-paper | evaluated | ctx:zuwanderungsdruck, nachfragedruck, spekulationshemmung |
+| JP-003 | Land scarcity, high construction volume, and distinctive leases: Japan's rental housing markets (Yoshida/Brookings) | 2021 | working-paper | evaluated | mietrecht_kuendigungsschutz, angebotspotenzial |
 
 ## KR — Südkorea (Ergänzungen)
 
@@ -184,6 +186,7 @@ status_counts:
 |----|-------|------|-----|--------|--------------|
 | AU-002 | Exploring the many housing elasticities of supply: Australia (Melser et al.) | 2022 | peer-reviewed | found | raumplanung_zonenreserve, angebotspotenzial |
 | AU-003 | National Planning Reform Blueprint — Housing Supply Measures | 2023 | government-report | found | raumplanung_verdichtung, bau_bewilligungsverfahren, angebotspotenzial |
+| AU-004 | The Effect of Zoning on Housing Prices (Kendall & Tulip, RBA) | 2018 | working-paper | evaluated | raumplanung_zonenreserve, raumplanung_ausnuetzungsziffer, angebotspotenzial |
 
 ## NO — Norwegen (NEU)
 
@@ -191,15 +194,22 @@ status_counts:
 |----|-------|------|-----|--------|--------------|
 | NO-001 | Making Norway's Housing More Affordable and Sustainable (OECD WP 1711) | 2022 | working-paper | evaluated | kapital_hypothekarregulierung, raumplanung_zonenreserve, nachfragedruck |
 | NO-002 | Housing Markets in Scandinavia: Supply, Demand and Regulation | 2019 | book-chapter | found | raumplanung_zonenreserve, kapital_hypothekarregulierung, angebotspotenzial |
+| NO-003 | The Drivers of Norway's House Prices (Urban Sila, OECD WP 1599) | 2020 | working-paper | evaluated | mietrecht_kuendigungsschutz, steuer_eigenmietwert, angebotspotenzial |
 
 ---
+
+## CH — Schweiz (Ergänzungen)
+
+| ID | Titel | Jahr | Typ | Status | DAG-Relevanz |
+|----|-------|------|-----|--------|-------------- |
+| CH-010 | Eigenmietwert-Abschaffung: Auswirkungen auf Wohneigentum in der Schweiz (Wüest Partner) | 2026 | working-paper | found | steuer_eigenmietwert, angebotspotenzial, nachfragedruck |
 
 ## Verbleibende Lücken nach Gap-Filling (Stand 2026-04-12)
 
 - **Vorkaufsrecht (`boden_vorkaufsrecht`):** Keine quantitativen Wirkungsstudien gefunden — strukturelle Evidenzlücke bestätigt
 - **Bauverpflichtung (`boden_bauverpflichtung`):** Nur Difu 2021 (DE-011), keine Preiswirkungsstudien
-- **Eigenmietwert-Abschaffung (`steuer_eigenmietwert`):** Keine CH- oder internationale Studien gefunden — strukturelle Evidenzlücke
-- **Einspracherecht Dritte (`bau_einspracherecht_dritte`):** Qualitativ erwähnt in NO-001, keine quantitativen Studien
+- **Eigenmietwert-Abschaffung (`steuer_eigenmietwert`):** CH-010 (Wüest Partner 2026, Industrie-Report) — echte Evidenzlücke bleibt
+- **Einspracherecht Dritte (`bau_einspracherecht_dritte`):** Keine quantitativen Studien gefunden
 - **Interaktionseffekte:** KR-003 adressiert teils, grundlegend untererforscht
 
 ## Regionen ohne Studien (Stand 2026-04-11)

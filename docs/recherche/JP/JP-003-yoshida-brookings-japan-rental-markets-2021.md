@@ -1,5 +1,5 @@
 ---
-id: "JP-002"
+id: "JP-003"
 title: "Land scarcity, high construction volume, and distinctive leases characterize Japan's rental housing markets"
 authors: ["Yoshida, Jiro"]
 year: 2021

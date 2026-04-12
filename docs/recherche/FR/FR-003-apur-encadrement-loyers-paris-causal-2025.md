@@ -1,5 +1,5 @@
 ---
-id: "FR-002"
+id: "FR-003"
 title: "Impact de l'encadrement des loyers à Paris en 2024 — Actualisation de l'évaluation et extension à 5 autres villes régulées"
 authors: ["Breuillé, Marie-Laure", "Heurteau, Romain", "Rougier, Mathieu"]
 year: 2025
