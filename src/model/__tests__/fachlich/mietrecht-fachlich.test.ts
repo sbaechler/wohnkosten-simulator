@@ -378,7 +378,7 @@ describe('Mietrecht: CH-004 / CH-005 — Kündigungsschutz → Marktfriktion (Sc
       mietrecht_mietzinsindex:    { from: 0, to: 2 },
     };
     const mit = phases(lockeresMietrecht, BERLIN_CONTEXT, genfDiff);
-    expect(mit[0].marketState.marktfriktion)
-      .toBeGreaterThan(ohne[0].marketState.marktfriktion);
+    expect(mit[0].marketState.markfriktion)
+      .toBeGreaterThan(ohne[0].marketState.markfriktion);
   });
 });

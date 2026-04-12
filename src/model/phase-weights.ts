@@ -155,6 +155,32 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     // Wirtschaftskraft ermöglicht sofortige Investitionen; langfristig abnehmende Grenzrerträge
   },
 
+  // Mietrecht hat starken langfristigen negativen Effekt auf Angebot (GLOBAL-029, Kholodilin & Kohl 2023)
+  {
+    from: 'mietrecht_kuendigungsschutz',
+    to: 'angebotspotenzial',
+    sign: -1,
+    weights: [0.1, 0.4, 0.8],
+    // Restriktives Mietrecht reduziert Neubau langfristig deutlich.
+    // Kurzfristig wenig Effekt; langfristig stark (Investoren meiden Markt).
+  },
+  {
+    from: 'mietrecht_kostenmiete',
+    to: 'angebotspotenzial',
+    sign: -1,
+    weights: [0.2, 0.5, 0.9],
+    // Kostenmietregulierung senkt Renditeerwartung → Neubau wird unattraktiv.
+    // GLOBAL-029: 16 Länder 1910–2016 — stärkster langfristiger Effekt.
+  },
+  {
+    from: 'nutzung_zweitwohnungen',
+    to: 'angebotspotenzial',
+    sign: -1,
+    weights: [0.3, 0.5, 0.7],
+    // CH-006 Lex Weber: Zweitwohnungsbeschränkung senkt paradoxerweise
+    // Gesamtbauaktivität (weniger Bauprojekte insgesamt).
+  },
+
   // ═══════════════════════════════════════════════════════════════════
   // E0 → nachfragedruck (11 edges)
   // Research: RESULT-agent1-weights.md
@@ -238,6 +264,39 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     // Restriktion ausländischer Käufer reduziert Nachfrage sofort; Markt kompensiert langfristig
   },
 
+  // CH-007 BWO: Zonenreserve dämpft Nachfragedruck durch Angebotsausweitung
+  {
+    from: 'raumplanung_zonenreserve',
+    to: 'nachfragedruck',
+    sign: -1,
+    weights: [0.2, 0.5, 0.8],
+    // Mehr Bauland → mehr Angebot → weniger Knappheit → weniger Nachfragedruck.
+    // Langfristig stärkster Effekt wenn Bauland tatsächlich mobilisiert wird.
+  },
+  // AT-002 WIFO: Gemeinnütziger Wohnbau als "Public Option" — dämpft Privatmarktnachfrage
+  {
+    from: 'gemeinnuetzig_mindestanteil',
+    to: 'nachfragedruck',
+    sign: -1,
+    weights: [0.3, 0.5, 0.7],
+    // Wien-Effekt: 60% Sozialwohnungen → strukturelle Marktdämpfung.
+    // Kurzfristig begrenzt; langfristig wenn Bestand wächst.
+  },
+  {
+    from: 'gemeinnuetzig_foerderfonds',
+    to: 'nachfragedruck',
+    sign: -1,
+    weights: [0.1, 0.4, 0.7],
+    // Förderfonds braucht Aufbauphase; langfristig alternative Wohnangebote.
+  },
+  {
+    from: 'gemeinnuetzig_baurecht',
+    to: 'nachfragedruck',
+    sign: -1,
+    weights: [0.2, 0.4, 0.6],
+    // Baurechte für Gemeinnützige erweitern Angebot; mittelfristig wirksam.
+  },
+
   // ═══════════════════════════════════════════════════════════════════
   // E0 → verdrängungsrisiko (7 edges)
   // Research: RESULT-agent2-weights.md
@@ -281,6 +340,14 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     weights: [0.8, 0.7, 0.6],
     // Untermietverbote reduzieren kurzfristig eine Verdrängungsstrategie;
     // Vermieter weichen mittelfristig aus.
+  },
+  {
+    from: 'raumplanung_verdichtung',
+    to: 'verdraengungsrisiko',
+    sign: +1,
+    weights: [0.5, 0.7, 0.5],
+    // CH-008 ETH SPUR: Verdichtung via Ersatzneubau verdrängt vulnerable Bewohnende.
+    // Mittelfristig stärkster Effekt bei Bauboom; langfristig leichte Dämpfung.
   },
   {
     from: 'ctx:zuwanderungsdruck',
@@ -437,6 +504,14 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     // Starker Kündigungsschutz reduziert Fluktuation → Marktstarrheit steigt.
     // Mieter bleiben in Wohnungen, die nicht mehr zum Lebensstil passen.
     // Kumulative Wirkung nimmt über Zeit zu (P3 stärker als P1).
+  },
+  {
+    from: 'mietrecht_mietzinstransparenz',
+    to: 'markfriktion',
+    sign: +1,
+    weights: [0.3, 0.4, 0.5],
+    // CH-003: Anfechtungsrecht erhöht Transaktionskosten für Vermieter;
+    // strategische Preissetzung trotzdem möglich, aber Friktion steigt.
   },
 
   // ═══════════════════════════════════════════════════════════════════
