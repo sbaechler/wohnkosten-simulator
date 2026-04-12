@@ -232,3 +232,96 @@ describe('Bau: Einspracherechte verzögern Angebot (Forschungs-Befund)', () => {
       .toBeLessThan(dritte[0].marketState.angebotspotenzial);
   });
 });
+
+describe('Bodenrecht: CH-007 BWO Raumplanung — Zonenreserve dämpft Kostenanstieg', () => {
+  /**
+   * Ref: docs/recherche/CH/CH-007-bwo-raumplanung-wohnkosten-2023.md
+   *
+   * BWO/CRED-Studie: Mieten CH 2000–2021 +30%, Wohneigentum +80%.
+   * In Regionen mit mehr Bauland steigen Kosten bei Nachfrageanstieg weniger stark.
+   * Lange Bewilligungs- und Einspracheverfahren tragen zur Kostensteigerung bei.
+   *
+   * Im Modell:
+   * - raumplanung_zonenreserve ↑ → nachfragedruck ↓ (reagiert auf Anspannung)
+   * - raumplanung_zonenreserve ↑ → angebotspotenzial ↑ (Baulandoffensive)
+   */
+  it('[FACH] CH-007: Mehr Zonenreserve senkt langfristig den nachfragedruck', () => {
+    const basis: CityParams40 = {
+      ...ZUERICH_V2,
+      raumplanung_zonenreserve: 0,
+    };
+    const ohne = phases(basis, ZUERICH_CONTEXT, {});
+
+    const mitReserve: ParamsDiff40 = {
+      raumplanung_zonenreserve: { from: 0, to: 2 },
+    };
+    const mit = phases(basis, ZUERICH_CONTEXT, mitReserve);
+    // Mehr Bauland → mehr Angebotspotenzial → weniger Nachfragedruck
+    expect(mit[2].marketState.nachfragedruck)
+      .toBeLessThan(ohne[2].marketState.nachfragedruck);
+  });
+});
+
+describe('Bodenrecht: CH-008 / CH-009 ETH Verdichtung → Verdrängungsrisiko', () => {
+  /**
+   * Ref: docs/recherche/CH/CH-008-eth-spur-verdichtung-verdraengung-2025.md
+   * Ref: docs/recherche/CH/CH-009-bautatigkeit-verdraengung-eth-bwo-2025.md
+   *
+   * ETH SPUR: Verdichtung via Ersatzbauten verdrängt vulnerable Bewohnende —
+   * insbesondere Einkommensschwache. Neubauaktivitäten haben negativen Effekt auf
+   * vulnerable Personen in urbanem Raum.
+   *
+   * Key Findings:
+   * - In Basel: ~15% neue Wohngebäude 2020–2023 auf Industrie-/Gewerbezonen; 24% aller neuen Wohnungen
+   * - Verdrängung betrifft überproportional einkommensschwache, ältere, niedriggebildete Haushalte
+   * - Für CH: Kombination Verdichtungsgebot + Verdrängungsschutz nötig
+   *
+   * Im Modell:
+   * - raumplanung_verdichtung ↑ → verdraengungsrisiko ↑ (NEUE Kante)
+   * - raumplanung_verdichtung ↑ → angebotspotenzial ↑ (Bestätigt in CH-008)
+   * - raumplanung_verdichtung ↑ → gentrifizierungsindex ↑
+   */
+  it('[FACH] CH-008: Verdichtung erhöht Verdrängungsrisiko (ETH-SPUR-Befund)', () => {
+    const basis: CityParams40 = {
+      ...ZUERICH_V2,
+      raumplanung_verdichtung: 0,
+    };
+    const ohne = phases(basis, ZUERICH_CONTEXT, {});
+    const mitVerdichtung: ParamsDiff40 = {
+      raumplanung_verdichtung: { from: 0, to: 2 },
+    };
+    const mit = phases(basis, ZUERICH_CONTEXT, mitVerdichtung);
+    // Verdichtung → Verdrängung vulnerabler Gruppen (Ersatzneubau verdrängt Mieter)
+    expect(mit[0].marketState.verdraengungsrisiko)
+      .toBeGreaterThan(ohne[0].marketState.verdraengungsrisiko);
+  });
+  it('[FACH] CH-009: Verdichtung erhöht Gentrifizierungsindex (soziale Aufwertung)', () => {
+    const basis: CityParams40 = {
+      ...ZUERICH_V2,
+      raumplanung_verdichtung: 0,
+    };
+    const ohne = phases(basis, ZUERICH_CONTEXT, {});
+    const mitVerdichtung: ParamsDiff40 = {
+      raumplanung_verdichtung: { from: 0, to: 2 },
+    };
+    const mit = phases(basis, ZUERICH_CONTEXT, mitVerdichtung);
+    // Verdichtung → Gentrifizierung (soziale Aufwertung ohne Sozialmischung)
+    expect(mit[0].derived.gentrifizierungsindex)
+      .toBeGreaterThan(ohne[0].derived.gentrifizierungsindex);
+  });
+  it('[FACH] CH-008: Verdichtung erhöht Angebotspotenzial (Bestätigung)', () => {
+    const basis: CityParams40 = {
+      ...ZUERICH_V2,
+      raumplanung_verdichtung: 0,
+    };
+    const ohne = phases(basis, ZUERICH_CONTEXT, {});
+    const mitVerdichtung: ParamsDiff40 = {
+      raumplanung_verdichtung: { from: 0, to: 2 },
+    };
+    const mit = phases(basis, ZUERICH_CONTEXT, mitVerdichtung);
+    // Verdichtung → mehr Neubau auf innerstädtischen Flächen
+    expect(mit[2].marketState.angebotspotenzial)
+      .toBeGreaterThan(ohne[2].marketState.angebotspotenzial);
+  });
+});
+

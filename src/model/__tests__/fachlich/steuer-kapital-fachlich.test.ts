@@ -250,3 +250,69 @@ describe('Steuern: Eigenmietwert → senkt Wohneigentumsnachfrage', () => {
       .toBeLessThan(neutral[0].marketState.nachfragedruck);
   });
 });
+
+describe('Steuern: CH-006 Lex Weber — Zweitwohnungsinitiative paradox', () => {
+  /**
+   * Ref: docs/recherche/CH/CH-006-lex-weber-fallstudie.md
+   *
+   * Lex Weber (Volksinitiative, angenommen März 2012, Inkrafttreten Jan. 2016):
+   * Beschränkung Zweitwohnungsbau auf 20% in betroffenen Gemeinden.
+   *
+   * Key Finding: Paradoxer Effekt — Lex Weber schränkte den Bau von
+   * Mietwohnungen in betroffenen Gemeinden ein, weil generelle Bauaktivität
+   * zurückging. Zweitwohnungspreise stiegen trotz Beschränkung (2021: +10%).
+   *
+   * Im Modell:
+   * - nutzung_zweitwohnungen ↑ → angebotspotenzial ↓ (paradox: weniger Bau overall)
+   */
+  it('[FACH] CH-006: Zweitwohnungsbeschränkung senkt angebotspotenzial (paradox)', () => {
+    const ohneLex: CityParams40 = {
+      ...ZUERICH_V2,
+      nutzung_zweitwohnungen: 0,
+    };
+    const ohne = phases(ohneLex, ZUERICH_CONTEXT, {});
+
+    const mitLex: ParamsDiff40 = {
+      nutzung_zweitwohnungen: { from: 0, to: 2 },
+    };
+    const mit = phases(ohneLex, ZUERICH_CONTEXT, mitLex);
+    // Lex Weber: Einschränkung → paradoxerweise weniger Gesamtbauaktivität
+    expect(mit[2].marketState.angebotspotenzial)
+      .toBeLessThan(ohne[2].marketState.angebotspotenzial);
+  });
+});
+
+describe('Steuern: AT-002 — Gemeinnütziger Wohnbau dämpft Mietpreise', () => {
+  /**
+   * Ref: docs/recherche/AT/AT-002-wifo-gemeinnuetziger-wohnbau-preisdaempfung.md
+   *
+   * WIFO-Studie (2023): Gemeinnütziger Wohnbau dämpft Mietpreise auch im
+   * privaten Sektor durch Konkurrenz-Effekt ("Public Option").
+   * Wien: Gemeindewohnung €5.10/m² vs. Privatmarkt deutlich höher.
+   * 60% aller Wiener Wohnungen sozial/gemeinnützig → strukturelle Marktdämpfung.
+   *
+   * Im Modell:
+   * - gemeinnuetzig_mindestanteil ↑ → mietpreis_schutzlevel ↑
+   * - gemeinnuetzig_kraft ↑ → nachfragedruck ↓ (Konkurrenzeffekt)
+   */
+  it('[FACH] AT-002: Hoher Gemeinnützig-Anteil senkt nachfragedruck', () => {
+    const ohneGemeinnuetzig: CityParams40 = {
+      ...ZUERICH_V2,
+      gemeinnuetzig_mindestanteil: 0,
+      gemeinnuetzig_foerderfonds: 0,
+      gemeinnuetzig_baurecht: 0,
+    };
+    const ohne = phases(ohneGemeinnuetzig, ZUERICH_CONTEXT, {});
+
+    const mitGemeinnuetzig: ParamsDiff40 = {
+      gemeinnuetzig_mindestanteil: { from: 0, to: 2 },
+      gemeinnuetzig_foerderfonds:  { from: 0, to: 2 },
+      gemeinnuetzig_baurecht:      { from: 0, to: 2 },
+    };
+    const mit = phases(ohneGemeinnuetzig, ZUERICH_CONTEXT, mitGemeinnuetzig);
+    // Grosser Gemeinnützig-Sektor → Konkurrenz dämpft Privatmarktnachfrage
+    expect(mit[0].marketState.nachfragedruck)
+      .toBeLessThan(ohne[0].marketState.nachfragedruck);
+  });
+});
+

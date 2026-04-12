@@ -156,7 +156,42 @@ describe('Mietrecht: San Francisco Effekt', () => {
   });
 });
 
-describe('Mietrecht: Verlagerungseffekt (Mietrecht → Untermieten/Airbnb)', () => {
+describe('Mietrecht: CH-003 Anfechtungsrecht — kein messbarer Preiseffekt', () => {
+  /**
+   * Ref: docs/recherche/CH/CH-003-sui-generis-initial-rent-2023.md
+   *
+   * Empirische Analyse zur Wirkung des schweizerischen Anfechtungsrechts der
+   * Initialmiete (Art. 270 OR): Mieter können innerhalb von 30 Tagen nach
+   * Einzug die neue Miete anfechten.
+   *
+   * Key Finding: KEIN messbarer Effekt auf das Niveau der Neuvertragsmieten
+   * nach Einführung des Anfechtungsrechts.
+   * → Strategische Preissetzung durch Vermieter trotz Regulierung.
+   *
+   * Im Modell: mietrecht_anfangsmiete ↑ hat begrenzte Wirkung auf
+   * nachfragedruck oder marktfriktion — die Transparenz-Komponente allein
+   * reicht nicht zur Preisdämpfung.
+   */
+  it('[FACH] CH-003: Anfechtungsrecht erhöht Miettransparenz, senkt aber NICHT nachfragedruck', () => {
+    const ohneAnfechtung: ParamsDiff40 = {
+      mietrecht_mietzinstransparenz: { from: 1, to: 1 }, // bleibt gleich
+    };
+    const mitAnfechtung: ParamsDiff40 = {
+      mietrecht_mietzinstransparenz: { from: 1, to: 2 }, // Anfechtungsrecht eingeführt
+    };
+
+    const ohne = phases(BERLIN_BASELINE_V2, BERLIN_CONTEXT, ohneAnfechtung);
+    const mit   = phases(BERLIN_BASELINE_V2, BERLIN_CONTEXT, mitAnfechtung);
+
+    // CH-003 zeigt: KEIN messbarer Preiseffekt
+    // Im Modell: mietrecht_mietzinstransparenz ↑ sollte allenfalls markfriktion ↑,
+    // aber NICHT nachfragedruck senken
+    expect(mit[0].marketState.markfriktion)
+      .toBeGreaterThan(ohne[0].marketState.markfriktion);
+  });
+});
+
+describe('Mietrecht: San Francisco Effekt', () => {
   /**
    * Forschung zeigt: Mietpreisbremse/Mietendeckel führt zu Verlagerung in:
    * - Möblierte Mieten
@@ -177,5 +212,173 @@ describe('Mietrecht: Verlagerungseffekt (Mietrecht → Untermieten/Airbnb)', () 
 
     expect(withDiff[0].marketState.spekulationshemmung)
       .toBeGreaterThan(neutral[0].marketState.spekulationshemmung);
+  });
+});
+
+describe('Mietrecht: Paris Encadrement des Loyers (FR-002) — −4.2% Mieten', () => {
+  /**
+   * Ref: docs/recherche/FR/FR-002-apur-encadrement-loyers-evaluation-2024.md
+   *
+   * APUR/Wille de Paris Evaluation des Pariser Mietpreisdeckels (seit Juli 2019).
+   * Difference-in-Differences-Methodik (kausale Inferenz).
+   *
+   * Key Finding: −4.2% Mietpreiseffekt zwischen Juli 2019 und Juni 2022,
+   * gegenüber dem Szenario ohne Regulierung. 768 EUR Ersparnis pro Jahr.
+   * Effekt steigt über die Zeit bei steigendem Marktdruck.
+   *
+   * Im Modell:
+   * - mietrecht_anfangsmiete ↑ + kuendigungsschutz ↑ → mietpreis_schutzlevel ↑
+   */
+  it('[FACH] FR-002: Mietpreisdeckel erhöht mietpreis_schutzlevel deutlich (Paris −4.2%)', () => {
+    const parisContext: CityContext = {
+      zinsniveau: -1,
+      zuwanderungsdruck: 2,
+      wirtschaftskraft: 2,
+      bevoelkerungstrend: 2,
+    };
+
+    const neutral = phases(BERLIN_BASELINE_V2, parisContext, {});
+
+    // Paris: Anfechtungsrecht (Anfangsmiete) + Mietzinsindex + Kündigungsschutz
+    const mitEncadrement: ParamsDiff40 = {
+      mietrecht_anfangsmiete:      { from: 1, to: 2 },
+      mietrecht_kuendigungsschutz: { from: 1, to: 2 },
+      mietrecht_mietzinsindex:    { from: 1, to: 2 },
+    };
+    const mitDeckel = phases(BERLIN_BASELINE_V2, parisContext, mitEncadrement);
+
+    expect(mitDeckel[0].marketState.mietpreis_schutzlevel)
+      .toBeGreaterThan(neutral[0].marketState.mietpreis_schutzlevel);
+  });
+});
+
+describe('Mietrecht: GLOBAL-029 Langzeiteffekt — Neubau wird gehemmt ausser wenn exempt', () => {
+  /**
+   * Ref: docs/recherche/GLOBAL/GLOBAL-029-kholodilin-kohl-longrun-construction-2023.md
+   *
+   * Kholodilin & Kohl (2023): Mietrecht und Wohnungsbau in 16 Ländern, 1910–2016.
+   *
+   * Key Finding: Restriktivere Mietmarktgesetze haben generell einen negativen
+   * Effekt auf Neubau und Wohnbauinvestitionen.
+   *
+   * AUSNAHME: Wenn Neubau explizit von Mietpreiskontrollen ausgenommen wird,
+   * tritt dieser Negativeffekt NICHT auf (New construction exemption).
+   *
+   * Im Modell:
+   * - mietrecht_kuendigungsschutz ↑ → angebotspotenzial ↓ (langfristig)
+   * - mietrecht_kostenmiete ↑ → neubau_hemmnisindex ↑
+   */
+  it('[FACH] GLOBAL-029: Mieteingriff senkt angebotspotenzial langfristig', () => {
+    const ohneRegulierung: CityParams40 = {
+      ...BERLIN_BASELINE_V2,
+      mietrecht_kostenmiete:      0,
+      mietrecht_anfangsmiete:     0,
+      mietrecht_kuendigungsschutz: 0,
+    };
+    const ohne = phases(ohneRegulierung, BERLIN_CONTEXT, {});
+
+    const mietrechtDiff: ParamsDiff40 = {
+      mietrecht_kostenmiete:      { from: 0, to: 2 },
+      mietrecht_anfangsmiete:     { from: 0, to: 2 },
+      mietrecht_kuendigungsschutz: { from: 0, to: 2 },
+    };
+    const mitRegulierung = phases(ohneRegulierung, BERLIN_CONTEXT, mietrechtDiff);
+
+    // Langfristig (Phase 3): Neubau wird durch Mietregulierung gehemmt
+    expect(mitRegulierung[2].marketState.angebotspotenzial)
+      .toBeLessThan(ohne[2].marketState.angebotspotenzial);
+  });
+
+  it('[FACH] GLOBAL-029: Mieteingriff erhöht neubau_hemmnisindex', () => {
+    const ohneRegulierung: CityParams40 = {
+      ...BERLIN_BASELINE_V2,
+      mietrecht_kostenmiete:       0,
+      mietrecht_kuendigungsschutz: 0,
+    };
+    const ohne = phases(ohneRegulierung, BERLIN_CONTEXT, {});
+
+    const mietrechtDiff: ParamsDiff40 = {
+      mietrecht_kostenmiete:       { from: 0, to: 2 },
+      mietrecht_kuendigungsschutz: { from: 0, to: 2 },
+    };
+    const mitRegulierung = phases(ohneRegulierung, BERLIN_CONTEXT, mietrechtDiff);
+
+    expect(mitRegulierung[2].derived.neubau_hemmnisindex)
+      .toBeGreaterThan(ohne[2].derived.neubau_hemmnisindex);
+  });
+});
+
+describe('Mietrecht: CH-004 / CH-005 — Kündigungsschutz → Marktfriktion (Schweiz)', () => {
+  /**
+   * Ref: docs/recherche/CH/CH-004-ch-residential-mobility-2021.md
+   * Ref: docs/recherche/CH/CH-005-genf-basel-miete-fallstudie.md
+   *
+   * CH-004 Key Finding: Mietrecht fungiert als Mobilitätsbremse — Fluktuation
+   * geringer als in weniger regulierten Märkten. Schweiz hat trotz jahrzehntelanger
+   * Mietregulierung höchste Mieterquoten Europas (Basel 84%, Genf 78%).
+   *
+   * CH-005 Key Finding: Genf: Durchschnittliche Mietdauer 13.7 Jahre (Extremwert
+   * als Indikator für geringe Fluktuation). Durchschnittliche Neuvertragsmiete
+   * CHF 372/m²a vs. Bestand CHF 279/m²a — ~33% Differenz.
+   *
+   * Im Modell:
+   * - mietrecht_kuendigungsschutz ↑ → markfriktion ↑
+   * - markfriktion ↑ → angebotspotenzial ↓ (langfristig)
+   */
+  it('[FACH] CH-004: Kündigungsschutz erhöht Marktfriktion (Mobilitätsbremse)', () => {
+    const lockeresMietrecht: CityParams40 = {
+      ...BERLIN_BASELINE_V2,
+      mietrecht_kuendigungsschutz: 0,
+    };
+
+
+    const ohne = phases(lockeresMietrecht, BERLIN_CONTEXT, {});
+
+
+    const mitKschutz: ParamsDiff40 = {
+      mietrecht_kuendigungsschutz: { from: 0, to: 2 },
+    };
+    const mit = phases(lockeresMietrecht, BERLIN_CONTEXT, mitKschutz);
+
+    // Strenger Kündigungsschutz → höhere Marktfriktion (Fluktuation sinkt)
+    expect(mit[0].marketState.markfriktion)
+      .toBeGreaterThan(ohne[0].marketState.markfriktion);
+  });
+
+  it('[FACH] CH-005: Strenges Mietrecht senkt Fluktuation — Mietdauer steigt', () => {
+    const lockeresMietrecht: CityParams40 = {
+      ...BERLIN_BASELINE_V2,
+      mietrecht_kuendigungsschutz: 0,
+      mietrecht_kostenmiete: 0,
+    };
+    const ohne = phases(lockeresMietrecht, BERLIN_CONTEXT, {});
+
+    // Genf-like: Kostenmiete + Kündigungsschutz + Mietzinsindex
+    const genfDiff: ParamsDiff40 = {
+      mietrecht_kuendigungsschutz: { from: 0, to: 2 },
+      mietrecht_kostenmiete:      { from: 0, to: 2 },
+      mietrecht_mietzinsindex:    { from: 0, to: 2 },
+    };
+    const mit = phases(lockeresMietrecht, BERLIN_CONTEXT, genfDiff);
+    // Strenges Mietrecht → höhere Marktfriktion → weniger Fluktuation
+    expect(mit[0].marketState.markfriktion)
+      .toBeGreaterThan(ohne[0].marketState.markfriktion);
+  });
+
+  it('[FACH] CH-005: Strenges Mietrecht erhoht Preisspreizung (Neumieter vs. Bestand)', () => {
+    const lockeresMietrecht: CityParams40 = {
+      ...BERLIN_BASELINE_V2,
+      mietrecht_kuendigungsschutz: 0,
+      mietrecht_kostenmiete: 0,
+    };
+    const ohne = phases(lockeresMietrecht, BERLIN_CONTEXT, {});
+    const genfDiff: ParamsDiff40 = {
+      mietrecht_kuendigungsschutz: { from: 0, to: 2 },
+      mietrecht_kostenmiete:      { from: 0, to: 2 },
+      mietrecht_mietzinsindex:    { from: 0, to: 2 },
+    };
+    const mit = phases(lockeresMietrecht, BERLIN_CONTEXT, genfDiff);
+    expect(mit[0].marketState.marktfriktion)
+      .toBeGreaterThan(ohne[0].marketState.marktfriktion);
   });
 });
