@@ -1,6 +1,6 @@
 # Recherche-Synthese Wohnkosten-Simulator
 
-**Stand:** 2026-04-11
+**Stand:** 2026-04-12 (aktualisiert nach Gap-Filling-Recherche)
 **Status:** finalisiert
 
 ---
@@ -97,23 +97,30 @@
 
 ---
 
-## Evidenzlücken (Critical Gaps)
+## Evidenzlücken (Critical Gaps) — Stand nach Gap-Filling 2026-04-12
 
-| Lücke | Qualität | Priorität | Bemerkung |
-|-------|----------|-----------|-----------|
-| Vorkaufsrecht | Fast nur qualitativ/rechtlich | Sehr hoch | Größte Evidenzlücke im Datensatz |
-| Bauverpflichtung | 1 gute Praxisstudie (Difu 2021) | Hoch | Quantifizierung fehlt |
-| Eigenmietwert-Abschaffung (CH) | Fast keine empirischen Studien | Sehr hoch | Echte Evidenzlücke |
-| Langfristige Mietregulierung (>10 Jahre) | Mittel | Mittel-Hoch | Einige Studien, Lücken bleiben |
-| Interaktionseffekte mehrerer Parameter | Schwach | Mittel | Untererforscht |
+| Lücke | Qualität | Priorität | Status nach Gap-Filling |
+|-------|----------|-----------|-------------------------|
+| Vorkaufsrecht | Fast nur qualitativ/rechtlich | Sehr hoch | ❌ Nicht schließbar — strukturelle Forschungslücke |
+| Bauverpflichtung | 1 Praxisstudie (Difu 2021, DE-011) | Hoch | ❌ Keine Preiswirkungsstudien gefunden |
+| Eigenmietwert-Abschaffung (CH) | Fast keine empirischen Studien | Sehr hoch | ❌ Nicht schließbar — echte Forschungslücke |
+| Langfristige Mietregulierung (>10 Jahre) | **Jetzt stärker** | Mittel (verbessert) | ✅ GLOBAL-029 (Kholodilin & Kohl 2023) schließt Lücke weitgehend |
+| Interaktionseffekte mehrerer Parameter | Schwach + KR-003 | Mittel | ⚠️ KR-003 adressiert teils, grundlegend bleibt Lücke |
+| Einspracherecht Dritte | Nur qualitativ erwähnt (NO-001) | Mittel | ❌ Keine quantitativen Studien gefunden |
 
 ---
 
-## Offene Länder-Lücken
+## Länder-Abdeckung — Stand nach Gap-Filling 2026-04-12
 
-- **NO** (Norwegen): Keine Studien vorhanden
-- **FR, JP, KR, AU:** Nur 1–2 Studien — hier fehlt Tiefe (besonders historische Studien 1970–1995)
-- Historische Rent-Control-Studien aus den 70er/80er Jahren (Olsen 1972, Arnott 1995, Fischel 1985) sind bereits integriert
+| Region | Vor Gap-Filling | Nach Gap-Filling | Qualität |
+|--------|----------------|-----------------|----------|
+| NO | 0 Studien | 2 Studien (NO-001, NO-002) | ✅ Basis vorhanden |
+| FR | 1 Studie | 2 Studien (+ FR-002 kausale Evaluation) | ✅ Deutlich besser |
+| JP | 1 Studie | 2 Studien (+ JP-002 IMF Demographie) | ✅ Verbessert |
+| KR | 1 Studie | 3 Studien (+ KR-002 Jeonse, KR-003 CGE) | ✅ Deutlich besser |
+| AU | 1 Studie | 3 Studien (+ AU-002 Elastizität, AU-003 Blueprint) | ✅ Deutlich besser |
+
+**Verbleibende Lücken:** Historische Studien für FR/JP 1970–1990 noch dünn. Keine eigentlichen Norwegen-spezifischen Langzeitstudien.
 
 ---
 

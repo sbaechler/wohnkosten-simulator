@@ -1,9 +1,9 @@
 ---
-generated: "2026-04-11"
-total_studies: 71
+generated: "2026-04-12"
+total_studies: 80
 status_counts:
-  found: 53
-  evaluated: 18
+  found: 60
+  evaluated: 20
   reading: 0
   integrated: 0
 ---
@@ -153,9 +153,58 @@ status_counts:
 
 ---
 
+## GLOBAL (Ergänzungen)
+
+| ID | Titel | Jahr | Typ | Status | DAG-Relevanz |
+|----|-------|------|-----|--------|--------------|
+| GLOBAL-029 | Do rent controls affect new construction? Long-run historical evidence (Kholodilin & Kohl) | 2023 | peer-reviewed | evaluated | mietrecht_kuendigungsschutz, angebotspotenzial, neubau_hemmnisindex |
+
+## FR — Frankreich (Ergänzungen)
+
+| ID | Titel | Jahr | Typ | Status | DAG-Relevanz |
+|----|-------|------|-----|--------|--------------|
+| FR-002 | Évaluation d'impact de l'encadrement des loyers à Paris (2019–2022) | 2024 | government-report | evaluated | mietrecht_anfangsmiete, mietpreis_schutzlevel |
+
+## JP — Japan (Ergänzungen)
+
+| ID | Titel | Jahr | Typ | Status | DAG-Relevanz |
+|----|-------|------|-----|--------|--------------|
+| JP-002 | Demographics and the Housing Market: Japan's Disappearing Cities (IMF WP/20/200) | 2020 | working-paper | evaluated | ctx:zuwanderungsdruck, nachfragedruck, spekulationshemmung |
+
+## KR — Südkorea (Ergänzungen)
+
+| ID | Titel | Jahr | Typ | Status | DAG-Relevanz |
+|----|-------|------|-----|--------|--------------|
+| KR-002 | Putting a ceiling on housing costs: Jeonse rent control aftermath | 2025 | peer-reviewed | found | mietrecht_anfangsmiete, angebotspotenzial, markfriktion |
+| KR-003 | Demand and supply-side interventions South Korea: dynamic housing-CGE analysis | 2024 | peer-reviewed | found | kapital_hypothekarregulierung, angebotspotenzial, nachfragedruck |
+
+## AU — Australien (Ergänzungen)
+
+| ID | Titel | Jahr | Typ | Status | DAG-Relevanz |
+|----|-------|------|-----|--------|--------------|
+| AU-002 | Exploring the many housing elasticities of supply: Australia (Melser et al.) | 2022 | peer-reviewed | found | raumplanung_zonenreserve, angebotspotenzial |
+| AU-003 | National Planning Reform Blueprint — Housing Supply Measures | 2023 | government-report | found | raumplanung_verdichtung, bau_bewilligungsverfahren, angebotspotenzial |
+
+## NO — Norwegen (NEU)
+
+| ID | Titel | Jahr | Typ | Status | DAG-Relevanz |
+|----|-------|------|-----|--------|--------------|
+| NO-001 | Making Norway's Housing More Affordable and Sustainable (OECD WP 1711) | 2022 | working-paper | evaluated | kapital_hypothekarregulierung, raumplanung_zonenreserve, nachfragedruck |
+| NO-002 | Housing Markets in Scandinavia: Supply, Demand and Regulation | 2019 | book-chapter | found | raumplanung_zonenreserve, kapital_hypothekarregulierung, angebotspotenzial |
+
+---
+
+## Verbleibende Lücken nach Gap-Filling (Stand 2026-04-12)
+
+- **Vorkaufsrecht (`boden_vorkaufsrecht`):** Keine quantitativen Wirkungsstudien gefunden — strukturelle Evidenzlücke bestätigt
+- **Bauverpflichtung (`boden_bauverpflichtung`):** Nur Difu 2021 (DE-011), keine Preiswirkungsstudien
+- **Eigenmietwert-Abschaffung (`steuer_eigenmietwert`):** Keine CH- oder internationale Studien gefunden — strukturelle Evidenzlücke
+- **Einspracherecht Dritte (`bau_einspracherecht_dritte`):** Qualitativ erwähnt in NO-001, keine quantitativen Studien
+- **Interaktionseffekte:** KR-003 adressiert teils, grundlegend untererforscht
+
 ## Regionen ohne Studien (Stand 2026-04-11)
 
-- FR, JP, KR, AU, NO: noch keine Studien erfasst
+~~FR, JP, KR, AU, NO: noch keine Studien erfasst~~ (jetzt alle mit mind. 2 Studien abgedeckt)
 
 ---
 
