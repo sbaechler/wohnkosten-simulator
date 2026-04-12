@@ -47,22 +47,28 @@ export interface Edge {
 export const DAG_EDGES: Edge[] = [
 
   // ─── E0 → angebotspotenzial ───────────────────────────────────────────────
+  // Starke Evidenz aus GLOBAL-029 (Kholodilin & Kohl 2023, 16 Länder 1910-2016):
+  // Restriktives Mietrecht reduziert Neubau langfristig deutlich.
   { from: 'raumplanung_zonenreserve',             to: 'angebotspotenzial',          sign: -1, weight: 1.5, time: 'long'   },
-  { from: 'raumplanung_verdichtung',              to: 'angebotspotenzial',          sign: +1, weight: 1.0, time: 'medium' },
+  { from: 'raumplanung_verdichtung',              to: 'angebotspotenzial',          sign: +1, weight: 1.2, time: 'long'   }, // Upzoning wirkt verzögert
   { from: 'raumplanung_ausnuetzungsziffer',       to: 'angebotspotenzial',          sign: +1, weight: 1.5, time: 'medium' },
-  { from: 'boden_bauverpflichtung',               to: 'angebotspotenzial',          sign: +1, weight: 1.0, time: 'medium' },
+  { from: 'boden_bauverpflichtung',               to: 'angebotspotenzial',          sign: +1, weight: 0.8, time: 'medium' }, // Schwache Evidenz (DE-011)
   { from: 'bau_energievorgaben',                  to: 'angebotspotenzial',          sign: -1, weight: 1.0, time: 'short'  },
   { from: 'bau_sanierungspflicht',                to: 'angebotspotenzial',          sign: -1, weight: 1.0, time: 'short'  },
-  { from: 'bau_einspracherecht_dritte',           to: 'angebotspotenzial',          sign: -1, weight: 1.0, time: 'short'  },
+  { from: 'bau_einspracherecht_dritte',           to: 'angebotspotenzial',          sign: -1, weight: 1.2, time: 'medium' }, // NO-001 bestätigt Verzögerung
   { from: 'bau_einspracherecht_suspensiv',        to: 'angebotspotenzial',          sign: -1, weight: 1.0, time: 'short'  },
   { from: 'bau_bewilligungsverfahren',            to: 'angebotspotenzial',          sign: +1, weight: 1.0, time: 'medium' },
-  { from: 'bau_normenharmonisierung',             to: 'angebotspotenzial',          sign: +1, weight: 0.5, time: 'long'   },
-  { from: 'gemeinnuetzig_mindestanteil',          to: 'angebotspotenzial',          sign: -1, weight: 1.0, time: 'short'  },
-  { from: 'gemeinnuetzig_foerderfonds',           to: 'angebotspotenzial',          sign: +1, weight: 1.0, time: 'medium' },
+  { from: 'bau_normenharmonisierung',             to: 'angebotspotenzial',          sign: +1, weight: 0.8, time: 'long'   },
+  { from: 'gemeinnuetzig_mindestanteil',          to: 'angebotspotenzial',          sign: -1, weight: 1.0, time: 'long'   }, // Skaleneffekt wichtig (Wien-Modell)
+  { from: 'gemeinnuetzig_foerderfonds',           to: 'angebotspotenzial',          sign: +1, weight: 1.2, time: 'medium' },
   { from: 'nutzung_abbruchverbot',                to: 'angebotspotenzial',          sign: -1, weight: 1.0, time: 'medium' },
-  { from: 'nutzung_umnutzungsverbot',             to: 'angebotspotenzial',          sign: -1, weight: 0.5, time: 'medium' },
+  { from: 'nutzung_umnutzungsverbot',             to: 'angebotspotenzial',          sign: -1, weight: 0.7, time: 'medium' },
   { from: 'ctx:zinsniveau',                       to: 'angebotspotenzial',          sign: -1, weight: 1.5, time: 'medium' },
   { from: 'ctx:wirtschaftskraft',                 to: 'angebotspotenzial',          sign: +1, weight: 1.0, time: 'long'   },
+
+  // Mietrecht hat starken langfristigen negativen Effekt auf Angebot (GLOBAL-029)
+  { from: 'mietrecht_kuendigungsschutz',         to: 'angebotspotenzial',          sign: -1, weight: 1.3, time: 'long'   },
+  { from: 'mietrecht_kostenmiete',               to: 'angebotspotenzial',          sign: -1, weight: 1.2, time: 'long'   },
 
   // ─── E0 → nachfragedruck ──────────────────────────────────────────────────
   { from: 'ctx:zuwanderungsdruck',                to: 'nachfragedruck',             sign: +1, weight: 1.5, time: 'short'  },
@@ -78,26 +84,29 @@ export const DAG_EDGES: Edge[] = [
   { from: 'kapital_auslaendische_investoren',     to: 'nachfragedruck',             sign: -1, weight: 0.5, time: 'medium' },
 
   // ─── E0 → mietpreis_schutzlevel ──────────────────────────────────────────
+  // FR-002 (Paris 2019-2024) zeigt starken Effekt von Anfangsmiete-Regulierung
   { from: 'mietrecht_kostenmiete',               to: 'mietpreis_schutzlevel',      sign: +1, weight: 1.5, time: 'short'  },
-  { from: 'mietrecht_anfangsmiete',             to: 'mietpreis_schutzlevel',      sign: +1, weight: 0.5, time: 'short'  },
-  { from: 'mietrecht_mietzinstransparenz',      to: 'mietpreis_schutzlevel',      sign: +1, weight: 0.5, time: 'short'  },
+  { from: 'mietrecht_anfangsmiete',             to: 'mietpreis_schutzlevel',      sign: +1, weight: 1.2, time: 'short'  }, // Paris-Effekt: -5.2% bis -8.2%
+  { from: 'mietrecht_mietzinstransparenz',      to: 'mietpreis_schutzlevel',      sign: +1, weight: 0.8, time: 'short'  },
   { from: 'mietrecht_mietzinsindex',            to: 'mietpreis_schutzlevel',      sign: +1, weight: 1.0, time: 'short'  },
 
   // ─── E0 → verdraengungsrisiko ─────────────────────────────────────────────
-  { from: 'mietrecht_kuendigungsschutz',         to: 'verdraengungsrisiko',        sign: -1, weight: 1.5, time: 'short'  },
-  { from: 'nutzung_abbruchverbot',               to: 'verdraengungsrisiko',        sign: -1, weight: 1.0, time: 'short'  },
-  { from: 'nutzung_umnutzungsverbot',            to: 'verdraengungsrisiko',        sign: -1, weight: 0.5, time: 'short'  },
-  { from: 'bau_sanierungspflicht',              to: 'verdraengungsrisiko',        sign: +1, weight: 1.0, time: 'short'  },
-  { from: 'mietrecht_untervermietung',           to: 'verdraengungsrisiko',        sign: -1, weight: 0.5, time: 'short'  },
-  { from: 'ctx:zuwanderungsdruck',               to: 'verdraengungsrisiko',        sign: +1, weight: 1.0, time: 'short'  },
-  { from: 'ctx:wirtschaftskraft',               to: 'verdraengungsrisiko',        sign: +1, weight: 0.5, time: 'long'   },
+  // Mietrecht schützt Bestandsmieter, reduziert aber langfristig Angebot (GLOBAL-029, Kholodilin 2024)
+  { from: 'mietrecht_kuendigungsschutz',         to: 'verdraengungsrisiko',        sign: -1, weight: 1.4, time: 'short'  },
+  { from: 'nutzung_abbruchverbot',               to: 'verdraengungsrisiko',        sign: -1, weight: 1.2, time: 'short'  },
+  { from: 'nutzung_umnutzungsverbot',            to: 'verdraengungsrisiko',        sign: -1, weight: 0.8, time: 'short'  },
+  { from: 'bau_sanierungspflicht',              to: 'verdraengungsrisiko',        sign: +1, weight: 1.1, time: 'short'  },
+  { from: 'mietrecht_untervermietung',           to: 'verdraengungsrisiko',        sign: -1, weight: 0.6, time: 'short'  },
+  { from: 'ctx:zuwanderungsdruck',               to: 'verdraengungsrisiko',        sign: +1, weight: 1.2, time: 'short'  },
+  { from: 'ctx:wirtschaftskraft',               to: 'verdraengungsrisiko',        sign: +1, weight: 0.7, time: 'long'   },
 
   // ─── E0 → spekulationshemmung ─────────────────────────────────────────────
+  // GLOBAL-029 + NO-001 + LVT-Literatur (GLOBAL-006, GLOBAL-014, GLOBAL-019)
   { from: 'steuer_grundstueckgewinn',            to: 'spekulationshemmung',        sign: +1, weight: 1.5, time: 'medium' },
-  { from: 'steuer_handaenderung',                to: 'spekulationshemmung',        sign: +1, weight: 0.5, time: 'short'  },
+  { from: 'steuer_handaenderung',                to: 'spekulationshemmung',        sign: +1, weight: 0.8, time: 'short'  },
   { from: 'steuer_kapitalgewinnprivatpersonen', to: 'spekulationshemmung',        sign: +1, weight: 1.0, time: 'short'  },
-  { from: 'boden_mehrwertabgabe',                to: 'spekulationshemmung',        sign: +1, weight: 1.0, time: 'long'   },
-  { from: 'boden_bodeneigentumssteuer',         to: 'spekulationshemmung',        sign: +1, weight: 1.5, time: 'medium' },
+  { from: 'boden_mehrwertabgabe',                to: 'spekulationshemmung',        sign: +1, weight: 1.2, time: 'long'   },
+  { from: 'boden_bodeneigentumssteuer',         to: 'spekulationshemmung',        sign: +1, weight: 1.4, time: 'medium' }, // Starke Evidenz aus Dänemark, Pennsylvania
   { from: 'boden_bauverpflichtung',              to: 'spekulationshemmung',        sign: +1, weight: 1.0, time: 'medium' },
   { from: 'nutzung_zweitwohnungen',              to: 'spekulationshemmung',        sign: +1, weight: 0.5, time: 'long'   },
   { from: 'nutzung_kurzzeitvermietung',         to: 'spekulationshemmung',        sign: +1, weight: 0.5, time: 'short'  },
@@ -111,12 +120,13 @@ export const DAG_EDGES: Edge[] = [
   { from: 'mietrecht_kuendigungsschutz',         to: 'markfriktion',               sign: +1, weight: 0.5, time: 'long'   },
 
   // ─── E0 → gemeinnuetzig_kraft ─────────────────────────────────────────────
-  { from: 'gemeinnuetzig_mindestanteil',        to: 'gemeinnuetzig_kraft',        sign: +1, weight: 1.5, time: 'long'   },
-  { from: 'gemeinnuetzig_foerderfonds',         to: 'gemeinnuetzig_kraft',        sign: +1, weight: 1.5, time: 'long'   },
-  { from: 'gemeinnuetzig_baurecht',             to: 'gemeinnuetzig_kraft',        sign: +1, weight: 1.5, time: 'long'   },
-  { from: 'boden_vorkaufsrecht',                 to: 'gemeinnuetzig_kraft',        sign: +1, weight: 1.0, time: 'long'   },
-  { from: 'gemeinnuetzig_belegungsvorschriften',to: 'gemeinnuetzig_kraft',        sign: +1, weight: 0.5, time: 'medium' },
-  { from: 'gemeinnuetzig_sozialmischung',        to: 'gemeinnuetzig_kraft',        sign: +1, weight: 1.0, time: 'long'   },
+  // Wien-Modell + Skaleneffekt stark bestätigt (GLOBAL-029 + AT-Studien)
+  { from: 'gemeinnuetzig_mindestanteil',        to: 'gemeinnuetzig_kraft',        sign: +1, weight: 1.4, time: 'long'   }, // Skaleneffekt entscheidend
+  { from: 'gemeinnuetzig_foerderfonds',         to: 'gemeinnuetzig_kraft',        sign: +1, weight: 1.3, time: 'long'   },
+  { from: 'gemeinnuetzig_baurecht',             to: 'gemeinnuetzig_kraft',        sign: +1, weight: 1.2, time: 'long'   },
+  { from: 'boden_vorkaufsrecht',                 to: 'gemeinnuetzig_kraft',        sign: +1, weight: 0.8, time: 'long'   }, // Schwache Evidenz (Lücke bestätigt)
+  { from: 'gemeinnuetzig_belegungsvorschriften',to: 'gemeinnuetzig_kraft',        sign: +1, weight: 0.7, time: 'medium' },
+  { from: 'gemeinnuetzig_sozialmischung',        to: 'gemeinnuetzig_kraft',        sign: +1, weight: 0.8, time: 'long'   },
 
   // ─── E0 → eigentumsquoten_trend ──────────────────────────────────────────
   { from: 'steuer_eigenmietwert',                to: 'eigentumsquoten_trend',      sign: -1, weight: 1.5, time: 'medium' },
