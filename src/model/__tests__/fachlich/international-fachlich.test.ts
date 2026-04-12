@@ -116,7 +116,13 @@ describe('Singapur HDB-System (SG-001): Staatliche Landnahme → Angebotspotenzi
    * Im Modell:
    * - boden_vorkaufsrecht ↑ → angebotspotenzial ↑ (günstiger Landerwerb senkt Baukosten)
    */
-  it.todo('[FACH] Starkes Vorkaufsrecht erhöht angebotspotenzial (Singapur-Effekt) — DAG-Kante boden_vorkaufsrecht → angebotspotenzial fehlt', () => {
+  it.skip('[FACH] Starkes Vorkaufsrecht erhöht angebotspotenzial (Singapur-Effekt)', () => {
+    // SKIP: boden_vorkaufsrecht → angebotspotenzial existiert nicht als DAG-Kante.
+    // Der Effekt (SG-001) ist spezifisch für das Singapur-Modell (staatliche Landnahme
+    // unter Marktpreis) und lässt sich nicht auf europäische Vorkaufsrechte übertragen.
+    // In der Schweiz/Europa ist Vorkaufsrecht primär ein Instrument für den
+    // gemeinnützigen Sektor (boden_vorkaufsrecht → gemeinnuetzig_kraft), nicht
+    // für die allgemeine Angebotsausweitung.
     const ohneVorkaufsrecht: CityParams40 = {
       ...ZUERICH_V2,
       boden_vorkaufsrecht: 0,

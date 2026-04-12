@@ -916,4 +916,15 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     // Kürzerer Lag als bei Gentrifizierung-Dämpfung, aber immer noch verzögert.
   },
 
+  // UK-001 Crossrail / GLOBAL-020 TIF: ÖPNV-Ausbau generiert langfristig
+  // fiskalische Rückflüsse durch Bodenwertzuwachs und höhere Steuereinnahmen.
+  {
+    from: 'aufwertungsdruck',
+    to: 'fiskalische_wirkung',
+    sign: +1,
+    weights: [0.1, 0.4, 0.8],
+    // Aufwertung → höhere Immobilienwerte → mehr Grundstückgewinn-/Handänderungssteuern.
+    // Tax Increment Financing: Effekt braucht Jahre bis zur vollen Entfaltung.
+  },
+
 ] as const;

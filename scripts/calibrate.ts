@@ -137,8 +137,9 @@ function forwardPass(
 
     const fw_num = 1.5 * newState.spekulationshemmung
                  + 1.0 * (1 - newState.markfriktion)
-                 + 1.0 * newState.gemeinnuetzig_kraft;
-    const fw_den = 1.5 + 1.0 + 1.0;
+                 + 1.0 * newState.gemeinnuetzig_kraft
+                 + 0.8 * newState.aufwertungsdruck;
+    const fw_den = 1.5 + 1.0 + 1.0 + 0.8;
 
     const derived: DerivedIndicators = {
       gentrifizierungsindex: clamp(gi_num / gi_den),

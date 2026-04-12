@@ -58,12 +58,14 @@ export function computeDerivedIndicators(
   const verdraengungsrisiko_index = clamp(state.verdraengungsrisiko);
 
   // ── fiskalische_wirkung ───────────────────────────────────────────────────
-  // spekulationshemmung=1.5, (1-markfriktion)=1.0, gemeinnuetzig_kraft=1.0
+  // spekulationshemmung=1.5, (1-markfriktion)=1.0, gemeinnuetzig_kraft=1.0,
+  // aufwertungsdruck=0.8 (UK-001 Crossrail / GLOBAL-020 TIF: Aufwertung → höhere Steuereinnahmen)
   const fw_numerator =
     1.5 * state.spekulationshemmung +
     1.0 * (1 - state.markfriktion) +
-    1.0 * state.gemeinnuetzig_kraft;
-  const fw_denominator = 1.5 + 1.0 + 1.0;
+    1.0 * state.gemeinnuetzig_kraft +
+    0.8 * state.aufwertungsdruck;
+  const fw_denominator = 1.5 + 1.0 + 1.0 + 0.8;
   const fiskalische_wirkung = clamp(fw_numerator / fw_denominator);
 
   return {

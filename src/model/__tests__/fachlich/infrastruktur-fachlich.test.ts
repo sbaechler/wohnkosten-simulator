@@ -94,7 +94,7 @@ describe('Infrastruktur: Crossrail London (UK-001) — OEPNV ↑ → Aufwertungs
       .toBeGreaterThan(ohne[0].marketState.aufwertungsdruck);
   });
 
-  it.todo('[FACH] OEPNV-Ausbau erhöht fiskalische_wirkung langfristig (Crossrail-TIF-Mechanismus) — kein direkter Pfad infra_oepnv → fiskalische_wirkung im DAG', () => {
+  it('[FACH] OEPNV-Ausbau erhöht fiskalische_wirkung langfristig (Crossrail-TIF-Mechanismus)', () => {
     /**
      * Ref: docs/recherche/GLOBAL/GLOBAL-020-tax-increment-financing-1998.md
      *
