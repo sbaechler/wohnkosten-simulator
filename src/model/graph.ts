@@ -38,7 +38,7 @@ export interface Edge {
   from: NodeId;
   to:   NodeId;
   sign:   1 | -1;
-  weight: 0.5 | 1 | 1.5;
+  weight: number;
   time:   'short' | 'medium' | 'long';
 }
 

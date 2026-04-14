@@ -45,24 +45,6 @@ import type { CityContext, CityParams40, ParamsDiff40 } from '../../../types';
 
 // ── Baselines ─────────────────────────────────────────────────────────────────
 
-// Genf-like baseline (LDTR-Regime, angespannter Markt, hohe Regulierung)
-// Entspricht Zürich-Baseline + erhöhte Mietrecht-Parameter
-const GENF_V2: CityParams40 = {
-  raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
-  boden_vorkaufsrecht: 2, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
-  bau_energievorgaben: 1, bau_sanierungspflicht: 1,
-  bau_einspracherecht_dritte: 2, bau_einspracherecht_suspensiv: 2,
-  bau_bewilligungsverfahren: 2, bau_normenharmonisierung: 2,
-  gemeinnuetzig_mindestanteil: 2, gemeinnuetzig_foerderfonds: 2, gemeinnuetzig_baurecht: 2,
-  gemeinnuetzig_belegungsvorschriften: 1, gemeinnuetzig_sozialmischung: 1,
-  mietrecht_kostenmiete: 2, mietrecht_anfangsmiete: 2, mietrecht_mietzinstransparenz: 2,
-  mietrecht_kuendigungsschutz: 2, mietrecht_mietzinsindex: 2, mietrecht_untervermietung: 2,
-  steuer_grundstueckgewinn: 2, steuer_eigenmietwert: 2, steuer_leerstandsabgabe: 1,
-  steuer_handaenderung: 2, steuer_kapitalgewinnprivatpersonen: 1,
-  kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 1, kapital_hypothekarregulierung: 1,
-  nutzung_kurzzeitvermietung: 2, nutzung_umnutzungsverbot: 2, nutzung_abbruchverbot: 2, nutzung_zweitwohnungen: 1,
-  infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
-};
 
 // Zürich-like baseline (moderate Regulierung, kein Mietpreisdeckel)
 const ZUERICH_V2: CityParams40 = {

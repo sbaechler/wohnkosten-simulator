@@ -124,7 +124,7 @@ describe('Singapur HDB-System (SG-001): Staatliche Landnahme → Angebotspotenzi
     // gemeinnützigen Sektor (boden_vorkaufsrecht → gemeinnuetzig_kraft), nicht
     // für die allgemeine Angebotsausweitung.
     const ohneVorkaufsrecht: CityParams40 = {
-      ...ZUERICH_V2,
+      ...SG_LIKE,
       boden_vorkaufsrecht: 0,
     };
     const ohne = phases(ohneVorkaufsrecht, ANGESPANNT, {});
@@ -147,7 +147,7 @@ describe('Singapur HDB-System (SG-001): Staatliche Landnahme → Angebotspotenzi
      * Test auf gemeinnuetzig_kraft umgestellt.
      */
     const ohneVorkaufsrecht: CityParams40 = {
-      ...ZUERICH_V2,
+      ...SG_LIKE,
       boden_vorkaufsrecht: 0,
     };
     const ohne = phases(ohneVorkaufsrecht, ANGESPANNT, {});
@@ -168,7 +168,7 @@ describe('Singapur HDB-System (SG-001): Staatliche Landnahme → Angebotspotenzi
      * Ref: SG-001
      */
     const base: CityParams40 = {
-      ...ZUERICH_V2,
+      ...SG_LIKE,
       boden_vorkaufsrecht: 0,
       gemeinnuetzig_mindestanteil: 0,
       gemeinnuetzig_foerderfonds: 0,
