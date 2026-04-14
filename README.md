@@ -8,12 +8,12 @@
 
 ## Was ist das?
 
-Ein interaktiver Policy-Simulator für den Schweizer Wohnungsmarkt. Du wählst eine Stadt (Zürich, Genf, Bern, Basel, Lausanne), ajustierst 40 wohnungspolitische Parameter in drei Stufen (schwach → mittel → stark) und siehst sofort, wie sich die Indikatoren verändern:
+Ein interaktiver Policy-Simulator für den Schweizer Wohnungsmarkt. Du wählst eine Stadt (Zürich, Genf, Bern, Basel, Lausanne), justierst 40 wohnungspolitische Parameter in drei Stufen (schwach → mittel → stark) und siehst sofort, wie sich die Indikatoren verändern:
 
-- **E1 — Markt-Zustand:** Angebpotenzial, Nachfragedruck, Mietpreisschutz, Verdrängungsrisiko, Spekulationshemmung, Marktfriktion, gemeinnützige Kraft, Eigentumsquoten-Trend, Aufwertungsdruck, Investitionsattraktivität
-- **E2 — Abgeleitete Indikatoren:** Gentrifizierungsindex, Neubau-Hemmnis, Verdrängungsrisiko-Index, Fiskalische Wirkung
+- **Markt-Zustand:** Angebpotenzial, Nachfragedruck, Mietpreisschutz, Verdrängungsrisiko, Spekulationshemmung, Marktfriktion, gemeinnützige Kraft, Eigentumsquoten-Trend, Aufwertungsdruck, Investitionsattraktivität
+- **Abgeleitete Indikatoren:** Gentrifizierungsindex, Neubau-Hemmnis, Verdrängungsrisiko-Index, Fiskalische Wirkung
 
-Die Berechnung läuft über ein DAG-Modell (Directed Acyclic Graph) mit Phase-Weighting im Browser.
+Die Berechnung basiert auf Erkenntnissen aus über [100 wissenschaftlichen Studien](./docs/recherche/index.md).
 
 ---
 
@@ -38,34 +38,6 @@ Die Berechnung läuft über ein DAG-Modell (Directed Acyclic Graph) mit Phase-We
 | **Kapital & Investitionen** | Ausländische Investoren, Institutionelle Regulierung, Hypothekarregulierung |
 | **Nutzungsregulierung** | Kurzzeitvermietung, Umnutzungsverbot, Abbruchverbot, Zweitwohnungen |
 | **Infrastruktur & Standortqualität** | ÖPNV, Schule/Kita, Öffentlicher Raum, Wirtschaftsansiedlung |
-
----
-
-## Tech-Stack
-
-- **React 19** + **TypeScript**
-- **Vite** — Build-Tool
-- **D3.js** — Diagramme (OwnershipDonut, SupplyDemandChart, DivergingTrend, TrendArrow)
-- **URL-State** — Alle Parameter serialisieren sich in die URL (share-fähig)
-- **Cloudflare Workers** — Deployment (Workers + Pages)
-- **AGPL-3.0** — Open Source
-
----
-
-## Lokal entwickeln
-
-```bash
-git clone git@github.com:sbaechler/wohnkosten-simulator.git
-cd wohnkosten-simulator
-npm install
-npm run dev
-```
-
-Build für Produktion:
-
-```bash
-npm run build
-```
 
 ---
 
@@ -96,9 +68,14 @@ src/
 
 - Zürich
 - Genf
-- Bern
 - Basel
 - Lausanne
+- Bern
+- Winterthur
+- Luzern
+- St. Gallen
+- Lugano
+- Biel
 
 ---
 
