@@ -92,10 +92,19 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
     }
 
     function findEquilibrium(supplyShift: number, demandShift: number): [number, number] {
+      // Ökonomisch korrekte Gleichgewichts-Berechnung:
+      // Angebot:  P = 1 + 0.8·(q - 7·s) = 1-5.6s + 0.8q  (steigend, shift↑ → Kurve links → weniger q, höherer P)
+      // Nachfrage: P = 9 - 0.8·(q - 7·d) = 9+5.6d - 0.8q (fallend, shift↑ → Kurve rechts → mehr q, tieferer P)
+      // Gleichsetzen: qEq = 5 + 3.5·(s+d),  pEq = 5 + 4.48·d - 2.8·s
+      //
+      // Preiseffekt kommt über BEIDE Variablen:
+      //   demand↑ → Preise ↑ (Kaufkraft/Druck)
+      //   supply↑ → Preise ↓ (Angebotsausweitung)
+      // Das ist die korrekte ökonomische Mechanik.
       const s = supplyShift, d = demandShift;
-      const qEq = (8 + 0.8 * SHIFT_SCALE * (s + d)) / 1.6;
-      const pEq = 1 + (qEq - s * SHIFT_SCALE) * 0.8;
-      return [Math.max(0, Math.min(10, qEq)), Math.max(0, Math.min(10, pEq))];
+      const qEq = Math.max(0, Math.min(10, 5 + 3.5 * (s + d)));
+      const pEq = Math.max(0, Math.min(10, 5 + 4.48 * d - 2.8 * s));
+      return [qEq, pEq];
     }
 
     // Baseline curves: always use baseline params for the dashed reference line
