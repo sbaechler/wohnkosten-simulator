@@ -60,6 +60,14 @@ function getE0Delta(
 
 const PERSISTENCE = 0.8;
 
+/**
+ * Marktverengungs-Multiplikator: -2→0.4× (entspannt), 0→1.0× (normal), +2→1.6× (extrem eng)
+ * Ein enger Markt reagiert stärker auf Policies weil wenig Ausgleich vorhanden ist.
+ */
+function marketModulator(marktenge: number): number {
+  return 1.0 + marktenge * 0.3;
+}
+
 export function computeE1WithPhaseAndCarry(
   context: CityContext,
   _params: CityParams40,
@@ -68,6 +76,7 @@ export function computeE1WithPhaseAndCarry(
   carryE1: MarketState | null,
 ): MarketState {
   const phaseIndex = phase - 1; // 0, 1, 2
+  const marketMult = marketModulator(context.marktenge);
 
   const newState = {} as MarketState;
 
@@ -91,7 +100,7 @@ export function computeE1WithPhaseAndCarry(
     }
 
     const weightedSum = denominator === 0 ? 0 : numerator / denominator;
-    newState[nodeId] = clamp(prevValue * PERSISTENCE + weightedSum);
+    newState[nodeId] = clamp(prevValue * PERSISTENCE + weightedSum * marketMult);
   }
 
   return newState;

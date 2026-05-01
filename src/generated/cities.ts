@@ -9,7 +9,8 @@ export const cities: CityConfig[] = [
       "zinsniveau": -1,
       "zuwanderungsdruck": 2,
       "wirtschaftskraft": 2,
-      "bevoelkerungstrend": -1
+      "bevoelkerungstrend": -1,
+      "marktenge": 2
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -61,7 +62,8 @@ export const cities: CityConfig[] = [
       "zinsniveau": -1,
       "zuwanderungsdruck": 2,
       "wirtschaftskraft": 2,
-      "bevoelkerungstrend": -1
+      "bevoelkerungstrend": -1,
+      "marktenge": 2
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -113,7 +115,8 @@ export const cities: CityConfig[] = [
       "zinsniveau": -1,
       "zuwanderungsdruck": 1,
       "wirtschaftskraft": 2,
-      "bevoelkerungstrend": -1
+      "bevoelkerungstrend": -1,
+      "marktenge": 1
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -165,7 +168,8 @@ export const cities: CityConfig[] = [
       "zinsniveau": -1,
       "zuwanderungsdruck": 2,
       "wirtschaftskraft": 2,
-      "bevoelkerungstrend": -1
+      "bevoelkerungstrend": -1,
+      "marktenge": 2
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -217,7 +221,8 @@ export const cities: CityConfig[] = [
       "zinsniveau": -1,
       "zuwanderungsdruck": 1,
       "wirtschaftskraft": 1,
-      "bevoelkerungstrend": -1
+      "bevoelkerungstrend": -1,
+      "marktenge": 2
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -269,7 +274,8 @@ export const cities: CityConfig[] = [
       "zinsniveau": -1,
       "zuwanderungsdruck": 2,
       "wirtschaftskraft": 1,
-      "bevoelkerungstrend": -1
+      "bevoelkerungstrend": -1,
+      "marktenge": 2
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -321,7 +327,8 @@ export const cities: CityConfig[] = [
       "zinsniveau": -1,
       "zuwanderungsdruck": 1,
       "wirtschaftskraft": 1,
-      "bevoelkerungstrend": -1
+      "bevoelkerungstrend": -1,
+      "marktenge": 1
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -373,7 +380,8 @@ export const cities: CityConfig[] = [
       "zinsniveau": -1,
       "zuwanderungsdruck": 0,
       "wirtschaftskraft": 1,
-      "bevoelkerungstrend": -1
+      "bevoelkerungstrend": -1,
+      "marktenge": 0
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -425,7 +433,8 @@ export const cities: CityConfig[] = [
       "zinsniveau": -1,
       "zuwanderungsdruck": 0,
       "wirtschaftskraft": 1,
-      "bevoelkerungstrend": -1
+      "bevoelkerungstrend": -1,
+      "marktenge": 1
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -477,7 +486,8 @@ export const cities: CityConfig[] = [
       "zinsniveau": -1,
       "zuwanderungsdruck": 1,
       "wirtschaftskraft": 1,
-      "bevoelkerungstrend": -1
+      "bevoelkerungstrend": -1,
+      "marktenge": 1
     },
     "params": {
       "raumplanung_zonenreserve": 1,

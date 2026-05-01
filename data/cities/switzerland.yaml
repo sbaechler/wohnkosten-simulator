@@ -1,44 +1,40 @@
-# Swiss cities with >40k inhabitants
-# Research source: docs/superpowers/research/staedte-parameter-recherche.md
-# Generated: npm run build:data
-# Last updated: 2026-04-06
-
 - slug: zuerich
-  name: "Zürich"
+  name: Zürich
   context:
     zinsniveau: -1
     zuwanderungsdruck: 2
     wirtschaftskraft: 2
     bevoelkerungstrend: -1
+    marktenge: 2
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 2
     raumplanung_ausnuetzungsziffer: 2
-    boden_vorkaufsrecht: 0        # Initiative 30.11.2025 abgelehnt
+    boden_vorkaufsrecht: 0
     boden_bauverpflichtung: 1
-    boden_mehrwertabgabe: 1      # 40% (Kanton ZH)
+    boden_mehrwertabgabe: 1
     boden_bodeneigentumssteuer: 0
     bau_energievorgaben: 1
-    bau_sanierungspflicht: 2    # Elektroheizungen-Pflicht bis 2030
+    bau_sanierungspflicht: 2
     bau_einspracherecht_dritte: 1
     bau_einspracherecht_suspensiv: 2
     bau_bewilligungsverfahren: 2
     bau_normenharmonisierung: 1
-    gemeinnuetzig_mindestanteil: 2  # 33%-Ziel Stadtrat
-    gemeinnuetzig_foerderfonds: 2   # 360 Mio. CHF (Nov. 2025)
+    gemeinnuetzig_mindestanteil: 2
+    gemeinnuetzig_foerderfonds: 2
     gemeinnuetzig_baurecht: 1
     gemeinnuetzig_belegungsvorschriften: 0
-    gemeinnuetzig_sozialmischung: 2   # BZO-Revision 2026
+    gemeinnuetzig_sozialmischung: 2
     mietrecht_kostenmiete: 1
     mietrecht_anfangsmiete: 1
     mietrecht_mietzinstransparenz: 1
-    mietrecht_kuendigungsschutz: 2    # WRG ZH
+    mietrecht_kuendigungsschutz: 2
     mietrecht_mietzinsindex: 0
     mietrecht_untervermietung: 1
     steuer_grundstueckgewinn: 1
     steuer_eigenmietwert: 1
     steuer_leerstandsabgabe: 0
-    steuer_handaenderung: 0       # Kanton ZH: keine
+    steuer_handaenderung: 0
     steuer_kapitalgewinnprivatpersonen: 0
     kapital_auslaendische_investoren: 1
     kapital_institutionelle_regulierung: 0
@@ -51,14 +47,14 @@
     infra_schule_kita: 2
     infra_oeffentlicher_raum: 2
     infra_wirtschaftsansiedlung: 2
-
 - slug: genf
-  name: "Genf"
+  name: Genf
   context:
     zinsniveau: -1
-    zuwanderungsdruck: 2      # 0.34% Leerstand 2025
+    zuwanderungsdruck: 2
     wirtschaftskraft: 2
     bevoelkerungstrend: -1
+    marktenge: 2
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 2
@@ -78,10 +74,10 @@
     gemeinnuetzig_baurecht: 1
     gemeinnuetzig_belegungsvorschriften: 0
     gemeinnuetzig_sozialmischung: 1
-    mietrecht_kostenmiete: 2       # LDTR
+    mietrecht_kostenmiete: 2
     mietrecht_anfangsmiete: 2
     mietrecht_mietzinstransparenz: 1
-    mietrecht_kuendigungsschutz: 2  # LDTR
+    mietrecht_kuendigungsschutz: 2
     mietrecht_mietzinsindex: 0
     mietrecht_untervermietung: 1
     steuer_grundstueckgewinn: 1
@@ -100,14 +96,14 @@
     infra_schule_kita: 2
     infra_oeffentlicher_raum: 2
     infra_wirtschaftsansiedlung: 2
-
 - slug: basel
-  name: "Basel"
+  name: Basel
   context:
     zinsniveau: -1
-    zuwanderungsdruck: 1      # 0.9% Leerstand 2025
+    zuwanderungsdruck: 1
     wirtschaftskraft: 2
     bevoelkerungstrend: -1
+    marktenge: 1
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 2
@@ -127,10 +123,10 @@
     gemeinnuetzig_baurecht: 2
     gemeinnuetzig_belegungsvorschriften: 1
     gemeinnuetzig_sozialmischung: 1
-    mietrecht_kostenmiete: 2       # Wohnschutzgesetz
+    mietrecht_kostenmiete: 2
     mietrecht_anfangsmiete: 2
     mietrecht_mietzinstransparenz: 1
-    mietrecht_kuendigungsschutz: 2  # Wohnschutzgesetz
+    mietrecht_kuendigungsschutz: 2
     mietrecht_mietzinsindex: 0
     mietrecht_untervermietung: 1
     steuer_grundstueckgewinn: 1
@@ -149,19 +145,19 @@
     infra_schule_kita: 2
     infra_oeffentlicher_raum: 2
     infra_wirtschaftsansiedlung: 2
-
 - slug: lausanne
-  name: "Lausanne"
+  name: Lausanne
   context:
     zinsniveau: -1
-    zuwanderungsdruck: 2      # 0.58% Leerstand 2025, EPFL
+    zuwanderungsdruck: 2
     wirtschaftskraft: 2
     bevoelkerungstrend: -1
+    marktenge: 2
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
     raumplanung_ausnuetzungsziffer: 1
-    boden_vorkaufsrecht: 2         # LPPPL aktiv (2020)
+    boden_vorkaufsrecht: 2
     boden_bauverpflichtung: 1
     boden_mehrwertabgabe: 1
     boden_bodeneigentumssteuer: 0
@@ -173,7 +169,7 @@
     bau_normenharmonisierung: 1
     gemeinnuetzig_mindestanteil: 1
     gemeinnuetzig_foerderfonds: 1
-    gemeinnuetzig_baurecht: 2       # LPPPL
+    gemeinnuetzig_baurecht: 2
     gemeinnuetzig_belegungsvorschriften: 0
     gemeinnuetzig_sozialmischung: 1
     mietrecht_kostenmiete: 1
@@ -198,33 +194,33 @@
     infra_schule_kita: 2
     infra_oeffentlicher_raum: 2
     infra_wirtschaftsansiedlung: 2
-
 - slug: bern
-  name: "Bern"
+  name: Bern
   context:
     zinsniveau: -1
-    zuwanderungsdruck: 1      # ~0.4% Leerstand 2025
+    zuwanderungsdruck: 1
     wirtschaftskraft: 1
     bevoelkerungstrend: -1
+    marktenge: 2
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
     raumplanung_ausnuetzungsziffer: 1
     boden_vorkaufsrecht: 0
     boden_bauverpflichtung: 1
-    boden_mehrwertabgabe: 2      # 50% (Einzonungen)
+    boden_mehrwertabgabe: 2
     boden_bodeneigentumssteuer: 0
-    bau_energievorgaben: 2         # MuKEn 2025 früh umgesetzt
+    bau_energievorgaben: 2
     bau_sanierungspflicht: 1
     bau_einspracherecht_dritte: 1
     bau_einspracherecht_suspensiv: 2
     bau_bewilligungsverfahren: 1
     bau_normenharmonisierung: 1
-    gemeinnuetzig_mindestanteil: 2   # Drittelsregel (Gesetz)
+    gemeinnuetzig_mindestanteil: 2
     gemeinnuetzig_foerderfonds: 1
     gemeinnuetzig_baurecht: 1
     gemeinnuetzig_belegungsvorschriften: 0
-    gemeinnuetzig_sozialmischung: 2   # Drittelsregel
+    gemeinnuetzig_sozialmischung: 2
     mietrecht_kostenmiete: 1
     mietrecht_anfangsmiete: 1
     mietrecht_mietzinstransparenz: 1
@@ -247,14 +243,14 @@
     infra_schule_kita: 2
     infra_oeffentlicher_raum: 1
     infra_wirtschaftsansiedlung: 1
-
 - slug: winterthur
-  name: "Winterthur"
+  name: Winterthur
   context:
     zinsniveau: -1
-    zuwanderungsdruck: 2      # 0.18% Leerstand 2025 (enger als ZH!)
+    zuwanderungsdruck: 2
     wirtschaftskraft: 1
     bevoelkerungstrend: -1
+    marktenge: 2
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 1
@@ -264,26 +260,26 @@
     boden_mehrwertabgabe: 1
     boden_bodeneigentumssteuer: 0
     bau_energievorgaben: 1
-    bau_sanierungspflicht: 2    # Elektroheizungen-Pflicht bis 2030
+    bau_sanierungspflicht: 2
     bau_einspracherecht_dritte: 1
     bau_einspracherecht_suspensiv: 2
     bau_bewilligungsverfahren: 1
     bau_normenharmonisierung: 1
     gemeinnuetzig_mindestanteil: 1
-    gemeinnuetzig_foerderfonds: 2   # Kanton ZH Fonds
+    gemeinnuetzig_foerderfonds: 2
     gemeinnuetzig_baurecht: 1
     gemeinnuetzig_belegungsvorschriften: 0
     gemeinnuetzig_sozialmischung: 1
     mietrecht_kostenmiete: 1
     mietrecht_anfangsmiete: 1
     mietrecht_mietzinstransparenz: 1
-    mietrecht_kuendigungsschutz: 2    # WRG ZH gilt auch für Winterthur
+    mietrecht_kuendigungsschutz: 2
     mietrecht_mietzinsindex: 0
     mietrecht_untervermietung: 1
     steuer_grundstueckgewinn: 1
     steuer_eigenmietwert: 1
     steuer_leerstandsabgabe: 0
-    steuer_handaenderung: 0       # Kanton ZH
+    steuer_handaenderung: 0
     steuer_kapitalgewinnprivatpersonen: 0
     kapital_auslaendische_investoren: 1
     kapital_institutionelle_regulierung: 0
@@ -296,21 +292,21 @@
     infra_schule_kita: 1
     infra_oeffentlicher_raum: 1
     infra_wirtschaftsansiedlung: 1
-
 - slug: luzern
-  name: "Luzern"
+  name: Luzern
   context:
     zinsniveau: -1
-    zuwanderungsdruck: 1      # 1.01% Leerstand 2025
+    zuwanderungsdruck: 1
     wirtschaftskraft: 1
     bevoelkerungstrend: -1
+    marktenge: 1
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
     raumplanung_ausnuetzungsziffer: 1
     boden_vorkaufsrecht: 0
     boden_bauverpflichtung: 1
-    boden_mehrwertabgabe: 1      # RPG-Minimum 20%
+    boden_mehrwertabgabe: 1
     boden_bodeneigentumssteuer: 0
     bau_energievorgaben: 1
     bau_sanierungspflicht: 1
@@ -345,21 +341,21 @@
     infra_schule_kita: 1
     infra_oeffentlicher_raum: 2
     infra_wirtschaftsansiedlung: 1
-
 - slug: st-gallen
-  name: "St. Gallen"
+  name: St. Gallen
   context:
     zinsniveau: -1
-    zuwanderungsdruck: 0      # 2.1% Leerstand 2024 (entspannt)
+    zuwanderungsdruck: 0
     wirtschaftskraft: 1
     bevoelkerungstrend: -1
+    marktenge: 0
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
     raumplanung_ausnuetzungsziffer: 1
     boden_vorkaufsrecht: 0
     boden_bauverpflichtung: 1
-    boden_mehrwertabgabe: 1      # RPG-Minimum 20%
+    boden_mehrwertabgabe: 1
     boden_bodeneigentumssteuer: 0
     bau_energievorgaben: 1
     bau_sanierungspflicht: 1
@@ -391,17 +387,17 @@
     nutzung_abbruchverbot: 1
     nutzung_zweitwohnungen: 1
     infra_oepnv: 1
-    infra_schule_kita: 2        # HSG
+    infra_schule_kita: 2
     infra_oeffentlicher_raum: 1
     infra_wirtschaftsansiedlung: 1
-
 - slug: lugano
-  name: "Lugano"
+  name: Lugano
   context:
     zinsniveau: -1
-    zuwanderungsdruck: 0      # ~1.0% Leerstand (moderat)
+    zuwanderungsdruck: 0
     wirtschaftskraft: 1
     bevoelkerungstrend: -1
+    marktenge: 1
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -443,33 +439,33 @@
     infra_schule_kita: 1
     infra_oeffentlicher_raum: 1
     infra_wirtschaftsansiedlung: 1
-
 - slug: biel
-  name: "Biel/Bienne"
+  name: Biel/Bienne
   context:
     zinsniveau: -1
-    zuwanderungsdruck: 1      # 1.08% Leerstand 2024
+    zuwanderungsdruck: 1
     wirtschaftskraft: 1
     bevoelkerungstrend: -1
+    marktenge: 1
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
     raumplanung_ausnuetzungsziffer: 1
     boden_vorkaufsrecht: 0
     boden_bauverpflichtung: 1
-    boden_mehrwertabgabe: 2      # Kanton BE: 50%
+    boden_mehrwertabgabe: 2
     boden_bodeneigentumssteuer: 0
-    bau_energievorgaben: 2         # MuKEn 2025
+    bau_energievorgaben: 2
     bau_sanierungspflicht: 1
     bau_einspracherecht_dritte: 1
     bau_einspracherecht_suspensiv: 2
     bau_bewilligungsverfahren: 1
     bau_normenharmonisierung: 1
-    gemeinnuetzig_mindestanteil: 2   # Drittelsregel (Kanton BE)
+    gemeinnuetzig_mindestanteil: 2
     gemeinnuetzig_foerderfonds: 1
     gemeinnuetzig_baurecht: 1
     gemeinnuetzig_belegungsvorschriften: 0
-    gemeinnuetzig_sozialmischung: 2   # Drittelsregel
+    gemeinnuetzig_sozialmischung: 2
     mietrecht_kostenmiete: 1
     mietrecht_anfangsmiete: 1
     mietrecht_mietzinstransparenz: 1

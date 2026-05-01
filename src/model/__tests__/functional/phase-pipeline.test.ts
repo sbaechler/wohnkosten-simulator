@@ -42,6 +42,7 @@ const ZUERICH_CONTEXT: CityContext = {
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
   bevoelkerungstrend: 2,
+  marktenge: 2,
 };
 
 const EMPTY_DIFF = {} as never;

@@ -86,6 +86,7 @@ const ANGESPANNT: CityContext = {
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
   bevoelkerungstrend: 2,
+  marktenge: 2,
 };
 
 const NEUTRAL_CONTEXT: CityContext = {
@@ -93,6 +94,7 @@ const NEUTRAL_CONTEXT: CityContext = {
   zuwanderungsdruck: 0,
   wirtschaftskraft: 0,
   bevoelkerungstrend: 0,
+  marktenge: 0,
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

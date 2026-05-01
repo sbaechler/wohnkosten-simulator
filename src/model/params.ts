@@ -379,6 +379,7 @@ export const contextMeta: ContextMeta[] = [
   { key: 'zuwanderungsdruck', label: 'Zuwanderung', levels: ['stark sinkend', 'sinkend', 'stabil', 'wachsend', 'stark wachsend'] },
   { key: 'wirtschaftskraft', label: 'Wirtschaftskraft', levels: ['sehr schwach', 'schwach', 'mittel', 'stark', 'sehr stark'] },
   { key: 'bevoelkerungstrend', label: 'Bevölkerung', levels: ['stark sinkend', 'sinkend', 'stabil', 'wachsend', 'stark wachsend'] },
+  { key: 'marktenge', label: 'Marktenge', levels: ['entspannt', 'leicht eng', 'moderat', 'angespannt', 'extrem eng'] },
 ];
 
 // ── Diff-Funktionen ──────────────────────────────────────────────────────────

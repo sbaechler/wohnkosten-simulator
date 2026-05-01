@@ -54,6 +54,7 @@ const ZUERICH_CONTEXT: CityContext = {
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
   bevoelkerungstrend: 2,
+  marktenge: 2,
 };
 
 function phases(params: CityParams40, context: CityContext, diff: ParamsDiff40) {

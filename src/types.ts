@@ -67,6 +67,8 @@ export interface CityContext {
   zuwanderungsdruck: ContextValue;
   wirtschaftskraft: ContextValue;
   bevoelkerungstrend: ContextValue;
+  /** Marktverfassung: -2=entspannt (>5% Leerstand), +2=extrem eng (<1% Leerstand) */
+  marktenge: ContextValue;
 }
 
 export interface CityConfig {
