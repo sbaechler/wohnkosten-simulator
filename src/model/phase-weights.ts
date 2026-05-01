@@ -927,4 +927,66 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     // Tax Increment Financing: Effekt braucht Jahre bis zur vollen Entfaltung.
   },
 
+  // ═══════════════════════════════════════════════════════════════════
+  // E0 → angebotspotenzial_regulation (Phase 3)
+  // Bestimmt die Elastizität des Angebots in Bezug auf Preisänderungen.
+  // Starke Regulierung → unelastische Angebotskurve → Preise reagieren stark, Menge wenig.
+  // Schwache Regulierung → elastische Angebotskurve → Menge reagiert stark, Preise wenig.
+  // ═══════════════════════════════════════════════════════════════════
+
+  {
+    from: 'mietrecht_kostenmiete',
+    to: 'angebotspotenzial_regulation',
+    sign: +1,
+    weights: [0.7, 0.9, 1.0],
+    // Kostenmietregulierung macht Preissignale irrelevant für Anleger → unelastisch.
+    // GLOBAL-029: Stärkster Effekt bei langfristiger Regulierung.
+  },
+  {
+    from: 'mietrecht_kuendigungsschutz',
+    to: 'angebotspotenzial_regulation',
+    sign: +1,
+    weights: [0.5, 0.7, 0.9],
+    // Kündigungsschutz reduziert Exit-Optionen → Investoren reagieren weniger auf Preisänderungen.
+  },
+  {
+    from: 'bau_bewilligungsverfahren',
+    to: 'angebotspotenzial_regulation',
+    sign: +1,
+    weights: [0.6, 0.8, 0.5],
+    // Komplexe Verfahren machen Angebotstrist träge → weniger Elastizität.
+    // Kurzfristig stark, da bestehende Projekte nicht schnell reagiert können.
+  },
+  {
+    from: 'bau_einspracherecht_suspensiv',
+    to: 'angebotspotenzial_regulation',
+    sign: +1,
+    weights: [0.5, 0.7, 0.6],
+    // Veto-Recht schafft Unsicherheit → Anleger meiden den Markt bei Preisänderungen.
+  },
+  {
+    from: 'nutzung_abbruchverbot',
+    to: 'angebotspotenzial_regulation',
+    sign: +1,
+    weights: [0.6, 0.8, 0.7],
+    // Rationierung blockiert den physischen Reaktionskanal → Angebot reagiert kaum auf Preise.
+    // FHNW: Basel Baugesuche −76% zeigt diese Unelastizität.
+  },
+  {
+    from: 'ctx:zinsniveau',
+    to: 'angebotspotenzial_regulation',
+    sign: +1,
+    weights: [0.8, 0.6, 0.4],
+    // Zinserhöhung verteuert Finanzierung → selbst bei hohen Preisen kein Angebot.
+    // Kurzfristig starker Effekt, da Kapital sofort teurer wird.
+  },
+  {
+    from: 'ctx:marktenge',
+    to: 'angebotspotenzial_regulation',
+    sign: +1,
+    weights: [0.7, 0.6, 0.5],
+    // Enger Markt hat weniger Ausweichoptionen → selbst bei Preisreiz kein Angebot möglich.
+    // Entspannter Markt: mehr Spielraum für Angebotsreaktion.
+  },
+
 ] as const;

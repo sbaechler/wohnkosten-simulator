@@ -114,16 +114,38 @@ export interface ContextMeta {
 // ── E1: Markt-Zustandsvariablen ───────────────────────────────────────────────
 
 export interface MarketState {
+  /** Physisches Bau-/Planungspotenzial — Beeinflusst MAXIMALE Menge (Verschiebung der Angebotskurve nach rechts) */
   angebotspotenzial: number;        // –1 … +1
+  /** Nachfragedruck — Beeinflusst die nachgefragte Menge bei gegebenem Preis (Verschiebung der Nachfragekurve) */
   nachfragedruck: number;            // –1 … +1
-  mietpreis_schutzlevel: number;    // –1 … +1
-  verdraengungsrisiko: number;       // –1 … +1
-  spekulationshemmung: number;      // –1 … +1
-  markfriktion: number;             // –1 … +1
+  /** Mietpreis-Schutzniveau — Wie stark schützt Regulierung Bestandsmieter */
+  mietpreis_schutzlevel: number;     // –1 … +1
+  /** Verdrängungsrisiko — Wahrscheinlichkeit, dass Mieter durch Aufwertung verdrängt werden */
+  verdraengungsrisiko: number;        // –1 … +1
+  /** Spekulationshemmung — Wie stark hemmen Steuern/Abgaben spekulatives Halten */
+  spekulationshemmung: number;        // –1 … +1
+  /** Marktfriktion — Wie stark bremst Regulierung den Wohnungswechsel */
+  markfriktion: number;              // –1 … +1
+  /** Gemeinnützige Kraft — Stärke des gemeinnützigen Sektors */
   gemeinnuetzig_kraft: number;       // –1 … +1
+  /** Eigentumsquoten-Trend — Trend zu Wohneigentum vs. Miete */
   eigentumsquoten_trend: number;    // –1 … +1
+  /** Aufwertungsdruck — Wie stark wird der Stadtraum aufgewertet (Gentifizierungstreiber) */
   aufwertungsdruck: number;         // –1 … +1
+  /** Investitionsattraktivität — Wie attraktiv ist der Markt für Immobilieninvestoren */
   investitionsattraktivitaet: number; // –1 … +1
+  /**
+   * Angebotsregulation (Phase 3 Trennung): Elastizität des Angebots in Bezug auf Preisänderungen.
+   *
+   * -1 = dereguliert, elastisch: Angebot reagiert stark auf Preissignale (Milei-Effekt)
+   *  0 = neutral
+   * +1 = stark reguliert, unelastisch: Angebot reagiert kaum auf Preissignale (Stockholm)
+   *
+   * Beeinflusst die STEGUNG der Angebotskurve im Preis-Mengen-Diagramm:
+   * steepness = 0.8 × (1 + ang ebotsregulation × 0.5)
+   * → Hohe Regulation → steilere Kurve (weniger Elastizität)
+   */
+  angebotspotenzial_regulation: number; // –1 … +1
 }
 
 // ── E2: Abgeleitete Indikatoren ──────────────────────────────────────────────

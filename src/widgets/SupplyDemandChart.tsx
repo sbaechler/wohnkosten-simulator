@@ -75,10 +75,15 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
 
     const SHIFT_SCALE = 7;
 
-    function supplyCurve(shift: number): [number, number][] {
+    function supplyCurve(shift: number, regulation: number): [number, number][] {
+      // Steigung abhängig von Regulationsgrad:
+      // regulation = -1 (elastisch/dereguliert): slope = 0.8 × 0.5 = 0.4 → flache Kurve, Menge reagiert stark
+      // regulation =  0 (neutral):             slope = 0.8 × 1.0 = 0.8 → Normalkurve
+      // regulation = +1 (unelastisch/reguliert): slope = 0.8 × 1.5 = 1.2 → steile Kurve, Preis reagiert stark
+      const slope = 0.8 * (1 + regulation * 0.5);
       return Array.from({ length: 50 }, (_, i) => {
         const q = (i / 49) * 10;
-        const p = 1 + (q - shift * SHIFT_SCALE) * 0.8;
+        const p = 1 + (q - shift * SHIFT_SCALE) * slope;
         return [q, Math.max(0, Math.min(10, p))] as [number, number];
       });
     }
@@ -91,28 +96,30 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
       });
     }
 
-    function findEquilibrium(supplyShift: number, demandShift: number): [number, number] {
+    function findEquilibrium(supplyShift: number, demandShift: number, supplyRegulation: number): [number, number] {
       // Ökonomisch korrekte Gleichgewichts-Berechnung:
-      // Angebot:  P = 1 + 0.8·(q - 7·s) = 1-5.6s + 0.8q  (steigend, shift↑ → Kurve links → weniger q, höherer P)
-      // Nachfrage: P = 9 - 0.8·(q - 7·d) = 9+5.6d - 0.8q (fallend, shift↑ → Kurve rechts → mehr q, tieferer P)
-      // Gleichsetzen: qEq = 5 + 3.5·(s+d),  pEq = 5 + 4.48·d - 2.8·s
+      // Angebot:  P = 1 + slope·(q - 7·s)  mit slope = 0.8×(1 + regulation×0.5)
+      // Nachfrage: P = 9 - 0.8·(q - 7·d)
+      // Gleichsetzen → qEq und pEq in Abhängigkeit von slope
       //
       // Preiseffekt kommt über BEIDE Variablen:
       //   demand↑ → Preise ↑ (Kaufkraft/Druck)
       //   supply↑ → Preise ↓ (Angebotsausweitung)
       // Das ist die korrekte ökonomische Mechanik.
+      const slope = 0.8 * (1 + supplyRegulation * 0.5);
       const s = supplyShift, d = demandShift;
-      const qEq = Math.max(0, Math.min(10, 5 + 3.5 * (s + d)));
-      const pEq = Math.max(0, Math.min(10, 5 + 4.48 * d - 2.8 * s));
+      // Nachfrage steigt mit 0.8, Angebot steigt mit slope
+      const qEq = Math.max(0, Math.min(10, (5 + 3.5 * slope * (s + d)) / (0.8 + slope)));
+      const pEq = Math.max(0, Math.min(10, 1 + slope * (qEq - 7 * s)));
       return [qEq, pEq];
     }
 
     // Baseline curves: always use baseline params for the dashed reference line
     const baselineState = clampE1(computeMarketState(context, baseline, baseline, {}));
-    const [bq, bp] = findEquilibrium(baselineState.angebotspotenzial, baselineState.nachfragedruck);
+    const [bq, bp] = findEquilibrium(baselineState.angebotspotenzial, baselineState.nachfragedruck, baselineState.angebotspotenzial_regulation);
 
     // Draw baseline curves (dashed)
-    g.append('path').datum(supplyCurve(baselineState.angebotspotenzial))
+    g.append('path').datum(supplyCurve(baselineState.angebotspotenzial, baselineState.angebotspotenzial_regulation))
       .attr('d', line).attr('fill', 'none')
       .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
     g.append('path').datum(demandCurve(baselineState.nachfragedruck))
@@ -130,10 +137,10 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
     activePhasesForChart.forEach((phase, idx) => {
       const isActive = idx === activePhaseIndex;
       const state = phase.marketState;
-      const [pq, pp] = findEquilibrium(state.angebotspotenzial, state.nachfragedruck);
+      const [pq, pp] = findEquilibrium(state.angebotspotenzial, state.nachfragedruck, state.angebotspotenzial_regulation);
 
-      // Supply curve
-      g.append('path').datum(supplyCurve(state.angebotspotenzial))
+      // Supply curve — Steigung abhängig von Regulationsgrad
+      g.append('path').datum(supplyCurve(state.angebotspotenzial, state.angebotspotenzial_regulation))
         .attr('d', line).attr('fill', 'none')
         .attr('stroke', COLORS.supply)
         .attr('stroke-width', isActive ? 2.5 : 1)

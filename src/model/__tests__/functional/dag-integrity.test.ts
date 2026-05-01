@@ -28,6 +28,7 @@ const E1_NODE_IDS: (keyof MarketState)[] = [
   'eigentumsquoten_trend',
   'aufwertungsdruck',
   'investitionsattraktivitaet',
+  'angebotspotenzial_regulation',
 ];
 
 const VALID_FROM_KEYS = new Set([
@@ -36,6 +37,7 @@ const VALID_FROM_KEYS = new Set([
   'ctx:zuwanderungsdruck',
   'ctx:wirtschaftskraft',
   'ctx:bevoelkerungstrend',
+  'ctx:marktenge',
   ...E1_NODE_IDS,
 ]);
 

@@ -37,6 +37,7 @@ const E1_NODES = [
   'eigentumsquoten_trend',
   'aufwertungsdruck',
   'investitionsattraktivitaet',
+  'angebotspotenzial_regulation',
 ] as const;
 
 // ── getE0Delta ────────────────────────────────────────────────────────────────
@@ -59,6 +60,18 @@ function getE0Delta(
 // ── computeE1WithPhaseAndCarry ────────────────────────────────────────────────
 
 const PERSISTENCE = 0.8;
+
+/**
+ * Per-Phase Basis-Multiplikator: P1=0.4, P2=0.7, P3=1.0
+ *
+ * Der Wohnungsmarkt hat massive strukturelle Trägheit:
+ * - P1 (0-2 Jahre): Verträge, Bewilligungen, Kapital allokiert — Reaktion minimal
+ * - P2 (2-5 Jahre): Projekte werden angepasst, neue Investitionen fliessen
+ * - P3 (5-10 Jahre): Langfristiges Gleichgewicht — alle Effekte voll wirksam
+ *
+ * Dieser Faktor skaliert ALLE Kantengewichte über alle Phasen hinweg.
+ */
+const PHASE_BASE_MULTIPLIER: readonly [number, number, number] = [0.4, 0.7, 1.0];
 
 /**
  * Marktverengungs-Multiplikator: -2→0.4× (entspannt), 0→1.0× (normal), +2→1.6× (extrem eng)
@@ -100,7 +113,7 @@ export function computeE1WithPhaseAndCarry(
     }
 
     const weightedSum = denominator === 0 ? 0 : numerator / denominator;
-    newState[nodeId] = clamp(prevValue * PERSISTENCE + weightedSum * marketMult);
+    newState[nodeId] = clamp(prevValue * PERSISTENCE + weightedSum * PHASE_BASE_MULTIPLIER[phaseIndex] * marketMult);
   }
 
   return newState;

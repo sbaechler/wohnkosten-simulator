@@ -92,6 +92,7 @@ export function computeMarketState(
     eigentumsquoten_trend: aggregateNode('eigentumsquoten_trend',  paramDiff, ctxValue),
     aufwertungsdruck:       aggregateNode('aufwertungsdruck',      paramDiff, ctxValue),
     investitionsattraktivitaet: aggregateNode('investitionsattraktivitaet', paramDiff, ctxValue),
+    angebotspotenzial_regulation: aggregateNode('angebotspotenzial_regulation', paramDiff, ctxValue),
   };
 }
 
@@ -111,5 +112,6 @@ export function clampE1(state: MarketState): MarketState {
     eigentumsquoten_trend:     c(state.eigentumsquoten_trend),
     aufwertungsdruck:           c(state.aufwertungsdruck),
     investitionsattraktivitaet: c(state.investitionsattraktivitaet),
+    angebotspotenzial_regulation: c(state.angebotspotenzial_regulation),
   };
 }

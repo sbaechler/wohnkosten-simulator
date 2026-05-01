@@ -28,6 +28,7 @@ export type NodeId =
   | 'angebotspotenzial' | 'nachfragedruck' | 'mietpreis_schutzlevel' | 'verdraengungsrisiko'
   | 'spekulationshemmung' | 'markfriktion' | 'gemeinnuetzig_kraft'
   | 'eigentumsquoten_trend' | 'aufwertungsdruck' | 'investitionsattraktivitaet'
+  | 'angebotspotenzial_regulation'
   // E2 — abgeleitete Indikatoren
   | 'gentrifizierungsindex' | 'neubau_hemmnisindex' | 'verdraengungsrisiko_index'
   | 'fiskalische_wirkung';
