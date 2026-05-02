@@ -221,26 +221,9 @@ const ANGESPANNT: CityContext = { zinsniveau: -1, zuwanderungsdruck: 2, wirtscha
 
 const LOCKERE_BASIS: CityParams40 = {
   ...ZUERICH_V2,
-  raumplanung_ausnuetzungsziffer: 0 as 0,
-  raumplanung_verdichtung: 0 as 0,
-  bau_bewilligungsverfahren: 0 as 0,
-};
-
-const STOCKHOLM_LIKE: CityParams40 = {
-  raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
-  boden_vorkaufsrecht: 1, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
-  bau_energievorgaben: 1, bau_sanierungspflicht: 1,
-  bau_einspracherecht_dritte: 1, bau_einspracherecht_suspensiv: 1,
-  bau_bewilligungsverfahren: 1, bau_normenharmonisierung: 1,
-  gemeinnuetzig_mindestanteil: 2, gemeinnuetzig_foerderfonds: 2, gemeinnuetzig_baurecht: 2,
-  gemeinnuetzig_belegungsvorschriften: 2, gemeinnuetzig_sozialmischung: 2,
-  mietrecht_kostenmiete: 2, mietrecht_anfangsmiete: 2, mietrecht_mietzinstransparenz: 2,
-  mietrecht_kuendigungsschutz: 2, mietrecht_mietzinsindex: 2, mietrecht_untervermietung: 2,
-  steuer_grundstueckgewinn: 2, steuer_eigenmietwert: 1, steuer_leerstandsabgabe: 1,
-  steuer_handaenderung: 2, steuer_kapitalgewinnprivatpersonen: 1,
-  kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 2, kapital_hypothekarregulierung: 2,
-  nutzung_kurzzeitvermietung: 2, nutzung_umnutzungsverbot: 2, nutzung_abbruchverbot: 2, nutzung_zweitwohnungen: 1,
-  infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
+  raumplanung_ausnuetzungsziffer: 0 as const,
+  raumplanung_verdichtung: 0 as const,
+  bau_bewilligungsverfahren: 0 as const,
 };
 
 // Helper: create modified baseline
@@ -296,7 +279,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
   // GLOBAL-029: Mieteingriff senkt angebotspotenzial langfristig
   {
     id: 'mietrecht-global029-angebot-p2',
-    context: BERLIN_CTX, baseline: withOverrides(BERLIN_BASELINE, { mietrecht_kostenmiete: 0, mietrecht_anfangsmiete: 0, mietrecht_kuendigungsschutz: 0 } as any),
+    context: BERLIN_CTX, baseline: withOverrides(BERLIN_BASELINE, { mietrecht_kostenmiete: 0, mietrecht_anfangsmiete: 0, mietrecht_kuendigungsschutz: 0 }),
     diffA: { mietrecht_kostenmiete: { from: 0, to: 2 }, mietrecht_anfangsmiete: { from: 0, to: 2 }, mietrecht_kuendigungsschutz: { from: 0, to: 2 } },
     diffB: {},
     phase: 2, field: 'marketState.angebotspotenzial', relation: 'lt',
@@ -304,7 +287,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
   // GLOBAL-029: Mieteingriff erhöht neubau_hemmnisindex
   {
     id: 'mietrecht-global029-hemmnis-p2',
-    context: BERLIN_CTX, baseline: withOverrides(BERLIN_BASELINE, { mietrecht_kostenmiete: 0, mietrecht_kuendigungsschutz: 0 } as any),
+    context: BERLIN_CTX, baseline: withOverrides(BERLIN_BASELINE, { mietrecht_kostenmiete: 0, mietrecht_kuendigungsschutz: 0 }),
     diffA: { mietrecht_kostenmiete: { from: 0, to: 2 }, mietrecht_kuendigungsschutz: { from: 0, to: 2 } },
     diffB: {},
     phase: 2, field: 'derived.neubau_hemmnisindex', relation: 'gt',
@@ -312,7 +295,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
   // CH-004: Kündigungsschutz erhöht Marktfriktion
   {
     id: 'mietrecht-ch004-friktion-p0',
-    context: BERLIN_CTX, baseline: withOverrides(BERLIN_BASELINE, { mietrecht_kuendigungsschutz: 0 } as any),
+    context: BERLIN_CTX, baseline: withOverrides(BERLIN_BASELINE, { mietrecht_kuendigungsschutz: 0 }),
     diffA: { mietrecht_kuendigungsschutz: { from: 0, to: 2 } },
     diffB: {},
     phase: 0, field: 'marketState.markfriktion', relation: 'gt',
@@ -320,7 +303,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
   // CH-005: Strenges Mietrecht senkt Fluktuation (markfriktion steigt)
   {
     id: 'mietrecht-ch005-fluktuation-p0',
-    context: BERLIN_CTX, baseline: withOverrides(BERLIN_BASELINE, { mietrecht_kuendigungsschutz: 0, mietrecht_kostenmiete: 0 } as any),
+    context: BERLIN_CTX, baseline: withOverrides(BERLIN_BASELINE, { mietrecht_kuendigungsschutz: 0, mietrecht_kostenmiete: 0 }),
     diffA: { mietrecht_kuendigungsschutz: { from: 0, to: 2 }, mietrecht_kostenmiete: { from: 0, to: 2 }, mietrecht_mietzinsindex: { from: 0, to: 2 } },
     diffB: {},
     phase: 0, field: 'marketState.markfriktion', relation: 'gt',
@@ -328,7 +311,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
   // CH-005: Preisspreizung (uses marktfriktion which is a typo in test — markfriktion)
   {
     id: 'mietrecht-ch005-preisspreizung-p0',
-    context: BERLIN_CTX, baseline: withOverrides(BERLIN_BASELINE, { mietrecht_kuendigungsschutz: 0, mietrecht_kostenmiete: 0 } as any),
+    context: BERLIN_CTX, baseline: withOverrides(BERLIN_BASELINE, { mietrecht_kuendigungsschutz: 0, mietrecht_kostenmiete: 0 }),
     diffA: { mietrecht_kuendigungsschutz: { from: 0, to: 2 }, mietrecht_kostenmiete: { from: 0, to: 2 }, mietrecht_mietzinsindex: { from: 0, to: 2 } },
     diffB: {},
     phase: 0, field: 'marketState.markfriktion', relation: 'gt',
@@ -379,7 +362,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
   // Auckland: kombinierte Reform erhöht Angebotspotenzial
   {
     id: 'boden-auckland-angebot-p2',
-    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { raumplanung_ausnuetzungsziffer: 0, raumplanung_verdichtung: 0, bau_bewilligungsverfahren: 0 } as any),
+    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { raumplanung_ausnuetzungsziffer: 0, raumplanung_verdichtung: 0, bau_bewilligungsverfahren: 0 }),
     diffA: { raumplanung_ausnuetzungsziffer: { from: 0, to: 2 }, raumplanung_verdichtung: { from: 0, to: 2 }, bau_bewilligungsverfahren: { from: 0, to: 2 } },
     diffB: {},
     phase: 2, field: 'marketState.angebotspotenzial', relation: 'gt',
@@ -403,7 +386,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
   // CH-007: Zonenreserve senkt nachfragedruck (NOTE: this tests zonenreserve which has sign=-1 for angebotspotenzial!)
   {
     id: 'boden-ch007-nachfrage-p2',
-    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { raumplanung_zonenreserve: 0 } as any),
+    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { raumplanung_zonenreserve: 0 }),
     diffA: { raumplanung_zonenreserve: { from: 0, to: 2 } },
     diffB: {},
     phase: 2, field: 'marketState.nachfragedruck', relation: 'lt',
@@ -411,7 +394,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
   // CH-008: Verdichtung erhöht Verdrängungsrisiko
   {
     id: 'boden-ch008-verdraengung-p0',
-    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { raumplanung_verdichtung: 0 } as any),
+    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { raumplanung_verdichtung: 0 }),
     diffA: { raumplanung_verdichtung: { from: 0, to: 2 } },
     diffB: {},
     phase: 0, field: 'marketState.verdraengungsrisiko', relation: 'gt',
@@ -419,7 +402,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
   // CH-009: Verdichtung erhöht Gentrifizierungsindex
   {
     id: 'boden-ch009-gentri-p0',
-    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { raumplanung_verdichtung: 0 } as any),
+    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { raumplanung_verdichtung: 0 }),
     diffA: { raumplanung_verdichtung: { from: 0, to: 2 } },
     diffB: {},
     phase: 0, field: 'derived.gentrifizierungsindex', relation: 'gt',
@@ -427,7 +410,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
   // CH-008: Verdichtung erhöht Angebotspotenzial
   {
     id: 'boden-ch008-angebot-p2',
-    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { raumplanung_verdichtung: 0 } as any),
+    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { raumplanung_verdichtung: 0 }),
     diffA: { raumplanung_verdichtung: { from: 0, to: 2 } },
     diffB: {},
     phase: 2, field: 'marketState.angebotspotenzial', relation: 'gt',
@@ -518,7 +501,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
   // CH-006: Zweitwohnungsbeschränkung senkt angebotspotenzial (paradox)
   {
     id: 'steuer-ch006-angebot-p2',
-    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { nutzung_zweitwohnungen: 0 } as any),
+    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { nutzung_zweitwohnungen: 0 }),
     diffA: { nutzung_zweitwohnungen: { from: 0, to: 2 } },
     diffB: {},
     phase: 2, field: 'marketState.angebotspotenzial', relation: 'lt',
@@ -526,7 +509,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
   // AT-002: Gemeinnützig senkt nachfragedruck
   {
     id: 'steuer-at002-nachfrage-p0',
-    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { gemeinnuetzig_mindestanteil: 0, gemeinnuetzig_foerderfonds: 0, gemeinnuetzig_baurecht: 0 } as any),
+    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { gemeinnuetzig_mindestanteil: 0, gemeinnuetzig_foerderfonds: 0, gemeinnuetzig_baurecht: 0 }),
     diffA: { gemeinnuetzig_mindestanteil: { from: 0, to: 2 }, gemeinnuetzig_foerderfonds: { from: 0, to: 2 }, gemeinnuetzig_baurecht: { from: 0, to: 2 } },
     diffB: {},
     phase: 0, field: 'marketState.nachfragedruck', relation: 'lt',
@@ -562,7 +545,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
   {
     id: 'gemeinnuetzig-mindest-gentri-p0',
     context: ZH_CTX,
-    baseline: withOverrides(ZUERICH_V2, { gemeinnuetzig_mindestanteil: 0, gemeinnuetzig_foerderfonds: 0, gemeinnuetzig_baurecht: 0 } as any),
+    baseline: withOverrides(ZUERICH_V2, { gemeinnuetzig_mindestanteil: 0, gemeinnuetzig_foerderfonds: 0, gemeinnuetzig_baurecht: 0 }),
     diffA: { gemeinnuetzig_mindestanteil: { from: 0, to: 2 }, gemeinnuetzig_foerderfonds: { from: 0, to: 2 }, gemeinnuetzig_baurecht: { from: 0, to: 2 } },
     diffB: {},
     phase: 0, field: 'derived.gentrifizierungsindex', relation: 'lt',
@@ -570,7 +553,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
   // Foerderfonds erhöht angebotspotenzial
   {
     id: 'gemeinnuetzig-fonds-angebot-p2',
-    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { gemeinnuetzig_foerderfonds: 0 } as any),
+    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { gemeinnuetzig_foerderfonds: 0 }),
     diffA: { gemeinnuetzig_foerderfonds: { from: 0, to: 2 } },
     diffB: {},
     phase: 2, field: 'marketState.angebotspotenzial', relation: 'gt',
@@ -697,7 +680,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
   {
     id: 'infra-oepnv-aufwertung-p0',
     context: NEUTRAL_CTX,
-    baseline: withOverrides(ZUERICH_V2, { infra_oepnv: 0 } as any),
+    baseline: withOverrides(ZUERICH_V2, { infra_oepnv: 0 }),
     diffA: { infra_oepnv: { from: 0, to: 2 } },
     diffB: {},
     phase: 0, field: 'marketState.aufwertungsdruck', relation: 'gt',
@@ -706,7 +689,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
   {
     id: 'infra-oepnv-wirtschaft-aufwertung-p1',
     context: ZH_CTX,
-    baseline: withOverrides(ZUERICH_V2, { infra_oepnv: 0, infra_wirtschaftsansiedlung: 0 } as any),
+    baseline: withOverrides(ZUERICH_V2, { infra_oepnv: 0, infra_wirtschaftsansiedlung: 0 }),
     diffA: { infra_oepnv: { from: 0, to: 2 }, infra_wirtschaftsansiedlung: { from: 0, to: 2 } },
     diffB: { infra_oepnv: { from: 0, to: 2 } },
     phase: 1, field: 'marketState.aufwertungsdruck', relation: 'gt',
@@ -718,7 +701,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
   {
     id: 'intl-sg-kombiniert-gentri-p0',
     context: ANGESPANNT,
-    baseline: withOverrides(ZUERICH_V2, { boden_vorkaufsrecht: 0, gemeinnuetzig_mindestanteil: 0, gemeinnuetzig_foerderfonds: 0, gemeinnuetzig_baurecht: 0 } as any),
+    baseline: withOverrides(ZUERICH_V2, { boden_vorkaufsrecht: 0, gemeinnuetzig_mindestanteil: 0, gemeinnuetzig_foerderfonds: 0, gemeinnuetzig_baurecht: 0 }),
     diffA: { boden_vorkaufsrecht: { from: 0, to: 2 }, gemeinnuetzig_mindestanteil: { from: 0, to: 2 }, gemeinnuetzig_foerderfonds: { from: 0, to: 2 }, gemeinnuetzig_baurecht: { from: 0, to: 2 } },
     diffB: { boden_vorkaufsrecht: { from: 0, to: 2 } },
     phase: 0, field: 'derived.gentrifizierungsindex', relation: 'lt',
@@ -824,7 +807,6 @@ function optimize(
   for (let iter = 0; iter < maxIter; iter++) {
     // Compute gradient via central finite differences
     const grad = new Float64Array(weights.length);
-    const baseLoss = computeLoss(weights, constraints).total;
 
     // Only compute gradients for weights that affect violated constraints
     for (let i = 0; i < weights.length; i++) {
@@ -897,12 +879,7 @@ function writeWeights(weights: number[]): void {
   }));
 
   // Find comment blocks for each edge in original file
-  const lines = original.split('\n');
-  let output = '';
-  let edgeIdx = 0;
-  let inArray = false;
-  let skipUntilNextEdge = false;
-  let collectingComment: string[] = [];
+  void original; // unused — kept for documentation of original approach
 
   // Simpler approach: rebuild the file preserving comments
   // Find the array start and end, replace edge objects
@@ -922,8 +899,8 @@ function writeWeights(weights: number[]): void {
   newContent += '  from: string;\n  to: string;\n  sign: 1 | -1;\n  weights: readonly [number, number, number];\n}[] = [\n';
 
   // Extract comments from original
-  const edgeRegex = /\{\s*from:\s*'([^']+)',\s*to:\s*'([^']+)',\s*sign:\s*([+-]1),\s*weights:\s*\[([^\]]+)\],?\s*([^}]*)\}/gs;
-  const commentRegex = /\/\/[^\n]*/g;
+  void edgeRegex;
+  void commentRegex; // unused — kept for documentation of original approach
   
   // Parse original to extract per-edge comments
   const arrayContent = original.slice(arrayStart, arrayEnd);
