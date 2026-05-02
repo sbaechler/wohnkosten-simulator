@@ -174,7 +174,7 @@ Folgende Abweichungen vom Ist-Stand:
 |--------------|-----------|--------|
 | `zeit_bis_wirkung` als E2-Indikator | Entfernt (nicht aussagekräftig im Phasen-Modell) | ✅ Implementiert wie geplant |
 | `TIME_CLASS_MAP` | Entfernt (redundant mit Phase-Gewichten) | ✅ Implementiert wie geplant |
-| `DAG_EDGES` mit `weights: [P1,P2,P3]` | Noch nicht umgesetzt; `graph.ts` nutzt noch single-weight + time | ⚠️ In Bearbeitung |
+| `DAG_EDGES` mit `weights: [P1,P2,P3]` | ✅ `PHASE_WEIGHTED_EDGES` in `phase-weights.ts` | ✅ Implementiert |
 | `carryE1` Akkumulation | ✅ `computeE1WithPhaseAndCarry()` | ✅ Implementiert |
 | 4 E2-Indikatoren (zeit_bis_wirkung entfernt) | ✅ 4 Indikatoren | ✅ Implementiert |
 | Phase-Aware Kanten-Gewichte | ✅ `PHASE_WEIGHTED_EDGES` in `phase-weights.ts` | ✅ Implementiert |
