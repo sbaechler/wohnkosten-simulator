@@ -26,6 +26,7 @@ export const PARAM_KEYS_40 = [
   // 2. Bau & Bewilligung
   'bau_energievorgaben',
   'bau_sanierungspflicht',
+  'bau_ersatzneubau_effizienz',
   'bau_einspracherecht_dritte',
   'bau_einspracherecht_suspensiv',
   'bau_bewilligungsverfahren',
@@ -63,6 +64,8 @@ export const PARAM_KEYS_40 = [
   'infra_schule_kita',
   'infra_oeffentlicher_raum',
   'infra_wirtschaftsansiedlung',
+  // 9. Markt-Kontext (Sotomo 2025)
+  'markt_mietbelastungs_grenze',
 ] as const;
 
 // Compile-time check: PARAM_KEYS_40 must cover all CityParams40 keys
@@ -141,6 +144,13 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Sanierungspflicht Bestand',
     helpText: 'Gesetzliche Pflicht zur energetischen Sanierung von Bestandsbauten',
     levels: ['Keine Pflicht', 'Zielwert empfohlen', 'Gesetzliche Pflicht mit Frist'],
+    group: 'bau',
+  },
+  {
+    key: 'bau_ersatzneubau_effizienz',
+    label: 'Ersatzneubau-Effizienz',
+    helpText: 'Wie viele Netto-Neubauwohnungen entstehen pro abgerissener Wohnung? (Zürich: 2.8x, Lausanne: 6.5x)',
+    levels: ['Ineffizient (2–3x)', 'Mittel (3–5x)', 'Effizient (5x+)'],
     group: 'bau',
   },
   {
@@ -370,6 +380,13 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Wirtschaftsförderung',
     helpText: 'Aktive Ansiedlung von Gewerbe und Unternehmen',
     levels: ['Keine aktive Förderung', 'Moderate Anreize', 'Starke Förderung (Gewerbezonen)'],
+    group: 'infrastruktur',
+  },
+  {
+    key: 'markt_mietbelastungs_grenze',
+    label: 'Mietbelastungsgrenze',
+    helpText: 'Strukturelles Niveau der Mietbelastung (Anteil am Haushaltseinkommen). Sotomo 2025: Tiefes Einkommen 30%, Viertel über 40%.',
+    levels: ['Tief (<20%)', 'Mittel (20–30%)', 'Hoch (>30%)'],
     group: 'infrastruktur',
   },
 ];

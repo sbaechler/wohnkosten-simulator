@@ -9,7 +9,7 @@ export const cities: CityConfig[] = [
       "zinsniveau": -1,
       "zuwanderungsdruck": 2,
       "wirtschaftskraft": 2,
-      "bevoelkerungstrend": -1,
+      "bevoelkerungstrend": 1,
       "marktenge": 2
     },
     "params": {
@@ -52,7 +52,9 @@ export const cities: CityConfig[] = [
       "infra_oepnv": 2,
       "infra_schule_kita": 2,
       "infra_oeffentlicher_raum": 2,
-      "infra_wirtschaftsansiedlung": 2
+      "infra_wirtschaftsansiedlung": 2,
+      "bau_ersatzneubau_effizienz": 0,
+      "markt_mietbelastungs_grenze": 2
     }
   },
   {
@@ -105,7 +107,9 @@ export const cities: CityConfig[] = [
       "infra_oepnv": 2,
       "infra_schule_kita": 2,
       "infra_oeffentlicher_raum": 2,
-      "infra_wirtschaftsansiedlung": 2
+      "infra_wirtschaftsansiedlung": 2,
+      "bau_ersatzneubau_effizienz": 1,
+      "markt_mietbelastungs_grenze": 2
     }
   },
   {
@@ -158,7 +162,9 @@ export const cities: CityConfig[] = [
       "infra_oepnv": 2,
       "infra_schule_kita": 2,
       "infra_oeffentlicher_raum": 2,
-      "infra_wirtschaftsansiedlung": 2
+      "infra_wirtschaftsansiedlung": 2,
+      "bau_ersatzneubau_effizienz": 1,
+      "markt_mietbelastungs_grenze": 2
     }
   },
   {
@@ -211,7 +217,9 @@ export const cities: CityConfig[] = [
       "infra_oepnv": 2,
       "infra_schule_kita": 2,
       "infra_oeffentlicher_raum": 2,
-      "infra_wirtschaftsansiedlung": 2
+      "infra_wirtschaftsansiedlung": 2,
+      "bau_ersatzneubau_effizienz": 1,
+      "markt_mietbelastungs_grenze": 2
     }
   },
   {
@@ -264,7 +272,9 @@ export const cities: CityConfig[] = [
       "infra_oepnv": 2,
       "infra_schule_kita": 2,
       "infra_oeffentlicher_raum": 1,
-      "infra_wirtschaftsansiedlung": 1
+      "infra_wirtschaftsansiedlung": 1,
+      "bau_ersatzneubau_effizienz": 1,
+      "markt_mietbelastungs_grenze": 1
     }
   },
   {
@@ -317,7 +327,9 @@ export const cities: CityConfig[] = [
       "infra_oepnv": 1,
       "infra_schule_kita": 1,
       "infra_oeffentlicher_raum": 1,
-      "infra_wirtschaftsansiedlung": 1
+      "infra_wirtschaftsansiedlung": 1,
+      "bau_ersatzneubau_effizienz": 1,
+      "markt_mietbelastungs_grenze": 1
     }
   },
   {
@@ -370,7 +382,9 @@ export const cities: CityConfig[] = [
       "infra_oepnv": 2,
       "infra_schule_kita": 1,
       "infra_oeffentlicher_raum": 2,
-      "infra_wirtschaftsansiedlung": 1
+      "infra_wirtschaftsansiedlung": 1,
+      "bau_ersatzneubau_effizienz": 1,
+      "markt_mietbelastungs_grenze": 1
     }
   },
   {
@@ -423,7 +437,9 @@ export const cities: CityConfig[] = [
       "infra_oepnv": 1,
       "infra_schule_kita": 2,
       "infra_oeffentlicher_raum": 1,
-      "infra_wirtschaftsansiedlung": 1
+      "infra_wirtschaftsansiedlung": 1,
+      "bau_ersatzneubau_effizienz": 1,
+      "markt_mietbelastungs_grenze": 1
     }
   },
   {
@@ -476,7 +492,9 @@ export const cities: CityConfig[] = [
       "infra_oepnv": 1,
       "infra_schule_kita": 1,
       "infra_oeffentlicher_raum": 1,
-      "infra_wirtschaftsansiedlung": 1
+      "infra_wirtschaftsansiedlung": 1,
+      "bau_ersatzneubau_effizienz": 1,
+      "markt_mietbelastungs_grenze": 1
     }
   },
   {
@@ -529,7 +547,9 @@ export const cities: CityConfig[] = [
       "infra_oepnv": 1,
       "infra_schule_kita": 1,
       "infra_oeffentlicher_raum": 1,
-      "infra_wirtschaftsansiedlung": 1
+      "infra_wirtschaftsansiedlung": 1,
+      "bau_ersatzneubau_effizienz": 1,
+      "markt_mietbelastungs_grenze": 1
     }
   }
 ];

@@ -51,6 +51,8 @@ const BERLIN_BASELINE_V2: CityParams40 = {
   kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 1, kapital_hypothekarregulierung: 1,
   nutzung_kurzzeitvermietung: 1, nutzung_umnutzungsverbot: 1, nutzung_abbruchverbot: 1, nutzung_zweitwohnungen: 1,
   infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
+    bau_ersatzneubau_effizienz: 1,
+    markt_mietbelastungs_grenze: 1,
 };
 
 const BERLIN_CONTEXT: CityContext = {
@@ -79,6 +81,8 @@ const SF_V2: CityParams40 = {
   kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 1, kapital_hypothekarregulierung: 1,
   nutzung_kurzzeitvermietung: 1, nutzung_umnutzungsverbot: 1, nutzung_abbruchverbot: 1, nutzung_zweitwohnungen: 1,
   infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
+    bau_ersatzneubau_effizienz: 1,
+    markt_mietbelastungs_grenze: 1,
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

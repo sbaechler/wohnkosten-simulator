@@ -15,8 +15,8 @@ if (!Array.isArray(raw)) {
   throw new Error(`Expected YAML root to be an array, got ${typeof raw}`);
 }
 
-// Validate all 40 V2 params are present
-const REQUIRED_KEYS = 40;
+// Validate all 42 V2 params are present (40 original + 2 from Sotomo 2025)
+const REQUIRED_KEYS = 42;
 for (const city of raw) {
   const keys = Object.keys(city.params);
   if (keys.length !== REQUIRED_KEYS) {

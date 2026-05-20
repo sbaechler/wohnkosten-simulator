@@ -1,0 +1,93 @@
+.mietbelastung-widget {
+  background: #13132a;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.mietbelastung-widget__title {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+/* ── Single display ────────────────────────────────────────────── */
+
+.mietbelastung-widget__single {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.mietbelastung-widget__bar {
+  display: flex;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  gap: 2px;
+}
+
+.mietbelastung-widget__bar-segment {
+  border-radius: 2px;
+  transition: opacity 0.3s;
+}
+
+.mietbelastung-widget__level-label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.mietbelastung-widget__pct {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* ── Comparison (Heute vs. Simuliert) ──────────────────────────── */
+
+.mietbelastung-widget__comparison {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.mietbelastung-widget__comparison-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.mietbelastung-widget__comparison-label {
+  font-size: 10px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mietbelastung-widget__comparison-value {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mietbelastung-widget__comparison-pct {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.mietbelastung-widget__divider {
+  width: 1px;
+  background: #333;
+}
+
+/* ── Reference footnote ────────────────────────────────────────── */
+
+.mietbelastung-widget__reference {
+  font-size: 9px;
+  color: #555;
+  margin-top: 10px;
+  line-height: 1.3;
+}

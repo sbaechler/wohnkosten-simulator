@@ -10,7 +10,7 @@ export type NodeId =
   // E0 — steuerbare Parameter
   | 'raumplanung_zonenreserve' | 'raumplanung_verdichtung' | 'raumplanung_ausnuetzungsziffer'
   | 'boden_vorkaufsrecht' | 'boden_bauverpflichtung' | 'boden_mehrwertabgabe' | 'boden_bodeneigentumssteuer'
-  | 'bau_energievorgaben' | 'bau_sanierungspflicht'
+  | 'bau_energievorgaben' | 'bau_sanierungspflicht' | 'bau_ersatzneubau_effizienz'
   | 'bau_einspracherecht_dritte' | 'bau_einspracherecht_suspensiv'
   | 'bau_bewilligungsverfahren' | 'bau_normenharmonisierung'
   | 'gemeinnuetzig_mindestanteil' | 'gemeinnuetzig_foerderfonds' | 'gemeinnuetzig_baurecht'
@@ -22,6 +22,7 @@ export type NodeId =
   | 'kapital_auslaendische_investoren' | 'kapital_institutionelle_regulierung' | 'kapital_hypothekarregulierung'
   | 'nutzung_kurzzeitvermietung' | 'nutzung_umnutzungsverbot' | 'nutzung_abbruchverbot' | 'nutzung_zweitwohnungen'
   | 'infra_oepnv' | 'infra_schule_kita' | 'infra_oeffentlicher_raum' | 'infra_wirtschaftsansiedlung'
+  | 'markt_mietbelastungs_grenze'
   // E0 — Kontextfaktoren
   | 'ctx:zinsniveau' | 'ctx:zuwanderungsdruck' | 'ctx:wirtschaftskraft' | 'ctx:bevoelkerungstrend'
   // E1 — Markt-Zustandsvariablen
@@ -56,6 +57,8 @@ export const DAG_EDGES: Edge[] = [
   { from: 'boden_bauverpflichtung',               to: 'angebotspotenzial',          sign: +1, weight: 0.8, time: 'medium' }, // Schwache Evidenz (DE-011)
   { from: 'bau_energievorgaben',                  to: 'angebotspotenzial',          sign: -1, weight: 1.0, time: 'short'  },
   { from: 'bau_sanierungspflicht',                to: 'angebotspotenzial',          sign: -1, weight: 1.0, time: 'short'  },
+  // Sotomo 2025: Ersatzneubau-Effizienz (Zürich 2.8x, Lausanne 6.5x)
+  { from: 'bau_ersatzneubau_effizienz',         to: 'angebotspotenzial',          sign: +1, weight: 1.0, time: 'medium' },
   { from: 'bau_einspracherecht_dritte',           to: 'angebotspotenzial',          sign: -1, weight: 1.2, time: 'medium' }, // NO-001 bestätigt Verzögerung
   { from: 'bau_einspracherecht_suspensiv',        to: 'angebotspotenzial',          sign: -1, weight: 1.0, time: 'short'  },
   { from: 'bau_bewilligungsverfahren',            to: 'angebotspotenzial',          sign: +1, weight: 1.0, time: 'medium' },
@@ -90,6 +93,8 @@ export const DAG_EDGES: Edge[] = [
   { from: 'mietrecht_anfangsmiete',             to: 'mietpreis_schutzlevel',      sign: +1, weight: 1.2, time: 'short'  }, // Paris-Effekt: -5.2% bis -8.2%
   { from: 'mietrecht_mietzinstransparenz',      to: 'mietpreis_schutzlevel',      sign: +1, weight: 0.8, time: 'short'  },
   { from: 'mietrecht_mietzinsindex',            to: 'mietpreis_schutzlevel',      sign: +1, weight: 1.0, time: 'short'  },
+  // Sotomo 2025: Strukturelle Mietbelastung (tiefes Einkommen ∅30%, Viertel >40%)
+  { from: 'markt_mietbelastungs_grenze',       to: 'mietpreis_schutzlevel',      sign: +1, weight: 0.8, time: 'medium' },
 
   // ─── E0 → verdraengungsrisiko ─────────────────────────────────────────────
   // Mietrecht schützt Bestandsmieter, reduziert aber langfristig Angebot (GLOBAL-029, Kholodilin 2024)
@@ -119,6 +124,8 @@ export const DAG_EDGES: Edge[] = [
   { from: 'ctx:zinsniveau',                      to: 'markfriktion',               sign: +1, weight: 1.0, time: 'short'  },
   { from: 'mietrecht_kostenmiete',               to: 'markfriktion',               sign: +1, weight: 1.0, time: 'long'   },
   { from: 'mietrecht_kuendigungsschutz',         to: 'markfriktion',               sign: +1, weight: 0.5, time: 'long'   },
+  // Sotomo 2025: Hohe strukturelle Mietbelastung → rigider Markt mit tiefer Rotation
+  { from: 'markt_mietbelastungs_grenze',       to: 'markfriktion',               sign: +1, weight: 0.8, time: 'long'   },
 
   // ─── E0 → gemeinnuetzig_kraft ─────────────────────────────────────────────
   // Wien-Modell + Skaleneffekt stark bestätigt (GLOBAL-029 + AT-Studien)

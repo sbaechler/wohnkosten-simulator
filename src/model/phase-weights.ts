@@ -79,6 +79,15 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     weights: [0.9, 0.6, 0.3],
     // Kapital wird SOFORT umgelenkt (Renovation vs. Neubau); langfristig weniger relevant
   },
+  // Sotomo 2025: Ersatzneubau-Effizienz (Zürich 2.8x, Lausanne 6.5x)
+  {
+    from: 'bau_ersatzneubau_effizienz',
+    to: 'angebotspotenzial',
+    sign: +1,
+    weights: [0.1, 0.5, 0.8],
+    // Effizienter Ersatzneubau → mehr Netto-Neubau pro Abriss → höheres Angebot.
+    // Kurzfristig gering (laufende Projekte); mittelfristig und langfristig volle Wirkung.
+  },
   {
     from: 'bau_einspracherecht_dritte',
     to: 'angebotspotenzial',
@@ -515,8 +524,8 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → mietpreis_schutzlevel (4 edges)
-  // Research: RESULT-agent2-weights.md (spekulationshemmung group logic applied)
+  // E0 → mietpreis_schutzlevel (5 edges)
+  // Research: RESULT-agent2-weights.md + Sotomo ZH-Wohnraumstudie 2025
   // ═══════════════════════════════════════════════════════════════════
 
   {
@@ -550,7 +559,15 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     weights: [1.0, 0.9, 0.9],
     // Mietzinsindex bindet automatisch an Inflation; sofort und dauerhaft wirksam.
   },
-
+  // Sotomo 2025: Strukturelle Mietbelastung (tiefes Einkommen ∅30%, Viertel >40%)
+  {
+    from: 'markt_mietbelastungs_grenze',
+    to: 'mietpreis_schutzlevel',
+    sign: +1,
+    weights: [0.3, 0.5, 0.7],
+    // Hohe strukturelle Belastung → bereits regulierter Markt → stärkerer Schutz-Effekt.
+    // Langfristig am stärksten wenn Markt sich angepasst hat.
+  },
   // ═══════════════════════════════════════════════════════════════════
   // E0 → gemeinnuetzig_kraft (6 edges)
   // Research: RESULT-agent2-weights.md

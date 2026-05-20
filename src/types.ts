@@ -1,9 +1,15 @@
 // ============================================================
 // Domain Types — Wohnkosten-Simulator
-// E0: 40 atomic parameters + 4 context factors
+// E0: 42 atomic parameters (40 + 2 new from Sotomo ZH-Wohnraumstudie 2025)
 // E1: 10 MarketState variables (normalized –1…+1)
 // E2: 5 DerivedIndicators
 // ============================================================
+//
+// Neue Parameter (Sotomo Wohnraumstudie ZH, September 2025):
+//   - bau_ersatzneubau_effizienz: Netto-Neubau pro Abriss (Zürich: 2.8x, Westschweiz: 6+x)
+//   - markt_mietbelastungs_grenze: Strukturelles Mietbelastungsniveau (tief: 30%, Viertel >40%)
+//   Quelle: https://www.sotomo.ch/files/data/projectfile/2025/09/Sotomo-Wohnraumstudie-%E2%80%93-ZHK-2025-09.pdf
+//
 
 export type ParamValue = 0 | 1 | 2;
 export type ContextValue = -2 | -1 | 0 | 1 | 2;
@@ -23,6 +29,7 @@ export type CityParams40 = {
   // 2. Bau & Bewilligung
   bau_energievorgaben: ParamValue;
   bau_sanierungspflicht: ParamValue;
+  bau_ersatzneubau_effizienz: ParamValue; // Sotomo 2025: Netto-Neubau pro Abriss (Zürich 2.8x, WSchweiz 6+x)
   bau_einspracherecht_dritte: ParamValue;
   bau_einspracherecht_suspensiv: ParamValue;
   bau_bewilligungsverfahren: ParamValue;
@@ -60,6 +67,9 @@ export type CityParams40 = {
   infra_schule_kita: ParamValue;
   infra_oeffentlicher_raum: ParamValue;
   infra_wirtschaftsansiedlung: ParamValue;
+  // 9. Markt-Kontext (statistische Referenzwerte, keine Steuerung)
+  /** Strukturelles Mietbelastungsniveau (Anteil am Haushaltseinkommen) */
+  markt_mietbelastungs_grenze: ParamValue; // Sotomo 2025: tiefes Einkommen 30%, Viertel >40%
 };
 
 export interface CityContext {
