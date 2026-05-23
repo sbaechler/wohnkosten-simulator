@@ -97,19 +97,15 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
     }
 
     function findEquilibrium(supplyShift: number, demandShift: number, supplyRegulation: number): [number, number] {
-      // Ökonomisch korrekte Gleichgewichts-Berechnung:
-      // Angebot:  P = 1 + slope·(q - 7·s)  mit slope = 0.8×(1 + regulation×0.5)
-      // Nachfrage: P = 9 - 0.8·(q - 7·d)
-      // Gleichsetzen → qEq und pEq in Abhängigkeit von slope
-      //
-      // Preiseffekt kommt über BEIDE Variablen:
-      //   demand↑ → Preise ↑ (Kaufkraft/Druck)
-      //   supply↑ → Preise ↓ (Angebotsausweitung)
-      // Das ist die korrekte ökonomische Mechanik.
+      // Gleichgewicht aus:
+      //   Angebot:  P = 1 + slope·(q - 7·s)   mit slope = 0.8·(1 + regulation·0.5)
+      //   Nachfrage: P = 9 - 0.8·(q - 7·d)
+      // Gleichsetzen → (slope + 0.8)·q = 8 + 7·slope·s + 5.6·d
+      // → qEq = (8 + 7·slope·s + 5.6·d) / (slope + 0.8)
+      // Mit slope=0.8 (unreguliert): qEq = (8 + 5.6·s + 5.6·d) / 1.6 = 5 + 3.5·(s+d) ✓
       const slope = 0.8 * (1 + supplyRegulation * 0.5);
       const s = supplyShift, d = demandShift;
-      // Nachfrage steigt mit 0.8, Angebot steigt mit slope
-      const qEq = Math.max(0, Math.min(10, (5 + 3.5 * slope * (s + d)) / (0.8 + slope)));
+      const qEq = Math.max(0, Math.min(10, (8 + 7 * slope * s + 5.6 * d) / (slope + 0.8)));
       const pEq = Math.max(0, Math.min(10, 1 + slope * (qEq - 7 * s)));
       return [qEq, pEq];
     }
