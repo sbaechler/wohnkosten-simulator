@@ -73,6 +73,7 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
       .x(d => x(d[0])).y(d => y(d[1]))
       .curve(d3.curveBasis);
 
+    const CURVE_POINTS = 200;
     const SHIFT_SCALE = 7;
 
     function supplyCurve(shift: number, regulation: number): [number, number][] {
@@ -81,16 +82,16 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
       // regulation =  0 (neutral):             slope = 0.8 × 1.0 = 0.8 → Normalkurve
       // regulation = +1 (unelastisch/reguliert): slope = 0.8 × 1.5 = 1.2 → steile Kurve, Preis reagiert stark
       const slope = 0.8 * (1 + regulation * 0.5);
-      return Array.from({ length: 50 }, (_, i) => {
-        const q = (i / 49) * 10;
+      return Array.from({ length: CURVE_POINTS }, (_, i) => {
+        const q = (i / (CURVE_POINTS - 1)) * 10;
         const p = 1 + (q - shift * SHIFT_SCALE) * slope;
         return [q, Math.max(0, Math.min(10, p))] as [number, number];
       });
     }
 
     function demandCurve(shift: number): [number, number][] {
-      return Array.from({ length: 50 }, (_, i) => {
-        const q = (i / 49) * 10;
+      return Array.from({ length: CURVE_POINTS }, (_, i) => {
+        const q = (i / (CURVE_POINTS - 1)) * 10;
         const p = 9 - (q - shift * SHIFT_SCALE) * 0.8;
         return [q, Math.max(0, Math.min(10, p))] as [number, number];
       });
