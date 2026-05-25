@@ -71,7 +71,7 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
 
     const line = d3.line<[number, number]>()
       .x(d => x(d[0])).y(d => y(d[1]))
-      .curve(d3.curveBasis);
+      .curve(d3.curveLinear);
 
     const CURVE_POINTS = 200;
     const SHIFT_SCALE = 7;
