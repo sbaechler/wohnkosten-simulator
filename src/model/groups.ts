@@ -13,7 +13,8 @@ import type { MarketState, CityParams40, ParamsDiff40 } from '../types';
 /** Die 8 festen Bevölkerungsgruppen */
 export type GroupId =
   | 'geringverdiener'
-  | 'normalverdiener_mieter'
+  | 'normalverdiener_bestand'
+  | 'normalverdiener_angebot'
   | 'glueckspilze'
   | 'normalverdiener_eigentuemer'
   | 'junge_familien'
@@ -38,11 +39,18 @@ export const GROUPS: GroupMeta[] = [
     description: 'Tiefe Einkommen, auf Sozialhilfe oder stark geförderte Wohnungen angewiesen',
   },
   {
-    id: 'normalverdiener_mieter',
-    label: 'Normalverdiener Mieter',
-    shortLabel: 'Mieter',
+    id: 'normalverdiener_bestand',
+    label: 'Bestandsmieter',
+    shortLabel: 'Bestand',
     emoji: '🏠',
-    description: 'Mittleres Einkommen, auf dem freien Mietmarkt',
+    description: 'Bestehende Mietverhältnisse, geschützt durch Mietrecht und Regulierung',
+  },
+  {
+    id: 'normalverdiener_angebot',
+    label: 'Neumieter (Angebot)',
+    shortLabel: 'Angebot',
+    emoji: '🔑',
+    description: 'Wohnungssuchende auf dem freien Markt zu aktuellen Konditionen',
   },
   {
     id: 'glueckspilze',
@@ -118,17 +126,22 @@ function basePriceTrend(state: MarketState, group: GroupId): { trend: number; ex
 
   const base = supplyEffect + demandEffect;
 
-  // Mietschutz dämpft Preise für Mieter
-  const protectionEffect = state.mietpreis_schutzlevel * 0.3;
+  // Mietschutz dämpft Preisanstieg für Mieter
+  const protectionEffect = state.mietpreis_schutzlevel * 0.4;
 
   // Gruppe-spezifische Basis-Anpassung
   let groupBase = base;
 
   if (group === 'geringverdiener') {
     // Geringverdiener sind stärker vom Markt entkoppelt (Sozialhilfe, Ergänzungsleistungen)
-    groupBase = base * 0.6 + protectionEffect * 0.8;
-  } else if (group === 'normalverdiener_mieter') {
-    groupBase = base * 0.85 + protectionEffect * 0.5;
+    groupBase = base * 0.5 - protectionEffect * 1.0;
+  } else if (group === 'normalverdiener_bestand') {
+    // Bestandsmieter: Starke Dämpfung durch Regulierung, reagiert träge auf Markt
+    groupBase = base * 0.4 - protectionEffect * 1.2;
+  } else if (group === 'normalverdiener_angebot') {
+    // Neumieter: Volle Marktdynamik, kaum Schutz durch Bestandshürden
+    // Hoher Mietschutz für den Bestand kann das Angebot für Neumieter sogar verknappen (Spillover)
+    groupBase = base * 1.2 + protectionEffect * 0.2;
   } else if (group === 'glueckspilze') {
     // Glückspilze sind fast vollständig vom Markt entkoppelt
     // Ihre "Preise" (Kostenlimite) steigen nur minimal mit dem Markt
@@ -139,13 +152,15 @@ function basePriceTrend(state: MarketState, group: GroupId): { trend: number; ex
     groupBase = base * 0.5 + (-state.angebotspotenzial) * 0.3;
   } else if (group === 'junge_familien') {
     // Familien sind sehr preissensitiv, grosser Wohnungsbedarf
-    groupBase = base * 1.1 + protectionEffect * 0.2;
+    // Oft Neumieter, daher belastet durch Marktdruck
+    groupBase = base * 1.1 + protectionEffect * 0.1;
   } else if (group === 'genossenschafter') {
     // Genossenschafter sind gut geschützt durch Gemeinnützigkeit
-    groupBase = base * 0.3 + state.gemeinnuetzig_kraft * 0.3;
+    groupBase = base * 0.3 - state.gemeinnuetzig_kraft * 0.5;
   } else if (group === 'rentner') {
-    // Rentner sind preissensitiv, fixiertes Einkommen, hohe Sanierungsbetroffenheit
-    groupBase = base * 0.7 + state.verdraengungsrisiko * 0.2 + protectionEffect * 0.4;
+    // Rentner sind preissensitiv, fixiertes Einkommen
+    // Meist Bestandsmieter -> profitieren von Schutz
+    groupBase = base * 0.7 + state.verdraengungsrisiko * 0.2 - protectionEffect * 0.8;
   } else if (group === 'high_earner') {
     // High Earner sind weniger preissensitiv, mehr steuer- und standortmotiviert
     groupBase = base * 0.4 + state.investitionsattraktivitaet * 0.3;
@@ -221,11 +236,15 @@ function computeDrivers(
       { key: 'nutzung_abbruchverbot', direction: 'down', weight: 0.8 },
       { key: 'bau_sanierungspflicht', direction: 'up', weight: 1.0 },
     ],
-    normalverdiener_mieter: [
-      { key: 'mietrecht_kostenmiete', direction: 'down', weight: 1.2 },
-      { key: 'mietrecht_kuendigungsschutz', direction: 'down', weight: 0.8 },
-      { key: 'bau_sanierungspflicht', direction: 'up', weight: 0.8 },
-      { key: 'nutzung_abbruchverbot', direction: 'down', weight: 0.6 },
+    normalverdiener_bestand: [
+      { key: 'mietrecht_kuendigungsschutz', direction: 'down', weight: 1.5 },
+      { key: 'mietrecht_mietzinsindex', direction: 'down', weight: 1.0 },
+      { key: 'mietrecht_kostenmiete', direction: 'down', weight: 0.8 },
+    ],
+    normalverdiener_angebot: [
+      { key: 'raumplanung_verdichtung', direction: 'down', weight: 1.2 },
+      { key: 'mietrecht_anfangsmiete', direction: 'down', weight: 1.0 },
+      { key: 'bau_ersatzneubau_effizienz', direction: 'down', weight: 1.0 },
     ],
     glueckspilze: [
       { key: 'gemeinnuetzig_foerderfonds', direction: 'down', weight: 1.0 },
