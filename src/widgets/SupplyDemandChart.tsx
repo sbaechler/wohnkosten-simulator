@@ -74,7 +74,7 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
       .curve(d3.curveLinear);
 
     const CURVE_POINTS = 200;
-    const SHIFT_SCALE = 7;
+    const SHIFT_SCALE = 5;
 
     function supplyCurve(shift: number, regulation: number): [number, number][] {
       // Steigung abhängig von Regulationsgrad:
