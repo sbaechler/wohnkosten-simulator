@@ -75,7 +75,12 @@ export function WidgetGrid({ context, baseline, modified, diff }: Props) {
       <TrendArrow label="Neubau-Hemmnis" phases={modifiedPhases} baselinePhases={hasChanges ? baselinePhases : undefined} invertColors getValue={p => p.derived.neubau_hemmnisindex} />
       <TrendArrow label="Verdichtungsdruck" phases={modifiedPhases} baselinePhases={hasChanges ? baselinePhases : undefined} invertColors getValue={p => p.marketState.angebotspotenzial * -0.5 + p.marketState.nachfragedruck * 0.3} />
       <TrendArrow label="Stadtbild" phases={modifiedPhases} baselinePhases={hasChanges ? baselinePhases : undefined} invertColors getValue={stadtbildGetter(modified, baseline)} />
-      <MietbelastungWidget params={modified} baseline={hasChanges ? baseline : undefined} />
+      <MietbelastungWidget
+        params={modified}
+        baseline={hasChanges ? baseline : undefined}
+        marketState={latestModified.marketState}
+        baselineMarketState={hasChanges ? latestBaseline.marketState : undefined}
+      />
       <OwnershipDonut context={context} baseline={baseline} modified={modified} diff={diff} state={latestModified.marketState} baselineState={hasChanges ? latestBaseline.marketState : undefined} />
     </div>
   );

@@ -36,18 +36,33 @@ const LABELS = {
 
 /**
  * Berechnet Eigentumsverteilung aus V2-Parametern.
+ *
+ * Baselines (BFS Strukturerhebung / BWO / Wüest Partner 2023/2024):
+ *   - Privat (Privatpersonen, inkl. Einzel-Eigentümer): ~59%
+ *     Quelle: BFS 2023 — 45% der Mietwohnungen in Privatbesitz;
+ *             private Eigentümer machen ~37% Eigentumsquote aus
+ *   - Institutionelle Anleger (Fonds, Pensionskassen, REITs): ~19%
+ *     Quelle: Wüest Partner Schätzung 2023/2024
+ *   - Genossenschaften (BWO Zähler 2022, 90% Coverage): ~10%
+ *     Quelle: BWO, Wohnungen gemeinnütziger Wohnbauträger
+ *   - Öffentlicher Wohnungsbau (BWO Schätzung): ~5%
+ *     Quelle: BWO Schätzung 2022
+ *
  * Die Verteilung reagiert auf:
  * - Gemeinnützigkeitsförderung (→ Genossenschaften, öffentlich)
  * - Mietrecht-Strenge (→ weniger institutionelle Anleger)
  * - Ausländische Investoren-Regulierung (→ weniger institutionell)
  * - Wirtschaftskraft (→ mehr institutionell)
  */
+const BFS_BASELINE = {
+  privat:         0.59,
+  institutionell:  0.19,
+  genossenschaft:  0.10,
+  oeffentlich:    0.05,
+} as const;
+
 function computeOwnership(params: CityParams40, context: CityContext): OwnershipShares {
-  // Basisverteilung (gemäss BFS / Wüest Partner ca. 36% Eigentum, Rest Miete)
-  let privat = 0.42;
-  let institutionell = 0.28;
-  let genossenschaft = 0.18;
-  let oeffentlich = 0.12;
+  let { privat, institutionell, genossenschaft, oeffentlich } = BFS_BASELINE;
 
   // Gemeinnützig fördert Genossenschafts- und öffentlichen Wohnungsbau
   const foerderung =
@@ -68,7 +83,7 @@ function computeOwnership(params: CityParams40, context: CityContext): Ownership
   genossenschaft += mietEffect * 0.6;
   privat += mietEffect * 0.4;
 
-  // Kapitalregulierung: restriktive параметры reduzieren institutionelle
+  // Kapitalregulierung: restriktive Parameter reduzieren institutionelle
   const kapitalEffect =
     (params.kapital_auslaendische_investoren +
       params.kapital_institutionelle_regulierung +

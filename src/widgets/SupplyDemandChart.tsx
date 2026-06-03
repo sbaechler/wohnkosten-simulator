@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
 import type { CityParams40, CityContext, ParamsDiff40 } from '../types';
+import { supplyCurve, demandCurve, findEquilibrium } from '../model/supply-demand';
 import type { PhaseResult } from '../model/phases';
 import { computeMarketState, clampE1 } from '../model/market-state';
 import './SupplyDemandChart.css';
@@ -73,50 +74,12 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
       .x(d => x(d[0])).y(d => y(d[1]))
       .curve(d3.curveLinear);
 
-    const CURVE_POINTS = 200;
-    const SHIFT_SCALE = 5;
-
-    function supplyCurve(shift: number, regulation: number): [number, number][] {
-      // Steigung abhängig von Regulationsgrad:
-      // regulation = -1 (elastisch/dereguliert): slope = 0.8 × 0.5 = 0.4 → flache Kurve, Menge reagiert stark
-      // regulation =  0 (neutral):             slope = 0.8 × 1.0 = 0.8 → Normalkurve
-      // regulation = +1 (unelastisch/reguliert): slope = 0.8 × 1.5 = 1.2 → steile Kurve, Preis reagiert stark
-      const slope = 0.8 * (1 + regulation * 0.5);
-      return Array.from({ length: CURVE_POINTS }, (_, i) => {
-        const q = (i / (CURVE_POINTS - 1)) * 10;
-        const p = 1 + (q - shift * SHIFT_SCALE) * slope;
-        return [q, Math.max(0, Math.min(10, p))] as [number, number];
-      });
-    }
-
-    function demandCurve(shift: number): [number, number][] {
-      return Array.from({ length: CURVE_POINTS }, (_, i) => {
-        const q = (i / (CURVE_POINTS - 1)) * 10;
-        const p = 9 - (q - shift * SHIFT_SCALE) * 0.8;
-        return [q, Math.max(0, Math.min(10, p))] as [number, number];
-      });
-    }
-
-    function findEquilibrium(supplyShift: number, demandShift: number, supplyRegulation: number): [number, number] {
-      // Gleichgewicht aus:
-      //   Angebot:  P = 1 + slope·(q - 7·s)   mit slope = 0.8·(1 + regulation·0.5)
-      //   Nachfrage: P = 9 - 0.8·(q - 7·d)
-      // Gleichsetzen → (slope + 0.8)·q = 8 + 7·slope·s + 5.6·d
-      // → qEq = (8 + 7·slope·s + 5.6·d) / (slope + 0.8)
-      // Mit slope=0.8 (unreguliert): qEq = (8 + 5.6·s + 5.6·d) / 1.6 = 5 + 3.5·(s+d) ✓
-      const slope = 0.8 * (1 + supplyRegulation * 0.5);
-      const s = supplyShift, d = demandShift;
-      const qEq = Math.max(0, Math.min(10, (8 + 7 * slope * s + 5.6 * d) / (slope + 0.8)));
-      const pEq = Math.max(0, Math.min(10, 1 + slope * (qEq - 7 * s)));
-      return [qEq, pEq];
-    }
-
     // Baseline curves: always use baseline params for the dashed reference line
     const baselineState = clampE1(computeMarketState(context, baseline, baseline, {}));
-    const [bq, bp] = findEquilibrium(baselineState.angebotspotenzial, baselineState.nachfragedruck, baselineState.angebotspotenzial_regulation);
+    const [bq, bp] = findEquilibrium(baselineState.angebotspotenzial, baselineState.nachfragedruck, baselineState.angebotspotenzial_regulation, baselineState);
 
     // Draw baseline curves (dashed)
-    g.append('path').datum(supplyCurve(baselineState.angebotspotenzial, baselineState.angebotspotenzial_regulation))
+    g.append('path').datum(supplyCurve(baselineState.angebotspotenzial, baselineState.angebotspotenzial_regulation, baselineState))
       .attr('d', line).attr('fill', 'none')
       .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
     g.append('path').datum(demandCurve(baselineState.nachfragedruck))
@@ -134,10 +97,10 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
     activePhasesForChart.forEach((phase, idx) => {
       const isActive = idx === activePhaseIndex;
       const state = phase.marketState;
-      const [pq, pp] = findEquilibrium(state.angebotspotenzial, state.nachfragedruck, state.angebotspotenzial_regulation);
+      const [pq, pp] = findEquilibrium(state.angebotspotenzial, state.nachfragedruck, state.angebotspotenzial_regulation, state);
 
       // Supply curve — Steigung abhängig von Regulationsgrad
-      g.append('path').datum(supplyCurve(state.angebotspotenzial, state.angebotspotenzial_regulation))
+      g.append('path').datum(supplyCurve(state.angebotspotenzial, state.angebotspotenzial_regulation, state))
         .attr('d', line).attr('fill', 'none')
         .attr('stroke', COLORS.supply)
         .attr('stroke-width', isActive ? 2.5 : 1)
