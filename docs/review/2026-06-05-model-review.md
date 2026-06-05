@@ -14,7 +14,7 @@ Architektur, Datenmodell (3 Ebenen E0→E1→E2) und State-Flow (URL als Source 
 
 Die grössten Risiken liegen in **(a) versteckter Duplikation der DAG-Definition** (`graph.ts` vs. `phase-weights.ts`, die auseinanderdriften), **(b) einem Cache-Bug, der Stadtwchsel falsch cached**, und **(c) mehreren toten bzw. ungenutzten Feldern** im Datenmodell. Die AGENTS-Konvention "keine magic numbers in `phase-weights.ts`" wird an mehreren Stellen verletzt.
 
-Es wurden **6 echte Bugs** (P0/P1) und **7 strukturelle Probleme** (P1/P2) identifiziert, dazu mehrere kleinere Issues.
+Es wurden **5 echte Bugs** (P0/P1) und **7 strukturelle Probleme** (P1/P2) identifiziert, dazu mehrere kleinere Issues. (Ursprünglich 6 Bugs — B6 erwies sich nach Recherche als Fehlalarm.)
 
 ---
 
@@ -57,18 +57,42 @@ Da `DAG_EDGES: Edge[]` bereits getypt ist, ist die Bedingung **trivialerweise tr
 **Impact:** False sense of security — der Test suggeriert Validierung, deckt aber nichts ab.
 **Referenz:** In `params.ts:72-78` ist der entsprechende Check korrekt (prüft beide Richtungen der Schlüssel-Gleichheit).
 
-#### B6 — `rentner`-Formel widerspricht ihrem Kommentar (P0/P1)
+#### B6 — `rentner`-Formel: Korrekt, **kein Bug** (Status: verifiziert)
 **Datei:** `src/model/groups.ts:160-163`
-**Problem:**
+**Erste Einschätzung:** Kommentar "profitieren von Schutz" passt nicht zu `+ verdraengungsrisiko * 0.2`.
+**Verifikation (durchgeführt 2026-06-05):**
+
+1. **Git-History** (`git log -p -S "rentner" -- src/model/groups.ts`):
+   - **Commit `2dfe7d7` (28.03.2026, Erst-Version):** `groupBase = base * 0.7 + state.verdraengungsrisiko * 0.2 + protectionEffect * 0.4` — die `+protectionEffect`-Formel war ein systematischer Vorzeichen-Bug, der **alle** Mieter-Gruppen betraf (gleiches Muster in `geringverdiener`, `normalverdiener_mieter`, `junge_familien`).
+   - **Commit `0bfdd46` (25.05.2026, Split-Refactor):** Vorzeichen-Korrekturen für die Schutz-empfangenden Gruppen:
+     - `geringverdiener`: `+ protectionEffect * 0.8` → `− protectionEffect * 1.0`
+     - `normalverdiener_bestand` (neu aus `normalverdiener_mieter`): `+ protectionEffect * 0.5` → `− protectionEffect * 1.2`
+     - `genossenschafter`: `+ state.gemeinnuetzig_kraft * 0.3` → `− state.gemeinnuetzig_kraft * 0.5`
+     - **`rentner`: `+ protectionEffect * 0.4` → `− protectionEffect * 0.8`** ← der fragliche Term
+   - Der `+ state.verdraengungsrisiko * 0.2`-Term blieb in beiden Commits unverändert.
+
+2. **Recherche-Belege** (`docs/recherche/CH/CH-008-eth-spur-verdichtung-verdraengung-2025.md`):
+   > *"Verdrängung betrifft besonders Haushalte mit niedrigem Einkommen und **ältere Personen** in sanierungsbedürftigen Beständen"*
+   > *"Verdrängte Bevölkerung: Vor allem vulnerable Personen — Menschen, die wahrscheinlich Schwierigkeiten haben, wieder bezahlbaren Wohnraum zu finden"*
+
+   ETH SPUR 2025 benennt Rentner (ältere Personen) **explizit** als verletzliche Gruppe. Hohes `verdraengungsrisiko` ist also genau das, was auf Rentner preistreibend wirkt.
+
+3. **Logik-Check:**
+   - `mietpreis_schutzlevel > 0` = Regulierung schützt → Preistrend für Rentner soll **sinken** (sie profitieren) → `− protectionEffect * 0.8` ist **korrekt** ✓
+   - `verdraengungsrisiko > 0` = Verdrängungsdruck hoch → Preistrend für Rentner soll **steigen** (sie werden durch Sanierung/Ersatzneubau verdrängt) → `+ verdraengungsrisiko * 0.2` ist **korrekt** ✓
+
+**Schluss:** Code und Kommentar sind beide korrekt. Mein initialer B6-Flag war ein Fehlalarm. Die einzige kleine Inkonsistenz ist, dass der Kommentar nur den `protectionEffect`-Aspekt adressiert, nicht den `verdraengungsrisiko`-Aspekt.
+
+**Empfehlung (P3, Polish):** Kommentar präzisieren, damit die Logik klarer wird:
 ```ts
-// Rentner sind preissensitiv, fixiertes Einkommen
-// Meist Bestandsmieter -> profitieren von Schutz
 } else if (group === 'rentner') {
+  // Rentner: preissensitiv, fixiertes Einkommen
+  // - Meist Bestandsmieter → profitieren von Mietschutz (protection dämpft Trend)
+  // - Als verletzliche Gruppe (CH-008) aber auch verdrängungsgefährdet
+  //   bei Sanierung/Ersatzneubau (verdraengungsrisiko erhöht Trend)
   groupBase = base * 0.7 + state.verdraengungsrisiko * 0.2 - protectionEffect * 0.8;
 }
 ```
-Kommentar sagt "profitieren von Schutz", aber `+ verdraengungsrisiko * 0.2` addiert Druck. Fachliche Klärung nötig: Sollte hier `-verdraengungsrisiko` stehen (analog zu Bestandsmieter), oder ist die Logik korrekt und der Kommentar veraltet?
-**Impact:** Falsche Preistrends für eine ganze Bevölkerungsgruppe (immerhin ein substantieller Anteil der Schweizer Haushalte).
 
 #### B7 — Veraltete / inkonsistente Kommentare in `phase-weights.ts` (P3)
 **Datei:** `src/model/phase-weights.ts`
@@ -205,14 +229,8 @@ Sortiert nach Priorität, jedes Item mit Aufwandsschätzung und Abhängigkeiten.
 3. Test in `phase-pipeline.test.ts` ergänzen, der explizit zwei verschiedene Städte mit gleichen Params/Diff aufruft und unterschiedliche Cache-Einträge prüft.
 4. `invalidatePhasesCache` muss nichts ändern — `clear()` bleibt.
 
-#### Fix-2: B6 — `rentner`-Vorzeichen klären
-**Datei:** `src/model/groups.ts:160-163`
-**Aufwand:** 30 min (inkl. Recherche)
-**Schritte:**
-1. Fachliche Recherche: Reagiert die Rentner-Preisentwicklung positiv oder negativ auf Verdrängungsrisiko?
-2. Hypothese: wahrscheinlich `-` (wie bei Bestandsmieter: Schutz durch geringe Fluktuation)
-3. Formel oder Kommentar angleichen
-4. Test in `gruppen-divergenz.test.ts` ergänzen, der die Richtung fixiert.
+#### Fix-2: ~~B6 — `rentner`-Vorzeichen klären~~ → **erledigt (kein Bug)**
+**Status:** Recherche durchgeführt, Code ist korrekt. Siehe B6-Block oben. Nur Polish nötig (Kommentar präzisieren, kein Code-Fix). Wird in Sprint 2 als Fix-7b nachgeholt.
 
 #### Fix-3: B4 — `computeMarketState` Diff konsistent nutzen
 **Datei:** `src/model/market-state.ts:73-76`
@@ -271,6 +289,7 @@ Sortiert nach Priorität, jedes Item mit Aufwandsschätzung und Abhängigkeiten.
 1. Section-Header-Counts updaten (20, 15, 9, 9 statt 16, 11, 7, 8).
 2. Chinesisches `额外` in Z. 846 entfernen.
 3. Z. 950 Kommentar "Phase 3" entweder präzisieren oder in normalen Kanten-Kommentar umwandeln.
+4. **Fix-7b (war B6):** `rentner`-Kommentar in `groups.ts:160-163` präzisieren, damit beide Mechaniken (Schutz und Verdrängung) erklärt sind.
 
 #### Fix-8: K1 — `extra`-Feld aus `basePriceTrend` entfernen
 **Datei:** `src/model/groups.ts:121, 169-172`
@@ -381,6 +400,6 @@ npx vitest run
 
 ## Offene Fragen an Stakeholder
 
-1. **B6 `rentner`-Vorzeichen:** Soll die Preisentwicklung für Rentner positiv oder negativ auf Verdrängungsrisiko reagieren? Fachlich klären, dann fixen.
+1. ~~**B6 `rentner`-Vorzeichen**~~ → **erledigt.** Code ist korrekt (CH-008 ETH SPUR bestätigt). Nur Kommentar präzisieren (Fix-7b).
 2. **K4 `markt_mietbelastungs_grenze`:** Kontext oder Parameter? Wirkt sich auf UI, Tests, YAML-Schema aus.
 3. **S5 Magic-Number-Policy:** Soll `calibration.ts` extrahiert werden, oder AGENTS.md gelockert werden? Team-Entscheidung.
