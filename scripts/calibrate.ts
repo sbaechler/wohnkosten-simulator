@@ -16,8 +16,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PHASE_WEIGHTED_EDGES } from '../src/model/phase-weights.js';
-import { cities } from '../src/generated/cities.js';
+import { PHASE_WEIGHTED_EDGES } from '../src/model/phase-weights.ts';
+import { cities } from '../src/generated/cities.ts';
 import type { CityContext, CityParams40, ParamsDiff40, MarketState, DerivedIndicators } from '../src/types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
