@@ -55,7 +55,6 @@ export default function App() {
           ) : (
             <DAGVisualization
               context={context}
-              baseline={baseline}
               modified={modified}
               diff={diff}
             />

@@ -18,7 +18,9 @@ src/
 │   ├── market-state.ts     # E1: 10 Marktvariablen (normiert –1…+1)
 │   ├── derived.ts          # E2: abgeleitete Indikatoren
 │   ├── params.ts          # Param-Metadaten, Diff-Funktionen
-│   └── phases.ts          # Phase types
+│   ├── phases.ts          # Phase types
+│   ├── dag-topology.ts    # DAG topology projection (single-weight for viz)
+│   └── phase-weights.ts   # Phase-gewichtete Kanten (P1/P2/P3 weights)
 ├── widgets/                # React+D3 Widgets
 │   ├── WidgetGrid.tsx     # Layout-Orchestration
 │   ├── GroupTrendWidget   # Preistrend-Tabelle

@@ -336,7 +336,7 @@ function makeTooltip(trend: number, drivers: GroupPriceTrend['drivers']): string
 /**
  * Berechnet die Preistrends für alle 8 Bevölkerungsgruppen.
  *
- * @param state   Markt-Zustand (E1) aus computeMarketState()
+ * @param state   Markt-Zustand (E1) aus computePhasesCached()
  * @param baseline Original-Parameter (Ist-Zustand)
  * @param modified Geänderte Parameter (Nutzer-Szenario)
  * @param diff    Geänderte Parameter (from/to)

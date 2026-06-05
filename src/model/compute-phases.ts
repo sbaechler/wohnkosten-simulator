@@ -155,8 +155,8 @@ export function* computePhasePipeline(
 
 const _cache = new Map<string, PhaseResult[]>();
 
-function _cacheKey(params: CityParams40, diff: ParamsDiff40): string {
-  return JSON.stringify({ params, diff });
+function _cacheKey(context: CityContext, params: CityParams40, diff: ParamsDiff40): string {
+  return JSON.stringify({ context, params, diff });
 }
 
 export function computePhasesCached(
@@ -164,7 +164,7 @@ export function computePhasesCached(
   params: CityParams40,
   diff: ParamsDiff40,
 ): PhaseResult[] {
-  const key = _cacheKey(params, diff);
+  const key = _cacheKey(context, params, diff);
   const cached = _cache.get(key);
   if (cached) return cached;
 

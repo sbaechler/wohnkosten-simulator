@@ -256,6 +256,39 @@ Sortiert nach Priorität, jedes Item mit Aufwandsschätzung und Abhängigkeiten.
 9. Alle bestehenden Tests müssen grün bleiben — `dag-integrity.test.ts` ist weiterhin valide.
 10. Neuen Test: `dag-topology.test.ts` der prüft, dass `getDagTopology` alle 11 E1 + 4 E2 Nodes abdeckt (Konsistenz mit `phase-pipeline.test.ts`).
 
+---
+
+### Sprint 1 — Completion Status (2026-06-06)
+
+**Erledigt:**
+
+| Fix | Status | Notizen |
+|-----|--------|---------|
+| Fix-1 (B1 Cache-Key) | ✅ Done | `_cacheKey` enthält `context`. Neuer Test in `phase-pipeline.test.ts` (zwei Städte, gleiche Params → zwei Cache-Einträge). |
+| Fix-2 (B6 rentner) | ✅ Done (kein Bug) | Recherche bestätigt: ETH SPUR 2025 (`CH-008`) listet ältere Personen explizit als verletzliche Gruppe. Mechanik korrekt. Polish in Fix-7b. |
+| Fix-3 (B4 Diff) | ✅ Done | `market-state.ts` gelöscht → `computePhasesCached` ist jetzt die einzige Compute-Entry. `diff` fliesst korrekt durch die Pipeline. |
+| Fix-4 (S1 DAG-Konsolidierung) | ✅ Done | `dag-topology.ts` neu (60 LOC, single-weight Projektion). `graph.ts` + `market-state.ts` gelöscht. `DAGVisualization.tsx` + `SupplyDemandChart.tsx` migriert. `dag-topology.test.ts` neu (9 Tests). |
+
+**Begleitende Aufräumarbeiten:**
+
+- `App.tsx:56-61`: `baseline`-Prop aus `DAGVisualization`-Call entfernt (jetzt unused).
+- `DAGVisualization.tsx:382`: `baseline`-Prop aus Interface entfernt.
+- `DAGVisualization.tsx:392`: `phases[phases.length - 1]` statt hardcoded `phases[2]` (defensiv, falls Phasenanzahl ändert).
+- `SupplyDemandChart.tsx:6,42-46`: Baseline-Compute mit `useMemo` + Deps `[context, baseline]` (React-konform, kein render-path anti-pattern).
+- `groups.ts:339`: JSDoc von `computeMarketState()` auf `computePhasesCached()` aktualisiert.
+- `AGENTS.md:23-25`: `dag-topology.ts` + `phase-weights.ts` ergänzt.
+
+**Verifikation:**
+
+- `npx vitest run`: **104 passed, 1 skipped** (baseline 94/95 + 9 neu in `dag-topology.test.ts` + 1 cache-key-Test in `phase-pipeline.test.ts`).
+- `npx tsc --noEmit`: clean.
+
+**Hinweise für Sprint 2:**
+
+- `clampE1`-Migration (Fix-4 Schritt 8 / Fix-12) entfällt — Datei ist mit `market-state.ts` gelöscht.
+- Sollten für `SupplyDemandChart` weitere Re-Memoisationen geprüft werden (`activePhasesForChart` etc.)?
+- B2/B3 (tote Felder) und S4 (clamp) sind jetzt deutlich kleiner geworden.
+
 ### Sprint 2: Aufräumen (P2)
 
 #### Fix-5: B2 + B3 — Tote Felder und unbenutzte Parameter entfernen

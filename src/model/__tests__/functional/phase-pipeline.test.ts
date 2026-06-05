@@ -147,4 +147,14 @@ describe('computePhasesCached', () => {
     const second = computePhasesCached(ZUERICH_CONTEXT, ZUERICH_V2, EMPTY_DIFF);
     expect(first).not.toBe(second);
   });
+
+  it('different contexts with same params/diff produce different cache entries', () => {
+    const zuerich = computePhasesCached(ZUERICH_CONTEXT, ZUERICH_V2, EMPTY_DIFF);
+    const winterthur = computePhasesCached(
+      { ...ZUERICH_CONTEXT, zuwanderungsdruck: 0 },
+      ZUERICH_V2,
+      EMPTY_DIFF,
+    );
+    expect(zuerich).not.toEqual(winterthur);
+  });
 });
