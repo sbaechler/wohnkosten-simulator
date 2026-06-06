@@ -369,14 +369,14 @@ Sortiert nach Priorität, jedes Item mit Aufwandsschätzung und Abhängigkeiten.
 
 ### Sprint 3: Polish (P3)
 
-#### Fix-11: S3 — `sign`+`weight` zusammenführen
-**Aufwand:** 2-3 h
-**Schritte:**
-1. In `phase-weights.ts` Schema umstellen auf `weights: readonly [number, number, number]` (signed).
-2. Codemod oder Skript schreiben, das alle `sign:` Zeilen in den Edge-Objekten entfernt und die `weights` mit Vorzeichen versieht.
-3. Formel `numerator += edge.sign * weight * delta` → `numerator += weight * delta`.
-4. Tests in `dag-integrity.test.ts` (sign-Check) anpassen oder entfernen.
-5. Kompatibilität mit `dag-topology` (aus Fix-4) prüfen.
+#### Fix-11: ~~S3 — `sign`+`weight` zusammenführen~~ → **dropped (Architektur-Entscheidung)**
+**Status:** Diskutiert 2026-06-06, verworfen. Aktuelles `sign: ±1` + `weights: [w1, w2, w3]` Schema bleibt.
+**Begründung:**
+- 0/111 Edges haben phasenabhängige Vorzeichen (empirisch verifiziert).
+- `sign: ±1` ist die qualitative Ja/Nein-Frage („mehr Wohnraum fördert Angebot = +1"), `weights: [...]` die quantitative Stärke. Diese Trennung ist semantisch sauberer als `[-0.2, -0.6, -0.4]`.
+- Pipeline-Formel `numerator += sign * weight * delta` macht den Edge-Effekt transparent.
+- **Negative `weights` werden bewusst als Escape hatch offengehalten** — falls ein Vektor oszilliert (Vorzeichen-Wechsel in einer späteren Phase nötig), soll das Schema das ohne Migration erlauben.
+- Keine Integritäts-Invariante (kein sign-flip-Assert), weil das den Escape hatch blockieren würde.
 
 #### Fix-12: S4 — `clamp` deduplizieren
 **Aufwand:** 15 min
@@ -387,15 +387,20 @@ Sortiert nach Priorität, jedes Item mit Aufwandsschätzung und Abhängigkeiten.
 4. Build + Tests.
 
 #### Fix-13: S5 — Magic-Number-Konsolidierung
-**Aufwand:** 2-3 h
-**Schritte:**
-1. Entscheidung: Option 1 (Konstanten in `calibration.ts`) oder Option 2 (AGENTS.md lockern).
-2. Falls Option 1: `src/model/calibration.ts` mit:
-   - `PERSISTENCE`, `PHASE_BASE_MULTIPLIER`, `MARKT_MODULATOR_FACTOR` (aus `compute-phases.ts`)
-   - `MIETBELASTUNG_SENSITIVITY` (aus `belastung.ts`)
-   - `KNAPPHEIT_GEWICHTE` (aus `supply-demand.ts`)
-   - `GRUPPEN_FAKTOREN` (aus `groups.ts`) — Diskussion: sind das wirklich Kalibrierung oder Modell-Design?
-3. `AGENTS.md` Z. 122 präzisieren auf die getroffene Variante.
+**Aufwand:** 1.5 h (reduziert von 2-3 h, da `calibration.ts` verworfen)
+**Architektur-Entscheidung 2026-06-06:** Kein einzelnes `calibration.ts`. Stattdessen drei kategorisierte Sub-Fixes, weil die Magic Numbers unterschiedliche Klassen sind (Kalibrierung vs. Modell-Design vs. UI-Logik).
+
+**Empirische Bestandsaufnahme** (wo Magic Numbers heute stehen):
+- `compute-phases.ts:63,75,82` — `PERSISTENCE=0.8`, `PHASE_BASE_MULTIPLIER=[0.4,0.7,1.0]`, `marketModulator-Faktor=0.3` (Pipeline-Tuning, bereits benannt)
+- `belastung.ts:31-34,56-59,73-74` — Sotomo-Anker (25.1%, 44.8%, 12.9%, 25.7%) + Sensitivitätskoeffizienten (* 8, 6, 5, 3, 4) (Kalibrierung, anonym)
+- `supply-demand.ts:25-28,34,39,57,72` — Knappheits-Gewichte, Regulation-Effektivität, Kurven-Geometrie (Kalibrierung, anonym)
+- `groups.ts:130,137-171,240-283,304-332` — Per-Group-Faktoren (Modell-Design), Driver-Weights (UI), Thresholds (UI)
+
+**Schritte (4 Sub-Tasks):**
+1. `compute-phases.ts` (15 min): JSDoc an PERSISTENCE, PHASE_BASE_MULTIPLIER, marketModulator-Faktor — Herkunft dokumentieren (Gradient-Descent-Kalibrierung in `scripts/calibrate.ts`).
+2. `belastung.ts` + `supply-demand.ts` (45 min): Anonyme Literale → benannte `const`s am Dateianfang, JSDoc mit Sotomo-Quelle. Beispiele: `MIETBELASTUNG_SENSITIVITY_NACHFRAGE = 8`, `KNAPPHEIT_NACHFRAGE_GEWICHT = 0.4`.
+3. `groups.ts` (30 min): Per-Group-Faktoren NICHT extrahieren (Modell-Design), aber JSDoc an jeden Faktor mit Design-Rationale (z. B. „Rentner = 0.7: Fixeinkommen + knappe Reserven"). Driver-Weights + Thresholds ebenfalls mit JSDoc.
+4. `AGENTS.md:122` präzisieren: „Anonyme Magic Numbers in der DAG-Pipeline sind verboten. Andere Dateien dürfen benannte `const`s mit JSDoc-Quelle verwenden. Per-Group-Faktoren in `groups.ts` sind Modell-Design und werden mit Rationale dokumentiert."
 
 #### Fix-14: S6 — Type-Safety-Lücken schliessen
 **Aufwand:** 1 h
@@ -460,5 +465,6 @@ npx vitest run
 ## Offene Fragen an Stakeholder
 
 1. ~~**B6 `rentner`-Vorzeichen**~~ → **erledigt.** Code ist korrekt (CH-008 ETH SPUR bestätigt). Nur Kommentar präzisieren (Fix-7b).
-2. **K4 `markt_mietbelastungs_grenze`:** Kontext oder Parameter? Wirkt sich auf UI, Tests, YAML-Schema aus.
-3. **S5 Magic-Number-Policy:** Soll `calibration.ts` extrahiert werden, oder AGENTS.md gelockert werden? Team-Entscheidung.
+2. ~~**K4 `markt_mietbelastungs_grenze`~~** → **erledigt** (Sprint 2 Variante A): Refactor zu `CityContext.mietbelastungs_grenze`, DAG-Edge entfernt.
+3. ~~**Fix-11 S3 sign+weight zusammenführen**~~ → **erledigt** (verworfen): Aktuelles Schema bleibt, negative `weights` als Escape-Hatch offen.
+4. **S5 Magic-Number-Policy:** Soll `calibration.ts` extrahiert werden, oder AGENTS.md gelockert werden? Team-Entscheidung.
