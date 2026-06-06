@@ -466,6 +466,37 @@ Sortiert nach Priorität, jedes Item mit Aufwandsschätzung und Abhängigkeiten.
 3. `url-helpers.test.ts`: Round-Trip `buildUrl ↔ parseUrl`. Injection-Versuche (z. B. `mietrecht_kostenmiete=99`).
 4. `groups-drivers.test.ts`: `computeDrivers` mit geänderten und unveränderten Params. Top-3-Sortierung. Edge cases (keine Änderung, alle geändert).
 
+---
+
+### Fix-15 — Completion Status (2026-06-06)
+
+**Erledigt in 5 atomaren Commits** (statt 1 grossen Block):
+
+- `e6d371e` **Sub-15A** `belastung.test.ts` (195 LOC, +20 Tests)
+- `72ba8ed` **Sub-15B** `supply-demand.test.ts` (262 LOC, +27 Tests)
+- `7e31b3e` **Sub-15C** `group-trends.test.ts` (294 LOC, +21 Tests)
+- `cc609f1` **Sub-15D** `dag-topology.test.ts` erweitert (+8 Tests)
+- `a71f39a` **Sub-15E** `url-helpers.test.ts` (66 LOC, +8 Tests)
+
+**Total:** +84 Tests, +894 LOC Test-Code, 5 separate Commits.
+
+**Blackbox-Prinzip** (Reviewer-Anforderung):
+- KEINE Kopplung an interne Konstanten (z. B. `MIETBELASTUNG_SENSITIVITY.nachfragedruck = 8`, `CURVE_POINTS = 200`)
+- Tests beschreiben **Verhalten**: Range, Monotonie, Sortierung, Achsen-Bounds, Tooltip-Inhalt
+- Implementation darf refactored werden (Gewichte, Formel, Schwellwerte) — Tests bleiben grün solange Invarianten erhalten bleiben
+- Ausnahmen: `sign in {+1, -1}` (UI-Render-Vertrag), `time ∈ {short, medium, long}` (Type-Vertrag)
+
+**Test-Strategie pro Sub-Item:**
+- **15A (belastung)**: Range, Monotonie in 4 Inputs, Clamp-Verhalten, Baseline-Invariante (`undefined ≡ all-zero`)
+- **15B (supply-demand)**: Rohwert vs. clamped, Vorzeichen, Monotonie, Achsen-Bounds, deterministisch
+- **15C (groups)**: Sachliche Divergenz (Bestand<Angebot, Geringverdiener entlastet, Rentner+Verdrängung), XOR-Direction-Logic, Sortierung, Top-N, Tooltip-Inhalt
+- **15D (dag-topology)**: Invarianten über alle Edges (Type-Discriminants, sign-preservation, time-Mapping, Determinismus)
+- **15E (url-helpers)**: Wertebereich, Set-Konversions-Invariante, alle Keys vorhanden
+
+**Verifikation:** 188 passed, 1 skipped (war 104). tsc clean. 17 Test-Files (war 13).
+
+**Plan-Doc:** `docs/review/2026-06-05-fix-15-plan.md` (vom Plan zum Completion Summary aktualisiert, §12).
+
 #### Fix-16: K3 — `groups.ts:293` Ternaries auflösen
 **Aufwand:** 15 min
 **Schritte:**
@@ -501,7 +532,7 @@ direction: effectiveDirection,
 |---|---|---|
 | Sprint 1 (Korrektheit) | Fix-1, -2, -3, -4 | 4-5 h |
 | Sprint 2 (Aufräumen) | Fix-5 bis -10 | 3-4 h |
-| Sprint 3 (Polish) | Fix-11 (dropped), -12, -13, -14, -15, -16 | 10-13 h (Fix-15 offen) |
+| Sprint 3 (Polish) | Fix-11 (dropped), -12, -13, -14, -15, -16 | 10-13 h |
 | **Total** | 16 Items | **~17-22 h** |
 
 Empfohlene Reihenfolge: Sprint 1 am Stück (insb. Fix-4 S1) — alles andere baut darauf auf, dass die DAG-Architektur stabil ist.
@@ -529,3 +560,4 @@ npx vitest run
 2. ~~**K4 `markt_mietbelastungs_grenze`~~** → **erledigt** (Sprint 2 Variante A): Refactor zu `CityContext.mietbelastungs_grenze`, DAG-Edge entfernt.
 3. ~~**Fix-11 S3 sign+weight zusammenführen**~~ → **erledigt** (verworfen): Aktuelles Schema bleibt, negative `weights` als Escape-Hatch offen.
 4. ~~**S5 Magic-Number-Policy**~~ → **erledigt** (Fix-13): Policy in AGENTS.md:122 etabliert. Per-Group-Faktoren in `groups.ts` als Modell-Design dokumentiert, andere Magic Numbers als benannte `const`s mit JSDoc-Quelle.
+5. ~~**K2 Test-Coverage**~~ → **erledigt** (Fix-15): 84 neue Blackbox-Tests in 5 Sub-Commits. 188 passed, 1 skipped.
