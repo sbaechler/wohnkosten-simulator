@@ -7,6 +7,7 @@ import type { Phase, PhaseResult } from './phases';
 import { PHASE_NAMES, PHASE_YEAR_LABELS, PHASES } from './phases';
 import { PHASE_WEIGHTED_EDGES } from './phase-weights';
 import { computeDerivedIndicators } from './derived';
+import { clamp } from './utils';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -20,10 +21,6 @@ function normalizeDiff(diff: number): number {
   return diff / 2;
 }
 
-/** Clamp to –1…+1 */
-function clamp(v: number, lo = -1, hi = 1): number {
-  return Math.max(lo, Math.min(hi, v));
-}
 
 // ── E1 Node IDs ───────────────────────────────────────────────────────────────
 

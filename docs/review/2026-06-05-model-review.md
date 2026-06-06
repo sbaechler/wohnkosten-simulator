@@ -386,6 +386,19 @@ Sortiert nach Priorität, jedes Item mit Aufwandsschätzung und Abhängigkeiten.
 3. Alle 5 Stellen umstellen.
 4. Build + Tests.
 
+---
+
+### Fix-12 — Completion Status (2026-06-06)
+
+**Erledigt:**
+
+- `src/model/utils.ts` neu (15 LOC): `clamp(v, lo=-1, hi=1)` mit JSDoc.
+- 3 Stellen umgestellt: `compute-phases.ts:24`, `derived.ts:10`, `groups.ts:110`.
+- `url-helpers.ts:clampParam` bleibt separat (domain-spezifisch: rundet auf 0/1/2 für `ParamValue`).
+- Net -8 LOC (5 dupliziert → 1 zentralisiert).
+
+**Verifikation:** 104 passed, 1 skipped. tsc clean.
+
 #### Fix-13: S5 — Magic-Number-Konsolidierung
 **Aufwand:** 1.5 h (reduziert von 2-3 h, da `calibration.ts` verworfen)
 **Architektur-Entscheidung 2026-06-06:** Kein einzelnes `calibration.ts`. Stattdessen drei kategorisierte Sub-Fixes, weil die Magic Numbers unterschiedliche Klassen sind (Kalibrierung vs. Modell-Design vs. UI-Logik).
@@ -430,6 +443,21 @@ Sortiert nach Priorität, jedes Item mit Aufwandsschätzung und Abhängigkeiten.
 3. `phase-pipeline.test.ts:50` `as never` → `as ParamsDiff40`.
 4. `compute-phases.ts:134` `as Phase[]` → typisierte Konstante oder direkt `[1, 2, 3] as const`.
 
+---
+
+### Fix-14 — Completion Status (2026-06-06)
+
+**Erledigt:**
+
+- Schritt 3: `phase-pipeline.test.ts:49` `{} as never` → `{} as ParamsDiff40`. `ParamsDiff40` Import ergänzt.
+- Schritte 1, 2, 4: **entfallen** — die referenzierten Dateien/Codezeilen existieren in der aktuellen Code-Basis nicht mehr:
+  - `market-state.ts` wurde in Sprint 1 (Fix-4) gelöscht.
+  - `compute-phases.ts:134` `as Phase[]` ist inzwischen `as const`-Phases-Loop.
+
+**Effektiver Aufwand:** 5 min.
+
+**Verifikation:** 104 passed, 1 skipped. tsc clean.
+
 #### Fix-15: K2 — Test-Coverage ausbauen
 **Aufwand:** 4-5 h
 **Schritte:**
@@ -454,13 +482,26 @@ direction: effectiveDirection,
 
 ---
 
+### Fix-16 — Completion Status (2026-06-06)
+
+**Erledigt:**
+
+- `groups.ts:321` (`computeGroupTrends`): Ternary durch XOR-Vergleich ersetzt.
+- Variante: keine extra `const effectiveDirection`-Variable, sondern direkt im Object-Literal — `direction: (delta > 0) === (kp.direction === 'up') ? 'up' : 'down'`. Semantisch identisch, kompakter.
+
+**Effektiver Aufwand:** 5 min.
+
+**Verifikation:** 104 passed, 1 skipped. tsc clean.
+
+---
+
 ## Zeit-Schätzung Total
 
 | Sprint | Items | Aufwand |
 |---|---|---|
 | Sprint 1 (Korrektheit) | Fix-1, -2, -3, -4 | 4-5 h |
 | Sprint 2 (Aufräumen) | Fix-5 bis -10 | 3-4 h |
-| Sprint 3 (Polish) | Fix-11 bis -16 | 10-13 h |
+| Sprint 3 (Polish) | Fix-11 (dropped), -12, -13, -14, -15, -16 | 10-13 h (Fix-15 offen) |
 | **Total** | 16 Items | **~17-22 h** |
 
 Empfohlene Reihenfolge: Sprint 1 am Stück (insb. Fix-4 S1) — alles andere baut darauf auf, dass die DAG-Architektur stabil ist.
@@ -487,4 +528,4 @@ npx vitest run
 1. ~~**B6 `rentner`-Vorzeichen**~~ → **erledigt.** Code ist korrekt (CH-008 ETH SPUR bestätigt). Nur Kommentar präzisieren (Fix-7b).
 2. ~~**K4 `markt_mietbelastungs_grenze`~~** → **erledigt** (Sprint 2 Variante A): Refactor zu `CityContext.mietbelastungs_grenze`, DAG-Edge entfernt.
 3. ~~**Fix-11 S3 sign+weight zusammenführen**~~ → **erledigt** (verworfen): Aktuelles Schema bleibt, negative `weights` als Escape-Hatch offen.
-4. **S5 Magic-Number-Policy:** Soll `calibration.ts` extrahiert werden, oder AGENTS.md gelockert werden? Team-Entscheidung.
+4. ~~**S5 Magic-Number-Policy**~~ → **erledigt** (Fix-13): Policy in AGENTS.md:122 etabliert. Per-Group-Faktoren in `groups.ts` als Modell-Design dokumentiert, andere Magic Numbers als benannte `const`s mit JSDoc-Quelle.

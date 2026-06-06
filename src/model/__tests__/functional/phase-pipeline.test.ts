@@ -15,7 +15,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { computePhasePipeline, computePhasesCached, invalidatePhasesCache } from '../../compute-phases';
-import type { CityContext, CityParams40 } from '../../../types';
+import type { CityContext, CityParams40, ParamsDiff40 } from '../../../types';
 
 // Zürich (entspricht V1: raumplanung=2, bauvorschriften=2, energetischeVorgaben=1,
 // mietrecht=1, steuerpolitik=2, foerderungGemeinnuetzig=2, subventionen=1,
@@ -46,7 +46,7 @@ const ZUERICH_CONTEXT: CityContext = {
   marktenge: 2,  mietbelastungs_grenze: 1,
 };
 
-const EMPTY_DIFF = {} as never;
+const EMPTY_DIFF = {} as ParamsDiff40;
 
 function inRange(value: number): void {
   expect(value).toBeGreaterThanOrEqual(-1);

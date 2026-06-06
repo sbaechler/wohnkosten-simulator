@@ -4,12 +4,7 @@
 // ============================================================
 
 import type { MarketState, DerivedIndicators } from '../types';
-
-// ── Hilfsfunktion: clamp ──────────────────────────────────────────────────────
-
-function clamp(v: number, lo = -1, hi = 1): number {
-  return Math.max(lo, Math.min(hi, v));
-}
+import { clamp } from './utils';
 
 // ── E2-Berechnung ───────────────────────────────────────────────────────────
 

@@ -9,6 +9,7 @@
 // ============================================================
 
 import type { MarketState, CityParams40, ParamsDiff40 } from '../types';
+import { clamp } from './utils';
 
 /** Die 8 festen Bevölkerungsgruppen */
 export type GroupId =
@@ -107,9 +108,6 @@ export interface GroupPriceTrend {
   tooltip: string;
 }
 
-function clamp(v: number): number {
-  return Math.max(-1, Math.min(1, v));
-}
 
 // ── Hilfsfunktionen ────────────────────────────────────────────────────────
 
@@ -320,7 +318,9 @@ function computeDrivers(
       drivers.push({
         paramKey: kp.key,
         label: paramLabels[kp.key] ?? kp.key,
-        direction: delta > 0 ? (kp.direction === 'up' ? 'up' : 'down') : (kp.direction === 'up' ? 'down' : 'up'),
+        // Bei positivem delta bleibt die Richtung, bei negativem dreht sie um.
+        // XOR-Logik: Richtung invertiert wenn genau einer der Faktoren (delta oder kp.direction) „negativ" ist.
+        direction: (delta > 0) === (kp.direction === 'up') ? 'up' : 'down',
         weight: Math.abs(delta) * kp.weight,
       });
     }
