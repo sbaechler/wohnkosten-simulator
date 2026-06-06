@@ -60,6 +60,17 @@ function getE0Delta(
 
 // ── computeE1WithPhaseAndCarry ────────────────────────────────────────────────
 
+/**
+ * Carry-over-Faktor: wie stark der Wert einer Phase auf die nächste Phase
+ * übertragen wird. 0.8 = 80% des Vorwerts bleibt erhalten, 20% werden durch
+ * den neuen gewichteten Input ersetzt.
+ *
+ * Kalibrierung: Gradient-Descent in `scripts/calibrate.ts` (PERSISTENCE dort
+ * hartkodiert — bei Änderung hier UND dort synchron halten).
+ *
+ * Höher = mehr Trägheit (Modell reagiert langsamer auf Policy-Wechsel).
+ * Niedriger = mehr unmittelbare Reaktion pro Phase.
+ */
 const PERSISTENCE = 0.8;
 
 /**
@@ -71,12 +82,19 @@ const PERSISTENCE = 0.8;
  * - P3 (5-10 Jahre): Langfristiges Gleichgewicht — alle Effekte voll wirksam
  *
  * Dieser Faktor skaliert ALLE Kantengewichte über alle Phasen hinweg.
+ *
+ * Kalibrierung: resultiert aus den 60+ Constraints in `scripts/calibrate.ts`.
+ * NICHT willkürlich ändern — würde alle 246 Edge-Gewichte re-skaliert bedeuten.
  */
 const PHASE_BASE_MULTIPLIER: readonly [number, number, number] = [0.4, 0.7, 1.0];
 
 /**
  * Marktverengungs-Multiplikator: -2→0.4× (entspannt), 0→1.0× (normal), +2→1.6× (extrem eng)
  * Ein enger Markt reagiert stärker auf Policies weil wenig Ausgleich vorhanden ist.
+ *
+ * Kalibrierung: 0.3 entspricht einer ±30% Reaktion bei extremem Marktengpass.
+ * Forschungsbasis: Sotomo ZH-Wohnraumstudie 2025 + CH-007 (Zonenreserve-Wirkung
+ * ist in angespannten Märkten ~3× stärker als in entspannten).
  */
 function marketModulator(marktenge: number): number {
   return 1.0 + marktenge * 0.3;

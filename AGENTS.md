@@ -121,7 +121,9 @@ Für citiespezifische Recherche-Werte: `docs/superpowers/research/staedte-parame
 
 ## Wichtige Konventionen
 
-- **Keine magic numbers** — alle Werte für die DAG kommen aus `phase-weights.ts`
+- **Keine anonymen Magic Numbers in der DAG-Pipeline** — Werte kommen aus `phase-weights.ts` (per-Edge `weights: [w1, w2, w3]`)
+- **Andere Dateien dürfen benannte `const`s verwenden** — sie MÜSSEN aber JSDoc mit Quelle (Forschung, Sotomo, ETH SPUR etc.) und Zweck haben. Beispiele: `MIETBELASTUNG_SENSITIVITY` (belastung.ts), `KNAPPHEIT_GEWICHTE` (supply-demand.ts), `PERSISTENCE` (compute-phases.ts).
+- **Per-Group-Faktoren in `groups.ts` sind Modell-Design** (definieren WAS eine Gruppe ist) — NICHT in `calibration.ts` extrahieren, sondern inline mit JSDoc-Rationale dokumentieren.
 - **URL ist Source of Truth** — nie lokalen React-State für Parameter nutzen
 - **Tests müssen grün sein** bevor gepullt wird: `npx vitest run`
 - **Generated Files**: `src/generated/` wird aus YAML generiert — nicht manuell editieren

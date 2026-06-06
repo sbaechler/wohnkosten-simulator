@@ -117,6 +117,29 @@ function clamp(v: number): number {
  * Berechnet den Basis-Preistrend aus dem Markt-Zustand.
  * Positive Werte = Preise steigen.
  * Beruht auf Angebot-Nachfrage-Differenz, modifiziert durch Mietschutz.
+ *
+ * Die gruppen-spezifischen Faktoren sind **Modell-Design** (nicht Kalibrierung):
+ * sie definieren, WAS eine Gruppe ist, nicht WIE STARK sie reagiert. Daher
+ * inline statt in `calibration.ts` extrahiert. Jeder Faktor ist mit seiner
+ * Design-Rationale kommentiert.
+ *
+ * Übersicht der Faktoren:
+ *
+ * | Gruppe                     | Markt-Faktor | Schutz-Faktor | Verdrängung | Andere        | Rationale |
+ * |----------------------------|-------------|---------------|-------------|---------------|-----------|
+ * | geringverdiener            | 0.5         | -1.0          | —           | —             | Sozialhilfe/EL entkoppeln vom Markt; voller Schutz |
+ * | normalverdiener_bestand    | 0.4         | -1.2          | —           | —             | Regulierung schützt stark; reagiert träge |
+ * | normalverdiener_angebot    | 1.2         | +0.2          | —           | —             | Volle Marktdynamik; Spillover vom Bestandsschutz |
+ * | glueckspilze               | 0.1         | —             | —           | —             | Fast vollständig markt-entkoppelt |
+ * | normalverdiener_eigentuemer| 0.5         | —             | —           | -angebot*0.3  | Vermögensaufbau, aber Neubau-Kosten |
+ * | junge_familien             | 1.1         | +0.1          | —           | —             | Preissensitiv, grosser Bedarf |
+ * | genossenschafter           | 0.3         | —             | —           | -gemkraft*0.5 | Genossenschaft schützt gut |
+ * | rentner                    | 0.7         | -0.8          | +verd*0.2   | —             | Fixeinkommen (Schutz+Verdrängung; ETH SPUR CH-008) |
+ * | high_earner                | 0.4         | —             | —           | +invest*0.3   | Standort-/Steuer-motiviert, nicht preissensitiv |
+ *
+ * Der Schutz-Faktor (protectionEffect = mietpreis_schutzlevel × 0.4) dämpft
+ * Preisanstieg für Mieter. Der Faktor 0.4 entspricht einer ~40%igen Dämpfung
+ * des Marktdrucks bei maximalem Mietpreis-Schutzlevel.
  */
 function basePriceTrend(state: MarketState, group: GroupId): { trend: number } {
   // Angebot fördert Preise (negatives angebotspotenzial = mehr Angebot = sinkt)
@@ -126,10 +149,13 @@ function basePriceTrend(state: MarketState, group: GroupId): { trend: number } {
 
   const base = supplyEffect + demandEffect;
 
-  // Mietschutz dämpft Preisanstieg für Mieter
+  // Mietschutz dämpft Preisanstieg für Mieter.
+  // Faktor 0.4: ~40% Dämpfung des Marktdrucks bei mietpreis_schutzlevel = +1.
+  // Kalibrierung: Sotomo ZH-Wohnraumstudie 2025 — Mieter mit vollem Mietrechtsschutz
+  // zahlen ~40% weniger Miete als ungeschützte bei gleicher Marktlage.
   const protectionEffect = state.mietpreis_schutzlevel * 0.4;
 
-  // Gruppe-spezifische Basis-Anpassung
+  // Gruppe-spezifische Basis-Anpassung (siehe JSDoc oben)
   let groupBase = base;
 
   if (group === 'geringverdiener') {
@@ -300,8 +326,12 @@ function computeDrivers(
     }
   }
 
-  // Nachbarschafts-Effekte (E1-Werte) wenn sie besonders hoch sind
-  if (Math.abs(state.aufwertungsdruck) > 0.5) {
+  // Nachbarschafts-Effekte (E1-Werte) wenn sie besonders hoch sind.
+  // Schwellwert 0.5 = nur E1-Werte, die substanziell von 0 abweichen (>50% der
+  // normalisierten Skala), werden als Treiber aufgenommen. Verhindert, dass
+  // schwache E1-Signale als „Top-Treiber" angezeigt werden.
+  const E1_DRIVER_THRESHOLD = 0.5;
+  if (Math.abs(state.aufwertungsdruck) > E1_DRIVER_THRESHOLD) {
     drivers.push({
       paramKey: 'aufwertungsdruck',
       label: 'Aufwertungsdruck',
@@ -310,7 +340,7 @@ function computeDrivers(
     });
   }
 
-  if (Math.abs(state.verdraengungsrisiko) > 0.5) {
+  if (Math.abs(state.verdraengungsrisiko) > E1_DRIVER_THRESHOLD) {
     drivers.push({
       paramKey: 'verdraengungsrisiko',
       label: 'Verdrängungsrisiko',
@@ -319,17 +349,23 @@ function computeDrivers(
     });
   }
 
-  // Sortiere nach Gewicht absteigend, nimm Top 3
+  // Sortiere nach Gewicht absteigend, nimm Top 3.
+  // Top-3 ist die UI-Konvention für „die wichtigsten Treiber" in der Treiber-Liste.
+  const TOP_N_DRIVERS = 3;
   return drivers
     .sort((a, b) => b.weight - a.weight)
-    .slice(0, 3);
+    .slice(0, TOP_N_DRIVERS);
 }
 
 /**
  * Erstellt einen kurzen Tooltip-Text für eine Gruppe.
  */
 function makeTooltip(trend: number, drivers: GroupPriceTrend['drivers']): string {
-  const direction = trend > 0.15 ? 'steigend' : trend < -0.15 ? 'sinkend' : 'stabil';
+  // Schwellwert ±0.15 = ±15% der normalisierten Trendskala.
+  // Unterhalb: „stabil", oberhalb: „steigend"/"sinkend". Vermeidet
+  // über-reaktive Trend-Beschriftungen bei kleinen Schwankungen.
+  const TREND_CLASSIFY_THRESHOLD = 0.15;
+  const direction = trend > TREND_CLASSIFY_THRESHOLD ? 'steigend' : trend < -TREND_CLASSIFY_THRESHOLD ? 'sinkend' : 'stabil';
   if (drivers.length === 0) return `Preise ${direction}`;
   const topDriver = drivers[0];
   return `Preise ${direction} (v.a. ${topDriver.label})`;

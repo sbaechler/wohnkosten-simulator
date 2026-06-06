@@ -402,6 +402,26 @@ Sortiert nach Priorität, jedes Item mit Aufwandsschätzung und Abhängigkeiten.
 3. `groups.ts` (30 min): Per-Group-Faktoren NICHT extrahieren (Modell-Design), aber JSDoc an jeden Faktor mit Design-Rationale (z. B. „Rentner = 0.7: Fixeinkommen + knappe Reserven"). Driver-Weights + Thresholds ebenfalls mit JSDoc.
 4. `AGENTS.md:122` präzisieren: „Anonyme Magic Numbers in der DAG-Pipeline sind verboten. Andere Dateien dürfen benannte `const`s mit JSDoc-Quelle verwenden. Per-Group-Faktoren in `groups.ts` sind Modell-Design und werden mit Rationale dokumentiert."
 
+---
+
+### Fix-13 — Completion Status (2026-06-06)
+
+**Erledigt (alle 4 Sub-Tasks):**
+
+| Sub-Task | Status | Notizen |
+|---|---|---|
+| 13.1 `compute-phases.ts` | ✅ Done | JSDoc an PERSISTENCE, PHASE_BASE_MULTIPLIER, `marketModulator()`. Herkunft dokumentiert (Gradient-Descent in `scripts/calibrate.ts`); Hinweis auf Synchron-Pflicht. |
+| 13.2 `belastung.ts` | ✅ Done | `MIETBELASTUNG_SENSITIVITY = { nachfragedruck: 8, angebotspotenzial: 6, mietpreis_schutzlevel: 5, markfriktion: 3 } as const` extrahiert. `EIGENTUM_SENSITIVITY = { nachfragedruck: 4, investitionsattraktivitaet: 3 } as const`. Floor/Ceiling als `MIETBELASTUNG_MIN/MAX` und `EIGENTUM_MIN/MAX`. `WOHNMONITOR_BASELINE` mit JSDoc. |
+| 13.2 `supply-demand.ts` | ✅ Done | `KNAPPHEIT_GEWICHTE = { nachfragedruck: 0.4, angebotspotenzial: 0.3, markfriktion: 0.15, gemeinnuetzig_kraft: 0.15 } as const` extrahiert. Konstanten: `SUPPLY_BASE_SLOPE`, `SUPPLY_SLOPE_REGULATION_FAKTOR`, `DEMAND_INTERCEPT`, `DEMAND_SLOPE`, `EQUILIBRIUM_Q_CENTER/INTERCEPT/SUPPLY_FAKTOR/DEMAND_FAKTOR`, `AXIS_MIN/MAX`. JSDoc mit Forschungsbasis. |
+| 13.3 `groups.ts` | ✅ Done | Per-Group-Faktoren NICHT extrahiert (Modell-Design), sondern als Markdown-Tabelle in der `basePriceTrend`-JSDoc mit Rationale dokumentiert. `E1_DRIVER_THRESHOLD = 0.5`, `TOP_N_DRIVERS = 3`, `TREND_CLASSIFY_THRESHOLD = 0.15` als benannte Konstanten extrahiert. |
+| 13.4 `AGENTS.md:122` | ✅ Done | Konvention präzisiert: DAG-Pipeline-Werte aus `phase-weights.ts`; andere Dateien dürfen benannte `const`s mit JSDoc; Per-Group-Faktoren in `groups.ts` sind Modell-Design. |
+
+**Verifikation:**
+
+- `npx vitest run`: **104 passed, 1 skipped** (unverändert).
+- `npx tsc --noEmit`: clean.
+- Diff: +204/-39 LOC (5 Dateien: AGENTS.md, compute-phases.ts, belastung.ts, supply-demand.ts, groups.ts).
+
 #### Fix-14: S6 — Type-Safety-Lücken schliessen
 **Aufwand:** 1 h
 **Schritte:**
