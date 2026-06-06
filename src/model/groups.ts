@@ -118,7 +118,7 @@ function clamp(v: number): number {
  * Positive Werte = Preise steigen.
  * Beruht auf Angebot-Nachfrage-Differenz, modifiziert durch Mietschutz.
  */
-function basePriceTrend(state: MarketState, group: GroupId): { trend: number; extra: number } {
+function basePriceTrend(state: MarketState, group: GroupId): { trend: number } {
   // Angebot fördert Preise (negatives angebotspotenzial = mehr Angebot = sinkt)
   const supplyEffect = -state.angebotspotenzial;
   // Nachfrage erhöht Preise
@@ -158,8 +158,13 @@ function basePriceTrend(state: MarketState, group: GroupId): { trend: number; ex
     // Genossenschafter sind gut geschützt durch Gemeinnützigkeit
     groupBase = base * 0.3 - state.gemeinnuetzig_kraft * 0.5;
   } else if (group === 'rentner') {
-    // Rentner sind preissensitiv, fixiertes Einkommen
-    // Meist Bestandsmieter -> profitieren von Schutz
+    // Rentner: zwei gegenläufige Mechaniken.
+    // (1) Schutz: Als Bestandsmieter mit fixiertem Einkommen profitieren sie
+    //     stark vom Mietrecht (protectionEffect dämpft Preistrend).
+    // (2) Verdrängung: ETH SPUR 2025 listet ältere Personen explizit als
+    //     verletzliche Gruppe auf dem Wohnungsmarkt (vgl. CH-008). Bei
+    //     hohem verdraengungsrisiko steigt ihre Belastung.
+    // Die Preissensitivität (Faktor 0.7) reflektiert das fixe Einkommen.
     groupBase = base * 0.7 + state.verdraengungsrisiko * 0.2 - protectionEffect * 0.8;
   } else if (group === 'high_earner') {
     // High Earner sind weniger preissensitiv, mehr steuer- und standortmotiviert
@@ -168,7 +173,6 @@ function basePriceTrend(state: MarketState, group: GroupId): { trend: number; ex
 
   return {
     trend: clamp(groupBase),
-    extra: protectionEffect,
   };
 }
 
@@ -345,9 +349,7 @@ export function computeGroupTrends(
   state: MarketState,
   baseline: CityParams40,
   modified: CityParams40,
-  _diff: ParamsDiff40,
 ): GroupPriceTrend[] {
-  void _diff; // part of shared compute-function signature
   return GROUPS.map(group => {
     const { trend } = basePriceTrend(state, group.id);
     const drivers = computeDrivers(state, baseline, modified, group.id);

@@ -64,8 +64,6 @@ export const PARAM_KEYS_40 = [
   'infra_schule_kita',
   'infra_oeffentlicher_raum',
   'infra_wirtschaftsansiedlung',
-  // 9. Markt-Kontext (Sotomo 2025)
-  'markt_mietbelastungs_grenze',
 ] as const;
 
 // Compile-time check: PARAM_KEYS_40 must cover all CityParams40 keys
@@ -382,13 +380,6 @@ export const paramMeta40: ParamMeta40[] = [
     levels: ['Keine aktive Förderung', 'Moderate Anreize', 'Starke Förderung (Gewerbezonen)'],
     group: 'infrastruktur',
   },
-  {
-    key: 'markt_mietbelastungs_grenze',
-    label: 'Mietbelastungsgrenze',
-    helpText: 'Strukturelles Niveau der Mietbelastung (Anteil am Haushaltseinkommen). Sotomo 2025: Tiefes Einkommen 30%, Viertel über 40%.',
-    levels: ['Tief (<20%)', 'Mittel (20–30%)', 'Hoch (>30%)'],
-    group: 'infrastruktur',
-  },
 ];
 
 export const contextMeta: ContextMeta[] = [
@@ -397,6 +388,7 @@ export const contextMeta: ContextMeta[] = [
   { key: 'wirtschaftskraft', label: 'Wirtschaftskraft', levels: ['sehr schwach', 'schwach', 'mittel', 'stark', 'sehr stark'] },
   { key: 'bevoelkerungstrend', label: 'Bevölkerung', levels: ['stark sinkend', 'sinkend', 'stabil', 'wachsend', 'stark wachsend'] },
   { key: 'marktenge', label: 'Marktenge', levels: ['entspannt', 'leicht eng', 'moderat', 'angespannt', 'extrem eng'] },
+  { key: 'mietbelastungs_grenze', label: 'Mietbelastungsgrenze', levels: ['sehr tief (<15%)', 'tief (15–20%)', 'mittel (20–25%)', 'hoch (25–30%)', 'sehr hoch (>30%)'] },
 ];
 
 // ── Diff-Funktionen ──────────────────────────────────────────────────────────

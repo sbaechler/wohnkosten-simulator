@@ -48,7 +48,6 @@ const ZUERICH_V2: CityParams40 = {
   nutzung_kurzzeitvermietung: 1, nutzung_umnutzungsverbot: 1, nutzung_abbruchverbot: 1, nutzung_zweitwohnungen: 1,
   infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
     bau_ersatzneubau_effizienz: 1,
-    markt_mietbelastungs_grenze: 1,
 };
 
 const ZUERICH_CONTEXT: CityContext = {
@@ -56,7 +55,7 @@ const ZUERICH_CONTEXT: CityContext = {
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
   bevoelkerungstrend: 2,
-  marktenge: 2,
+  marktenge: 2,  mietbelastungs_grenze: 1,
 };
 
 function phases(params: CityParams40, context: CityContext, diff: ParamsDiff40) {

@@ -391,7 +391,7 @@ interface TooltipData {
 export function DAGVisualization({ context, modified, diff }: Props) {
   const phases = computePhasesCached(context, modified, diff);
   const state = phases[phases.length - 1].marketState;
-  const derived = computeDerivedIndicators(state, context, diff);
+  const derived = computeDerivedIndicators(state);
 
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);

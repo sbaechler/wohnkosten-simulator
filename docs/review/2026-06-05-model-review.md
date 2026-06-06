@@ -341,6 +341,32 @@ Sortiert nach Priorität, jedes Item mit Aufwandsschätzung und Abhängigkeiten.
 **Dateien:** `src/model/phases.ts`, `src/model/compute-phases.ts:124-125`
 **Aufwand:** 15 min
 
+---
+
+### Sprint 2 — Completion Status (2026-06-06)
+
+**Erledigt:**
+
+| Fix | Status | Notizen |
+|-----|--------|---------|
+| Fix-5 (B2/B3 Dead Fields) | ✅ Done | `dominantParams: string[]` aus `PhaseResult` entfernt (war immer `[]`). `void _x;` Hacks + `_params`/`_diff`/`_context` aus Signaturen von `computeE1WithPhaseAndCarry`, `computeDerivedIndicators`, `computeGroupTrends` entfernt. Aufrufer in `compute-phases.ts`, `DAGVisualization.tsx`, `WidgetGrid.tsx`, `gruppen-divergenz.test.ts` aktualisiert. |
+| Fix-6 (B5 _AssertAllKeys) | ✅ Done (auto) | Mit `graph.ts`-Löschung in Sprint 1 automatisch erledigt. `_AssertAllKeys40` in `params.ts:72` ist unrelated (Params-40-Keys check, nicht Graph-Keys). |
+| Fix-7 (B7 phase-weights comments) | ✅ Done | Section-Header-Counts korrigiert: 20, 15, 9, 9, 7, 5, 6, 6, 7, 11, 10, 1. Chinesisches `额外` → `Verzögerung`. "Phase 3" Section-Header präzisiert zu "Wirkt primär in P3". |
+| Fix-7b (B6 rentner comment) | ✅ Done | `groups.ts:160-163`: beide Mechaniken (Schutz via Mietrecht + Verdrängung via ETH SPUR 2025) erklärt. |
+| Fix-8 (K1 extra-Feld) | ✅ Done | `basePriceTrend` returnt nur `{ trend }`, `extra: protectionEffect` entfernt (ungenutzt in `WidgetGrid.tsx:357`). |
+| Fix-9 (K4 markt_mietbelastungs_grenze) | ✅ Done (Variante A) | **Refactor:** Feld von `CityParams40` (ParamValue 0/1/2) nach `CityContext` (ContextValue -2..+2) verschoben, umbenannt zu `mietbelastungs_grenze` (Präfix-Drop konsistent mit `marktenge`, `zuwanderungsdruck`). DAG-Edge (`markt_mietbelastungs_grenze → mietpreis_schutzlevel`, weights [0.3, 0.5, 0.7]) entfernt — Context-Werte wirken nicht via DAG (analog `marktenge`). 10/10 YAML-Städte: Eintrag von `params:` nach `context:` migriert. `build:data` regeneriert `cities.ts` (10 Städte × `mietbelastungs_grenze: 1\|2`). `paramMeta40`-Eintrag entfernt, `contextMeta`-Eintrag hinzugefügt (5-stufige Skala). `build-city-data.ts`: `REQUIRED_KEYS 42 → 41`. 9 Test-Fixtures (CityContext-Typen) aktualisiert. **Hintergrund:** Original-Commit `0a53608` (Sotomo ZH-Wohnraumstudie 2025) platzierte das Feld fälschlich in `CityParams40` (Copy-Paste aus bestehendem Parameter-Pattern), obwohl die Intention ein read-only Kontextfaktor war (vergleichbar mit `marktenge`, `zuwanderungsdruck`). Der JSDoc-Hinweis "keine Steuerung" war die Wahrheit, der Code widersprach ihr. |
+| Fix-10 (K5 Phase-Labels) | ✅ Done | `PHASE_NAMES`, `PHASE_YEAR_LABELS`, `PHASES` nach `phases.ts` verschoben (zusammen mit den Typen). `compute-phases.ts` importiert sie. `[1, 2, 3] as Phase[]` → `for (const phase of PHASES)`. |
+
+**Verifikation:**
+
+- `npx vitest run`: **104 passed, 1 skipped** (unverändert).
+- `npx tsc --noEmit`: clean.
+
+**Verbleibende Sprint-2-Risiken:**
+
+- `groups.ts:38` und `computeGroupTrends` haben weiterhin den `modified: CityParams40` Parameter (genutzt in `computeDrivers`). Das ist nicht tot, nur nicht refactored.
+- Die Sotomo-Migrations-Scripts in `scripts/{add-new-params,patch-test-fixtures}.{ts,js,py}` referenzieren noch den alten Feldnamen — historische Artefakte, nicht in der Build-Pipeline. Können in einem Audit aufgeräumt werden.
+
 ### Sprint 3: Polish (P3)
 
 #### Fix-11: S3 — `sign`+`weight` zusammenführen

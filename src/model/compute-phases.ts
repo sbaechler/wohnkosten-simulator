@@ -4,6 +4,7 @@
 
 import type { CityContext, CityParams40, ParamsDiff40, MarketState } from '../types';
 import type { Phase, PhaseResult } from './phases';
+import { PHASE_NAMES, PHASE_YEAR_LABELS, PHASES } from './phases';
 import { PHASE_WEIGHTED_EDGES } from './phase-weights';
 import { computeDerivedIndicators } from './derived';
 
@@ -83,7 +84,6 @@ function marketModulator(marktenge: number): number {
 
 export function computeE1WithPhaseAndCarry(
   context: CityContext,
-  _params: CityParams40,
   diff: ParamsDiff40,
   phase: Phase,
   carryE1: MarketState | null,
@@ -121,9 +121,6 @@ export function computeE1WithPhaseAndCarry(
 
 // ── computePhasePipeline ───────────────────────────────────────────────────────
 
-const PHASE_NAMES: PhaseResult['name'][] = ['kurzfristig', 'mittelfristig', 'langfristig'];
-const PHASE_YEAR_LABELS = ['0–2 Jahre', '2–5 Jahre', '5–10 Jahre'];
-
 export function* computePhasePipeline(
   context: CityContext,
   params: CityParams40,
@@ -131,9 +128,9 @@ export function* computePhasePipeline(
 ): Generator<PhaseResult, PhaseResult[], void> {
   let carryE1: MarketState | null = null;
 
-  for (const phase of [1, 2, 3] as Phase[]) {
-    const e1 = computeE1WithPhaseAndCarry(context, params, diff, phase, carryE1);
-    const e2 = computeDerivedIndicators(e1, context, diff);
+  for (const phase of PHASES) {
+    const e1 = computeE1WithPhaseAndCarry(context, diff, phase, carryE1);
+    const e2 = computeDerivedIndicators(e1);
     carryE1 = e1;
 
     const result: PhaseResult = {
@@ -142,7 +139,6 @@ export function* computePhasePipeline(
       yearsLabel: PHASE_YEAR_LABELS[phase - 1],
       marketState: e1,
       derived: e2,
-      dominantParams: [],
     };
 
     yield result;
