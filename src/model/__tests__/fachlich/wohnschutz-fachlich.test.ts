@@ -84,9 +84,9 @@ const NEUTRAL_CONTEXT: CityContext = {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function phases(params: CityParams40, context: CityContext, diff: ParamsDiff40) {
+function phases(_params: CityParams40, context: CityContext, diff: ParamsDiff40) {
   invalidatePhasesCache();
-  return [...computePhasePipeline(context, params, diff)];
+  return [...computePhasePipeline(context, diff)];
 }
 
 // ── Test-Suite 1: Rationierung bremst stärker als Mietpreisregulierung ────────

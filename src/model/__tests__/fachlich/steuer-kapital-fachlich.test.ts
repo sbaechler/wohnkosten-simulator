@@ -65,9 +65,9 @@ const ZUERICH_CONTEXT: CityContext = {
   marktenge: 2,  mietbelastungs_grenze: 1,
 };
 
-function phases(params: CityParams40, context: CityContext, diff: ParamsDiff40) {
+function phases(_params: CityParams40, context: CityContext, diff: ParamsDiff40) {
   invalidatePhasesCache();
-  return [...computePhasePipeline(context, params, diff)];
+  return [...computePhasePipeline(context, diff)];
 }
 
 describe('Steuern: Grunderwerbsteuer / Handänderungssteuer', () => {

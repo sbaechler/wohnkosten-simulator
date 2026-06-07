@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { graphConnect, sugiyama, layeringSimplex, decrossTwoLayer, decrossDfs } from 'd3-dag';
-import type { ParamsDiff40, MarketState, DerivedIndicators, CityContext, CityParams40 } from '../types';
+import type { ParamsDiff40, MarketState, DerivedIndicators, CityContext } from '../types';
 import { computePhasesCached } from '../model/compute-phases';
 import { computeDerivedIndicators } from '../model/derived';
 import { getDagTopology, type Edge, type NodeId } from '../model/dag-topology';
@@ -377,7 +377,6 @@ function computeLayout(allNodes: NodeMeta[], dagEdges: readonly Edge[]): { nodeL
 
 interface Props {
   context: CityContext;
-  modified: CityParams40;
   diff: ParamsDiff40;
 }
 
@@ -388,8 +387,8 @@ interface TooltipData {
   value?: number;
 }
 
-export function DAGVisualization({ context, modified, diff }: Props) {
-  const phases = computePhasesCached(context, modified, diff);
+export function DAGVisualization({ context, diff }: Props) {
+  const phases = computePhasesCached(context, diff);
   const state = phases[phases.length - 1].marketState;
   const derived = computeDerivedIndicators(state);
 

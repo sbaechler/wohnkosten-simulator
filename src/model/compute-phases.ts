@@ -138,7 +138,6 @@ export function computeE1WithPhaseAndCarry(
 
 export function* computePhasePipeline(
   context: CityContext,
-  params: CityParams40,
   diff: ParamsDiff40,
 ): Generator<PhaseResult, PhaseResult[], void> {
   let carryE1: MarketState | null = null;
@@ -166,20 +165,19 @@ export function* computePhasePipeline(
 
 const _cache = new Map<string, PhaseResult[]>();
 
-function _cacheKey(context: CityContext, params: CityParams40, diff: ParamsDiff40): string {
-  return JSON.stringify({ context, params, diff });
+function _cacheKey(context: CityContext, diff: ParamsDiff40): string {
+  return JSON.stringify({ context, diff });
 }
 
 export function computePhasesCached(
   context: CityContext,
-  params: CityParams40,
   diff: ParamsDiff40,
 ): PhaseResult[] {
-  const key = _cacheKey(context, params, diff);
+  const key = _cacheKey(context, diff);
   const cached = _cache.get(key);
   if (cached) return cached;
 
-  const results = [...computePhasePipeline(context, params, diff)];
+  const results = [...computePhasePipeline(context, diff)];
   _cache.set(key, results);
   return results;
 }

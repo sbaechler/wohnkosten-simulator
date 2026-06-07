@@ -162,7 +162,7 @@ describe('computeEigentumBelastung', () => {
   });
 
   it('clamps to lower bound [10] under extreme relief', () => {
-    const extreme: MarketState = { ...emptyState, investmentsattraktivitaet: 10 };
+    const extreme: MarketState = { ...emptyState, investitionsattraktivitaet: 10 };
     expect(computeEigentumBelastung(extreme)).toBeGreaterThanOrEqual(10);
   });
 });

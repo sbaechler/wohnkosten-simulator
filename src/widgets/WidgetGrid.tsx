@@ -22,11 +22,11 @@ export function WidgetGrid({ context, baseline, modified, diff }: Props) {
   const hasChanges = Object.keys(diff).length > 0;
 
   // Phases for modified params (current behavior)
-  const modifiedPhases = computePhasesCached(context, modified, diff);
+  const modifiedPhases = computePhasesCached(context, diff);
 
   // Phases for baseline ("Heutige Situation") — empty diff means no changes
   const emptyDiff: ParamsDiff40 = useMemo(() => ({}), []);
-  const baselinePhases = computePhasesCached(context, baseline, emptyDiff);
+  const baselinePhases = computePhasesCached(context, emptyDiff);
 
   // Latest phase for single-value widgets
   const latestModified = modifiedPhases[modifiedPhases.length - 1]!;

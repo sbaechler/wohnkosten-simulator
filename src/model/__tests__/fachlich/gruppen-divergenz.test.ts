@@ -47,7 +47,7 @@ describe('Gruppen-Divergenz: Bestand vs. Angebot', () => {
       nutzung_abbruchverbot: 2 as ParamValue
     };
     
-    const results = [...computePhasePipeline(ANGESPANNT_CONTEXT, modified, {})];
+    const results = [...computePhasePipeline(ANGESPANNT_CONTEXT, {})];
     const phase2 = results[1];
     const trends = computeGroupTrends(phase2.marketState, params, modified);
     
@@ -65,7 +65,7 @@ describe('Gruppen-Divergenz: Bestand vs. Angebot', () => {
     const params = { ...NEUTRAL_PARAMS };
     const modified: CityParams40 = { ...params, mietrecht_kostenmiete: 2 as ParamValue };
     
-    const results = [...computePhasePipeline(ANGESPANNT_CONTEXT, modified, {})];
+    const results = [...computePhasePipeline(ANGESPANNT_CONTEXT, {})];
     const trends = computeGroupTrends(results[0].marketState, params, modified);
     
     const gering = trends.find(t => t.group.id === 'geringverdiener')!;

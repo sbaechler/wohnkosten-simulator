@@ -41,8 +41,8 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
   // Baseline reference state (dashed line) — uses pipeline phase 1 of the baseline
   // (no diff = neutral state). Memoized to avoid recomputing on every render.
   const baselineState = useMemo(
-    () => computePhasesCached(context, baseline, {})[0].marketState,
-    [context, baseline],
+    () => computePhasesCached(context, {})[0].marketState,
+    [context],
   );
 
   useEffect(() => {
