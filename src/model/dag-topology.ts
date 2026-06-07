@@ -42,11 +42,12 @@ export interface Edge {
  */
 export function getDagTopology(): readonly Edge[] {
   return PHASE_WEIGHTED_EDGES.map(edge => {
-    const [p1, p2, p3] = edge.weights;
-    const weights = [p1, p2, p3];
-    const maxWeight = Math.max(...weights);
-    const dominantIndex = weights.indexOf(maxWeight);
-    const time: 'short' | 'medium' | 'long' = dominantIndex === 0 ? 'short' : dominantIndex === 1 ? 'medium' : 'long';
+    const maxWeight = Math.max(...edge.weights);
+    const dominantIndex = edge.weights.indexOf(maxWeight);
+    const time: 'short' | 'medium' | 'long' =
+      dominantIndex === 0 ? 'short' :
+      dominantIndex === 1 ? 'medium' :
+      'long';
 
     return {
       from: edge.from as NodeId,
