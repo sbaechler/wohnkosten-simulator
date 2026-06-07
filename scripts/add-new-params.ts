@@ -6,7 +6,14 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const yamlPath = resolve(__dirname, '../data/cities/switzerland.yaml');
 
-const data = load(readFileSync(yamlPath, 'utf-8')) as any[];
+interface CityYaml {
+  slug: string;
+  name: string;
+  context: Record<string, number>;
+  params: Record<string, number>;
+}
+
+const data = load(readFileSync(yamlPath, 'utf-8')) as CityYaml[];
 
 for (const city of data) {
   // Add bau_ersatzneubau_effizienz after bau_sanierungspflicht
@@ -27,7 +34,7 @@ writeFileSync(yamlPath, [
   '# Last updated: 2026-05-20',
   '# New params: bau_ersatzneubau_effizienz, markt_mietbelastungs_grenze (Sotomo ZH-Wohnraumstudie 2025)',
   '',
-  ...data.map((city: any) => {
+  ...data.map((city: CityYaml) => {
     const ctx = city.context;
     const params = city.params;
     const ctxLines = Object.entries(ctx).map(([k, v]) => `    ${k}: ${v}`).join('\n');

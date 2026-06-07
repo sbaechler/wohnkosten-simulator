@@ -8,7 +8,7 @@
 // dort wo eine Aufsplittung inhaltlich Sinn macht.
 // ============================================================
 
-import type { MarketState, CityParams40, ParamsDiff40 } from '../types';
+import type { MarketState, CityParams40 } from '../types';
 import { clamp } from './utils';
 
 /** Die 8 festen Bevölkerungsgruppen */

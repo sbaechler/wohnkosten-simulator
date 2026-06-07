@@ -28,7 +28,7 @@ for (const file of FILES) {
   
   // Pattern: find 'infra_wirtschaftsansiedlung: X' followed by newlines and closing brace/blank
   content = content.replace(
-    /(\n  infra_wirtschaftsansiedlung: \d+)(\s*\n\s*\})/g,
+    /(\n {2}infra_wirtschaftsansiedlung: \d+)(\s*\n\s*\})/g,
     (match, line, rest) => {
       modified = true;
       return `${line},${NEW_PARAMS}${rest}`;

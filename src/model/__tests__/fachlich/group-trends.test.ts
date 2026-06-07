@@ -19,13 +19,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { computeGroupTrends, GROUPS, type GroupId } from '../../groups';
-import type { CityContext, CityParams40, MarketState, ParamValue } from '../../../types';
-
-const emptyContext: CityContext = {
-  zinsniveau: 0, zuwanderungsdruck: 0, wirtschaftskraft: 0,
-  bevoelkerungstrend: 0, marktenge: 0, mietbelastungs_grenze: 0,
-};
+import { computeGroupTrends, GROUPS } from '../../groups';
+import type { CityParams40, MarketState, ParamValue } from '../../../types';
 
 const emptyState: MarketState = {
   angebotspotenzial: 0,

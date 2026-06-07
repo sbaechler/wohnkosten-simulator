@@ -60,8 +60,6 @@ const DEMAND_INTERCEPT = 9;
 /** Steigung der Nachfragekurve. */
 const DEMAND_SLOPE = 0.8;
 
-/** Mittleres q (Mengen-Einheit) im ungesshifteten Diagramm. */
-const EQUILIBRIUM_Q_CENTER = 7;
 /** Intercept der q-Gleichung (q=0-Baseline bei p=1). */
 const EQUILIBRIUM_Q_INTERCEPT = 8;
 /** q-Verschiebungs-Empfindlichkeit pro supplyShift. */

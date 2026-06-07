@@ -433,7 +433,7 @@ export function DAGVisualization({ context, modified, diff }: Props) {
     }
 
     return { affectedNodes: an, affectedEdges: ae };
-  }, [diff]);
+  }, [diff, dagEdges]);
 
   function isEdgeHighlighted(e: Edge): boolean {
     return affectedEdges.has(e);
