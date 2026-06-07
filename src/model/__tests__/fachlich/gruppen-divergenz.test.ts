@@ -25,7 +25,7 @@ const NEUTRAL_PARAMS: CityParams40 = {
   kapital_auslaendische_investoren: 1 as ParamValue, kapital_institutionelle_regulierung: 1 as ParamValue, kapital_hypothekarregulierung: 1 as ParamValue,
   nutzung_kurzzeitvermietung: 1 as ParamValue, nutzung_umnutzungsverbot: 1 as ParamValue, nutzung_abbruchverbot: 1 as ParamValue, nutzung_zweitwohnungen: 1 as ParamValue,
   infra_oepnv: 1 as ParamValue, infra_schule_kita: 1 as ParamValue, infra_oeffentlicher_raum: 1 as ParamValue, infra_wirtschaftsansiedlung: 1 as ParamValue,
-  bau_ersatzneubau_effizienz: 1 as ParamValue, markt_mietbelastungs_grenze: 1 as ParamValue,
+  bau_ersatzneubau_effizienz: 1 as ParamValue,
 };
 
 const ANGESPANNT_CONTEXT: CityContext = {
@@ -33,7 +33,7 @@ const ANGESPANNT_CONTEXT: CityContext = {
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
   bevoelkerungstrend: 2,
-  marktenge: 2,
+  marktenge: 2,  mietbelastungs_grenze: 1,
 };
 
 describe('Gruppen-Divergenz: Bestand vs. Angebot', () => {
@@ -49,7 +49,7 @@ describe('Gruppen-Divergenz: Bestand vs. Angebot', () => {
     
     const results = [...computePhasePipeline(ANGESPANNT_CONTEXT, modified, {})];
     const phase2 = results[1];
-    const trends = computeGroupTrends(phase2.marketState, params, modified, {});
+    const trends = computeGroupTrends(phase2.marketState, params, modified);
     
     const bestand = trends.find(t => t.group.id === 'normalverdiener_bestand')!;
     const angebot = trends.find(t => t.group.id === 'normalverdiener_angebot')!;
@@ -66,7 +66,7 @@ describe('Gruppen-Divergenz: Bestand vs. Angebot', () => {
     const modified: CityParams40 = { ...params, mietrecht_kostenmiete: 2 as ParamValue };
     
     const results = [...computePhasePipeline(ANGESPANNT_CONTEXT, modified, {})];
-    const trends = computeGroupTrends(results[0].marketState, params, modified, {});
+    const trends = computeGroupTrends(results[0].marketState, params, modified);
     
     const gering = trends.find(t => t.group.id === 'geringverdiener')!;
     const angebot = trends.find(t => t.group.id === 'normalverdiener_angebot')!;

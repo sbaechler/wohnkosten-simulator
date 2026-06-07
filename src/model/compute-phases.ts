@@ -4,8 +4,10 @@
 
 import type { CityContext, CityParams40, ParamsDiff40, MarketState } from '../types';
 import type { Phase, PhaseResult } from './phases';
+import { PHASE_NAMES, PHASE_YEAR_LABELS, PHASES } from './phases';
 import { PHASE_WEIGHTED_EDGES } from './phase-weights';
 import { computeDerivedIndicators } from './derived';
+import { clamp } from './utils';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -19,10 +21,6 @@ function normalizeDiff(diff: number): number {
   return diff / 2;
 }
 
-/** Clamp to –1…+1 */
-function clamp(v: number, lo = -1, hi = 1): number {
-  return Math.max(lo, Math.min(hi, v));
-}
 
 // ── E1 Node IDs ───────────────────────────────────────────────────────────────
 
@@ -59,6 +57,17 @@ function getE0Delta(
 
 // ── computeE1WithPhaseAndCarry ────────────────────────────────────────────────
 
+/**
+ * Carry-over-Faktor: wie stark der Wert einer Phase auf die nächste Phase
+ * übertragen wird. 0.8 = 80% des Vorwerts bleibt erhalten, 20% werden durch
+ * den neuen gewichteten Input ersetzt.
+ *
+ * Kalibrierung: Gradient-Descent in `scripts/calibrate.ts` (PERSISTENCE dort
+ * hartkodiert — bei Änderung hier UND dort synchron halten).
+ *
+ * Höher = mehr Trägheit (Modell reagiert langsamer auf Policy-Wechsel).
+ * Niedriger = mehr unmittelbare Reaktion pro Phase.
+ */
 const PERSISTENCE = 0.8;
 
 /**
@@ -70,12 +79,19 @@ const PERSISTENCE = 0.8;
  * - P3 (5-10 Jahre): Langfristiges Gleichgewicht — alle Effekte voll wirksam
  *
  * Dieser Faktor skaliert ALLE Kantengewichte über alle Phasen hinweg.
+ *
+ * Kalibrierung: resultiert aus den 60+ Constraints in `scripts/calibrate.ts`.
+ * NICHT willkürlich ändern — würde alle 246 Edge-Gewichte re-skaliert bedeuten.
  */
 const PHASE_BASE_MULTIPLIER: readonly [number, number, number] = [0.4, 0.7, 1.0];
 
 /**
  * Marktverengungs-Multiplikator: -2→0.4× (entspannt), 0→1.0× (normal), +2→1.6× (extrem eng)
  * Ein enger Markt reagiert stärker auf Policies weil wenig Ausgleich vorhanden ist.
+ *
+ * Kalibrierung: 0.3 entspricht einer ±30% Reaktion bei extremem Marktengpass.
+ * Forschungsbasis: Sotomo ZH-Wohnraumstudie 2025 + CH-007 (Zonenreserve-Wirkung
+ * ist in angespannten Märkten ~3× stärker als in entspannten).
  */
 function marketModulator(marktenge: number): number {
   return 1.0 + marktenge * 0.3;
@@ -83,7 +99,6 @@ function marketModulator(marktenge: number): number {
 
 export function computeE1WithPhaseAndCarry(
   context: CityContext,
-  _params: CityParams40,
   diff: ParamsDiff40,
   phase: Phase,
   carryE1: MarketState | null,
@@ -121,9 +136,6 @@ export function computeE1WithPhaseAndCarry(
 
 // ── computePhasePipeline ───────────────────────────────────────────────────────
 
-const PHASE_NAMES: PhaseResult['name'][] = ['kurzfristig', 'mittelfristig', 'langfristig'];
-const PHASE_YEAR_LABELS = ['0–2 Jahre', '2–5 Jahre', '5–10 Jahre'];
-
 export function* computePhasePipeline(
   context: CityContext,
   params: CityParams40,
@@ -131,9 +143,9 @@ export function* computePhasePipeline(
 ): Generator<PhaseResult, PhaseResult[], void> {
   let carryE1: MarketState | null = null;
 
-  for (const phase of [1, 2, 3] as Phase[]) {
-    const e1 = computeE1WithPhaseAndCarry(context, params, diff, phase, carryE1);
-    const e2 = computeDerivedIndicators(e1, context, diff);
+  for (const phase of PHASES) {
+    const e1 = computeE1WithPhaseAndCarry(context, diff, phase, carryE1);
+    const e2 = computeDerivedIndicators(e1);
     carryE1 = e1;
 
     const result: PhaseResult = {
@@ -142,7 +154,6 @@ export function* computePhasePipeline(
       yearsLabel: PHASE_YEAR_LABELS[phase - 1],
       marketState: e1,
       derived: e2,
-      dominantParams: [],
     };
 
     yield result;
@@ -155,8 +166,8 @@ export function* computePhasePipeline(
 
 const _cache = new Map<string, PhaseResult[]>();
 
-function _cacheKey(params: CityParams40, diff: ParamsDiff40): string {
-  return JSON.stringify({ params, diff });
+function _cacheKey(context: CityContext, params: CityParams40, diff: ParamsDiff40): string {
+  return JSON.stringify({ context, params, diff });
 }
 
 export function computePhasesCached(
@@ -164,7 +175,7 @@ export function computePhasesCached(
   params: CityParams40,
   diff: ParamsDiff40,
 ): PhaseResult[] {
-  const key = _cacheKey(params, diff);
+  const key = _cacheKey(context, params, diff);
   const cached = _cache.get(key);
   if (cached) return cached;
 

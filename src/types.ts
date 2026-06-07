@@ -1,13 +1,13 @@
 // ============================================================
 // Domain Types — Wohnkosten-Simulator
-// E0: 42 atomic parameters (40 + 2 new from Sotomo ZH-Wohnraumstudie 2025)
+// E0: 40 atomic parameters + 5 context factors
 // E1: 10 MarketState variables (normalized –1…+1)
 // E2: 5 DerivedIndicators
 // ============================================================
 //
-// Neue Parameter (Sotomo Wohnraumstudie ZH, September 2025):
-//   - bau_ersatzneubau_effizienz: Netto-Neubau pro Abriss (Zürich: 2.8x, Westschweiz: 6+x)
-//   - markt_mietbelastungs_grenze: Strukturelles Mietbelastungsniveau (tief: 30%, Viertel >40%)
+// Sotomo Wohnraumstudie ZH 2025 (Sep.):
+//   - bau_ersatzneubau_effizienz: Netto-Neubau pro Abriss (Zürich: 2.8x, Westschweiz: 6+x) — als E0-Parameter
+//   - mietbelastungs_grenze: Strukturelles Mietbelastungsniveau (tief: 30%, Viertel >40%) — als CityContext
 //   Quelle: https://www.sotomo.ch/files/data/projectfile/2025/09/Sotomo-Wohnraumstudie-%E2%80%93-ZHK-2025-09.pdf
 //
 
@@ -67,9 +67,6 @@ export type CityParams40 = {
   infra_schule_kita: ParamValue;
   infra_oeffentlicher_raum: ParamValue;
   infra_wirtschaftsansiedlung: ParamValue;
-  // 9. Markt-Kontext (statistische Referenzwerte, keine Steuerung)
-  /** Strukturelles Mietbelastungsniveau (Anteil am Haushaltseinkommen) */
-  markt_mietbelastungs_grenze: ParamValue; // Sotomo 2025: tiefes Einkommen 30%, Viertel >40%
 };
 
 export interface CityContext {
@@ -79,6 +76,15 @@ export interface CityContext {
   bevoelkerungstrend: ContextValue;
   /** Marktverfassung: -2=entspannt (>5% Leerstand), +2=extrem eng (<1% Leerstand) */
   marktenge: ContextValue;
+  /**
+   * Strukturelles Mietbelastungsniveau (Anteil am Haushaltseinkommen).
+   * Quelle: Sotomo Wohnraumstudie ZH 2025 — tiefes Einkommen ~30%, Viertel >40%.
+   *
+   * Semantik: Read-only Kontextfaktor (nicht via Slider editierbar).
+   * Default pro Stadt aus data/cities/switzerland.yaml. Steuert die
+   * Marktfriktion als strukturelle Rahmenbedingung.
+   */
+  mietbelastungs_grenze: ContextValue;
 }
 
 export interface CityConfig {

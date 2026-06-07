@@ -15,7 +15,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { computePhasePipeline, computePhasesCached, invalidatePhasesCache } from '../../compute-phases';
-import type { CityContext, CityParams40 } from '../../../types';
+import type { CityContext, CityParams40, ParamsDiff40 } from '../../../types';
 
 // Zürich (entspricht V1: raumplanung=2, bauvorschriften=2, energetischeVorgaben=1,
 // mietrecht=1, steuerpolitik=2, foerderungGemeinnuetzig=2, subventionen=1,
@@ -36,7 +36,6 @@ const ZUERICH_V2: CityParams40 = {
   nutzung_kurzzeitvermietung: 1, nutzung_umnutzungsverbot: 1, nutzung_abbruchverbot: 1, nutzung_zweitwohnungen: 1,
   infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
     bau_ersatzneubau_effizienz: 1,
-    markt_mietbelastungs_grenze: 1,
 };
 
 const ZUERICH_CONTEXT: CityContext = {
@@ -44,10 +43,10 @@ const ZUERICH_CONTEXT: CityContext = {
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
   bevoelkerungstrend: 2,
-  marktenge: 2,
+  marktenge: 2,  mietbelastungs_grenze: 1,
 };
 
-const EMPTY_DIFF = {} as never;
+const EMPTY_DIFF = {} as ParamsDiff40;
 
 function inRange(value: number): void {
   expect(value).toBeGreaterThanOrEqual(-1);
@@ -146,5 +145,15 @@ describe('computePhasesCached', () => {
     invalidatePhasesCache();
     const second = computePhasesCached(ZUERICH_CONTEXT, ZUERICH_V2, EMPTY_DIFF);
     expect(first).not.toBe(second);
+  });
+
+  it('different contexts with same params/diff produce different cache entries', () => {
+    const zuerich = computePhasesCached(ZUERICH_CONTEXT, ZUERICH_V2, EMPTY_DIFF);
+    const winterthur = computePhasesCached(
+      { ...ZUERICH_CONTEXT, zuwanderungsdruck: 0 },
+      ZUERICH_V2,
+      EMPTY_DIFF,
+    );
+    expect(zuerich).not.toEqual(winterthur);
   });
 });

@@ -1,9 +1,9 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import type { CityParams40, CityContext, ParamsDiff40 } from '../types';
 import { supplyCurve, demandCurve, findEquilibrium } from '../model/supply-demand';
 import type { PhaseResult } from '../model/phases';
-import { computeMarketState, clampE1 } from '../model/market-state';
+import { computePhasesCached } from '../model/compute-phases';
 import './SupplyDemandChart.css';
 
 interface Props {
@@ -37,6 +37,13 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
 
   // Active phases depend on toggle
   const activePhasesForChart = (baselinePhases && viewMode === 'heutig') ? baselinePhases : phases;
+
+  // Baseline reference state (dashed line) — uses pipeline phase 1 of the baseline
+  // (no diff = neutral state). Memoized to avoid recomputing on every render.
+  const baselineState = useMemo(
+    () => computePhasesCached(context, baseline, {})[0].marketState,
+    [context, baseline],
+  );
 
   useEffect(() => {
     if (!svgRef.current || !phases || phases.length === 0) return;
@@ -75,7 +82,6 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
       .curve(d3.curveLinear);
 
     // Baseline curves: always use baseline params for the dashed reference line
-    const baselineState = clampE1(computeMarketState(context, baseline, baseline, {}));
     const [bq, bp] = findEquilibrium(baselineState.angebotspotenzial, baselineState.nachfragedruck, baselineState.angebotspotenzial_regulation, baselineState);
 
     // Draw baseline curves (dashed)
@@ -149,7 +155,7 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
     legend.append('circle').attr('cx', 10).attr('cy', 64).attr('r', 5).attr('fill', COLORS.equilibrium).attr('stroke', '#fff').attr('stroke-width', 1);
     legend.append('text').attr('x', 25).attr('y', 68).attr('fill', '#ccc').attr('font-size', 11).text('Gleichgewicht');
 
-  }, [context, baseline, modified, diff, phases, activePhaseIndex, baselinePhases, viewMode, activePhasesForChart]);
+  }, [context, baseline, modified, diff, phases, activePhaseIndex, baselinePhases, viewMode, activePhasesForChart, baselineState]);
 
   return (
     <div className="supply-demand-chart">

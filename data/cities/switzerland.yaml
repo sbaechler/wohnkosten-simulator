@@ -1,8 +1,9 @@
 # Swiss cities with >40k inhabitants
 # Research source: staedte-parameter-recherche.md
 # Generated: npm run build:data
-# Last updated: 2026-05-20
-# New params: bau_ersatzneubau_effizienz, markt_mietbelastungs_grenze (Sotomo ZH-Wohnraumstudie 2025)
+# Last updated: 2026-06-06
+# New param: bau_ersatzneubau_effizienz (Sotomo ZH-Wohnraumstudie 2025)
+# New context: mietbelastungs_grenze (Sotomo ZH-Wohnraumstudie 2025)
 
 - slug: zuerich
   name: "Zürich"
@@ -12,6 +13,7 @@
     wirtschaftskraft: 2
     bevoelkerungstrend: 1
     marktenge: 2
+    mietbelastungs_grenze: 2
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 2
@@ -54,7 +56,6 @@
     infra_oeffentlicher_raum: 2
     infra_wirtschaftsansiedlung: 2
     bau_ersatzneubau_effizienz: 0
-    markt_mietbelastungs_grenze: 2
 - slug: genf
   name: "Genf"
   context:
@@ -63,6 +64,7 @@
     wirtschaftskraft: 2
     bevoelkerungstrend: -1
     marktenge: 2
+    mietbelastungs_grenze: 2
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 2
@@ -105,7 +107,6 @@
     infra_oeffentlicher_raum: 2
     infra_wirtschaftsansiedlung: 2
     bau_ersatzneubau_effizienz: 1
-    markt_mietbelastungs_grenze: 2
 - slug: basel
   name: "Basel"
   context:
@@ -114,6 +115,7 @@
     wirtschaftskraft: 2
     bevoelkerungstrend: -1
     marktenge: 1
+    mietbelastungs_grenze: 2
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 2
@@ -156,7 +158,6 @@
     infra_oeffentlicher_raum: 2
     infra_wirtschaftsansiedlung: 2
     bau_ersatzneubau_effizienz: 1
-    markt_mietbelastungs_grenze: 2
 - slug: lausanne
   name: "Lausanne"
   context:
@@ -165,6 +166,7 @@
     wirtschaftskraft: 2
     bevoelkerungstrend: -1
     marktenge: 2
+    mietbelastungs_grenze: 2
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -207,7 +209,6 @@
     infra_oeffentlicher_raum: 2
     infra_wirtschaftsansiedlung: 2
     bau_ersatzneubau_effizienz: 1
-    markt_mietbelastungs_grenze: 2
 - slug: bern
   name: "Bern"
   context:
@@ -216,6 +217,7 @@
     wirtschaftskraft: 1
     bevoelkerungstrend: -1
     marktenge: 2
+    mietbelastungs_grenze: 1
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -258,7 +260,6 @@
     infra_oeffentlicher_raum: 1
     infra_wirtschaftsansiedlung: 1
     bau_ersatzneubau_effizienz: 1
-    markt_mietbelastungs_grenze: 1
 - slug: winterthur
   name: "Winterthur"
   context:
@@ -267,6 +268,7 @@
     wirtschaftskraft: 1
     bevoelkerungstrend: -1
     marktenge: 2
+    mietbelastungs_grenze: 1
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 1
@@ -309,7 +311,6 @@
     infra_oeffentlicher_raum: 1
     infra_wirtschaftsansiedlung: 1
     bau_ersatzneubau_effizienz: 1
-    markt_mietbelastungs_grenze: 1
 - slug: luzern
   name: "Luzern"
   context:
@@ -318,6 +319,7 @@
     wirtschaftskraft: 1
     bevoelkerungstrend: -1
     marktenge: 1
+    mietbelastungs_grenze: 1
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -360,7 +362,6 @@
     infra_oeffentlicher_raum: 2
     infra_wirtschaftsansiedlung: 1
     bau_ersatzneubau_effizienz: 1
-    markt_mietbelastungs_grenze: 1
 - slug: st-gallen
   name: "St. Gallen"
   context:
@@ -369,6 +370,7 @@
     wirtschaftskraft: 1
     bevoelkerungstrend: -1
     marktenge: 0
+    mietbelastungs_grenze: 1
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -411,7 +413,6 @@
     infra_oeffentlicher_raum: 1
     infra_wirtschaftsansiedlung: 1
     bau_ersatzneubau_effizienz: 1
-    markt_mietbelastungs_grenze: 1
 - slug: lugano
   name: "Lugano"
   context:
@@ -420,6 +421,7 @@
     wirtschaftskraft: 1
     bevoelkerungstrend: -1
     marktenge: 1
+    mietbelastungs_grenze: 1
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -462,7 +464,6 @@
     infra_oeffentlicher_raum: 1
     infra_wirtschaftsansiedlung: 1
     bau_ersatzneubau_effizienz: 1
-    markt_mietbelastungs_grenze: 1
 - slug: biel
   name: "Biel/Bienne"
   context:
@@ -471,6 +472,7 @@
     wirtschaftskraft: 1
     bevoelkerungstrend: -1
     marktenge: 1
+    mietbelastungs_grenze: 1
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -513,4 +515,3 @@
     infra_oeffentlicher_raum: 1
     infra_wirtschaftsansiedlung: 1
     bau_ersatzneubau_effizienz: 1
-    markt_mietbelastungs_grenze: 1

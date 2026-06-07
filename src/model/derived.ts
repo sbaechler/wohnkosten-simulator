@@ -3,13 +3,8 @@
 // Berechnet die 4 abgeleiteten Indikatoren aus E1
 // ============================================================
 
-import type { MarketState, DerivedIndicators, ParamsDiff40 } from '../types';
-
-// ── Hilfsfunktion: clamp ──────────────────────────────────────────────────────
-
-function clamp(v: number, lo = -1, hi = 1): number {
-  return Math.max(lo, Math.min(hi, v));
-}
+import type { MarketState, DerivedIndicators } from '../types';
+import { clamp } from './utils';
 
 // ── E2-Berechnung ───────────────────────────────────────────────────────────
 
@@ -32,12 +27,7 @@ function clamp(v: number, lo = -1, hi = 1): number {
  */
 export function computeDerivedIndicators(
   state: MarketState,
-  _context: unknown,
-  _diff: ParamsDiff40,
 ): DerivedIndicators {
-  // NOTE: _context and _diff are part of the shared compute-function signature
-  void _context;
-  void _diff;
   // ── gentrifizierungsindex ─────────────────────────────────────────────────
   // Gewichte: aufwertungsdruck=1.5, (1-mietpreis_schutzlevel)=1.5,
   //           verdraengungsrisiko=1.5, (1-gemeinnuetzig_kraft)=1.0

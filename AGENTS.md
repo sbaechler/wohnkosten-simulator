@@ -18,7 +18,9 @@ src/
 │   ├── market-state.ts     # E1: 10 Marktvariablen (normiert –1…+1)
 │   ├── derived.ts          # E2: abgeleitete Indikatoren
 │   ├── params.ts          # Param-Metadaten, Diff-Funktionen
-│   └── phases.ts          # Phase types
+│   ├── phases.ts          # Phase types
+│   ├── dag-topology.ts    # DAG topology projection (single-weight for viz)
+│   └── phase-weights.ts   # Phase-gewichtete Kanten (P1/P2/P3 weights)
 ├── widgets/                # React+D3 Widgets
 │   ├── WidgetGrid.tsx     # Layout-Orchestration
 │   ├── GroupTrendWidget   # Preistrend-Tabelle
@@ -119,9 +121,12 @@ Für citiespezifische Recherche-Werte: `docs/superpowers/research/staedte-parame
 
 ## Wichtige Konventionen
 
-- **Keine magic numbers** — alle Werte für die DAG kommen aus `phase-weights.ts`
+- **Keine anonymen Magic Numbers in der DAG-Pipeline** — Werte kommen aus `phase-weights.ts` (per-Edge `weights: [w1, w2, w3]`)
+- **Andere Dateien dürfen benannte `const`s verwenden** — sie MÜSSEN aber JSDoc mit Quelle (Forschung, Sotomo, ETH SPUR etc.) und Zweck haben. Beispiele: `MIETBELASTUNG_SENSITIVITY` (belastung.ts), `KNAPPHEIT_GEWICHTE` (supply-demand.ts), `PERSISTENCE` (compute-phases.ts).
+- **Per-Group-Faktoren in `groups.ts` sind Modell-Design** (definieren WAS eine Gruppe ist) — NICHT in `calibration.ts` extrahieren, sondern inline mit JSDoc-Rationale dokumentieren.
 - **URL ist Source of Truth** — nie lokalen React-State für Parameter nutzen
 - **Tests müssen grün sein** bevor gepullt wird: `npx vitest run`
+- **Coverage** (optional, lokal): `npm run test:coverage`. Misst nur `src/model/**` (Pipeline-Code) — keine Widgets, keine generated/, keine Scripts.
 - **Generated Files**: `src/generated/` wird aus YAML generiert — nicht manuell editieren
 - **Branch-Strategie**: Feature-Branches → main (keine protected Branches aktiv)
 

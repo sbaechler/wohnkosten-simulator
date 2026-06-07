@@ -34,10 +34,10 @@ export function WidgetGrid({ context, baseline, modified, diff }: Props) {
 
   // Group trends helper
   function computeModifiedGroupTrends(phase: PhaseResult) {
-    return computeGroupTrends(phase.marketState, baseline, modified, diff);
+    return computeGroupTrends(phase.marketState, baseline, modified);
   }
   function computeBaselineGroupTrends(phase: PhaseResult) {
-    return computeGroupTrends(phase.marketState, baseline, baseline, emptyDiff);
+    return computeGroupTrends(phase.marketState, baseline, baseline);
   }
 
   // Stadtbild getValue helper

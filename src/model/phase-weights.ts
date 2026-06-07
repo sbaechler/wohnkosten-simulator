@@ -31,7 +31,7 @@ export const PHASE_WEIGHTED_EDGES: readonly {
 }[] = [
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → angebotspotenzial (16 edges)
+  // E0 → angebotspotenzial (20 edges)
   // Research: RESULT-agent1-weights.md
   // ═══════════════════════════════════════════════════════════════════
 
@@ -191,7 +191,7 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → nachfragedruck (11 edges)
+  // E0 → nachfragedruck (15 edges)
   // Research: RESULT-agent1-weights.md
   // ═══════════════════════════════════════════════════════════════════
 
@@ -307,7 +307,7 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → verdrängungsrisiko (7 edges)
+  // E0 → verdrängungsrisiko (9 edges)
   // Research: RESULT-agent2-weights.md
   // ═══════════════════════════════════════════════════════════════════
 
@@ -383,7 +383,7 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → spekulationshemmung (8 edges)
+  // E0 → spekulationshemmung (9 edges)
   // Research: RESULT-agent2-weights.md
   // ═══════════════════════════════════════════════════════════════════
 
@@ -460,7 +460,7 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → markfriktion (6 edges)
+  // E0 → markfriktion (7 edges)
   // Research: RESULT-agent2-weights.md + FHNW-Studie (Ters/Kholodilin 2025)
   // ═══════════════════════════════════════════════════════════════════
 
@@ -524,8 +524,8 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → mietpreis_schutzlevel (5 edges)
-  // Research: RESULT-agent2-weights.md + Sotomo ZH-Wohnraumstudie 2025
+  // E0 → mietpreis_schutzlevel (4 edges)
+  // Research: RESULT-agent2-weights.md
   // ═══════════════════════════════════════════════════════════════════
 
   {
@@ -558,15 +558,6 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     sign: +1,
     weights: [1.0, 0.9, 0.9],
     // Mietzinsindex bindet automatisch an Inflation; sofort und dauerhaft wirksam.
-  },
-  // Sotomo 2025: Strukturelle Mietbelastung (tiefes Einkommen ∅30%, Viertel >40%)
-  {
-    from: 'markt_mietbelastungs_grenze',
-    to: 'mietpreis_schutzlevel',
-    sign: +1,
-    weights: [0.3, 0.5, 0.7],
-    // Hohe strukturelle Belastung → bereits regulierter Markt → stärkerer Schutz-Effekt.
-    // Langfristig am stärksten wenn Markt sich angepasst hat.
   },
   // ═══════════════════════════════════════════════════════════════════
   // E0 → gemeinnuetzig_kraft (6 edges)
@@ -731,7 +722,7 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → investitionsattraktivitaet (10 edges)
+  // E0 → investitionsattraktivitaet (11 edges)
   // Research: RESULT-agent2-weights.md + FHNW-Studie (Ters/Kholodilin 2025)
   // ═══════════════════════════════════════════════════════════════════
 
@@ -828,7 +819,7 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E1 → E2 edges (9 edges)
+  // E1 → E2 edges (10 edges)
   // Research: RESULT-agent3-e1e2-weights.md
   // Kern-Logik: E1-Werte sind kumulierte Markt-Zustände.
   // Rückkopplungs-Dämpfung: Steigendes E2 löst in P2/P3 Gegenkräfte aus,
@@ -843,7 +834,7 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     sign: +1,
     weights: [1.0, 1.0, 1.0],
     // Direkter Alias — E1 akkumuliert, E2 bildet sofort ab:
-    // aufwertungsdruck ist ein kumulierter Markt-Zustand; keine额外 Verzögerung.
+    // aufwertungsdruck ist ein kumulierter Markt-Zustand; keine Verzögerung.
   },
   {
     from: 'mietpreis_schutzlevel',
@@ -945,8 +936,9 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → angebotspotenzial_regulation (Phase 3)
+  // E0 → angebotspotenzial_regulation
   // Bestimmt die Elastizität des Angebots in Bezug auf Preisänderungen.
+  // Wirkt primär in P3 (langfristige Anpassung des Bauvolumens an Preissignale).
   // Starke Regulierung → unelastische Angebotskurve → Preise reagieren stark, Menge wenig.
   // Schwache Regulierung → elastische Angebotskurve → Menge reagiert stark, Preise wenig.
   // ═══════════════════════════════════════════════════════════════════

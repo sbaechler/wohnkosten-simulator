@@ -8,7 +8,8 @@
 // dort wo eine Aufsplittung inhaltlich Sinn macht.
 // ============================================================
 
-import type { MarketState, CityParams40, ParamsDiff40 } from '../types';
+import type { MarketState, CityParams40 } from '../types';
+import { clamp } from './utils';
 
 /** Die 8 festen Bevölkerungsgruppen */
 export type GroupId =
@@ -107,9 +108,6 @@ export interface GroupPriceTrend {
   tooltip: string;
 }
 
-function clamp(v: number): number {
-  return Math.max(-1, Math.min(1, v));
-}
 
 // ── Hilfsfunktionen ────────────────────────────────────────────────────────
 
@@ -117,8 +115,31 @@ function clamp(v: number): number {
  * Berechnet den Basis-Preistrend aus dem Markt-Zustand.
  * Positive Werte = Preise steigen.
  * Beruht auf Angebot-Nachfrage-Differenz, modifiziert durch Mietschutz.
+ *
+ * Die gruppen-spezifischen Faktoren sind **Modell-Design** (nicht Kalibrierung):
+ * sie definieren, WAS eine Gruppe ist, nicht WIE STARK sie reagiert. Daher
+ * inline statt in `calibration.ts` extrahiert. Jeder Faktor ist mit seiner
+ * Design-Rationale kommentiert.
+ *
+ * Übersicht der Faktoren:
+ *
+ * | Gruppe                     | Markt-Faktor | Schutz-Faktor | Verdrängung | Andere        | Rationale |
+ * |----------------------------|-------------|---------------|-------------|---------------|-----------|
+ * | geringverdiener            | 0.5         | -1.0          | —           | —             | Sozialhilfe/EL entkoppeln vom Markt; voller Schutz |
+ * | normalverdiener_bestand    | 0.4         | -1.2          | —           | —             | Regulierung schützt stark; reagiert träge |
+ * | normalverdiener_angebot    | 1.2         | +0.2          | —           | —             | Volle Marktdynamik; Spillover vom Bestandsschutz |
+ * | glueckspilze               | 0.1         | —             | —           | —             | Fast vollständig markt-entkoppelt |
+ * | normalverdiener_eigentuemer| 0.5         | —             | —           | -angebot*0.3  | Vermögensaufbau, aber Neubau-Kosten |
+ * | junge_familien             | 1.1         | +0.1          | —           | —             | Preissensitiv, grosser Bedarf |
+ * | genossenschafter           | 0.3         | —             | —           | -gemkraft*0.5 | Genossenschaft schützt gut |
+ * | rentner                    | 0.7         | -0.8          | +verd*0.2   | —             | Fixeinkommen (Schutz+Verdrängung; ETH SPUR CH-008) |
+ * | high_earner                | 0.4         | —             | —           | +invest*0.3   | Standort-/Steuer-motiviert, nicht preissensitiv |
+ *
+ * Der Schutz-Faktor (protectionEffect = mietpreis_schutzlevel × 0.4) dämpft
+ * Preisanstieg für Mieter. Der Faktor 0.4 entspricht einer ~40%igen Dämpfung
+ * des Marktdrucks bei maximalem Mietpreis-Schutzlevel.
  */
-function basePriceTrend(state: MarketState, group: GroupId): { trend: number; extra: number } {
+function basePriceTrend(state: MarketState, group: GroupId): { trend: number } {
   // Angebot fördert Preise (negatives angebotspotenzial = mehr Angebot = sinkt)
   const supplyEffect = -state.angebotspotenzial;
   // Nachfrage erhöht Preise
@@ -126,10 +147,13 @@ function basePriceTrend(state: MarketState, group: GroupId): { trend: number; ex
 
   const base = supplyEffect + demandEffect;
 
-  // Mietschutz dämpft Preisanstieg für Mieter
+  // Mietschutz dämpft Preisanstieg für Mieter.
+  // Faktor 0.4: ~40% Dämpfung des Marktdrucks bei mietpreis_schutzlevel = +1.
+  // Kalibrierung: Sotomo ZH-Wohnraumstudie 2025 — Mieter mit vollem Mietrechtsschutz
+  // zahlen ~40% weniger Miete als ungeschützte bei gleicher Marktlage.
   const protectionEffect = state.mietpreis_schutzlevel * 0.4;
 
-  // Gruppe-spezifische Basis-Anpassung
+  // Gruppe-spezifische Basis-Anpassung (siehe JSDoc oben)
   let groupBase = base;
 
   if (group === 'geringverdiener') {
@@ -158,8 +182,13 @@ function basePriceTrend(state: MarketState, group: GroupId): { trend: number; ex
     // Genossenschafter sind gut geschützt durch Gemeinnützigkeit
     groupBase = base * 0.3 - state.gemeinnuetzig_kraft * 0.5;
   } else if (group === 'rentner') {
-    // Rentner sind preissensitiv, fixiertes Einkommen
-    // Meist Bestandsmieter -> profitieren von Schutz
+    // Rentner: zwei gegenläufige Mechaniken.
+    // (1) Schutz: Als Bestandsmieter mit fixiertem Einkommen profitieren sie
+    //     stark vom Mietrecht (protectionEffect dämpft Preistrend).
+    // (2) Verdrängung: ETH SPUR 2025 listet ältere Personen explizit als
+    //     verletzliche Gruppe auf dem Wohnungsmarkt (vgl. CH-008). Bei
+    //     hohem verdraengungsrisiko steigt ihre Belastung.
+    // Die Preissensitivität (Faktor 0.7) reflektiert das fixe Einkommen.
     groupBase = base * 0.7 + state.verdraengungsrisiko * 0.2 - protectionEffect * 0.8;
   } else if (group === 'high_earner') {
     // High Earner sind weniger preissensitiv, mehr steuer- und standortmotiviert
@@ -168,7 +197,6 @@ function basePriceTrend(state: MarketState, group: GroupId): { trend: number; ex
 
   return {
     trend: clamp(groupBase),
-    extra: protectionEffect,
   };
 }
 
@@ -290,14 +318,20 @@ function computeDrivers(
       drivers.push({
         paramKey: kp.key,
         label: paramLabels[kp.key] ?? kp.key,
-        direction: delta > 0 ? (kp.direction === 'up' ? 'up' : 'down') : (kp.direction === 'up' ? 'down' : 'up'),
+        // Bei positivem delta bleibt die Richtung, bei negativem dreht sie um.
+        // XOR-Logik: Richtung invertiert wenn genau einer der Faktoren (delta oder kp.direction) „negativ" ist.
+        direction: (delta > 0) === (kp.direction === 'up') ? 'up' : 'down',
         weight: Math.abs(delta) * kp.weight,
       });
     }
   }
 
-  // Nachbarschafts-Effekte (E1-Werte) wenn sie besonders hoch sind
-  if (Math.abs(state.aufwertungsdruck) > 0.5) {
+  // Nachbarschafts-Effekte (E1-Werte) wenn sie besonders hoch sind.
+  // Schwellwert 0.5 = nur E1-Werte, die substanziell von 0 abweichen (>50% der
+  // normalisierten Skala), werden als Treiber aufgenommen. Verhindert, dass
+  // schwache E1-Signale als „Top-Treiber" angezeigt werden.
+  const E1_DRIVER_THRESHOLD = 0.5;
+  if (Math.abs(state.aufwertungsdruck) > E1_DRIVER_THRESHOLD) {
     drivers.push({
       paramKey: 'aufwertungsdruck',
       label: 'Aufwertungsdruck',
@@ -306,7 +340,7 @@ function computeDrivers(
     });
   }
 
-  if (Math.abs(state.verdraengungsrisiko) > 0.5) {
+  if (Math.abs(state.verdraengungsrisiko) > E1_DRIVER_THRESHOLD) {
     drivers.push({
       paramKey: 'verdraengungsrisiko',
       label: 'Verdrängungsrisiko',
@@ -315,17 +349,23 @@ function computeDrivers(
     });
   }
 
-  // Sortiere nach Gewicht absteigend, nimm Top 3
+  // Sortiere nach Gewicht absteigend, nimm Top 3.
+  // Top-3 ist die UI-Konvention für „die wichtigsten Treiber" in der Treiber-Liste.
+  const TOP_N_DRIVERS = 3;
   return drivers
     .sort((a, b) => b.weight - a.weight)
-    .slice(0, 3);
+    .slice(0, TOP_N_DRIVERS);
 }
 
 /**
  * Erstellt einen kurzen Tooltip-Text für eine Gruppe.
  */
 function makeTooltip(trend: number, drivers: GroupPriceTrend['drivers']): string {
-  const direction = trend > 0.15 ? 'steigend' : trend < -0.15 ? 'sinkend' : 'stabil';
+  // Schwellwert ±0.15 = ±15% der normalisierten Trendskala.
+  // Unterhalb: „stabil", oberhalb: „steigend"/"sinkend". Vermeidet
+  // über-reaktive Trend-Beschriftungen bei kleinen Schwankungen.
+  const TREND_CLASSIFY_THRESHOLD = 0.15;
+  const direction = trend > TREND_CLASSIFY_THRESHOLD ? 'steigend' : trend < -TREND_CLASSIFY_THRESHOLD ? 'sinkend' : 'stabil';
   if (drivers.length === 0) return `Preise ${direction}`;
   const topDriver = drivers[0];
   return `Preise ${direction} (v.a. ${topDriver.label})`;
@@ -336,7 +376,7 @@ function makeTooltip(trend: number, drivers: GroupPriceTrend['drivers']): string
 /**
  * Berechnet die Preistrends für alle 8 Bevölkerungsgruppen.
  *
- * @param state   Markt-Zustand (E1) aus computeMarketState()
+ * @param state   Markt-Zustand (E1) aus computePhasesCached()
  * @param baseline Original-Parameter (Ist-Zustand)
  * @param modified Geänderte Parameter (Nutzer-Szenario)
  * @param diff    Geänderte Parameter (from/to)
@@ -345,9 +385,7 @@ export function computeGroupTrends(
   state: MarketState,
   baseline: CityParams40,
   modified: CityParams40,
-  _diff: ParamsDiff40,
 ): GroupPriceTrend[] {
-  void _diff; // part of shared compute-function signature
   return GROUPS.map(group => {
     const { trend } = basePriceTrend(state, group.id);
     const drivers = computeDrivers(state, baseline, modified, group.id);

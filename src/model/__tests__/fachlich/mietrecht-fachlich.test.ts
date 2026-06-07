@@ -52,7 +52,6 @@ const BERLIN_BASELINE_V2: CityParams40 = {
   nutzung_kurzzeitvermietung: 1, nutzung_umnutzungsverbot: 1, nutzung_abbruchverbot: 1, nutzung_zweitwohnungen: 1,
   infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
     bau_ersatzneubau_effizienz: 1,
-    markt_mietbelastungs_grenze: 1,
 };
 
 const BERLIN_CONTEXT: CityContext = {
@@ -60,7 +59,7 @@ const BERLIN_CONTEXT: CityContext = {
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
   bevoelkerungstrend: 2,
-  marktenge: 2,
+  marktenge: 2,  mietbelastungs_grenze: 1,
 };
 
 // San Francisco-like (V1: raumplanung=2, bauvorschriften=2, energetischeVorgaben=1,
@@ -82,7 +81,6 @@ const SF_V2: CityParams40 = {
   nutzung_kurzzeitvermietung: 1, nutzung_umnutzungsverbot: 1, nutzung_abbruchverbot: 1, nutzung_zweitwohnungen: 1,
   infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
     bau_ersatzneubau_effizienz: 1,
-    markt_mietbelastungs_grenze: 1,
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -153,7 +151,7 @@ describe('Mietrecht: San Francisco Effekt', () => {
       zuwanderungsdruck: 2,
       wirtschaftskraft: 2,
       bevoelkerungstrend: 2,
-      marktenge: 2,
+      marktenge: 2,      mietbelastungs_grenze: 1,
     };
 
     const results = phases(SF_V2, sfContext, {});
@@ -241,7 +239,7 @@ describe('Mietrecht: Paris Encadrement des Loyers (FR-002) — −4.2% Mieten', 
       zuwanderungsdruck: 2,
       wirtschaftskraft: 2,
       bevoelkerungstrend: 2,
-      marktenge: 2,
+      marktenge: 2,      mietbelastungs_grenze: 1,
     };
 
     const neutral = phases(BERLIN_BASELINE_V2, parisContext, {});

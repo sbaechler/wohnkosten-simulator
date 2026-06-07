@@ -20,8 +20,7 @@ const baseV2: CityParams40 = {
   kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 1, kapital_hypothekarregulierung: 1,
   nutzung_kurzzeitvermietung: 1, nutzung_umnutzungsverbot: 1, nutzung_abbruchverbot: 1, nutzung_zweitwohnungen: 1,
   infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
-    bau_ersatzneubau_effizienz: 1,
-    markt_mietbelastungs_grenze: 1,};
+    bau_ersatzneubau_effizienz: 1,};
 
 describe('V2 — computeDiff40 / hasChanges40', () => {
   it('returns empty diff when identical', () => {

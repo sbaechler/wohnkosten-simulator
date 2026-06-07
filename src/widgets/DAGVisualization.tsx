@@ -2,9 +2,9 @@ import { useRef, useEffect, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { graphConnect, sugiyama, layeringSimplex, decrossTwoLayer, decrossDfs } from 'd3-dag';
 import type { ParamsDiff40, MarketState, DerivedIndicators, CityContext, CityParams40 } from '../types';
-import { computeMarketState, clampE1 } from '../model/market-state';
+import { computePhasesCached } from '../model/compute-phases';
 import { computeDerivedIndicators } from '../model/derived';
-import { DAG_EDGES, type NodeId, type Edge } from '../model/graph';
+import { getDagTopology, type Edge, type NodeId } from '../model/dag-topology';
 import { PARAM_KEYS_40 } from '../model/params';
 import './DAGVisualization.css';
 
@@ -274,12 +274,12 @@ interface NodeLayout {
   orderInLayer: number; // position within layer after crossing minimization
 }
 
-function computeLayout(allNodes: NodeMeta[]): { nodeLayouts: NodeLayout[]; totalHeight: number } {
+function computeLayout(allNodes: NodeMeta[], dagEdges: readonly Edge[]): { nodeLayouts: NodeLayout[]; totalHeight: number } {
   // Build d3-dag graph
   const dagNodes = new Map<NodeId, NodeMeta>();
   for (const n of allNodes) dagNodes.set(n.id, n);
 
-  const edgesForDag = DAG_EDGES.filter(e => dagNodes.has(e.from) && dagNodes.has(e.to));
+  const edgesForDag = dagEdges.filter(e => dagNodes.has(e.from) && dagNodes.has(e.to));
 
   // graphConnect expects [source, target] tuples by default
   // nodeDatum stores just the NodeId as a string so we can look up NodeMeta after
@@ -377,7 +377,6 @@ function computeLayout(allNodes: NodeMeta[]): { nodeLayouts: NodeLayout[]; total
 
 interface Props {
   context: CityContext;
-  baseline: CityParams40;
   modified: CityParams40;
   diff: ParamsDiff40;
 }
@@ -389,9 +388,10 @@ interface TooltipData {
   value?: number;
 }
 
-export function DAGVisualization({ context, baseline, modified, diff }: Props) {
-  const state = clampE1(computeMarketState(context, baseline, modified, diff));
-  const derived = computeDerivedIndicators(state, context, diff);
+export function DAGVisualization({ context, modified, diff }: Props) {
+  const phases = computePhasesCached(context, modified, diff);
+  const state = phases[phases.length - 1].marketState;
+  const derived = computeDerivedIndicators(state);
 
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -399,10 +399,11 @@ export function DAGVisualization({ context, baseline, modified, diff }: Props) {
   const [zoomed, setZoomed] = useState(1);
 
   const allNodes = useMemo(() => buildNodes(), []);
+  const dagEdges = useMemo(() => getDagTopology(), []);
 
   const { nodeLayouts, totalHeight } = useMemo(() => {
-    return computeLayout(allNodes);
-  }, [allNodes]);
+    return computeLayout(allNodes, dagEdges);
+  }, [allNodes, dagEdges]);
 
   const nodeLayoutMap = useMemo(() => {
     const m = new Map<NodeId, NodeLayout>();
@@ -416,7 +417,7 @@ export function DAGVisualization({ context, baseline, modified, diff }: Props) {
     const an = new Set<NodeId>();
     const ae = new Set<Edge>();
 
-    for (const edge of DAG_EDGES) {
+    for (const edge of dagEdges) {
       if (dk.has(edge.from)) {
         an.add(edge.from);
         an.add(edge.to);
@@ -424,7 +425,7 @@ export function DAGVisualization({ context, baseline, modified, diff }: Props) {
       }
     }
 
-    for (const edge of DAG_EDGES) {
+    for (const edge of dagEdges) {
       if (an.has(edge.from)) {
         an.add(edge.to);
         ae.add(edge);
@@ -432,7 +433,7 @@ export function DAGVisualization({ context, baseline, modified, diff }: Props) {
     }
 
     return { affectedNodes: an, affectedEdges: ae };
-  }, [diff]);
+  }, [diff, dagEdges]);
 
   function isEdgeHighlighted(e: Edge): boolean {
     return affectedEdges.has(e);
@@ -515,7 +516,7 @@ export function DAGVisualization({ context, baseline, modified, diff }: Props) {
     }
 
     // Draw edges
-    for (const edge of DAG_EDGES) {
+    for (const edge of dagEdges) {
       const fromLayout = nodeLayoutMap.get(edge.from);
       const toLayout = nodeLayoutMap.get(edge.to);
       if (!fromLayout || !toLayout) continue;

@@ -44,7 +44,6 @@ const SG_LIKE: CityParams40 = {
   nutzung_kurzzeitvermietung: 2, nutzung_umnutzungsverbot: 2, nutzung_abbruchverbot: 2, nutzung_zweitwohnungen: 2,
   infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
     bau_ersatzneubau_effizienz: 1,
-    markt_mietbelastungs_grenze: 1,
 };
 
 // Stockholm-artiges Szenario (starke Mietregulierung, kollektive Mietpreissetzung,
@@ -65,7 +64,6 @@ const STOCKHOLM_LIKE: CityParams40 = {
   nutzung_kurzzeitvermietung: 2, nutzung_umnutzungsverbot: 2, nutzung_abbruchverbot: 2, nutzung_zweitwohnungen: 1,
   infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
     bau_ersatzneubau_effizienz: 1,
-    markt_mietbelastungs_grenze: 1,
 };
 
 const ZUERICH_V2: CityParams40 = {
@@ -84,7 +82,6 @@ const ZUERICH_V2: CityParams40 = {
   nutzung_kurzzeitvermietung: 1, nutzung_umnutzungsverbot: 1, nutzung_abbruchverbot: 1, nutzung_zweitwohnungen: 1,
   infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
     bau_ersatzneubau_effizienz: 1,
-    markt_mietbelastungs_grenze: 1,
 };
 
 const ANGESPANNT: CityContext = {
@@ -92,7 +89,7 @@ const ANGESPANNT: CityContext = {
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
   bevoelkerungstrend: 2,
-  marktenge: 2,
+  marktenge: 2,  mietbelastungs_grenze: 1,
 };
 
 const NEUTRAL_CONTEXT: CityContext = {
@@ -100,7 +97,7 @@ const NEUTRAL_CONTEXT: CityContext = {
   zuwanderungsdruck: 0,
   wirtschaftskraft: 0,
   bevoelkerungstrend: 0,
-  marktenge: 0,
+  marktenge: 0,  mietbelastungs_grenze: 1,
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
