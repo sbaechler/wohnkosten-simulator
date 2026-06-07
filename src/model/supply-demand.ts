@@ -60,12 +60,6 @@ const DEMAND_INTERCEPT = 9;
 /** Steigung der Nachfragekurve. */
 const DEMAND_SLOPE = 0.8;
 
-/** Intercept der q-Gleichung (q=0-Baseline bei p=1). */
-const EQUILIBRIUM_Q_INTERCEPT = 8;
-/** q-Verschiebungs-Empfindlichkeit pro supplyShift. */
-const EQUILIBRIUM_Q_SUPPLY_FAKTOR = 7;
-/** q-Verschiebungs-Empfindlichkeit pro demandShift. */
-const EQUILIBRIUM_Q_DEMAND_FAKTOR = 5.6;
 /** p-Bereich in der Achse. */
 const AXIS_MIN = 0;
 const AXIS_MAX = 10;
@@ -91,35 +85,64 @@ export function supplySlope(regEff: number): number {
   return SUPPLY_BASE_SLOPE * (1 + regEff * SUPPLY_SLOPE_REGULATION_FAKTOR);
 }
 
+/**
+ * Geradenkoeffizienten [a, b] der Angebotskurve als p = a + b·q.
+ * Single source of truth — wird von `supplyCurve` UND `findEquilibrium`
+ * verwendet, damit der Gleichgewichts-Punkt mathematisch garantiert
+ * auf der gezeichneten Angebotslinie liegt.
+ */
+export function supplyLine(supplyShift: number, regulationBase: number, s: MarketState): [number, number] {
+  const slope = supplySlope(regulationEffective(regulationBase, s));
+  return [1 - slope * SHIFT_SCALE * supplyShift, slope];
+}
+
+/**
+ * Geradenkoeffizienten [a, b] der Nachfragekurve als p = a + b·q
+ * (Steigung ist negativ). Single source of truth — wird von
+ * `demandCurve` UND `findEquilibrium` verwendet.
+ */
+export function demandLine(demandShift: number): [number, number] {
+  return [DEMAND_INTERCEPT + DEMAND_SLOPE * SHIFT_SCALE * demandShift, -DEMAND_SLOPE];
+}
+
+/**
+ * Schnittpunkt zweier Geraden p = a1 + b1·q und p = a2 + b2·q.
+ * Wirft eine Fehlermeldung, falls die Geraden parallel sind
+ * (in diesem Simulator: nicht erreichbar, da DEMAND_SLOPE > 0
+ * und supplySlope > 0, b2 < 0 immer).
+ */
+function lineIntersection(a1: number, b1: number, a2: number, b2: number): [number, number] {
+  const denom = b1 - b2;
+  if (denom === 0) throw new Error('Parallele Geraden haben keinen Schnittpunkt');
+  const q = (a2 - a1) / denom;
+  return [q, a1 + b1 * q];
+}
+
 /** Angebotskurve (Preis-Mengen) als Punkte-Array. */
 export function supplyCurve(shift: number, regulationBase: number, s: MarketState): [number, number][] {
-  const regEff = regulationEffective(regulationBase, s);
-  const slope  = supplySlope(regEff);
+  const [a, b] = supplyLine(shift, regulationBase, s);
   return Array.from({ length: CURVE_POINTS }, (_, i) => {
     const q = (i / (CURVE_POINTS - 1)) * AXIS_MAX;
-    const p = 1 + (q - shift * SHIFT_SCALE) * slope;
+    const p = a + b * q;
     return [q, Math.max(AXIS_MIN, Math.min(AXIS_MAX, p))] as [number, number];
   });
 }
 
 /** Nachfragekurve (Preis-Mengen) als Punkte-Array. */
 export function demandCurve(shift: number): [number, number][] {
+  const [a, b] = demandLine(shift);
   return Array.from({ length: CURVE_POINTS }, (_, i) => {
     const q = (i / (CURVE_POINTS - 1)) * AXIS_MAX;
-    const p = DEMAND_INTERCEPT - (q - shift * SHIFT_SCALE) * DEMAND_SLOPE;
+    const p = a + b * q;
     return [q, Math.max(AXIS_MIN, Math.min(AXIS_MAX, p))] as [number, number];
   });
 }
 
 /**
  * Gleichgewichts-Punkt (Menge, Preis) aus Angebots-/Nachfrage-Parametern.
- *
- * q-Gleichung (linearisiert aus Kurvenschnitt):
- *   q = (EQUILIBRIUM_Q_INTERCEPT + EQUILIBRIUM_Q_SUPPLY_FAKTOR × slope × supplyShift
- *        + EQUILIBRIUM_Q_DEMAND_FAKTOR × demandShift)
- *       / (slope + DEMAND_SLOPE)
- *
- * p-Gleichung: p = 1 + slope × (q − EQUILIBRIUM_Q_SUPPLY_FAKTOR × supplyShift)
+ * Wird aus denselben Linien-Koeffizienten berechnet, die auch die
+ * `supplyCurve`/`demandCurve` verwenden — der Punkt liegt also
+ * mathematisch exakt auf beiden Geraden.
  */
 export function findEquilibrium(
   supplyShift: number,
@@ -127,11 +150,11 @@ export function findEquilibrium(
   regulationBase: number,
   s: MarketState,
 ): [number, number] {
-  const regEff = regulationEffective(regulationBase, s);
-  const slope  = supplySlope(regEff);
-  const qEq = Math.max(AXIS_MIN, Math.min(AXIS_MAX,
-    (EQUILIBRIUM_Q_INTERCEPT + EQUILIBRIUM_Q_SUPPLY_FAKTOR * slope * supplyShift + EQUILIBRIUM_Q_DEMAND_FAKTOR * demandShift) / (slope + DEMAND_SLOPE)
-  ));
-  const pEq = Math.max(AXIS_MIN, Math.min(AXIS_MAX, 1 + slope * (qEq - EQUILIBRIUM_Q_SUPPLY_FAKTOR * supplyShift)));
-  return [qEq, pEq];
+  const [aS, bS] = supplyLine(supplyShift, regulationBase, s);
+  const [aD, bD] = demandLine(demandShift);
+  const [q, p] = lineIntersection(aS, bS, aD, bD);
+  return [
+    Math.max(AXIS_MIN, Math.min(AXIS_MAX, q)),
+    Math.max(AXIS_MIN, Math.min(AXIS_MAX, p)),
+  ];
 }

@@ -21,6 +21,8 @@ import {
   knappheitSignal,
   regulationEffective,
   supplySlope,
+  supplyLine,
+  demandLine,
   supplyCurve,
   demandCurve,
   findEquilibrium,
@@ -258,5 +260,106 @@ describe('findEquilibrium', () => {
     const [qLow]  = findEquilibrium(0, 0, -1, emptyState);
     const [qHigh] = findEquilibrium(0, 0,  1, emptyState);
     expect(qHigh).toBeLessThanOrEqual(qLow);
+  });
+});
+
+/**
+ * Regression-Tests: Der Gleichgewichts-Punkt MUSS mathematisch exakt
+ * auf beiden Geraden liegen (Angebot + Nachfrage). Vorher koppelt der
+ * Code Konstanten (EQUILIBRIUM_Q_SUPPLY_FAKTOR, EQUILIBRIUM_Q_DEMAND_FAKTOR)
+ * die nicht zu SHIFT_SCALE × DEMAND_SLOPE passten — Dot driftete vom
+ * Schnittpunkt weg.
+ */
+describe('findEquilibrium — Konsistenz mit Linien-Gleichungen', () => {
+  /**
+   * Interpoliert p aus einer geplotteten Kurve an einer gegebenen q-Stelle.
+   * CURVE_POINTS = 200, also Abstand 0.05025 — Toleranz ~ 0.06 (Schrittweite).
+   */
+  function pAt(curve: [number, number][], q: number): number {
+    if (q <= curve[0][0]) return curve[0][1];
+    if (q >= curve[curve.length - 1][0]) return curve[curve.length - 1][1];
+    for (let i = 0; i < curve.length - 1; i++) {
+      const [q0, p0] = curve[i];
+      const [q1, p1] = curve[i + 1];
+      if (q >= q0 && q <= q1) {
+        const t = (q - q0) / (q1 - q0);
+        return p0 + t * (p1 - p0);
+      }
+    }
+    return curve[curve.length - 1][1];
+  }
+
+  it('Gleichgewichts-Punkt liegt auf der Angebots-Linie (sampling-Toleranz)', () => {
+    for (const [sSupply, sDemand, reg] of [[-1, -1, -1], [0, 0, 0], [1, 1, 1], [-0.5, 0.3, 0.7], [0.5, -0.5, -0.3]] as [number, number, number][]) {
+      const [q, p] = findEquilibrium(sSupply, sDemand, reg, emptyState);
+      if (q > 0 && q < 10) {
+        const supplyP = pAt(supplyCurve(sSupply, reg, emptyState), q);
+        expect(Math.abs(p - supplyP)).toBeLessThan(0.06);
+      }
+    }
+  });
+
+  it('Gleichgewichts-Punkt liegt auf der Nachfrage-Linie (sampling-Toleranz)', () => {
+    for (const [sSupply, sDemand, reg] of [[-1, -1, -1], [0, 0, 0], [1, 1, 1], [-0.5, 0.3, 0.7], [0.5, -0.5, -0.3]] as [number, number, number][]) {
+      const [q, p] = findEquilibrium(sSupply, sDemand, reg, emptyState);
+      if (q > 0 && q < 10) {
+        const demandP = pAt(demandCurve(sDemand), q);
+        expect(Math.abs(p - demandP)).toBeLessThan(0.06);
+      }
+    }
+  });
+
+  it('Gleichgewichts-Punkt erfüllt beide Linien-Gleichungen EXAKT (kein Sampling-Fehler)', () => {
+    // Innerhalb [0,10]×[0,10] ist die Übereinstimmung exakt (modulo Float-Rundung).
+    // An Clamping-Grenzen erwarten wir eine Abweichung (geclampter Wert
+    // entspricht nicht der Linie). Daher nur inside-window testen.
+    for (const [sSupply, sDemand, reg] of [[-0.3, -0.3, 0], [0, 0, 0], [0.3, 0.3, 0], [0, 0, 0.5]] as [number, number, number][]) {
+      const [q, p] = findEquilibrium(sSupply, sDemand, reg, emptyState);
+      expect(q).toBeGreaterThan(0);
+      expect(q).toBeLessThan(10);
+      const [aS, bS] = supplyLine(sSupply, reg, emptyState);
+      const [aD, bD] = demandLine(sDemand);
+      expect(p).toBeCloseTo(aS + bS * q, 10);
+      expect(p).toBeCloseTo(aD + bD * q, 10);
+    }
+  });
+
+  it('Clamping an [0, 10] ist aktiv wenn Linien-Schnitt ausserhalb', () => {
+    // Extrem grosse Shifts: Linien-Schnitt liegt links von q=0.
+    const [q, p] = findEquilibrium(-5, 5, 0, emptyState);
+    expect(q).toBeGreaterThanOrEqual(0);
+    expect(q).toBeLessThanOrEqual(10);
+    expect(p).toBeGreaterThanOrEqual(0);
+    expect(p).toBeLessThanOrEqual(10);
+  });
+});
+
+describe('supplyLine / demandLine', () => {
+  it('supplyLine gibt (a, b) zurück, p_s(0) = 1 − slope·5·supplyShift (Anker bei shift=0 ist p=1)', () => {
+    const [a] = supplyLine(0, 0, emptyState);
+    expect(a).toBe(1);
+  });
+
+  it('demandLine gibt (a, b) zurück, p_d(0) = 9 (Anker unabhängig vom shift)', () => {
+    const [a] = demandLine(0);
+    expect(a).toBe(9);
+    const [aShifted] = demandLine(0.5);
+    expect(aShifted).toBeGreaterThan(9);
+  });
+
+  it('supplyLine Steigung ist positiv (positive Steigung = normale Angebotskurve)', () => {
+    const [, b] = supplyLine(0, 0, emptyState);
+    expect(b).toBeGreaterThan(0);
+  });
+
+  it('demandLine Steigung ist negativ (fallende Nachfragekurve)', () => {
+    const [, b] = demandLine(0);
+    expect(b).toBeLessThan(0);
+  });
+
+  it('supplyLine Steigung wächst mit Regulation (mehr Reg = steiler)', () => {
+    const [, bLow]  = supplyLine(0, -1, emptyState);
+    const [, bHigh] = supplyLine(0,  1, emptyState);
+    expect(bHigh).toBeGreaterThan(bLow);
   });
 });
