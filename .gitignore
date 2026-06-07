@@ -36,3 +36,7 @@ src/generated/
 !.dev.vars.example
 .env*
 !.env.example
+
+# Coverage
+coverage/
+*.lcov

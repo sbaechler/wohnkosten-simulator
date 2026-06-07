@@ -126,6 +126,7 @@ Für citiespezifische Recherche-Werte: `docs/superpowers/research/staedte-parame
 - **Per-Group-Faktoren in `groups.ts` sind Modell-Design** (definieren WAS eine Gruppe ist) — NICHT in `calibration.ts` extrahieren, sondern inline mit JSDoc-Rationale dokumentieren.
 - **URL ist Source of Truth** — nie lokalen React-State für Parameter nutzen
 - **Tests müssen grün sein** bevor gepullt wird: `npx vitest run`
+- **Coverage** (optional, lokal): `npm run test:coverage`. Misst nur `src/model/**` (Pipeline-Code) — keine Widgets, keine generated/, keine Scripts.
 - **Generated Files**: `src/generated/` wird aus YAML generiert — nicht manuell editieren
 - **Branch-Strategie**: Feature-Branches → main (keine protected Branches aktiv)
 
