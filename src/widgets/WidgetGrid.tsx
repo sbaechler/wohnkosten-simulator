@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { CityParams40, CityContext, ParamsDiff40 } from '../types';
+import type { CityConfig, ParamsDiff40, CityParams40 } from '../types';
 import { computePhasesCached } from '../model/compute-phases';
 import { computeGroupTrends } from '../model/groups';
 import type { PhaseResult } from '../model/phases';
@@ -12,14 +12,14 @@ import { MietbelastungWidget } from './MietbelastungWidget';
 import './WidgetGrid.css';
 
 interface Props {
-  context: CityContext;
-  baseline: CityParams40;
+  city: CityConfig;
   modified: CityParams40;
   diff: ParamsDiff40;
 }
 
-export function WidgetGrid({ context, baseline, modified, diff }: Props) {
+export function WidgetGrid({ city, modified, diff }: Props) {
   const hasChanges = Object.keys(diff).length > 0;
+  const context = city.context;
 
   // Phases for modified params (current behavior)
   const modifiedPhases = computePhasesCached(context, diff);
@@ -32,6 +32,8 @@ export function WidgetGrid({ context, baseline, modified, diff }: Props) {
   const latestModified = modifiedPhases[modifiedPhases.length - 1]!;
   const latestBaseline = baselinePhases[baselinePhases.length - 1]!;
 
+  const baseline = city.params;
+
   // Group trends helper
   function computeModifiedGroupTrends(phase: PhaseResult) {
     return computeGroupTrends(phase.marketState, baseline, modified);
@@ -40,7 +42,6 @@ export function WidgetGrid({ context, baseline, modified, diff }: Props) {
     return computeGroupTrends(phase.marketState, baseline, baseline);
   }
 
-  // Stadtbild getValue helper
   const stadtbildGetter = (m: CityParams40, b: CityParams40) => () =>
     ((m.bau_einspracherecht_dritte as number) - (b.bau_einspracherecht_dritte as number)) * 0.2 +
     ((m.bau_einspracherecht_suspensiv as number) - (b.bau_einspracherecht_suspensiv as number)) * 0.15 +
@@ -81,7 +82,7 @@ export function WidgetGrid({ context, baseline, modified, diff }: Props) {
         marketState={latestModified.marketState}
         baselineMarketState={hasChanges ? latestBaseline.marketState : undefined}
       />
-      <OwnershipDonut context={context} baseline={baseline} modified={modified} diff={diff} state={latestModified.marketState} baselineState={hasChanges ? latestBaseline.marketState : undefined} />
+      <OwnershipDonut city={city} modified={modified} diff={diff} state={latestModified.marketState} baselineState={hasChanges ? latestBaseline.marketState : undefined} />
     </div>
   );
 }

@@ -10,6 +10,7 @@ export function ContextIndicators({ context }: Props) {
     <div className="context-indicators">
       {contextMeta.map(meta => {
         const value = context[meta.key];
+        if (typeof value !== 'number') return null;
         const levelIndex = value + 2; // -2→0, -1→1, 0→2, +1→3, +2→4
         return (
           <div key={meta.key} className="context-indicator">

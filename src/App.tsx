@@ -47,8 +47,7 @@ export default function App() {
         <div className="app__content">
           {viewMode === 'widgets' ? (
             <WidgetGrid
-              context={context}
-              baseline={baseline}
+              city={city}
               modified={modified}
               diff={diff}
             />

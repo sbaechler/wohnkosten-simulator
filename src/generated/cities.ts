@@ -11,7 +11,13 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 2,
       "bevoelkerungstrend": 1,
       "marktenge": 2,
-      "mietbelastungs_grenze": 2
+      "mietbelastungs_grenze": 2,
+      "ownershipBaseline": {
+        "privat": 0.39,
+        "institutionell": 0.3,
+        "genossenschaft": 0.175,
+        "oeffentlich": 0.066
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -66,7 +72,13 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 2,
       "bevoelkerungstrend": -1,
       "marktenge": 2,
-      "mietbelastungs_grenze": 2
+      "mietbelastungs_grenze": 2,
+      "ownershipBaseline": {
+        "privat": 0.39,
+        "institutionell": 0.3,
+        "genossenschaft": 0.175,
+        "oeffentlich": 0.066
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -121,7 +133,13 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 2,
       "bevoelkerungstrend": -1,
       "marktenge": 1,
-      "mietbelastungs_grenze": 2
+      "mietbelastungs_grenze": 2,
+      "ownershipBaseline": {
+        "privat": 0.39,
+        "institutionell": 0.3,
+        "genossenschaft": 0.175,
+        "oeffentlich": 0.066
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -176,7 +194,13 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 2,
       "bevoelkerungstrend": -1,
       "marktenge": 2,
-      "mietbelastungs_grenze": 2
+      "mietbelastungs_grenze": 2,
+      "ownershipBaseline": {
+        "privat": 0.39,
+        "institutionell": 0.3,
+        "genossenschaft": 0.175,
+        "oeffentlich": 0.066
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -231,7 +255,13 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": -1,
       "marktenge": 2,
-      "mietbelastungs_grenze": 1
+      "mietbelastungs_grenze": 1,
+      "ownershipBaseline": {
+        "privat": 0.39,
+        "institutionell": 0.3,
+        "genossenschaft": 0.175,
+        "oeffentlich": 0.066
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -286,7 +316,13 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": -1,
       "marktenge": 2,
-      "mietbelastungs_grenze": 1
+      "mietbelastungs_grenze": 1,
+      "ownershipBaseline": {
+        "privat": 0.39,
+        "institutionell": 0.3,
+        "genossenschaft": 0.175,
+        "oeffentlich": 0.066
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -341,7 +377,13 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": -1,
       "marktenge": 1,
-      "mietbelastungs_grenze": 1
+      "mietbelastungs_grenze": 1,
+      "ownershipBaseline": {
+        "privat": 0.39,
+        "institutionell": 0.3,
+        "genossenschaft": 0.175,
+        "oeffentlich": 0.066
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -396,7 +438,13 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": -1,
       "marktenge": 0,
-      "mietbelastungs_grenze": 1
+      "mietbelastungs_grenze": 1,
+      "ownershipBaseline": {
+        "privat": 0.39,
+        "institutionell": 0.3,
+        "genossenschaft": 0.175,
+        "oeffentlich": 0.066
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -451,7 +499,13 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": -1,
       "marktenge": 1,
-      "mietbelastungs_grenze": 1
+      "mietbelastungs_grenze": 1,
+      "ownershipBaseline": {
+        "privat": 0.39,
+        "institutionell": 0.3,
+        "genossenschaft": 0.175,
+        "oeffentlich": 0.066
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -506,7 +560,13 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": -1,
       "marktenge": 1,
-      "mietbelastungs_grenze": 1
+      "mietbelastungs_grenze": 1,
+      "ownershipBaseline": {
+        "privat": 0.39,
+        "institutionell": 0.3,
+        "genossenschaft": 0.175,
+        "oeffentlich": 0.066
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 1,
