@@ -22,45 +22,6 @@ for (const city of raw) {
   if (keys.length !== REQUIRED_KEYS) {
     throw new Error(`${city.slug}: expected ${REQUIRED_KEYS} params, got ${keys.length}`);
   }
-  
-  // Add default ownershipBaseline if missing
-  if (!city.ownershipBaseline || typeof city.ownershipBaseline !== 'object') {
-    city.ownershipBaseline = {
-      privat: 0.39,
-      institutionell: 0.30,
-      genossenschaft: 0.175,
-      oeffentlich: 0.066
-    };
-  }
-}
-
-// Add default ownershipBaseline to context if missing
-for (const city of raw) {
-  if (!city.context.ownershipBaseline || typeof city.context.ownershipBaseline !== 'object') {
-    city.context.ownershipBaseline = {
-      privat: 0.39,
-      institutionell: 0.30,
-      genossenschaft: 0.175,
-      oeffentlich: 0.066
-    };
-  }
-}
-
-// Remove ownershipBaseline from YAML output (it's only in TypeScript)
-for (const city of raw) {
-  delete (city as any).ownershipBaseline;
-}
-
-// Add default ownershipBaseline to context if missing
-for (const city of raw) {
-  if (!city.context.ownershipBaseline || typeof city.context.ownershipBaseline !== 'object') {
-    city.context.ownershipBaseline = {
-      privat: 0.39,
-      institutionell: 0.30,
-      genossenschaft: 0.175,
-      oeffentlich: 0.066
-    };
-  }
 }
 
 // Add default ownershipBaseline to context if missing (only in generated TS)

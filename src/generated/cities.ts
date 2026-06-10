@@ -6,18 +6,18 @@ export const cities: CityConfig[] = [
     "slug": "zuerich",
     "name": "Zürich",
     "context": {
+      "ownershipBaseline": {
+        "privat": 0.39,
+        "institutionell": 0.3,
+        "genossenschaft": 0.175,
+        "oeffentlich": 0.076
+      },
       "zinsniveau": -1,
       "zuwanderungsdruck": 2,
       "wirtschaftskraft": 2,
       "bevoelkerungstrend": 1,
       "marktenge": 2,
-      "mietbelastungs_grenze": 2,
-      "ownershipBaseline": {
-        "privat": 0.39,
-        "institutionell": 0.3,
-        "genossenschaft": 0.175,
-        "oeffentlich": 0.066
-      }
+      "mietbelastungs_grenze": 2
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -67,18 +67,18 @@ export const cities: CityConfig[] = [
     "slug": "genf",
     "name": "Genf",
     "context": {
+      "ownershipBaseline": {
+        "privat": 0.18,
+        "institutionell": 0.2,
+        "genossenschaft": 0.2,
+        "oeffentlich": 0.06
+      },
       "zinsniveau": -1,
       "zuwanderungsdruck": 2,
       "wirtschaftskraft": 2,
       "bevoelkerungstrend": -1,
       "marktenge": 2,
-      "mietbelastungs_grenze": 2,
-      "ownershipBaseline": {
-        "privat": 0.39,
-        "institutionell": 0.3,
-        "genossenschaft": 0.175,
-        "oeffentlich": 0.066
-      }
+      "mietbelastungs_grenze": 2
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -127,6 +127,12 @@ export const cities: CityConfig[] = [
   {
     "slug": "basel",
     "name": "Basel",
+    "ownershipBaseline": {
+      "privat": 0.15,
+      "institutionell": 0.2,
+      "genossenschaft": 0.2,
+      "oeffentlich": 0.08
+    },
     "context": {
       "zinsniveau": -1,
       "zuwanderungsdruck": 1,
@@ -188,6 +194,12 @@ export const cities: CityConfig[] = [
   {
     "slug": "lausanne",
     "name": "Lausanne",
+    "ownershipBaseline": {
+      "privat": 0.2,
+      "institutionell": 0.15,
+      "genossenschaft": 0.15,
+      "oeffentlich": 0.05
+    },
     "context": {
       "zinsniveau": -1,
       "zuwanderungsdruck": 2,
@@ -249,6 +261,12 @@ export const cities: CityConfig[] = [
   {
     "slug": "bern",
     "name": "Bern",
+    "ownershipBaseline": {
+      "privat": 0.22,
+      "institutionell": 0.18,
+      "genossenschaft": 0.18,
+      "oeffentlich": 0.07
+    },
     "context": {
       "zinsniveau": -1,
       "zuwanderungsdruck": 1,
@@ -310,6 +328,12 @@ export const cities: CityConfig[] = [
   {
     "slug": "winterthur",
     "name": "Winterthur",
+    "ownershipBaseline": {
+      "privat": 0.24,
+      "institutionell": 0.15,
+      "genossenschaft": 0.15,
+      "oeffentlich": 0.05
+    },
     "context": {
       "zinsniveau": -1,
       "zuwanderungsdruck": 2,
@@ -371,6 +395,12 @@ export const cities: CityConfig[] = [
   {
     "slug": "luzern",
     "name": "Luzern",
+    "ownershipBaseline": {
+      "privat": 0.25,
+      "institutionell": 0.15,
+      "genossenschaft": 0.15,
+      "oeffentlich": 0.06
+    },
     "context": {
       "zinsniveau": -1,
       "zuwanderungsdruck": 1,
@@ -432,6 +462,12 @@ export const cities: CityConfig[] = [
   {
     "slug": "st-gallen",
     "name": "St. Gallen",
+    "ownershipBaseline": {
+      "privat": 0.39,
+      "institutionell": 0.3,
+      "genossenschaft": 0.175,
+      "oeffentlich": 0.066
+    },
     "context": {
       "zinsniveau": -1,
       "zuwanderungsdruck": 0,
@@ -493,6 +529,12 @@ export const cities: CityConfig[] = [
   {
     "slug": "lugano",
     "name": "Lugano",
+    "ownershipBaseline": {
+      "privat": 0.35,
+      "institutionell": 0.15,
+      "genossenschaft": 0.12,
+      "oeffentlich": 0.04
+    },
     "context": {
       "zinsniveau": -1,
       "zuwanderungsdruck": 0,
@@ -554,6 +596,12 @@ export const cities: CityConfig[] = [
   {
     "slug": "biel",
     "name": "Biel/Bienne",
+    "ownershipBaseline": {
+      "privat": 0.28,
+      "institutionell": 0.16,
+      "genossenschaft": 0.17,
+      "oeffentlich": 0.06
+    },
     "context": {
       "zinsniveau": -1,
       "zuwanderungsdruck": 1,

@@ -88,8 +88,10 @@ export interface CityContext {
   /**
    * Aktuelle Eigentumsverteilung (Baseline-Daten aus amtlichen Quellen).
    * Quelle: Tsüri Grundbuch-Recherche Zürich 2026 (BFS/Wüest Partner).
+   * 
+   * Falls in YAML nicht definiert, werden Default-Werte im Build-Skript gesetzt.
    */
-  ownershipBaseline?: {
+  ownershipBaseline: {
     privat: number;
     institutionell: number;
     genossenschaft: number;

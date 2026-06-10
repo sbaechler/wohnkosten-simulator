@@ -7,12 +7,12 @@
 
 - slug: zuerich
   name: "Zürich"
-  ownershipBaseline:
-    privat: 0.39
-    institutionell: 0.30
-    genossenschaft: 0.175
-    oeffentlich: 0.076
   context:
+    ownershipBaseline:
+      privat: 0.39
+      institutionell: 0.30
+      genossenschaft: 0.175
+      oeffentlich: 0.076
     zinsniveau: -1
     zuwanderungsdruck: 2
     wirtschaftskraft: 2
@@ -63,12 +63,12 @@
     bau_ersatzneubau_effizienz: 0
 - slug: genf
   name: "Genf"
-  ownershipBaseline:
-    privat: 0.18
-    institutionell: 0.20
-    genossenschaft: 0.20
-    oeffentlich: 0.06
   context:
+    ownershipBaseline:
+      privat: 0.18
+      institutionell: 0.20
+      genossenschaft: 0.20
+      oeffentlich: 0.06
     zinsniveau: -1
     zuwanderungsdruck: 2
     wirtschaftskraft: 2
