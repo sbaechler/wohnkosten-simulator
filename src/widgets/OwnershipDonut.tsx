@@ -60,7 +60,9 @@ export function OwnershipDonut({ city, modified, diff, state }: Props) {
       .join('path')
       .attr('d', innerArc)
       .attr('fill', (_, i) => COLORS[keys[i]])
-      .attr('opacity', hasChanges ? 0.3 : 0.8);
+      .attr('opacity', hasChanges ? 0.3 : 0.8)
+      .append('title')
+      .text(d => `${LABELS[keys[d.index]]}: ${(d.data * 100).toFixed(1)}%`);
 
     // Outer ring: modified (only if changes exist)
     if (hasChanges) {
@@ -89,7 +91,11 @@ export function OwnershipDonut({ city, modified, diff, state }: Props) {
         .attr('d', outerArc)
         .attr('fill', (_, i) => COLORS[keys[i]])
         .attr('opacity', 0)
-        .transition().duration(600).attr('opacity', 0.9);
+        .transition().duration(600).attr('opacity', 0.9)
+        .on('end', function() {
+          d3.select(this).append('title')
+            .text(d => `${LABELS[keys[d.index]]}: ${(d.data * 100).toFixed(1)}%`);
+        });
     }
 
     // Center annotation
