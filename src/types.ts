@@ -85,6 +85,18 @@ export interface CityContext {
    * Marktfriktion als strukturelle Rahmenbedingung.
    */
   mietbelastungs_grenze: ContextValue;
+  /**
+   * Aktuelle Eigentumsverteilung (Baseline-Daten aus amtlichen Quellen).
+   * Quelle: Tsüri Grundbuch-Recherche Zürich 2026 (BFS/Wüest Partner).
+   * 
+   * Falls in YAML nicht definiert, werden Default-Werte im Build-Skript gesetzt.
+   */
+  ownershipBaseline: {
+    privat: number;
+    institutionell: number;
+    genossenschaft: number;
+    oeffentlich: number;
+  };
 }
 
 export interface CityConfig {

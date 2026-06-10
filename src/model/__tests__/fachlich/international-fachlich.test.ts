@@ -85,6 +85,12 @@ const ZUERICH_V2: CityParams40 = {
 };
 
 const ANGESPANNT: CityContext = {
+  ownershipBaseline: {
+    privat: 0.39,
+    institutionell: 0.30,
+    genossenschaft: 0.175,
+    oeffentlich: 0.066
+  },
   zinsniveau: -1,
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
@@ -93,6 +99,12 @@ const ANGESPANNT: CityContext = {
 };
 
 const NEUTRAL_CONTEXT: CityContext = {
+  ownershipBaseline: {
+    privat: 0.39,
+    institutionell: 0.30,
+    genossenschaft: 0.175,
+    oeffentlich: 0.066
+  },
   zinsniveau: 0,
   zuwanderungsdruck: 0,
   wirtschaftskraft: 0,

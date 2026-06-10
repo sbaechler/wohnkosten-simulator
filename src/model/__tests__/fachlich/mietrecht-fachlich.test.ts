@@ -55,6 +55,12 @@ const BERLIN_BASELINE_V2: CityParams40 = {
 };
 
 const BERLIN_CONTEXT: CityContext = {
+  ownershipBaseline: {
+    privat: 0.39,
+    institutionell: 0.30,
+    genossenschaft: 0.175,
+    oeffentlich: 0.066
+  },
   zinsniveau: -1,
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
@@ -147,11 +153,18 @@ describe('Mietrecht: San Francisco Effekt', () => {
    */
   it('[FACH] Hohes Mietrecht + Zuwanderung → hoher Gentrifizierungsindex', () => {
     const sfContext: CityContext = {
+      ownershipBaseline: {
+        privat: 0.39,
+        institutionell: 0.30,
+        genossenschaft: 0.175,
+        oeffentlich: 0.066
+      },
       zinsniveau: -1,
       zuwanderungsdruck: 2,
       wirtschaftskraft: 2,
       bevoelkerungstrend: 2,
-      marktenge: 2,      mietbelastungs_grenze: 1,
+      marktenge: 2,
+      mietbelastungs_grenze: 1,
     };
 
     const results = phases(SF_V2, sfContext, {});
@@ -235,11 +248,18 @@ describe('Mietrecht: Paris Encadrement des Loyers (FR-002) — −4.2% Mieten', 
    */
   it('[FACH] FR-002: Mietpreisdeckel erhöht mietpreis_schutzlevel deutlich (Paris −4.2%)', () => {
     const parisContext: CityContext = {
+      ownershipBaseline: {
+        privat: 0.39,
+        institutionell: 0.30,
+        genossenschaft: 0.175,
+        oeffentlich: 0.066
+      },
       zinsniveau: -1,
       zuwanderungsdruck: 2,
       wirtschaftskraft: 2,
       bevoelkerungstrend: 2,
-      marktenge: 2,      mietbelastungs_grenze: 1,
+      marktenge: 2,
+      mietbelastungs_grenze: 1,
     };
 
     const neutral = phases(BERLIN_BASELINE_V2, parisContext, {});

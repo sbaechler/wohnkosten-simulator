@@ -46,8 +46,10 @@ function getE0Delta(
   context: CityContext,
 ): number {
   if (nodeId.startsWith('ctx:')) {
-    const ctxKey = nodeId.slice(4) as keyof CityContext;
-    return normalizeContext(context[ctxKey]);
+    const ctxKey = nodeId.slice(4) as Exclude<keyof CityContext, 'ownershipBaseline'>;
+    const value = context[ctxKey];
+    if (typeof value !== 'number') return 0;
+    return normalizeContext(value as -2 | -1 | 0 | 1 | 2);
   }
   const paramKey = nodeId as keyof CityParams40;
   const diffEntry = diff[paramKey];

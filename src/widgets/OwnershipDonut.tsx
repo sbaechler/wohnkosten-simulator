@@ -1,23 +1,15 @@
 import { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
-import type { CityParams40, CityContext, ParamsDiff40, MarketState } from '../types';
+import type { CityConfig, ParamsDiff40, MarketState, CityParams40 } from '../types';
 import './OwnershipDonut.css';
 
 interface Props {
-  context: CityContext;
-  baseline: CityParams40;
+  city: CityConfig;
   modified: CityParams40;
   diff: ParamsDiff40;
   state: MarketState;
   /** When set, show baseline donut alongside modified for comparison */
   baselineState?: MarketState;
-}
-
-interface OwnershipShares {
-  privat: number;
-  institutionell: number;
-  genossenschaft: number;
-  oeffentlich: number;
 }
 
 const COLORS = {
@@ -34,122 +26,9 @@ const LABELS = {
   oeffentlich: 'Öfftl.',
 };
 
-/**
- * Berechnet Eigentumsverteilung aus V2-Parametern.
- *
- * Baselines (BFS Strukturerhebung / BWO / Wüest Partner 2023/2024):
- *   - Privat (Privatpersonen, inkl. Einzel-Eigentümer): ~59%
- *     Quelle: BFS 2023 — 45% der Mietwohnungen in Privatbesitz;
- *             private Eigentümer machen ~37% Eigentumsquote aus
- *   - Institutionelle Anleger (Fonds, Pensionskassen, REITs): ~19%
- *     Quelle: Wüest Partner Schätzung 2023/2024
- *   - Genossenschaften (BWO Zähler 2022, 90% Coverage): ~10%
- *     Quelle: BWO, Wohnungen gemeinnütziger Wohnbauträger
- *   - Öffentlicher Wohnungsbau (BWO Schätzung): ~5%
- *     Quelle: BWO Schätzung 2022
- *
- * Die Verteilung reagiert auf:
- * - Gemeinnützigkeitsförderung (→ Genossenschaften, öffentlich)
- * - Mietrecht-Strenge (→ weniger institutionelle Anleger)
- * - Ausländische Investoren-Regulierung (→ weniger institutionell)
- * - Wirtschaftskraft (→ mehr institutionell)
- */
-const BFS_BASELINE = {
-  privat:         0.59,
-  institutionell:  0.19,
-  genossenschaft:  0.10,
-  oeffentlich:    0.05,
-} as const;
-
-function computeOwnership(params: CityParams40, context: CityContext): OwnershipShares {
-  let { privat, institutionell, genossenschaft, oeffentlich } = BFS_BASELINE;
-
-  // Gemeinnützig fördert Genossenschafts- und öffentlichen Wohnungsbau
-  const foerderung =
-    (params.gemeinnuetzig_mindestanteil +
-      params.gemeinnuetzig_foerderfonds +
-      params.gemeinnuetzig_baurecht) / 6;
-  genossenschaft += foerderung;
-  oeffentlich += foerderung * 0.3;
-  privat -= foerderung * 0.7;
-  institutionell -= foerderung * 0.3;
-
-  // Mietrecht: strenges Mietrecht reduziert institutionelle Anleger
-  const mietEffect =
-    (params.mietrecht_kostenmiete +
-      params.mietrecht_anfangsmiete +
-      params.mietrecht_kuendigungsschutz) / 9;
-  institutionell -= mietEffect;
-  genossenschaft += mietEffect * 0.6;
-  privat += mietEffect * 0.4;
-
-  // Kapitalregulierung: restriktive Parameter reduzieren institutionelle
-  const kapitalEffect =
-    (params.kapital_auslaendische_investoren +
-      params.kapital_institutionelle_regulierung +
-      params.kapital_hypothekarregulierung) / 6;
-  institutionell -= kapitalEffect;
-  privat += kapitalEffect;
-
-  // Nutzungsregulierung: Kurzzeitvermietung → mehr institutionell (Airbnb-Ersatz)
-  const nutzEffect = params.nutzung_kurzzeitvermietung / 4;
-  institutionell += nutzEffect * 0.5;
-  privat -= nutzEffect * 0.5;
-
-  // Wirtschaftskraft: starke Wirtschaft → mehr institutionelle
-  institutionell += context.wirtschaftskraft * 0.02;
-  privat -= context.wirtschaftskraft * 0.02;
-
-  // Zinsniveau: tief → mehr Kauf, weniger Miete
-  privat += -context.zinsniveau * 0.01;
-  institutionell -= -context.zinsniveau * 0.01;
-
-  // Normalisieren
-  const total = privat + institutionell + genossenschaft + oeffentlich;
-  const round = (v: number) => Math.max(0.03, v / total);
-  return {
-    privat: round(privat),
-    institutionell: round(institutionell),
-    genossenschaft: round(genossenschaft),
-    oeffentlich: round(oeffentlich),
-  };
-}
-
-/**
- * Berechnet modifizierte Eigentumsverteilung basierend auf E1-Signalen.
- * - eigentumsquoten_trend: positive = mehr Privatbesitz
- * - gemeinnuetzig_kraft: positive = mehr Genossenschaften
- * - investitionsattraktivitaet: positive = mehr Institutionelle
- */
-function computeModifiedOwnership(baseShares: OwnershipShares, state: MarketState): OwnershipShares {
-  let { privat, institutionell, genossenschaft } = baseShares;
-  const { oeffentlich } = baseShares;
-
-  // E1-Signale anwenden (skaliert für sichtbare Effekte)
-  const eigentumShift = state.eigentumsquoten_trend * 0.15;
-  const genossShift = state.gemeinnuetzig_kraft * 0.12;
-  const investShift = state.investitionsattraktivitaet * 0.10;
-
-  // Apply shifts
-  privat += eigentumShift;
-  genossenschaft += genossShift;
-  institutionell += investShift;
-
-  // oeffentlich absorbs remaining or compensates
-  const total = privat + institutionell + genossenschaft + oeffentlich;
-  const scale = 1 / total;
-
-  return {
-    privat: Math.max(0.03, privat * scale),
-    institutionell: Math.max(0.03, institutionell * scale),
-    genossenschaft: Math.max(0.03, genossenschaft * scale),
-    oeffentlich: Math.max(0.03, oeffentlich * scale),
-  };
-}
-
 const SIZE = 180;
 
-export function OwnershipDonut({ context, baseline, modified, diff, state }: Props) {
+export function OwnershipDonut({ city, modified, diff, state }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
@@ -160,8 +39,12 @@ export function OwnershipDonut({ context, baseline, modified, diff, state }: Pro
 
     const g = svg.append('g').attr('transform', `translate(${SIZE / 2},${SIZE / 2})`);
 
-    const baseShares = computeOwnership(baseline, context);
-    const modShares = computeModifiedOwnership(baseShares, state);
+    const baseShares = city.context.ownershipBaseline || {
+      privat: 0.39,
+      institutionell: 0.30,
+      genossenschaft: 0.175,
+      oeffentlich: 0.066
+    };
     const hasChanges = Object.keys(diff).length > 0;
 
     const keys = ['privat', 'institutionell', 'genossenschaft', 'oeffentlich'] as const;
@@ -177,20 +60,42 @@ export function OwnershipDonut({ context, baseline, modified, diff, state }: Pro
       .join('path')
       .attr('d', innerArc)
       .attr('fill', (_, i) => COLORS[keys[i]])
-      .attr('opacity', hasChanges ? 0.3 : 0.8);
+      .attr('opacity', hasChanges ? 0.3 : 0.8)
+      .append('title')
+      .text(d => `${LABELS[keys[d.index]]}: ${(d.data * 100).toFixed(1)}%`);
 
-    // Outer ring: modified
+    // Outer ring: modified (only if changes exist)
     if (hasChanges) {
       const outerArc = d3.arc<d3.PieArcDatum<number>>()
         .innerRadius(48).outerRadius(70);
-      const modData = keys.map(k => modShares[k]);
+      const modData = keys.map(k => {
+        // E1-Signale anwenden (vereinfacht, ohne computeOwnership)
+        const eigentumShift = state.eigentumsquoten_trend * 0.05;
+        const genossShift = state.gemeinnuetzig_kraft * 0.03;
+        const investShift = state.investitionsattraktivitaet * 0.04;
+        
+        let value = baseShares[k as keyof typeof baseShares];
+        if (k === 'privat') value += eigentumShift;
+        if (k === 'genossenschaft') value += genossShift;
+        if (k === 'institutionell') value += investShift;
+        
+        return Math.max(0.01, value);
+      });
+      
+      const total = modData.reduce((a, b) => a + b, 0);
+      const normalizedModData = modData.map(v => v / total);
+      
       g.selectAll('.outer')
-        .data(pie(modData))
+        .data(pie(normalizedModData))
         .join('path')
         .attr('d', outerArc)
         .attr('fill', (_, i) => COLORS[keys[i]])
         .attr('opacity', 0)
-        .transition().duration(600).attr('opacity', 0.9);
+        .transition().duration(600).attr('opacity', 0.9)
+        .on('end', function() {
+          d3.select(this).append('title')
+            .text(d => `${LABELS[keys[d.index]]}: ${(d.data * 100).toFixed(1)}%`);
+        });
     }
 
     // Center annotation
@@ -201,7 +106,7 @@ export function OwnershipDonut({ context, baseline, modified, diff, state }: Pro
         .attr('fill', '#555').attr('font-size', 8).text('innen: ist');
     }
 
-  }, [context, baseline, modified, diff, state]);
+  }, [city, modified, diff, state]);
 
   return (
     <div className="ownership-donut">

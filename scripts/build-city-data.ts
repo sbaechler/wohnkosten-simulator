@@ -24,6 +24,18 @@ for (const city of raw) {
   }
 }
 
+// Add default ownershipBaseline to context if missing (only in generated TS)
+for (const city of raw) {
+  if (!city.context.ownershipBaseline || typeof city.context.ownershipBaseline !== 'object') {
+    city.context.ownershipBaseline = {
+      privat: 0.39,
+      institutionell: 0.30,
+      genossenschaft: 0.175,
+      oeffentlich: 0.066
+    };
+  }
+}
+
 mkdirSync(dirname(outPath), { recursive: true });
 
 writeFileSync(outPath, [
