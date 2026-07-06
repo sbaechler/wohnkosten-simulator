@@ -51,9 +51,11 @@ const OWNERSHIP_SHIFT = {
 const KEYS = ['privat', 'institutionell', 'genossenschaft', 'oeffentlich', 'uebrige'] as const;
 
 /**
- * Baseline-Anteile inkl. Residual "Übrige" (Rest zu 1 — z. B. selbstgenutztes
- * Stockwerkeigentum), damit die Arc-Grössen mit den Tooltip-Prozenten
- * übereinstimmen.
+ * Baseline-Anteile inkl. Residual "Übrige" (Rest zu 1). Bei belastbaren Daten
+ * (Zürich) ist der Rest klein (z. B. selbstgenutztes Stockwerkeigentum); bei
+ * geschätzten Städten enthält er v.a. nicht erfasstes privates Vermieter-
+ * eigentum (siehe `ownershipBaselineEstimated`). Der Rest wird explizit
+ * ausgewiesen, damit Arc-Grössen und Tooltip-Prozente übereinstimmen.
  */
 function sharesWithResidual(ob: CityConfig['context']['ownershipBaseline']): Record<(typeof KEYS)[number], number> {
   const sum = ob.privat + ob.institutionell + ob.genossenschaft + ob.oeffentlich;
@@ -125,6 +127,8 @@ export function OwnershipDonut({ city, modified, diff, state }: Props) {
 
   }, [city, modified, diff, state]);
 
+  const isEstimated = city.context.ownershipBaselineEstimated === true;
+
   return (
     <div className="ownership-donut">
       <div className="ownership-donut__title">Eigentümerschaft</div>
@@ -136,6 +140,13 @@ export function OwnershipDonut({ city, modified, diff, state }: Props) {
           </span>
         ))}
       </div>
+      {isEstimated && (
+        <p className="ownership-donut__estimate-note">
+          Für {city.name} sind die Anteile geschätzt (BFS-Mietmarkt-Kennzahlen,
+          keine Grundbuch-Erhebung). «Übrige» enthält v.a. nicht separat
+          erfasstes privates Eigentum.
+        </p>
+      )}
     </div>
   );
 }

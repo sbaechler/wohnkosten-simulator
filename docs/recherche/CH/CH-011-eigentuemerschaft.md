@@ -5,6 +5,20 @@
 
 ---
 
+> ⚠️ **Datenqualitäts-Vorbehalt (Nachtrag Juli 2026).** Nur **Zürich** beruht auf
+> einer echten Grundbuch-Vollerhebung (Tsüri.ch/WAV 2026, Summe ~0.94). Alle
+> anderen 9 Städte sind aus BFS-Mietmarkt-Kennzahlen abgeleitet
+> (Eigentumsquote + institutioneller/genossenschaftlicher Mietanteil) und
+> summieren nur auf ~0.55–0.66. Der Grund: `Privat` wurde dort faktisch mit der
+> **Eigentümerquote (selbstgenutzt)** befüllt, während privates
+> **Vermietereigentum** (national ~45–60% der Mietwohnungen, BFS MPI 2023) NICHT
+> erfasst ist und im Rest zu 1 verschwindet. Diese Städte sind in
+> `switzerland.yaml` mit `ownershipBaselineEstimated: true` markiert; der
+> OwnershipDonut zeigt dafür einen Schätz-Hinweis. **Offene Aufgabe:** GWR-/
+> Grundbuch-äquivalente Vollerhebung für die übrigen 9 Städte nachziehen.
+
+---
+
 ## 1. Methodik & Definitionen
 
 ### Eigentümertypen

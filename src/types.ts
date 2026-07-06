@@ -86,10 +86,19 @@ export interface CityContext {
    */
   mietbelastungs_grenze: ContextValue;
   /**
-   * Aktuelle Eigentumsverteilung (Baseline-Daten aus amtlichen Quellen).
-   * Quelle: Tsüri Grundbuch-Recherche Zürich 2026 (BFS/Wüest Partner).
-   * 
-   * Falls in YAML nicht definiert, werden Default-Werte im Build-Skript gesetzt.
+   * Aktuelle Eigentumsverteilung (Anteile aller Wohneinheiten nach Eigentümertyp).
+   *
+   * Datenqualität ist NICHT einheitlich (siehe `ownershipBaselineEstimated`):
+   * - Zürich beruht auf einer echten Grundbuch-Recherche (Tsüri.ch/WAV 2026),
+   *   Summe ~0.94.
+   * - Alle anderen Städte sind aus BFS-Mietmarkt-Kennzahlen abgeleitet
+   *   (Eigentumsquote + institutioneller/genossenschaftlicher Mietanteil),
+   *   NICHT aus einer Vollerhebung. Dort ist `privat` faktisch die
+   *   Eigentümerquote (selbstgenutzt) und der grosse Rest zu 1 ("Übrige")
+   *   enthält v.a. nicht separat erfasstes privates Vermietereigentum.
+   *   Details: docs/recherche/CH/CH-011-eigentuemerschaft.md.
+   *
+   * Muss in der YAML unter `context` definiert sein (kein Default im Build).
    */
   ownershipBaseline: {
     privat: number;
@@ -97,6 +106,12 @@ export interface CityContext {
     genossenschaft: number;
     oeffentlich: number;
   };
+  /**
+   * true, wenn `ownershipBaseline` geschätzt ist (BFS-Mietmarkt-Proxy statt
+   * Grundbuch-Vollerhebung). Steuert den Schätz-Hinweis im OwnershipDonut.
+   * Fehlt/false = belastbare Quelldaten (aktuell nur Zürich).
+   */
+  ownershipBaselineEstimated?: boolean;
 }
 
 export interface CityConfig {

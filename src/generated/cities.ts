@@ -73,6 +73,7 @@ export const cities: CityConfig[] = [
         "genossenschaft": 0.2,
         "oeffentlich": 0.06
       },
+      "ownershipBaselineEstimated": true,
       "zinsniveau": -1,
       "zuwanderungsdruck": 2,
       "wirtschaftskraft": 2,
@@ -134,6 +135,7 @@ export const cities: CityConfig[] = [
         "genossenschaft": 0.2,
         "oeffentlich": 0.08
       },
+      "ownershipBaselineEstimated": true,
       "zinsniveau": -1,
       "zuwanderungsdruck": 1,
       "wirtschaftskraft": 2,
@@ -195,6 +197,7 @@ export const cities: CityConfig[] = [
         "genossenschaft": 0.15,
         "oeffentlich": 0.05
       },
+      "ownershipBaselineEstimated": true,
       "zinsniveau": -1,
       "zuwanderungsdruck": 2,
       "wirtschaftskraft": 2,
@@ -256,6 +259,7 @@ export const cities: CityConfig[] = [
         "genossenschaft": 0.18,
         "oeffentlich": 0.07
       },
+      "ownershipBaselineEstimated": true,
       "zinsniveau": -1,
       "zuwanderungsdruck": 1,
       "wirtschaftskraft": 1,
@@ -317,6 +321,7 @@ export const cities: CityConfig[] = [
         "genossenschaft": 0.15,
         "oeffentlich": 0.05
       },
+      "ownershipBaselineEstimated": true,
       "zinsniveau": -1,
       "zuwanderungsdruck": 2,
       "wirtschaftskraft": 1,
@@ -378,6 +383,7 @@ export const cities: CityConfig[] = [
         "genossenschaft": 0.15,
         "oeffentlich": 0.06
       },
+      "ownershipBaselineEstimated": true,
       "zinsniveau": -1,
       "zuwanderungsdruck": 1,
       "wirtschaftskraft": 1,
@@ -439,6 +445,7 @@ export const cities: CityConfig[] = [
         "genossenschaft": 0.175,
         "oeffentlich": 0.066
       },
+      "ownershipBaselineEstimated": true,
       "zinsniveau": -1,
       "zuwanderungsdruck": 0,
       "wirtschaftskraft": 1,
@@ -500,6 +507,7 @@ export const cities: CityConfig[] = [
         "genossenschaft": 0.12,
         "oeffentlich": 0.04
       },
+      "ownershipBaselineEstimated": true,
       "zinsniveau": -1,
       "zuwanderungsdruck": 0,
       "wirtschaftskraft": 1,
@@ -561,6 +569,7 @@ export const cities: CityConfig[] = [
         "genossenschaft": 0.17,
         "oeffentlich": 0.06
       },
+      "ownershipBaselineEstimated": true,
       "zinsniveau": -1,
       "zuwanderungsdruck": 1,
       "wirtschaftskraft": 1,

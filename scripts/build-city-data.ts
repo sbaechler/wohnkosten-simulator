@@ -42,9 +42,18 @@ for (const city of raw) {
   if (sum > 1.001) {
     throw new Error(`${city.slug}: ownershipBaseline-Summe > 1 (${sum.toFixed(3)})`);
   }
-  // Anteile < 1 sind erlaubt (Rest = übrige Eigentumsformen), aber grobe Ausreisser melden
-  if (sum < 0.5) {
-    console.warn(`WARN ${city.slug}: ownershipBaseline-Summe nur ${sum.toFixed(3)} — Datenlücke?`);
+  // Ein grosser Rest zu 1 signalisiert geschätzte Daten (BFS-Proxy statt
+  // Grundbuch-Erhebung). Das MUSS via ownershipBaselineEstimated markiert sein,
+  // damit das Widget den Schätz-Hinweis zeigt — sonst gaukelt die Grafik eine
+  // Präzision vor, die die Daten nicht haben.
+  const RESIDUAL_ESTIMATE_THRESHOLD = 0.1; // Rest > 10% ⇒ Schätzung erwartet
+  const isEstimated = city.context.ownershipBaselineEstimated === true;
+  if (sum < 1 - RESIDUAL_ESTIMATE_THRESHOLD && !isEstimated) {
+    throw new Error(
+      `${city.slug}: ownershipBaseline-Summe nur ${sum.toFixed(3)} (Rest ${(1 - sum).toFixed(3)}), `
+      + `aber ownershipBaselineEstimated ist nicht gesetzt. Entweder Daten vervollständigen `
+      + `oder "ownershipBaselineEstimated: true" ergänzen.`,
+    );
   }
 }
 

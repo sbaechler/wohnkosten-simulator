@@ -69,6 +69,7 @@
       institutionell: 0.20
       genossenschaft: 0.20
       oeffentlich: 0.06
+    ownershipBaselineEstimated: true
     zinsniveau: -1
     zuwanderungsdruck: 2
     wirtschaftskraft: 2
@@ -125,6 +126,7 @@
       institutionell: 0.20
       genossenschaft: 0.20
       oeffentlich: 0.08
+    ownershipBaselineEstimated: true
     zinsniveau: -1
     zuwanderungsdruck: 1
     wirtschaftskraft: 2
@@ -181,6 +183,7 @@
       institutionell: 0.15
       genossenschaft: 0.15
       oeffentlich: 0.05
+    ownershipBaselineEstimated: true
     zinsniveau: -1
     zuwanderungsdruck: 2
     wirtschaftskraft: 2
@@ -237,6 +240,7 @@
       institutionell: 0.18
       genossenschaft: 0.18
       oeffentlich: 0.07
+    ownershipBaselineEstimated: true
     zinsniveau: -1
     zuwanderungsdruck: 1
     wirtschaftskraft: 1
@@ -293,6 +297,7 @@
       institutionell: 0.15
       genossenschaft: 0.15
       oeffentlich: 0.05
+    ownershipBaselineEstimated: true
     zinsniveau: -1
     zuwanderungsdruck: 2
     wirtschaftskraft: 1
@@ -349,6 +354,7 @@
       institutionell: 0.15
       genossenschaft: 0.15
       oeffentlich: 0.06
+    ownershipBaselineEstimated: true
     zinsniveau: -1
     zuwanderungsdruck: 1
     wirtschaftskraft: 1
@@ -405,6 +411,7 @@
       institutionell: 0.30
       genossenschaft: 0.175
       oeffentlich: 0.066
+    ownershipBaselineEstimated: true
     zinsniveau: -1
     zuwanderungsdruck: 0
     wirtschaftskraft: 1
@@ -461,6 +468,7 @@
       institutionell: 0.15
       genossenschaft: 0.12
       oeffentlich: 0.04
+    ownershipBaselineEstimated: true
     zinsniveau: -1
     zuwanderungsdruck: 0
     wirtschaftskraft: 1
@@ -517,6 +525,7 @@
       institutionell: 0.16
       genossenschaft: 0.17
       oeffentlich: 0.06
+    ownershipBaselineEstimated: true
     zinsniveau: -1
     zuwanderungsdruck: 1
     wirtschaftskraft: 1
