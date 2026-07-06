@@ -29,6 +29,7 @@ node_modules/
 dist/
 src/generated/
 .superpowers/
+.claude/settings.local.json
 
 # wrangler files
 .wrangler
