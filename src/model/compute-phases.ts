@@ -38,6 +38,34 @@ export const E1_NODES = [
   'angebotspotenzial_regulation',
 ] as const;
 
+/**
+ * Eingefrorene Normalisierungskonstanten pro E1-Node und Phase.
+ *
+ * Entspricht Σ|weights[phase]| aller eingehenden Kanten zum Kalibrierungs-
+ * stand 2026-07. Früher wurde diese Summe dynamisch berechnet — dann hätte
+ * jede NEUE Kante alle bestehenden Effekte auf denselben Node stillschweigend
+ * abgeschwächt (Re-Skalierung durch grösseren Nenner). Mit den eingefrorenen
+ * Konstanten addiert eine neue Kante ihren Effekt, statt die anderen zu
+ * verwässern.
+ *
+ * NUR zusammen mit einer Re-Kalibrierung ändern (scripts/calibrate.ts
+ * importiert diese Tabelle). Werte neu erzeugen:
+ *   Σ|weights[p]| über alle Kanten mit to === node, p = 0..2.
+ */
+export const E1_NORMALIZATION: Record<(typeof E1_NODES)[number], readonly [number, number, number]> = {
+  angebotspotenzial: [7.70, 12.00, 12.40],
+  nachfragedruck: [8.40, 9.60, 9.20],
+  mietpreis_schutzlevel: [3.80, 3.30, 3.00],
+  verdraengungsrisiko: [7.30, 7.60, 6.60],
+  spekulationshemmung: [7.20, 7.40, 6.90],
+  marktfriktion: [4.60, 5.00, 5.00],
+  gemeinnuetzig_kraft: [4.50, 5.30, 5.20],
+  eigentumsquoten_trend: [5.30, 5.40, 5.20],
+  aufwertungsdruck: [5.20, 5.90, 6.20],
+  investitionsattraktivitaet: [8.40, 8.90, 8.50],
+  angebotspotenzial_regulation: [4.40, 5.10, 4.60],
+};
+
 // ── getE0Delta ────────────────────────────────────────────────────────────────
 
 export function getE0Delta(
@@ -124,15 +152,14 @@ export function computeE1WithPhaseAndCarry(
     }
 
     let numerator = 0;
-    let denominator = 0;
 
     for (const edge of incomingEdges) {
       const delta = getE0Delta(edge.from, diff, context);
       const weight = edge.weights[phaseIndex];
       numerator += edge.sign * weight * delta;
-      denominator += Math.abs(weight);
     }
 
+    const denominator = E1_NORMALIZATION[nodeId][phaseIndex];
     const weightedSum = denominator === 0 ? 0 : numerator / denominator;
     newState[nodeId] = clamp(prevValue * PERSISTENCE + weightedSum * PHASE_BASE_MULTIPLIER[phaseIndex] * marketMult);
   }

@@ -11,15 +11,15 @@ user input            computation               visualization
 ────────────         ──────────────             ─────────────
                      ┌──────────────────────────────┐
 Stadt wählen  ────▶   │ CityConfig (Ist-Zustand)     │
-                     │   context: 4 Kontextfaktoren │
-                     │   params: 40 Parameter      │
+                     │   context: 6 Kontextfaktoren │
+                     │   params: 41 Parameter      │
                      └──────────────────────────────┘
                               │
                               ▼
 Parameter ändern  ────▶  ┌──────────────────────────────────────────────────────────┐
   (via Slider)           │ Graph-Compute-Pipeline (compute-phases.ts)                 │
                         │                                                          │
-                        │  E0 (40+4 Inputs) ──▶ E1 (10 Markt-Zustandsvariablen)     │
+                        │  E0 (41+6 Inputs) ──▶ E1 (11 Markt-Zustandsvariablen)     │
                         │       │                        │                         │
                         │       │              ┌──────────┴──────────┐              │
                         │       │              │ Phase-Aware Weights │              │
@@ -65,13 +65,13 @@ Parameter ändern  ────▶  ┌─────────────�
 ## Schichten (Layers)
 
 ### E0 — Rohdaten
-- **4 Kontextfaktoren** (`CityContext`): Zinsniveau, Zuwanderungsdruck, Wirtschaftskraft, Bevölkerungstrend — Skala –2…+2
-- **40 steuerbare Parameter** (`CityParams40`): Atomare Policies in 8 Kategorien — Skala 0/1/2
+- **6 Kontextfaktoren** (`CityContext`): Zinsniveau, Zuwanderungsdruck, Wirtschaftskraft, Bevölkerungstrend, Marktenge, Mietbelastungs-Grenze — Skala –2…+2 (+ `ownershipBaseline`-Anteile)
+- **41 steuerbare Parameter** (`CityParams40` — Name historisch, seit bau_ersatzneubau_effizienz sind es 41): Atomare Policies in 8 Kategorien — Skala 0/1/2
 - **Baseline** (Ist-Zustand der gewählten Stadt) vs. **Modified** (Nutzer-Szenario)
 - **Diff** (`ParamsDiff40`): Geänderte Parameter mit `from`/`to`-Werten
 
 ### E1 — Markt-Zustandsvariablen
-10 Variablen, jeweils normiert auf **–1 … +1**:
+11 Variablen, jeweils normiert auf **–1 … +1**:
 - Positiv = angebotsreduzierend / preistreibend / verdrängend
 - Negativ = angebotsfördernd / preissenkend / schützend
 
@@ -87,16 +87,21 @@ Parameter ändern  ────▶  ┌─────────────�
 | `eigentumsquoten_trend` | Tendenz zu mehr oder weniger Wohneigentum |
 | `aufwertungsdruck` | Tendenz zur Quartier-Aufwertung |
 | `investitionsattraktivitaet` | Attraktivität für private/institutionelle Investoren |
+| `angebotspotenzial_regulation` | Elastizität des Angebots auf Preissignale (Angebotskurven-Steigung) |
 
 ### E2 — Abgeleitete Indikatoren
 4 zusammengesetzte Grössen, normiert auf **–1 … +1**:
 
+Alle Terme sind nullpunkt-treu (neutraler Markt → Indikator 0); gewichtete
+Summe, normiert durch die Koeffizienten-Summe. Source of Truth: `E2_TERMS`
+in `src/model/derived.ts`.
+
 | Indikator | Formel |
 |-----------|--------|
-| `gentrifizierungsindex` | `w·aufwertungsdruck + w·(1–mietpreis_schutzlevel) + w·verdraengungsrisiko + w·(1–gemeinnuetzig_kraft)` |
+| `gentrifizierungsindex` | `w·aufwertungsdruck – w·mietpreis_schutzlevel + w·verdraengungsrisiko – w·gemeinnuetzig_kraft` |
 | `neubau_hemmnisindex` | `–1 × angebotspotenzial` (invertiert) |
 | `verdraengungsrisiko_index` | Alias von `verdraengungsrisiko` (E1) |
-| `fiskalische_wirkung` | `w·spekulationshemmung + w·(1–marktfriktion) + w·gemeinnuetzig_kraft + w·aufwertungsdruck` |
+| `fiskalische_wirkung` | `w·spekulationshemmung – w·marktfriktion + w·gemeinnuetzig_kraft + w·aufwertungsdruck` |
 
 ---
 
@@ -106,13 +111,11 @@ Parameter ändern  ────▶  ┌─────────────�
 src/
 ├── model/
 │   ├── params.ts          Metadaten der 40 Parameter (Labels, Stufen, Gruppen)
-│   ├── graph.ts           Alter Graph (single-weight + time) — NICHT für Berechnung verwendet
-│   ├── market-state.ts    E0→E1 Berechnung (alter Graph) — NICHT für Berechnung verwendet
-│   ├── derived.ts         E1→E2 Berechnung
+│   ├── derived.ts         E1→E2 Berechnung (E2_TERMS = Source of Truth)
 │   ├── phases.ts          Typ-Definitionen für Phase-Pipeline
 │   ├── phase-weights.ts   Phase-gewichtete Graph-Kanten (P1/P2/P3 weights)
 │   ├── compute-phases.ts  Phase-Pipeline (Carry-E1-Akkumulation)
-│   ├── groups.ts          Preistrends pro Bevölkerungsgruppe (8 Gruppen)
+│   ├── groups.ts          Preistrends pro Bevölkerungsgruppe (9 Gruppen)
 │   └── url-helpers.ts     URL-Serialisierung
 ├── widgets/
 │   ├── WidgetGrid.tsx     Widget-Orchestration

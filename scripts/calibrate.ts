@@ -22,6 +22,7 @@ import { fileURLToPath } from 'node:url';
 import { PHASE_WEIGHTED_EDGES } from '../src/model/phase-weights.ts';
 import {
   E1_NODES,
+  E1_NORMALIZATION,
   PERSISTENCE,
   PHASE_BASE_MULTIPLIER,
   marketModulator,
@@ -103,16 +104,18 @@ function forwardPass(
       }
 
       let numerator = 0;
-      let denominator = 0;
 
       for (const edgeIdx of incomingIndices) {
         const edge = EDGE_TEMPLATES[edgeIdx];
         const delta = getE0Delta(edge.from, diff, context);
         const w = weights[edgeIdx * 3 + phase];
         numerator += edge.sign * w * delta;
-        denominator += Math.abs(w);
       }
 
+      // Eingefrorene Normalisierung (siehe E1_NORMALIZATION in compute-phases.ts).
+      // ACHTUNG: Nach einer Re-Kalibrierung, die Gewichte substanziell ändert,
+      // sollte die Tabelle bewusst neu eingefroren werden.
+      const denominator = E1_NORMALIZATION[nodeId][phase];
       const weightedSum = denominator === 0 ? 0 : numerator / denominator;
       // Identisch zur Laufzeit-Engine (computeE1WithPhaseAndCarry):
       // Phase-Basis-Multiplikator + Marktverengungs-Modulator anwenden.

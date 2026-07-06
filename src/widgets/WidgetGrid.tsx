@@ -72,6 +72,15 @@ export function WidgetGrid({ city, modified, diff }: Props) {
 
   return (
     <div className="widget-grid">
+      {/* -- Lesehilfe: Was die Simulation zeigt (und was nicht) -- */}
+      <p className="widget-grid__note">
+        Die Simulation zeigt die Wirkung von <strong>Politik-Änderungen</strong> gegenüber
+        der heutigen Politik von {city.name} — nicht einen Vergleich der Städte untereinander.
+        Auch die «Heutige Situation» ist eine Projektion: Kontextfaktoren wie Zuwanderung,
+        Zinsen und Marktlage wirken über alle drei Zeiträume weiter. Alle Werte sind
+        normierte Indizes, keine Franken- oder Prozentbeträge.
+      </p>
+
       {/* -- GroupTrendWidget: full-width, shows both columns internally -- */}
       <GroupTrendWidget
         title="Trend Wohnpreise"

@@ -882,6 +882,13 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     weights: [0.7, 0.6, 0.5],
     // Enger Markt hat weniger Ausweichoptionen → selbst bei Preisreiz kein Angebot möglich.
     // Entspannter Markt: mehr Spielraum für Angebotsreaktion.
+    //
+    // Bewusste Koexistenz mit `marketModulator` (compute-phases.ts): marktenge
+    // wirkt dort GLOBAL als Reaktions-Verstärker ("enge Märkte reagieren
+    // stärker auf alles"), hier LOKAL als Elastizitäts-Treiber der
+    // Angebotskurve ("enge Märkte haben unelastisches Angebot"). Zwei
+    // verschiedene Mechanismen, die sich nur auf diesem einen Node überlagern —
+    // beide zusammen kalibriert (0/446 Constraint-Verletzungen).
   },
 
 ] as const;

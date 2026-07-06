@@ -1,2 +1,14 @@
-/* WidgetGrid — no additional styles needed currently.
-   Comparison layout is handled inside each widget. */
+/* WidgetGrid — comparison layout is handled inside each widget. */
+
+/* Lesehilfe über den Widgets: erklärt Diff-Semantik und Baseline-Projektion */
+.widget-grid__note {
+  grid-column: 1 / -1;
+  margin: 0 0 4px;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted, #8b949e);
+  background: var(--bg-subtle, rgba(128, 128, 128, 0.08));
+  border-left: 3px solid var(--border-accent, #4dabf7);
+  border-radius: 4px;
+}
