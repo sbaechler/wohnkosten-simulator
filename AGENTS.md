@@ -4,7 +4,7 @@
 
 Ein React/Ts/D3-Widget-Simulator für Schweizer Wohnungsmarktpolitik. Der Benutzer stellt politische Parameter ein (Mietrecht, Bodenrecht, Förderung etc.) und sieht die Auswirkungen auf den Wohnungsmarkt in 3 Zeiträumen (kurz-/mittel-/langfristig).
 
-**Live:** https://wohnkosten-schweiz.ch
+**Ziel-URL (noch nicht live):** https://wohnkosten-schweiz.ch
 
 ---
 
@@ -14,9 +14,8 @@ Ein React/Ts/D3-Widget-Simulator für Schweizer Wohnungsmarktpolitik. Der Benutz
 src/
 ├── generated/cities.ts     # AUTO-GENERATED aus YAML — nicht manuell editieren
 ├── model/
-│   ├── compute-phases.ts   # DAG-Execution: E0→E1→E2
-│   ├── market-state.ts     # E1: 10 Marktvariablen (normiert –1…+1)
-│   ├── derived.ts          # E2: abgeleitete Indikatoren
+│   ├── compute-phases.ts   # DAG-Execution: E0→E1→E2 (Engine, auch von scripts/calibrate.ts importiert)
+│   ├── derived.ts          # E2: abgeleitete Indikatoren (E2_TERMS = Source of Truth für E1→E2)
 │   ├── params.ts          # Param-Metadaten, Diff-Funktionen
 │   ├── phases.ts          # Phase types
 │   ├── dag-topology.ts    # DAG topology projection (single-weight for viz)
@@ -36,12 +35,10 @@ src/
 └── types.ts               # Domain Types (E0/E1/E2)
 data/cities/
 └── switzerland.yaml       # SOURCE OF TRUTH für Städtedaten
-docs/superpowers/
-├── specs/
-│   ├── parameter-hierarchie.md   # Alle 40 Parameter (Definitionen)
-│   └── wirkungsmodell-und-staedtedaten.md  # Wirkungsmodelle + ZH/BE/LU
-└── research/
-    └── staedte-parameter-recherche.md  # Recherche für alle 10 Städte
+docs/
+├── architektur/           # Graph-Kanten, Widget-Katalog
+├── recherche/             # Konsolidierte Studien (CH/DE/GLOBAL/… + summary.md)
+└── review/                # Modell-Reviews mit Fix-Plänen
 ```
 
 ---
@@ -51,11 +48,16 @@ docs/superpowers/
 ### E0 — Rohparameter (40 Stück)
 Politisch steuerbare Parameter, Werte 0/1/2. Beispiel: `mietrecht_kostenmiete`, `boden_vorkaufsrecht`.
 
-### E1 — Marktvariablen (10 Stück)
-Aus E0 berechnet, normalisiert –1…+1. Beispiel: `angebotspotenzial`, `nachfragedruck`, `mietpreis_schutzlevel`.
+### E1 — Marktvariablen (11 Stück)
+Aus E0 berechnet, normalisiert –1…+1. Beispiel: `angebotspotenzial`, `nachfragedruck`, `mietpreis_schutzlevel`, `angebotspotenzial_regulation`.
 
-### E2 — Abgeleitete Indikatoren (5 Stück)
-Aus E1 berechnet. Beispiel: `gentrifizierungsindex`, `verdichtungsrisiko`.
+### E2 — Abgeleitete Indikatoren (4 Stück)
+Aus E1 berechnet (`E2_TERMS` in derived.ts): `gentrifizierungsindex`, `neubau_hemmnisindex`, `verdraengungsrisiko_index`, `fiskalische_wirkung`.
+
+**Wichtige Modell-Annahmen:**
+- Die 40 E0-Parameter wirken als **Diffs** (Änderung vs. Stadt-Baseline). Die absoluten Parameter-Werte einer Stadt beeinflussen die Baseline-E1-Werte NICHT — die Baseline wird nur von den Kontextfaktoren (`ctx:*`) getrieben.
+- Kontextfaktoren wirken als konstanter Antrieb in jeder Phase → auch die Baseline ("Heutige Situation") entwickelt sich über die 3 Phasen weiter.
+- Alle E1/E2-Werte sind normierte Indizes (–1…+1), keine CHF- oder Prozentwerte.
 
 ### Pipeline
 ```
@@ -68,7 +70,7 @@ E0 (Param) → E1 (Markt) → E2 (Indikatoren)
 
 ## State-Flow
 
-1. **URL-Query-String** ist State: `/?zuerich&mietrecht_kostenmiete=2&raumplanung_zonenreserve=2`
+1. **URL** ist State: `/zuerich?mietrecht_kostenmiete=2&raumplanung_zonenreserve=2` (Pfad = Stadt-Slug, Query = Parameter-Overrides)
 2. **useUrlState** parsed URL → liefert `baseline` (Stadt-Default) und `modified` (mit Overrides)
 3. **computePhasesCached** berechnet die 3 Phasen
 4. **WidgetGrid** rendert alle Widgets
@@ -97,12 +99,7 @@ Aktuell: 10 Schweizer Städte (>40k Einwohner) mit allen 40 Parameter-Werten + 4
 
 ## Parameter nachschlagen
 
-Alle 40 Parameter sind in `docs/superpowers/specs/parameter-hierarchie.md` dokumentiert:
-- Definition jeder Stufe (0/1/2)
-- Begründung der Richtung
-- Bundesrecht vs. kantonale Zuständigkeit
-
-Für citiespezifische Recherche-Werte: `docs/superpowers/research/staedte-parameter-recherche.md`
+Die Parameter-Metadaten (Labels, Stufen-Definitionen 0/1/2, Gruppen) stehen in `src/model/params.ts` (`paramMeta40`). Kanten-Gewichte und deren Forschungsbasis: `src/model/phase-weights.ts` und `docs/recherche/summary.md`.
 
 ---
 

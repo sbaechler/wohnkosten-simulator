@@ -240,7 +240,7 @@ function buildNodes(): NodeMeta[] {
     { id: 'mietpreis_schutzlevel',        label: 'Mietschutz'                },
     { id: 'verdraengungsrisiko',          label: 'Verdrängungsrisiko'         },
     { id: 'spekulationshemmung',           label: 'Spekulationshemmung'        },
-    { id: 'markfriktion',                 label: 'Marktfriktion'              },
+    { id: 'marktfriktion',                 label: 'Marktfriktion'              },
     { id: 'gemeinnuetzig_kraft',         label: 'Gemeinnützig-Kraft'        },
     { id: 'eigentumsquoten_trend',        label: 'Eigentumsquote'             },
     { id: 'aufwertungsdruck',              label: 'Aufwertungsdruck'           },

@@ -9,9 +9,9 @@ language: "en"
 url: "https://www.sciencedirect.com/science/article/abs/pii/S0094119017300542"
 doi: "10.1016/j.jue.2017.04.002"
 status: "evaluated"
-dag_nodes: ["steuer_handaenderung", "markfriktion"]
+dag_nodes: ["steuer_handaenderung", "marktfriktion"]
 dag_edges_confirmed:
-  - { from: "steuer_handaenderung", to: "markfriktion", sign: -1, note: "~20% Rückgang der Mobilität an der £250k Schwelle bei Eigenheimbesitzern" }
+  - { from: "steuer_handaenderung", to: "marktfriktion", sign: -1, note: "~20% Rückgang der Mobilität an der £250k Schwelle bei Eigenheimbesitzern" }
 dag_edges_challenged: []
 relevance: "high"
 duplicate_of: null
@@ -28,7 +28,7 @@ Mikroökonometrische Studie zur Wirkung der UK Stamp Duty Land Tax auf Haushalts
 - Umgehungsstrategien: Bewertungs-manipulationen
 
 ## Relevanz für DAG
-Quantitative Evidenz für den negativen Effekt von steuer_handaenderung auf markfriktion. Wichtig für die DE/CH Diskussion um Transaktionssteuern.
+Quantitative Evidenz für den negativen Effekt von steuer_handaenderung auf marktfriktion. Wichtig für die DE/CH Diskussion um Transaktionssteuern.
 
 ## Notizen
 - Journal of Urban Economics, ScienceDirect

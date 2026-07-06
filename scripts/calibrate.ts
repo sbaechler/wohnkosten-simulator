@@ -2,8 +2,11 @@
 /**
  * calibrate.ts — Gradient-Descent Kalibrierung der DAG-Gewichte
  *
- * Optimiert die 246 Phasen-Gewichte (82 Kanten × 3 Phasen) so, dass alle
- * fachlichen Tests (research-basierte Constraints) erfüllt werden.
+ * Optimiert die Phasen-Gewichte aller E0/ctx→E1-Kanten (3 pro Kante) so, dass
+ * alle fachlichen Tests (research-basierte Constraints) erfüllt werden.
+ * Engine-Bausteine (PERSISTENCE, PHASE_BASE_MULTIPLIER, marketModulator,
+ * getE0Delta, computeDerivedIndicators) werden aus src/model importiert —
+ * Kalibrierung und Laufzeit rechnen damit garantiert identisch.
  *
  * Usage: npx tsx scripts/calibrate.ts [--dry-run] [--iterations N] [--lr RATE]
  *
@@ -17,6 +20,14 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PHASE_WEIGHTED_EDGES } from '../src/model/phase-weights.ts';
+import {
+  E1_NODES,
+  PERSISTENCE,
+  PHASE_BASE_MULTIPLIER,
+  marketModulator,
+  getE0Delta,
+} from '../src/model/compute-phases.ts';
+import { computeDerivedIndicators } from '../src/model/derived.ts';
 import { cities } from '../src/generated/cities.ts';
 import type { CityContext, CityParams40, ParamsDiff40, MarketState, DerivedIndicators } from '../src/types.js';
 
@@ -51,31 +62,8 @@ function extractWeights(): number[] {
   return w;
 }
 
-const E1_NODES = [
-  'angebotspotenzial', 'nachfragedruck', 'mietpreis_schutzlevel',
-  'verdraengungsrisiko', 'spekulationshemmung', 'markfriktion',
-  'gemeinnuetzig_kraft', 'eigentumsquoten_trend', 'aufwertungsdruck',
-  'investitionsattraktivitaet',
-] as const;
-
-const PERSISTENCE = 0.8;
-
 function clamp(v: number, lo = -1, hi = 1): number {
   return Math.max(lo, Math.min(hi, v));
-}
-
-function normalizeContext(v: number): number { return v / 2; }
-function normalizeDiff(diff: number): number { return diff / 2; }
-
-function getE0Delta(nodeId: string, diff: ParamsDiff40, context: CityContext): number {
-  if (nodeId.startsWith('ctx:')) {
-    const ctxKey = nodeId.slice(4) as keyof CityContext;
-    return normalizeContext(context[ctxKey]);
-  }
-  const paramKey = nodeId as keyof CityParams40;
-  const d = diff[paramKey];
-  if (!d) return 0;
-  return normalizeDiff((d.to as number) - (d.from as number));
 }
 
 interface PhaseOutput {
@@ -98,6 +86,7 @@ function forwardPass(
 
   for (let phase = 0; phase < 3; phase++) {
     const newState = {} as MarketState;
+    const marketMult = marketModulator(context.marktenge);
 
     for (const nodeId of E1_NODES) {
       const prevValue = carryE1 ? carryE1[nodeId] : 0;
@@ -125,28 +114,13 @@ function forwardPass(
       }
 
       const weightedSum = denominator === 0 ? 0 : numerator / denominator;
-      newState[nodeId] = clamp(prevValue * PERSISTENCE + weightedSum);
+      // Identisch zur Laufzeit-Engine (computeE1WithPhaseAndCarry):
+      // Phase-Basis-Multiplikator + Marktverengungs-Modulator anwenden.
+      newState[nodeId] = clamp(prevValue * PERSISTENCE + weightedSum * PHASE_BASE_MULTIPLIER[phase] * marketMult);
     }
 
-    // E2 derived indicators (fixed formulas from derived.ts)
-    const gi_num = 1.5 * newState.aufwertungsdruck
-                 + 1.5 * (1 - newState.mietpreis_schutzlevel)
-                 + 1.5 * newState.verdraengungsrisiko
-                 + 1.0 * (1 - newState.gemeinnuetzig_kraft);
-    const gi_den = 1.5 + 1.5 + 1.5 + 1.0;
-
-    const fw_num = 1.5 * newState.spekulationshemmung
-                 + 1.0 * (1 - newState.markfriktion)
-                 + 1.0 * newState.gemeinnuetzig_kraft
-                 + 0.8 * newState.aufwertungsdruck;
-    const fw_den = 1.5 + 1.0 + 1.0 + 0.8;
-
-    const derived: DerivedIndicators = {
-      gentrifizierungsindex: clamp(gi_num / gi_den),
-      neubau_hemmnisindex: clamp(-newState.angebotspotenzial),
-      verdraengungsrisiko_index: clamp(newState.verdraengungsrisiko),
-      fiskalische_wirkung: clamp(fw_num / fw_den),
-    };
+    // E2 aus der Laufzeit-Engine (Single Source of Truth: derived.ts / E2_TERMS)
+    const derived: DerivedIndicators = computeDerivedIndicators(newState);
 
     carryE1 = newState;
     results.push({ marketState: newState, derived });
@@ -196,7 +170,7 @@ const BERLIN_BASELINE: CityParams40 = {
   infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
 };
 
-const BERLIN_CTX: CityContext = { zinsniveau: -1, zuwanderungsdruck: 2, wirtschaftskraft: 2, bevoelkerungstrend: 2 };
+const BERLIN_CTX: CityContext = { zinsniveau: -1, zuwanderungsdruck: 2, wirtschaftskraft: 2, bevoelkerungstrend: 2, marktenge: 2, mietbelastungs_grenze: 2 } as CityContext;
 
 const ZUERICH_V2: CityParams40 = {
   raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
@@ -215,9 +189,9 @@ const ZUERICH_V2: CityParams40 = {
   infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
 };
 
-const ZH_CTX: CityContext = { zinsniveau: -1, zuwanderungsdruck: 2, wirtschaftskraft: 2, bevoelkerungstrend: 2 };
-const NEUTRAL_CTX: CityContext = { zinsniveau: 0, zuwanderungsdruck: 0, wirtschaftskraft: 0, bevoelkerungstrend: 0 };
-const ANGESPANNT: CityContext = { zinsniveau: -1, zuwanderungsdruck: 2, wirtschaftskraft: 2, bevoelkerungstrend: 2 };
+const ZH_CTX: CityContext = { zinsniveau: -1, zuwanderungsdruck: 2, wirtschaftskraft: 2, bevoelkerungstrend: 2, marktenge: 2, mietbelastungs_grenze: 2 } as CityContext;
+const NEUTRAL_CTX: CityContext = { zinsniveau: 0, zuwanderungsdruck: 0, wirtschaftskraft: 0, bevoelkerungstrend: 0, marktenge: 0, mietbelastungs_grenze: 0 } as CityContext;
+const ANGESPANNT: CityContext = { zinsniveau: -1, zuwanderungsdruck: 2, wirtschaftskraft: 2, bevoelkerungstrend: 2, marktenge: 2, mietbelastungs_grenze: 2 } as CityContext;
 
 const LOCKERE_BASIS: CityParams40 = {
   ...ZUERICH_V2,
@@ -252,13 +226,13 @@ const BASE_CONSTRAINTS: Constraint[] = [
     diffB: {},
     phase: 2, field: 'marketState.investitionsattraktivitaet', relation: 'lt',
   },
-  // CH-003: Anfechtungsrecht erhöht markfriktion
+  // CH-003: Anfechtungsrecht erhöht marktfriktion
   {
-    id: 'mietrecht-ch003-markfriktion-p0',
+    id: 'mietrecht-ch003-marktfriktion-p0',
     context: BERLIN_CTX, baseline: BERLIN_BASELINE,
     diffA: { mietrecht_mietzinstransparenz: { from: 1, to: 2 } },
     diffB: {},
-    phase: 0, field: 'marketState.markfriktion', relation: 'gt',
+    phase: 0, field: 'marketState.marktfriktion', relation: 'gt',
   },
   // Kurzzeitvermietung erhöht spekulationshemmung
   {
@@ -298,23 +272,23 @@ const BASE_CONSTRAINTS: Constraint[] = [
     context: BERLIN_CTX, baseline: withOverrides(BERLIN_BASELINE, { mietrecht_kuendigungsschutz: 0 }),
     diffA: { mietrecht_kuendigungsschutz: { from: 0, to: 2 } },
     diffB: {},
-    phase: 0, field: 'marketState.markfriktion', relation: 'gt',
+    phase: 0, field: 'marketState.marktfriktion', relation: 'gt',
   },
-  // CH-005: Strenges Mietrecht senkt Fluktuation (markfriktion steigt)
+  // CH-005: Strenges Mietrecht senkt Fluktuation (marktfriktion steigt)
   {
     id: 'mietrecht-ch005-fluktuation-p0',
     context: BERLIN_CTX, baseline: withOverrides(BERLIN_BASELINE, { mietrecht_kuendigungsschutz: 0, mietrecht_kostenmiete: 0 }),
     diffA: { mietrecht_kuendigungsschutz: { from: 0, to: 2 }, mietrecht_kostenmiete: { from: 0, to: 2 }, mietrecht_mietzinsindex: { from: 0, to: 2 } },
     diffB: {},
-    phase: 0, field: 'marketState.markfriktion', relation: 'gt',
+    phase: 0, field: 'marketState.marktfriktion', relation: 'gt',
   },
-  // CH-005: Preisspreizung (uses marktfriktion which is a typo in test — markfriktion)
+  // CH-005: Preisspreizung (uses marktfriktion which is a typo in test — marktfriktion)
   {
     id: 'mietrecht-ch005-preisspreizung-p0',
     context: BERLIN_CTX, baseline: withOverrides(BERLIN_BASELINE, { mietrecht_kuendigungsschutz: 0, mietrecht_kostenmiete: 0 }),
     diffA: { mietrecht_kuendigungsschutz: { from: 0, to: 2 }, mietrecht_kostenmiete: { from: 0, to: 2 }, mietrecht_mietzinsindex: { from: 0, to: 2 } },
     diffB: {},
-    phase: 0, field: 'marketState.markfriktion', relation: 'gt',
+    phase: 0, field: 'marketState.marktfriktion', relation: 'gt',
   },
 
   // ═══ bodenrecht-fachlich.test.ts ═══
@@ -418,13 +392,13 @@ const BASE_CONSTRAINTS: Constraint[] = [
 
   // ═══ steuer-kapital-fachlich.test.ts ═══
 
-  // Handänderungssteuer erhöht markfriktion
+  // Handänderungssteuer erhöht marktfriktion
   {
     id: 'steuer-handaenderung-friktion-p0',
     context: NEUTRAL_CTX, baseline: ZUERICH_V2,
     diffA: { steuer_handaenderung: { from: 1, to: 2 } },
     diffB: {},
-    phase: 0, field: 'marketState.markfriktion', relation: 'gt',
+    phase: 0, field: 'marketState.marktfriktion', relation: 'gt',
   },
   // Handänderungssteuer erhöht spekulationshemmung
   {
@@ -625,13 +599,13 @@ const BASE_CONSTRAINTS: Constraint[] = [
     diffB: {},
     phase: 2, field: 'marketState.investitionsattraktivitaet', relation: 'lt',
   },
-  // Genf-Regulierung erhöht markfriktion
+  // Genf-Regulierung erhöht marktfriktion
   {
     id: 'wohnschutz-genf-friktion-p0',
     context: ANGESPANNT, baseline: ZUERICH_V2,
     diffA: { mietrecht_kostenmiete: { from: 1, to: 2 }, mietrecht_anfangsmiete: { from: 1, to: 2 }, mietrecht_kuendigungsschutz: { from: 1, to: 2 }, mietrecht_mietzinsindex: { from: 1, to: 2 }, nutzung_abbruchverbot: { from: 1, to: 2 }, nutzung_umnutzungsverbot: { from: 1, to: 2 } },
     diffB: {},
-    phase: 0, field: 'marketState.markfriktion', relation: 'gt',
+    phase: 0, field: 'marketState.marktfriktion', relation: 'gt',
   },
   // Genf-Regulierung erhöht mietpreis_schutzlevel
   {

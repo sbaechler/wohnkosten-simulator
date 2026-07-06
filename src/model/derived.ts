@@ -1,67 +1,85 @@
 // ============================================================
 // derived.ts — E1 → E2 computation
 // Berechnet die 4 abgeleiteten Indikatoren aus E1
+//
+// SOURCE OF TRUTH für alle E1→E2 Beziehungen: `E2_TERMS` unten.
+// `computeDerivedIndicators` rechnet damit, `dag-topology.ts`
+// projiziert dieselben Terme als Kanten für die DAG-Visualisierung.
 // ============================================================
 
 import type { MarketState, DerivedIndicators } from '../types';
 import { clamp } from './utils';
 
-// ── E2-Berechnung ───────────────────────────────────────────────────────────
+/**
+ * Ein Summand eines E2-Indikators.
+ *
+ * mode 'value':    coeff · sign · x
+ * mode 'oneMinus': coeff · (1 − x)   — entspricht sign −1 in der DAG-Sicht
+ *                  (Indikator steigt, wenn x sinkt). Achtung: (1 − x) auf der
+ *                  −1…+1-Skala verschiebt den Nullpunkt — ein neutraler Markt
+ *                  (x = 0) liefert einen positiven Beitrag. Bewusste
+ *                  Modell-Entscheidung, siehe Formeln aus
+ *                  dag-berechnungsmodell.md.
+ */
+export interface E2Term {
+  from: keyof MarketState;
+  coeff: number;
+  mode: 'value' | 'oneMinus';
+  sign: 1 | -1;
+}
 
 /**
- * Berechnet E2 (abgeleitete Indikatoren) aus E1 (Markt-Zustand).
- *
- * Formeln aus dag-berechnungsmodell.md:
- *
- * gentrifizierungsindex =
- *   w1*aufwertungsdruck + w2*(1–mietpreis_schutzlevel)
- *   + w3*verdraengungsrisiko + w4*(1–gemeinnuetzig_kraft)
- *
- * neubau_hemmnisindex = -1 * angebotspotenzial
- *
- * verdraengungsrisiko_index = verdraengungsrisiko (alias)
- *
- * fiskalische_wirkung =
- *   w1*spekulationshemmung + w2*(1-markfriktion) + w3*gemeinnuetzig_kraft
- *   (Gewichte 1.5/1.0/1.0 gemäss Spezifikation)
+ * E1→E2 Koeffizienten (Gewichte gemäss Spezifikation dag-berechnungsmodell.md).
+ * Jeder Indikator ist die gewichtete Summe seiner Terme, normiert durch die
+ * Koeffizienten-Summe, danach auf −1…+1 geclampt.
+ */
+export const E2_TERMS: Record<keyof DerivedIndicators, readonly E2Term[]> = {
+  gentrifizierungsindex: [
+    { from: 'aufwertungsdruck',      coeff: 1.5, mode: 'value',    sign: +1 },
+    { from: 'mietpreis_schutzlevel', coeff: 1.5, mode: 'oneMinus', sign: -1 },
+    { from: 'verdraengungsrisiko',   coeff: 1.5, mode: 'value',    sign: +1 },
+    { from: 'gemeinnuetzig_kraft',   coeff: 1.0, mode: 'oneMinus', sign: -1 },
+  ],
+  // Invertiert: hohes Angebotspotenzial → tiefer Hemmnisindex
+  neubau_hemmnisindex: [
+    { from: 'angebotspotenzial', coeff: 1.0, mode: 'value', sign: -1 },
+  ],
+  // Direkter Alias aus E1
+  verdraengungsrisiko_index: [
+    { from: 'verdraengungsrisiko', coeff: 1.0, mode: 'value', sign: +1 },
+  ],
+  // aufwertungsdruck=0.8: UK-001 Crossrail / GLOBAL-020 TIF —
+  // Aufwertung → höhere Steuereinnahmen
+  fiskalische_wirkung: [
+    { from: 'spekulationshemmung', coeff: 1.5, mode: 'value',    sign: +1 },
+    { from: 'marktfriktion',        coeff: 1.0, mode: 'oneMinus', sign: -1 },
+    { from: 'gemeinnuetzig_kraft', coeff: 1.0, mode: 'value',    sign: +1 },
+    { from: 'aufwertungsdruck',    coeff: 0.8, mode: 'value',    sign: +1 },
+  ],
+};
+
+function computeIndicator(state: MarketState, terms: readonly E2Term[]): number {
+  let numerator = 0;
+  let denominator = 0;
+  for (const t of terms) {
+    const x = state[t.from];
+    numerator += t.mode === 'oneMinus' ? t.coeff * (1 - x) : t.coeff * t.sign * x;
+    denominator += t.coeff;
+  }
+  return clamp(numerator / denominator);
+}
+
+/**
+ * Berechnet E2 (abgeleitete Indikatoren) aus E1 (Markt-Zustand)
+ * gemäss `E2_TERMS`.
  */
 export function computeDerivedIndicators(
   state: MarketState,
 ): DerivedIndicators {
-  // ── gentrifizierungsindex ─────────────────────────────────────────────────
-  // Gewichte: aufwertungsdruck=1.5, (1-mietpreis_schutzlevel)=1.5,
-  //           verdraengungsrisiko=1.5, (1-gemeinnuetzig_kraft)=1.0
-  const gi_numerator =
-    1.5 * state.aufwertungsdruck +
-    1.5 * (1 - state.mietpreis_schutzlevel) +
-    1.5 * state.verdraengungsrisiko +
-    1.0 * (1 - state.gemeinnuetzig_kraft);
-  const gi_denominator = 1.5 + 1.5 + 1.5 + 1.0;
-  const gentrifizierungsindex = clamp(gi_numerator / gi_denominator);
-
-  // ── neubau_hemmnisindex ───────────────────────────────────────────────────
-  // Invertiert: hohes Angebotspotenzial → tiefer Hemmnisindex
-  const neubau_hemmnisindex = clamp(-state.angebotspotenzial);
-
-  // ── verdraengungsrisiko_index ──────────────────────────────────────────────
-  // Direkter Alias aus E1
-  const verdraengungsrisiko_index = clamp(state.verdraengungsrisiko);
-
-  // ── fiskalische_wirkung ───────────────────────────────────────────────────
-  // spekulationshemmung=1.5, (1-markfriktion)=1.0, gemeinnuetzig_kraft=1.0,
-  // aufwertungsdruck=0.8 (UK-001 Crossrail / GLOBAL-020 TIF: Aufwertung → höhere Steuereinnahmen)
-  const fw_numerator =
-    1.5 * state.spekulationshemmung +
-    1.0 * (1 - state.markfriktion) +
-    1.0 * state.gemeinnuetzig_kraft +
-    0.8 * state.aufwertungsdruck;
-  const fw_denominator = 1.5 + 1.0 + 1.0 + 0.8;
-  const fiskalische_wirkung = clamp(fw_numerator / fw_denominator);
-
   return {
-    gentrifizierungsindex,
-    neubau_hemmnisindex,
-    verdraengungsrisiko_index,
-    fiskalische_wirkung,
+    gentrifizierungsindex: computeIndicator(state, E2_TERMS.gentrifizierungsindex),
+    neubau_hemmnisindex: computeIndicator(state, E2_TERMS.neubau_hemmnisindex),
+    verdraengungsrisiko_index: computeIndicator(state, E2_TERMS.verdraengungsrisiko_index),
+    fiskalische_wirkung: computeIndicator(state, E2_TERMS.fiskalische_wirkung),
   };
 }

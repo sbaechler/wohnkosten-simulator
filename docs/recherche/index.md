@@ -18,7 +18,7 @@ status_counts:
 | GLOBAL-002 | Fundamental Drivers of House Prices in Advanced Economies (IMF WP/18/164) | 2018 | working-paper | evaluated | ctx:zinsniveau, kapital_hypothekarregulierung, nachfragedruck |
 | GLOBAL-003 | Macroprudential policies to mitigate housing market risks (BIS CGFS 69) | 2023 | government-report | evaluated | kapital_hypothekarregulierung, spekulationshemmung |
 | GLOBAL-004 | The Impact of Zoning on Housing Affordability (Glaeser & Gyourko) | 2002 | working-paper | evaluated | raumplanung_*, angebotspotenzial, neubau_hemmnisindex |
-| GLOBAL-005 | Can Property Taxes Reduce House Price Volatility? (IMF WP/16/216) | 2016 | working-paper | evaluated | steuer_*, spekulationshemmung, markfriktion |
+| GLOBAL-005 | Can Property Taxes Reduce House Price Volatility? (IMF WP/16/216) | 2016 | working-paper | evaluated | steuer_*, spekulationshemmung, marktfriktion |
 | GLOBAL-006 | Global Compendium of Land Value Capture Policies (OECD) | 2022 | government-report | found | boden_mehrwertabgabe, infra_oepnv, fiskalische_wirkung |
 | GLOBAL-007 | Land value capture: Crossrail vs. Grand Paris Express | 2025 | peer-reviewed | found | boden_mehrwertabgabe, infra_oepnv, fiskalische_wirkung |
 | GLOBAL-008 | International comparison on public value capture instruments | 2016 | working-paper | found | boden_mehrwertabgabe, fiskalische_wirkung |
@@ -26,27 +26,27 @@ status_counts:
 | GLOBAL-010 | Challenges and effects of short-term rentals regulation: European cities | 2023 | peer-reviewed | found | nutzung_kurzzeitvermietung, nachfragedruck |
 | GLOBAL-011 | Frictional and Speculative Vacancies: Effects of an Empty Homes Tax | 2023 | working-paper | found | steuer_leerstandsabgabe, spekulationshemmung, angebotspotenzial |
 | GLOBAL-012 | Rent control effects: An almost complete review (Kholodilin) | 2024 | meta-study | evaluated | mietrecht_kuendigungsschutz, mietrecht_anfangsmiete, angebotspotenzial |
-| GLOBAL-013 | The effects of transaction taxes on housing markets (CEPR) | 2023 | working-paper | found | steuer_handaenderung, markfriktion |
+| GLOBAL-013 | The effects of transaction taxes on housing markets (CEPR) | 2023 | working-paper | found | steuer_handaenderung, marktfriktion |
 | GLOBAL-014 | Land Value Taxation: Theory, Evidence, and Practice (Lincoln Institute) | 2024 | meta-study | found | steuer_eigenmietwert, boden_bodeneigentumssteuer |
-| GLOBAL-015 | Can Property Taxes Reduce House Price Volatility? (Poghosyan IMF) | 2016 | working-paper | evaluated | steuer_eigenmietwert, spekulationshemmung, markfriktion |
-| GLOBAL-016 | Transfer Taxes and Household Mobility (Hilber) | 2017 | peer-reviewed | evaluated | steuer_handaenderung, markfriktion |
-| GLOBAL-017 | Who Bears the Burden of Real Estate Transfer Taxes? Germany | 2024 | peer-reviewed | evaluated | steuer_handaenderung, markfriktion, nachfragedruck |
+| GLOBAL-015 | Can Property Taxes Reduce House Price Volatility? (Poghosyan IMF) | 2016 | working-paper | evaluated | steuer_eigenmietwert, spekulationshemmung, marktfriktion |
+| GLOBAL-016 | Transfer Taxes and Household Mobility (Hilber) | 2017 | peer-reviewed | evaluated | steuer_handaenderung, marktfriktion |
+| GLOBAL-017 | Who Bears the Burden of Real Estate Transfer Taxes? Germany | 2024 | peer-reviewed | evaluated | steuer_handaenderung, marktfriktion, nachfragedruck |
 | GLOBAL-018 | House Prices and Immovable Property Taxes: OECD Countries | 2016 | working-paper | found | steuer_eigenmietwert, nachfragedruck |
 | GLOBAL-019 | Paving the way towards predistribution: land value tax | 2025 | peer-reviewed | found | steuer_eigenmietwert, boden_bodeneigentumssteuer, fiskalische_wirkung |
 | GLOBAL-020 | Tax Increment Financing: Municipal Adoption and Effects | 1998 | peer-reviewed | found | infra_wirtschaftsansiedlung, fiskalische_wirkung, aufwertungsdruck |
 | GLOBAL-021 | Taxes and Borrower Behavior: Mortgage Interest Deductibility | 2020 | peer-reviewed | evaluated | kapital_hypothekarregulierung, nachfragedruck |
 | GLOBAL-022 | OECD Measuring effective taxation of housing (WP No. 56) | 2022 | working-paper | found | steuer_eigenmietwert, steuer_handaenderung, fiskalische_wirkung |
-| GLOBAL-023 | Transactions tax change during the pandemic: UK housing market | 2025 | peer-reviewed | found | steuer_handaenderung, nachfragedruck, markfriktion |
+| GLOBAL-023 | Transactions tax change during the pandemic: UK housing market | 2025 | peer-reviewed | found | steuer_handaenderung, nachfragedruck, marktfriktion |
 
 ## CH — Schweiz
 
 | ID | Titel | Jahr | Typ | Status | DAG-Relevanz |
 |----|-------|------|-----|--------|--------------|
-| CH-001 | Auswirkungen des Schweizer Mietrechts (BWO/SECO) | 2018 | government-report | found | mietrecht_kostenmiete, mietrecht_anfangsmiete, markfriktion |
+| CH-001 | Auswirkungen des Schweizer Mietrechts (BWO/SECO) | 2018 | government-report | found | mietrecht_kostenmiete, mietrecht_anfangsmiete, marktfriktion |
 | CH-002 | Mietpreisentwicklung und Wohnungsmangel — Bericht des Bundesrats | 2024 | government-report | found | ctx:zuwanderungsdruck, angebotspotenzial |
 | CH-003 | The Challenge of the Initial Rent in Switzerland (Sui Generis) | 2023 | peer-reviewed | found | mietrecht_anfangsmiete, mietrecht_mietzinstransparenz |
-| CH-004 | Tenants' residential mobility in Switzerland (BMC) | 2021 | peer-reviewed | found | mietrecht_kuendigungsschutz, markfriktion |
-| CH-005 | Genf und Basel-Stadt — Schweizer Kantone Mietregulierung | 2025 | government-report | found | mietrecht_kuendigungsschutz, mietrecht_anfangsmiete, markfriktion |
+| CH-004 | Tenants' residential mobility in Switzerland (BMC) | 2021 | peer-reviewed | found | mietrecht_kuendigungsschutz, marktfriktion |
+| CH-005 | Genf und Basel-Stadt — Schweizer Kantone Mietregulierung | 2025 | government-report | found | mietrecht_kuendigungsschutz, mietrecht_anfangsmiete, marktfriktion |
 | CH-006 | Lex Weber Zweitwohnungsinitiative — Fallstudie | 2022 | peer-reviewed | found | nutzung_zweitwohnungen, angebotspotenzial, nachfragedruck |
 | CH-007 | Ursachen für steigende Wohnkosten — Raumplanung (BWO/CRED) | 2023 | government-report | found | raumplanung_zonenreserve, bau_bewilligungsverfahren, angebotspotenzial |
 
@@ -54,8 +54,8 @@ status_counts:
 
 | ID | Titel | Jahr | Typ | Status | DAG-Relevanz |
 |----|-------|------|-----|--------|--------------|
-| DE-001 | Evaluation der Mietpreisbremse — Endbericht (DIW) | 2019 | government-report | found | mietrecht_mietzinstransparenz, mietrecht_anfangsmiete, markfriktion |
-| DE-002 | Evaluation der Mietpreisbremse — IW Policy Paper (Voigtländer) | 2017 | working-paper | found | mietrecht_anfangsmiete, markfriktion |
+| DE-001 | Evaluation der Mietpreisbremse — Endbericht (DIW) | 2019 | government-report | found | mietrecht_mietzinstransparenz, mietrecht_anfangsmiete, marktfriktion |
+| DE-002 | Evaluation der Mietpreisbremse — IW Policy Paper (Voigtländer) | 2017 | working-paper | found | mietrecht_anfangsmiete, marktfriktion |
 | DE-003 | Auswirkungen von Mietpreisregulierungen — IW Gutachten | 2024 | government-report | found | mietrecht_kostenmiete, mietrecht_anfangsmiete, investitionsattraktivitaet |
 | DE-004 | Forward to the Past: Berlin Rent Freeze (Hahn et al.) | 2024 | peer-reviewed | evaluated | mietrecht_kuendigungsschutz, mietrecht_anfangsmiete, angebotspotenzial |
 | DE-005 | Supply side effects of the Berlin rent freeze | 2022 | working-paper | evaluated | mietrecht_anfangsmiete, angebotspotenzial, verdraengungsrisiko |
@@ -116,7 +116,7 @@ status_counts:
 
 | ID | Titel | Jahr | Typ | Status | DAG-Relevanz |
 |----|-------|------|-----|--------|--------------|
-| NL-001 | Rental Contract Liberalisation in The Netherlands | 2024 | peer-reviewed | found | mietrecht_kuendigungsschutz, mietrecht_anfangsmiete, markfriktion |
+| NL-001 | Rental Contract Liberalisation in The Netherlands | 2024 | peer-reviewed | found | mietrecht_kuendigungsschutz, mietrecht_anfangsmiete, marktfriktion |
 | NL-002 | Amsterdam STR-Regulierung — Fallstudie | 2023 | peer-reviewed | found | nutzung_kurzzeitvermietung, nachfragedruck, aufwertungsdruck |
 
 ## PT — Portugal
@@ -129,7 +129,7 @@ status_counts:
 
 | ID | Titel | Jahr | Typ | Status | DAG-Relevanz |
 |----|-------|------|-----|--------|--------------|
-| SE-001 | Stockholm — Mietrecht und Wohnungsmarkt Fallstudie | 2024 | peer-reviewed | found | mietrecht_kuendigungsschutz, gemeinnuetzig_kraft, markfriktion |
+| SE-001 | Stockholm — Mietrecht und Wohnungsmarkt Fallstudie | 2024 | peer-reviewed | found | mietrecht_kuendigungsschutz, gemeinnuetzig_kraft, marktfriktion |
 
 ## SG — Singapur
 
@@ -177,7 +177,7 @@ status_counts:
 
 | ID | Titel | Jahr | Typ | Status | DAG-Relevanz |
 |----|-------|------|-----|--------|--------------|
-| KR-002 | Putting a ceiling on housing costs: Jeonse rent control aftermath | 2025 | peer-reviewed | found | mietrecht_anfangsmiete, angebotspotenzial, markfriktion |
+| KR-002 | Putting a ceiling on housing costs: Jeonse rent control aftermath | 2025 | peer-reviewed | found | mietrecht_anfangsmiete, angebotspotenzial, marktfriktion |
 | KR-003 | Demand and supply-side interventions South Korea: dynamic housing-CGE analysis | 2024 | peer-reviewed | found | kapital_hypothekarregulierung, angebotspotenzial, nachfragedruck |
 
 ## AU — Australien (Ergänzungen)

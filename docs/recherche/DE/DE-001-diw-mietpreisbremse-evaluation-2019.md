@@ -9,7 +9,7 @@ language: "de"
 url: "https://www.bmjv.de/SharedDocs/Downloads/DE/Fachpublikationen/MPB_Gutachten_DIW.pdf"
 doi: null
 status: "evaluated"
-dag_nodes: ["mietrecht_mietzinstransparenz", "mietrecht_anfangsmiete", "markfriktion"]
+dag_nodes: ["mietrecht_mietzinstransparenz", "mietrecht_anfangsmiete", "marktfriktion"]
 dag_edges_confirmed:
   - { from: "mietrecht_anfangsmiete", to: "angebotspotenzial", sign: -1, note: "Mietpreisbremse zeigt positive Effekte auf Neubau in Kommunen mit Regulierung" }
 dag_edges_challenged: []
@@ -29,7 +29,7 @@ DIW-Evaluation der 2015 eingeführten Mietpreisbremse in Deutschland. Untersucht
 - Fazit: Mietpreisbremse zeigt einige positive Effekte, ist aber in der Wirkung begrenzt
 
 ## Relevanz für DAG
-Zeigt die Trade-offs von Mietzinsregulierung: Preisdämpfung im regulierten Sektor, Verlagerung in nicht-regulierte Segmente. Relevant für Knoten mietrecht_anfangsmiete, markfriktion.
+Zeigt die Trade-offs von Mietzinsregulierung: Preisdämpfung im regulierten Sektor, Verlagerung in nicht-regulierte Segmente. Relevant für Knoten mietrecht_anfangsmiete, marktfriktion.
 
 ## Zitate
 > "Die Mietpreisbremse zeigt einzelne positive Effekte, ist aber in der Wirkung begrenzt." (DIW Endbericht 2019)

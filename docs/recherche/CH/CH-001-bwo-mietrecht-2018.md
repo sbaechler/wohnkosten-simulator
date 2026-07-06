@@ -42,7 +42,7 @@ Aus Beschreibungen bekannt:
 ## Relevanz für DAG
 
 - Direkte Schweizer Evidenz für `mietrecht_kostenmiete` und `mietrecht_anfangsmiete`
-- Relevant für `markfriktion`-Knoten: Hohe Diskrepanz zwischen Bestands-/Angebotsmieten = Mobilitätshemmnis
+- Relevant für `marktfriktion`-Knoten: Hohe Diskrepanz zwischen Bestands-/Angebotsmieten = Mobilitätshemmnis
 
 ## Notizen
 

@@ -9,7 +9,7 @@ language: "en"
 url: "https://www.sciencedirect.com/science/article/abs/pii/S1051137725000476"
 doi: "10.1016/j.jue.2025.XXXXX"
 status: "evaluated"
-dag_nodes: ["steuer_handaenderung", "nachfragedruck", "markfriktion"]
+dag_nodes: ["steuer_handaenderung", "nachfragedruck", "marktfriktion"]
 dag_edges_confirmed:
   - { from: "steuer_handaenderung", to: "nachfragedruck", sign: 1, note: "Signifikant positiver Effekt der Steuerpause auf Hauspreise" }
 dag_edges_challenged: []

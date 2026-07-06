@@ -9,9 +9,9 @@ language: "en"
 url: null
 doi: null
 status: "evaluated"
-dag_nodes: ["mietrecht_kuendigungsschutz", "mietrecht_anfangsmiete", "gemeinnuetzig_kraft", "markfriktion"]
+dag_nodes: ["mietrecht_kuendigungsschutz", "mietrecht_anfangsmiete", "gemeinnuetzig_kraft", "marktfriktion"]
 dag_edges_confirmed:
-  - { from: "mietrecht_kuendigungsschutz", to: "markfriktion", sign: -1, note: "Lange Wartelisten für Mietwohnungen (10-20 Jahre); Schwarzmärkttische Untervermietung" }
+  - { from: "mietrecht_kuendigungsschutz", to: "marktfriktion", sign: -1, note: "Lange Wartelisten für Mietwohnungen (10-20 Jahre); Schwarzmärkttische Untervermietung" }
 dag_edges_challenged: []
 relevance: "high"
 duplicate_of: null
@@ -29,7 +29,7 @@ Fallstudie zum schwedischen Mietrecht mit starkem Mieterschutz und kollektiver M
 - Umwandlung in Eigentumswohnungen stark eingeschränkt
 
 ## Relevanz für DAG
-Internationale Referenzstudie für mietrecht_kuendigungsschutz und markfriktion. Zeigt die extremste Form der Mietregulierung mit kollektiver Preissetzung und deren Konsequenzen.
+Internationale Referenzstudie für mietrecht_kuendigungsschutz und marktfriktion. Zeigt die extremste Form der Mietregulierung mit kollektiver Preissetzung und deren Konsequenzen.
 
 ## Notizen
 - Keine einzelne Studie identifiziert; breiter Konsens in der Literatur

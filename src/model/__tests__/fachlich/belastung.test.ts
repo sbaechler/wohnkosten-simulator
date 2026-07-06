@@ -29,7 +29,7 @@ const emptyState: MarketState = {
   mietpreis_schutzlevel: 0,
   verdraengungsrisiko: 0,
   spekulationshemmung: 0,
-  markfriktion: 0,
+  marktfriktion: 0,
   gemeinnuetzig_kraft: 0,
   eigentumsquoten_trend: 0,
   aufwertungsdruck: 0,
@@ -39,14 +39,14 @@ const emptyState: MarketState = {
 
 const allPositive: MarketState = {
   angebotspotenzial: 1, nachfragedruck: 1, mietpreis_schutzlevel: 1,
-  verdraengungsrisiko: 1, spekulationshemmung: 1, markfriktion: 1,
+  verdraengungsrisiko: 1, spekulationshemmung: 1, marktfriktion: 1,
   gemeinnuetzig_kraft: 1, eigentumsquoten_trend: 1, aufwertungsdruck: 1,
   investitionsattraktivitaet: 1, angebotspotenzial_regulation: 1,
 };
 
 const allNegative: MarketState = {
   angebotspotenzial: -1, nachfragedruck: -1, mietpreis_schutzlevel: -1,
-  verdraengungsrisiko: -1, spekulationshemmung: -1, markfriktion: -1,
+  verdraengungsrisiko: -1, spekulationshemmung: -1, marktfriktion: -1,
   gemeinnuetzig_kraft: -1, eigentumsquoten_trend: -1, aufwertungsdruck: -1,
   investitionsattraktivitaet: -1, angebotspotenzial_regulation: -1,
 };
@@ -95,10 +95,10 @@ describe('computeMieteBelastung', () => {
     expect(high).toBeLessThan(mid);
   });
 
-  it('increases monotonically with markfriktion', () => {
-    const low  = computeMieteBelastung({ ...emptyState, markfriktion: -1 });
-    const mid  = computeMieteBelastung({ ...emptyState, markfriktion:  0 });
-    const high = computeMieteBelastung({ ...emptyState, markfriktion:  1 });
+  it('increases monotonically with marktfriktion', () => {
+    const low  = computeMieteBelastung({ ...emptyState, marktfriktion: -1 });
+    const mid  = computeMieteBelastung({ ...emptyState, marktfriktion:  0 });
+    const high = computeMieteBelastung({ ...emptyState, marktfriktion:  1 });
     expect(mid).toBeGreaterThan(low);
     expect(high).toBeGreaterThan(mid);
   });
@@ -106,7 +106,7 @@ describe('computeMieteBelastung', () => {
   it('clamps to upper bound [70] under extreme pressure', () => {
     const extreme: MarketState = {
       ...emptyState,
-      nachfragedruck: 5, markfriktion: 5,
+      nachfragedruck: 5, marktfriktion: 5,
     };
     expect(computeMieteBelastung(extreme)).toBeLessThanOrEqual(70);
   });

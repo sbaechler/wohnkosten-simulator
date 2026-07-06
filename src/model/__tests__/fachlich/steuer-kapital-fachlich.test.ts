@@ -6,10 +6,10 @@
  * Wichtige empirische Befunde:
  * ─────────────────────────────────────────────────────────────────────
  * 1. Grunderwerbsteuer +1%-Punkt → −3% Immobilienpreise (Deutschland)
- *    → steuer_handaenderung ↑ → markfriktion ↑ → fiskalische_wirkung ↓
+ *    → steuer_handaenderung ↑ → marktfriktion ↑ → fiskalische_wirkung ↓
  *
  * 2. UK Stamp Duty: −20% Mobilität an der £250k Schwelle
- *    → steuer_handaenderung ↑ → markfriktion ↑ stark
+ *    → steuer_handaenderung ↑ → marktfriktion ↑ stark
  *
  * 3. Singapore ABSD Ausländer: 10% → 60% → deutliche Dämpfung
  *    → kapital_auslaendische_investoren ↑ → nachfragedruck ↓
@@ -88,11 +88,11 @@ describe('Steuern: Grunderwerbsteuer / Handänderungssteuer', () => {
    * UK Stamp Duty → −20% Mobilität an der £250k Schwelle
    *
    * Im Modell:
-   * - steuer_handaenderung ↑ → markfriktion ↑ (sofort)
+   * - steuer_handaenderung ↑ → marktfriktion ↑ (sofort)
    * - steuer_handaenderung ↑ → fiskalische_wirkung ↑ kurzfristig (mehr Einnahmen),
    *   dann ggf. rückläufig wenn Transaktionsvolumen sinkt
    */
-  it('[FACH] Handaänderungssteuer-Erhöhung erhöht markfriktion sofort', () => {
+  it('[FACH] Handaänderungssteuer-Erhöhung erhöht marktfriktion sofort', () => {
     const neutral = phases(ZUERICH_V2, NEUTRAL_CONTEXT, {});
 
     const withTax: ParamsDiff40 = {
@@ -100,8 +100,8 @@ describe('Steuern: Grunderwerbsteuer / Handänderungssteuer', () => {
     };
     const withDiff = phases(ZUERICH_V2, NEUTRAL_CONTEXT, withTax);
 
-    expect(withDiff[0].marketState.markfriktion)
-      .toBeGreaterThan(neutral[0].marketState.markfriktion);
+    expect(withDiff[0].marketState.marktfriktion)
+      .toBeGreaterThan(neutral[0].marketState.marktfriktion);
   });
 
   it('[FACH] Handaänderungssteuer-Erhöhung erhöht spekulationshemmung (Transaktionskosten ↑)', () => {
@@ -194,7 +194,7 @@ describe('Steuern: Kapitalgewinnbesteuerung für Privatpersonen', () => {
    *
    * Im Modell:
    * - steuer_kapitalgewinnprivatpersonen ↑ → spekulationshemmung ↑
-   * - steuer_kapitalgewinnprivatpersonen ↑ → markfriktion ↑ (mittelbar)
+   * - steuer_kapitalgewinnprivatpersonen ↑ → marktfriktion ↑ (mittelbar)
    */
   it('[FACH] Kapitalgewinnbesteuerung erhöht spekulationshemmung', () => {
     const neutral = phases(ZUERICH_V2, NEUTRAL_CONTEXT, {});

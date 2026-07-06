@@ -9,7 +9,7 @@ language: "en"
 url: "https://www.sciencedirect.com/science/article/abs/pii/S105113772500004X"
 doi: "10.1016/j.jhe.2025.101003"
 status: "evaluated"
-dag_nodes: ["mietrecht_kuendigungsschutz", "mietrecht_anfangsmiete", "angebotspotenzial", "markfriktion"]
+dag_nodes: ["mietrecht_kuendigungsschutz", "mietrecht_anfangsmiete", "angebotspotenzial", "marktfriktion"]
 dag_edges_confirmed: []
 dag_edges_challenged: []
 relevance: "high"
@@ -30,7 +30,7 @@ Aktuelle Studie (2025) zu den Nachfolgeeffekten des nationalen Mietpreisdeckels 
 ## Relevanz für DAG
 
 - `mietrecht_anfangsmiete` → Angebotsverschiebung (Vermieter wechseln Vertragstyp)
-- `markfriktion` erhöht durch Systemkomplexität
+- `marktfriktion` erhöht durch Systemkomplexität
 - Interessante Parallele zur CH-Kostenmiete: Regulierung kann Marktformen transformieren, nicht nur Preise
 
 ## Notizen

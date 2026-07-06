@@ -10,12 +10,15 @@
  * Weight: 0.0 = no effect, 1.0 = full effect in this phase.
  * sign:  +1 = increases target,  -1 = decreases target
  *
+ * Diese Datei enthält ausschliesslich E0/ctx → E1 Kanten.
+ * E1 → E2 wird in `derived.ts` berechnet (dortige Koeffizienten sind die
+ * Source of Truth; `dag-topology.ts` projiziert sie für die Visualisierung).
+ *
  * Research sources:
  *   - RESULT-agent1-weights.md   (27 edges: angebotspotenzial + nachfragedruck)
  *   - RESULT-agent2-weights.md   (46 edges: verdrängungsrisiko, spekulationshemmung,
- *                                 markfriktion, mietpreis_schutzlevel, gemeinnuetzig_kraft,
+ *                                 marktfriktion, mietpreis_schutzlevel, gemeinnuetzig_kraft,
  *                                 eigentumsquoten_trend, aufwertungsdruck, investitionsattraktivitaet)
- *   - RESULT-agent3-e1e2-weights.md (9 edges: E1→E2)
  *
  * Research principles:
  *   - Uncertainty → tend toward 0.0 rather than 0.5
@@ -460,13 +463,13 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → markfriktion (7 edges)
+  // E0 → marktfriktion (7 edges)
   // Research: RESULT-agent2-weights.md + FHNW-Studie (Ters/Kholodilin 2025)
   // ═══════════════════════════════════════════════════════════════════
 
   {
     from: 'steuer_grundstueckgewinn',
-    to: 'markfriktion',
+    to: 'marktfriktion',
     sign: +1,
     weights: [0.8, 0.7, 0.6],
     // Transaktionssteuern erzeugen sofort Reibung;
@@ -474,14 +477,14 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   },
   {
     from: 'steuer_handaenderung',
-    to: 'markfriktion',
+    to: 'marktfriktion',
     sign: +1,
     weights: [0.8, 0.7, 0.6],
     // Identischer Effekt wie Grundstückgewinnsteuer.
   },
   {
     from: 'steuer_kapitalgewinnprivatpersonen',
-    to: 'markfriktion',
+    to: 'marktfriktion',
     sign: +1,
     weights: [0.6, 0.7, 0.7],
     // Kapgewinnsteuer moderater Effekt;
@@ -489,7 +492,7 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   },
   {
     from: 'ctx:zinsniveau',
-    to: 'markfriktion',
+    to: 'marktfriktion',
     sign: +1,
     weights: [1.0, 1.0, 0.9],
     // Zinsniveau ist fundamentaler Markttreiber;
@@ -497,7 +500,7 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   },
   {
     from: 'mietrecht_kostenmiete',
-    to: 'markfriktion',
+    to: 'marktfriktion',
     sign: +1,
     weights: [0.6, 0.8, 0.9],
     // FHNW: In stark regulierten Märkten wie Genf sinkt die Marktrotation drastisch.
@@ -507,7 +510,7 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   },
   {
     from: 'mietrecht_kuendigungsschutz',
-    to: 'markfriktion',
+    to: 'marktfriktion',
     sign: +1,
     weights: [0.5, 0.7, 0.8],
     // Starker Kündigungsschutz reduziert Fluktuation → Marktstarrheit steigt.
@@ -516,7 +519,7 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   },
   {
     from: 'mietrecht_mietzinstransparenz',
-    to: 'markfriktion',
+    to: 'marktfriktion',
     sign: +1,
     weights: [0.3, 0.4, 0.5],
     // CH-003: Anfechtungsrecht erhöht Transaktionskosten für Vermieter;
@@ -816,123 +819,6 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     weights: [0.4, 0.6, 0.7],
     // Ergänzend zu Abbruchverbot: Umnutzungsverbot verhindert Redevelopment-Projekte.
     // Etwas schwächerer Effekt, da Umnutzungen seltener sind als Ersatzneubauten.
-  },
-
-  // ═══════════════════════════════════════════════════════════════════
-  // E1 → E2 edges (10 edges)
-  // Research: RESULT-agent3-e1e2-weights.md
-  // Kern-Logik: E1-Werte sind kumulierte Markt-Zustände.
-  // Rückkopplungs-Dämpfung: Steigendes E2 löst in P2/P3 Gegenkräfte aus,
-  // die das Verdrängungsrisiko relativ dämpfen.
-  // ═══════════════════════════════════════════════════════════════════
-
-  // ── gentrifizierungsindex ─────────────────────────────────────────────
-
-  {
-    from: 'aufwertungsdruck',
-    to: 'gentrifizierungsindex',
-    sign: +1,
-    weights: [1.0, 1.0, 1.0],
-    // Direkter Alias — E1 akkumuliert, E2 bildet sofort ab:
-    // aufwertungsdruck ist ein kumulierter Markt-Zustand; keine Verzögerung.
-  },
-  {
-    from: 'mietpreis_schutzlevel',
-    to: 'gentrifizierungsindex',
-    sign: -1,
-    weights: [0.3, 0.7, 1.0],
-    // Mieterpolitischer Schutz wirkt als Bremse gegen Gentrifizierung,
-    // aber mit systembedingter Verzögerung.
-    // Phase 1: Schutzniveau frisch gesetzt, Markt hat sich noch nicht voll angepasst.
-    // Phase 3: Schutzwirkung vollständig im Mietmarkt integriert.
-  },
-  {
-    from: 'verdraengungsrisiko',
-    to: 'gentrifizierungsindex',
-    sign: +1,
-    weights: [1.0, 0.9, 0.7],
-    // Direkter Alias in P1.
-    // Rückkopplungs-Dämpfung in P2/P3:
-    // Steigender Gentrifizierungsindex mobilisiert politische Gegenreaktion,
-    // Non-Profit-Aktivität — dämpft Verdrängungsrisiko relativ zum Index.
-  },
-  {
-    from: 'gemeinnuetzig_kraft',
-    to: 'gentrifizierungsindex',
-    sign: -1,
-    weights: [0.2, 0.6, 1.0],
-    // Non-Profit Akteure wirken gentrifizierungs-hemmend, aber mit erheblichem time-lag.
-    // Projekte brauchen Planung, Finanzierung, Bauzeit.
-    // Phase 1: nur erste Planungssignale wirksam.
-    // Phase 3: substanzielle Non-Profit-Bestände entstanden — volle Dämpfung.
-  },
-
-  // ── neubau_hemmnisindex ───────────────────────────────────────────────
-
-  {
-    from: 'angebotspotenzial',
-    to: 'neubau_hemmnisindex',
-    sign: -1,
-    weights: [1.0, 1.0, 1.0],
-    // Direkte Invertierung — keine zeitliche Dynamik.
-    // Hohes Angebots-potenzial = tiefer Hemmnis-Index.
-    // E1 akkumuliert, E2 bildet sofort ab.
-  },
-
-  // ── verdraengungsrisiko_index ───────────────────────────────────────────
-
-  {
-    from: 'verdraengungsrisiko',
-    to: 'verdraengungsrisiko_index',
-    sign: +1,
-    weights: [1.0, 0.9, 0.7],
-    // Direkter Alias in P1; Rückkopplungs-Dämpfung in P2/P3:
-    // Steigendes Verdrängungsrisiko triggert Gegenreaktionen
-    // (politische Massnahmen, Non-Profit-Aktivität, Migrationsbewegungen),
-    // die das Risiko relativ zum Index dämpfen.
-  },
-
-  // ── fiskalische_wirkung ────────────────────────────────────────────────
-
-  {
-    from: 'spekulationshemmung',
-    to: 'fiskalische_wirkung',
-    sign: +1,
-    weights: [0.3, 0.6, 1.0],
-    // Spekulationshemmung reduziert Transaktions-basierte Steuereinnahmen kurzfristig,
-    // aber die gesamte fiskalische Wirkung (stabilere Einnahmen, tiefere Sozialkosten,
-    // höhere Planungssicherheit) braucht Jahre um sich vollständig zu entfalten.
-    // Phase 1: nur unmittelbarer Rückgang der Handelsaktivität spürbar.
-    // Phase 3: volle positive Bilanz.
-  },
-  {
-    from: 'markfriktion',
-    to: 'fiskalische_wirkung',
-    sign: -1,
-    weights: [0.4, 0.7, 1.0],
-    // Weniger Markt-Friktion = effizienterer Immobilienmarkt
-    // = höheres Transaktionsvolumen = mehr fiskalische Einnahmen.
-    // Markt-Friktion hat systembedingte Anpassungsverzögerung.
-  },
-  {
-    from: 'gemeinnuetzig_kraft',
-    to: 'fiskalische_wirkung',
-    sign: +1,
-    weights: [0.5, 0.8, 1.0],
-    // Non-Profit-Projekte generieren fiskalische Wirkung primär durch
-    // Baubeginn und Betrieb (MwSt., Handwerkeraufträge, Arbeitsplätze).
-    // Kürzerer Lag als bei Gentrifizierung-Dämpfung, aber immer noch verzögert.
-  },
-
-  // UK-001 Crossrail / GLOBAL-020 TIF: ÖPNV-Ausbau generiert langfristig
-  // fiskalische Rückflüsse durch Bodenwertzuwachs und höhere Steuereinnahmen.
-  {
-    from: 'aufwertungsdruck',
-    to: 'fiskalische_wirkung',
-    sign: +1,
-    weights: [0.1, 0.4, 0.8],
-    // Aufwertung → höhere Immobilienwerte → mehr Grundstückgewinn-/Handänderungssteuern.
-    // Tax Increment Financing: Effekt braucht Jahre bis zur vollen Entfaltung.
   },
 
   // ═══════════════════════════════════════════════════════════════════

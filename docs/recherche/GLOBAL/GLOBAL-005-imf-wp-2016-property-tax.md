@@ -47,7 +47,7 @@ Grundstückssteuer und deren Wirkung auf Wohnmärkte.
 - `steuer_grundstueckgewinn → spekulationshemmung` (sign: +1) ✓
 - `steuer_eigenmietwert → investitionsattraktivitaet` (sign: -1): Abschaffung Eigenmietwert würde Investitionen ankurbeln
 - `steuer_leerstandsabgabe → spekulationshemmung` (sign: +1): Theoretisch plausibel, empirisch wenig direkte Evidenz
-- `steuer_handaenderung → markfriktion` (sign: +1): Hohe Handänderungssteuern hemmen Mobilität
+- `steuer_handaenderung → marktfriktion` (sign: +1): Hohe Handänderungssteuern hemmen Mobilität
 
 ## Zitate
 

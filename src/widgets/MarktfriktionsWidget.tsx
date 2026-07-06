@@ -19,7 +19,7 @@ function getDescription(value: number): string {
 }
 
 export function MarktfriktionsWidget({ state }: Props) {
-  const normalized = (state.markfriktion + 1) / 2;
+  const normalized = (state.marktfriktion + 1) / 2;
   const percentage = Math.round(normalized * 100);
 
   return (
@@ -49,7 +49,7 @@ export function MarktfriktionsWidget({ state }: Props) {
       </div>
 
       <div className="marktfriktions-widget__description">
-        {getDescription(state.markfriktion)}
+        {getDescription(state.marktfriktion)}
       </div>
     </div>
   );

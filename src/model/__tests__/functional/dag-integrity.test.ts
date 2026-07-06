@@ -23,7 +23,7 @@ const E1_NODE_IDS: (keyof MarketState)[] = [
   'mietpreis_schutzlevel',
   'verdraengungsrisiko',
   'spekulationshemmung',
-  'markfriktion',
+  'marktfriktion',
   'gemeinnuetzig_kraft',
   'eigentumsquoten_trend',
   'aufwertungsdruck',
@@ -87,8 +87,8 @@ describe('DAG integrity', () => {
     expect(missing).toHaveLength(0);
   });
 
-  it('E1→E2 edges exist (edges where from is an E1 node)', () => {
+  it('contains no E1→E2 edges (E1→E2 lives in derived.ts / E2_TERMS)', () => {
     const e1ToE2 = PHASE_WEIGHTED_EDGES.filter(e => E1_NODE_IDS.includes(e.from as never));
-    expect(e1ToE2.length).toBeGreaterThan(0);
+    expect(e1ToE2).toHaveLength(0);
   });
 });

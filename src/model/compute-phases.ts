@@ -24,13 +24,13 @@ function normalizeDiff(diff: number): number {
 
 // ── E1 Node IDs ───────────────────────────────────────────────────────────────
 
-const E1_NODES = [
+export const E1_NODES = [
   'angebotspotenzial',
   'nachfragedruck',
   'mietpreis_schutzlevel',
   'verdraengungsrisiko',
   'spekulationshemmung',
-  'markfriktion',
+  'marktfriktion',
   'gemeinnuetzig_kraft',
   'eigentumsquoten_trend',
   'aufwertungsdruck',
@@ -40,7 +40,7 @@ const E1_NODES = [
 
 // ── getE0Delta ────────────────────────────────────────────────────────────────
 
-function getE0Delta(
+export function getE0Delta(
   nodeId: string,
   diff: ParamsDiff40,
   context: CityContext,
@@ -64,13 +64,13 @@ function getE0Delta(
  * übertragen wird. 0.8 = 80% des Vorwerts bleibt erhalten, 20% werden durch
  * den neuen gewichteten Input ersetzt.
  *
- * Kalibrierung: Gradient-Descent in `scripts/calibrate.ts` (PERSISTENCE dort
- * hartkodiert — bei Änderung hier UND dort synchron halten).
+ * Wird von `scripts/calibrate.ts` importiert, damit Kalibrierung und
+ * Laufzeit-Engine identisch rechnen.
  *
  * Höher = mehr Trägheit (Modell reagiert langsamer auf Policy-Wechsel).
  * Niedriger = mehr unmittelbare Reaktion pro Phase.
  */
-const PERSISTENCE = 0.8;
+export const PERSISTENCE = 0.8;
 
 /**
  * Per-Phase Basis-Multiplikator: P1=0.4, P2=0.7, P3=1.0
@@ -82,10 +82,14 @@ const PERSISTENCE = 0.8;
  *
  * Dieser Faktor skaliert ALLE Kantengewichte über alle Phasen hinweg.
  *
- * Kalibrierung: resultiert aus den 60+ Constraints in `scripts/calibrate.ts`.
- * NICHT willkürlich ändern — würde alle 246 Edge-Gewichte re-skaliert bedeuten.
+ * Kalibrierungs-Historie: Die Edge-Gewichte wurden ursprünglich mit einem
+ * Forward-Pass OHNE diesen Multiplikator (und ohne marketModulator) gefittet.
+ * `scripts/calibrate.ts` importiert inzwischen diese Engine 1:1; ein Dry-Run
+ * mit der vereinheitlichten Engine erfüllt weiterhin alle Constraints
+ * (0/446 Verletzungen, Stand 2026-07).
+ * NICHT willkürlich ändern — würde alle Edge-Gewichte re-skalieren.
  */
-const PHASE_BASE_MULTIPLIER: readonly [number, number, number] = [0.4, 0.7, 1.0];
+export const PHASE_BASE_MULTIPLIER: readonly [number, number, number] = [0.4, 0.7, 1.0];
 
 /**
  * Marktverengungs-Multiplikator: -2→0.4× (entspannt), 0→1.0× (normal), +2→1.6× (extrem eng)
@@ -95,7 +99,7 @@ const PHASE_BASE_MULTIPLIER: readonly [number, number, number] = [0.4, 0.7, 1.0]
  * Forschungsbasis: Sotomo ZH-Wohnraumstudie 2025 + CH-007 (Zonenreserve-Wirkung
  * ist in angespannten Märkten ~3× stärker als in entspannten).
  */
-function marketModulator(marktenge: number): number {
+export function marketModulator(marktenge: number): number {
   return 1.0 + marktenge * 0.3;
 }
 
@@ -167,6 +171,14 @@ export function* computePhasePipeline(
 
 const _cache = new Map<string, PhaseResult[]>();
 
+/**
+ * Obergrenze für den Ergebnis-Cache. Jeder Slider-Schritt erzeugt einen
+ * Eintrag; ohne Deckel wächst die Map über eine lange Session unbegrenzt.
+ * Bei Überschreitung wird der älteste Eintrag entfernt (Map iteriert in
+ * Einfüge-Reihenfolge → FIFO).
+ */
+const CACHE_MAX_ENTRIES = 500;
+
 function _cacheKey(context: CityContext, diff: ParamsDiff40): string {
   return JSON.stringify({ context, diff });
 }
@@ -180,6 +192,9 @@ export function computePhasesCached(
   if (cached) return cached;
 
   const results = [...computePhasePipeline(context, diff)];
+  if (_cache.size >= CACHE_MAX_ENTRIES) {
+    _cache.delete(_cache.keys().next().value!);
+  }
   _cache.set(key, results);
   return results;
 }

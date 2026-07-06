@@ -17,6 +17,30 @@ interface Props {
   diff: ParamsDiff40;
 }
 
+/**
+ * Gewichte für den Anzeige-Indikator "Verdichtungsdruck" (nur Widget, kein
+ * Pipeline-Wert): hohes ungenutztes Angebotspotenzial senkt den Druck auf
+ * Innenverdichtung, hoher Nachfragedruck erhöht ihn. Angebot dominiert
+ * (0.5 vs. 0.3), da Verdichtung primär eine Angebots-Antwort ist
+ * (ARE-Raumbeobachtung: Innenentwicklung folgt Baulandknappheit).
+ */
+const VERDICHTUNGSDRUCK_GEWICHTE = { angebotspotenzial: -0.5, nachfragedruck: 0.3 } as const;
+
+/**
+ * Gewichte für den Anzeige-Indikator "Stadtbild" (nur Widget, kein
+ * Pipeline-Wert). Heuristik: Einsprache-Rechte und Normen-Vielfalt schützen
+ * das gewachsene Stadtbild (positiv), gemeinnütziger Mindestanteil erhöht
+ * den (Ersatz-)Neubau-Anteil leicht (negativ). Skala so gewählt, dass die
+ * maximale Parameter-Spanne (±2) im Trend-Pfeil sichtbar, aber nicht
+ * dominant ist.
+ */
+const STADTBILD_GEWICHTE = {
+  bau_einspracherecht_dritte: 0.2,
+  bau_einspracherecht_suspensiv: 0.15,
+  bau_normenharmonisierung: 0.1,
+  gemeinnuetzig_mindestanteil: -0.05,
+} as const;
+
 export function WidgetGrid({ city, modified, diff }: Props) {
   const hasChanges = Object.keys(diff).length > 0;
   const context = city.context;
@@ -43,10 +67,8 @@ export function WidgetGrid({ city, modified, diff }: Props) {
   }
 
   const stadtbildGetter = (m: CityParams40, b: CityParams40) => () =>
-    ((m.bau_einspracherecht_dritte as number) - (b.bau_einspracherecht_dritte as number)) * 0.2 +
-    ((m.bau_einspracherecht_suspensiv as number) - (b.bau_einspracherecht_suspensiv as number)) * 0.15 +
-    ((m.bau_normenharmonisierung as number) - (b.bau_normenharmonisierung as number)) * 0.1 -
-    ((m.gemeinnuetzig_mindestanteil as number) - (b.gemeinnuetzig_mindestanteil as number)) * 0.05;
+    (Object.entries(STADTBILD_GEWICHTE) as [keyof typeof STADTBILD_GEWICHTE, number][])
+      .reduce((acc, [key, w]) => acc + ((m[key] as number) - (b[key] as number)) * w, 0);
 
   return (
     <div className="widget-grid">
@@ -74,7 +96,7 @@ export function WidgetGrid({ city, modified, diff }: Props) {
       <TrendArrow label="Angebotspotenzial" phases={modifiedPhases} baselinePhases={hasChanges ? baselinePhases : undefined} invertColors getValue={p => -p.marketState.angebotspotenzial} />
       <GentrifizierungsWidget phases={modifiedPhases} baselinePhases={hasChanges ? baselinePhases : undefined} />
       <TrendArrow label="Neubau-Hemmnis" phases={modifiedPhases} baselinePhases={hasChanges ? baselinePhases : undefined} invertColors getValue={p => p.derived.neubau_hemmnisindex} />
-      <TrendArrow label="Verdichtungsdruck" phases={modifiedPhases} baselinePhases={hasChanges ? baselinePhases : undefined} invertColors getValue={p => p.marketState.angebotspotenzial * -0.5 + p.marketState.nachfragedruck * 0.3} />
+      <TrendArrow label="Verdichtungsdruck" phases={modifiedPhases} baselinePhases={hasChanges ? baselinePhases : undefined} invertColors getValue={p => p.marketState.angebotspotenzial * VERDICHTUNGSDRUCK_GEWICHTE.angebotspotenzial + p.marketState.nachfragedruck * VERDICHTUNGSDRUCK_GEWICHTE.nachfragedruck} />
       <TrendArrow label="Stadtbild" phases={modifiedPhases} baselinePhases={hasChanges ? baselinePhases : undefined} invertColors getValue={stadtbildGetter(modified, baseline)} />
       <MietbelastungWidget
         params={modified}

@@ -9,9 +9,9 @@ language: "en"
 url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC8604831/"
 doi: "10.1186/s12939-021-01572-6"
 status: "evaluated"
-dag_nodes: ["mietrecht_kuendigungsschutz", "markfriktion"]
+dag_nodes: ["mietrecht_kuendigungsschutz", "marktfriktion"]
 dag_edges_confirmed:
-  - { from: "mietrecht_kuendigungsschutz", to: "markfriktion", sign: -1, note: "Schweiz hat trotz jahrzehntelanger Mietregulierung höchste Mieterquoten Europas in städtischen Kantonen" }
+  - { from: "mietrecht_kuendigungsschutz", to: "marktfriktion", sign: -1, note: "Schweiz hat trotz jahrzehntelanger Mietregulierung höchste Mieterquoten Europas in städtischen Kantonen" }
 dag_edges_challenged: []
 relevance: "medium"
 duplicate_of: null
@@ -29,7 +29,7 @@ Analyse der Wohnmobilität in der Schweiz im Kontext des Schweizer Mietrechts (K
 - Basel-Stadt und Genf: Highest Mieterquoten trotz (oder wegen?) strenger Regulierung
 
 ## Relevanz für DAG
-Zeigt den Zusammenhang zwischen mietrecht_kuendigungsschutz und markfriktion in CH. Fluktuation als zentraler Marktindikator.
+Zeigt den Zusammenhang zwischen mietrecht_kuendigungsschutz und marktfriktion in CH. Fluktuation als zentraler Marktindikator.
 
 ## Notizen
 - PMC Article (2021)

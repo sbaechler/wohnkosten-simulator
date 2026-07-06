@@ -34,7 +34,7 @@
 | `boden_bauverpflichtung` | `angebotspotenzial` | [0.0, 0.5, 1.0] |
 | `boden_mehrwertabgabe` | `spekulationshemmung` | [0.5, 1.0, 0.5] |
 | `boden_mehrwertabgabe` | `investitionsattraktivitaet` | [–0.5, –0.5, –0.5] |
-| `boden_bodeneigentumssteuer` | `markfriktion` | [0.0, 0.5, 1.0] |
+| `boden_bodeneigentumssteuer` | `marktfriktion` | [0.0, 0.5, 1.0] |
 | `raumplanung_zonenreserve` | `angebotspotenzial` | [0.0, 0.5, 1.0] |
 | `raumplanung_verdichtung` | `angebotspotenzial` | [0.0, 0.5, 1.0] |
 | `raumplanung_ausnuetzungsziffer` | `angebotspotenzial` | [0.0, 0.5, 1.0] |
@@ -44,12 +44,12 @@
 | Quelle | Ziel | Gewichte [P1, P2, P3] |
 |--------|------|----------------------|
 | `bau_bewilligungsverfahren` | `angebotspotenzial` | [0.5, 1.0, 0.5] |
-| `bau_bewilligungsverfahren` | `markfriktion` | [0.5, 1.0, 0.5] |
+| `bau_bewilligungsverfahren` | `marktfriktion` | [0.5, 1.0, 0.5] |
 | `bau_energievorgaben` | `angebotspotenzial` | [0.0, 0.5, 1.0] |
 | `bau_sanierungspflicht` | `verdraengungsrisiko` | [0.5, 1.0, 0.5] |
-| `bau_sanierungspflicht` | `markfriktion` | [0.5, 0.5, 0.0] |
+| `bau_sanierungspflicht` | `marktfriktion` | [0.5, 0.5, 0.0] |
 | `bau_einspracherecht_suspensiv` | `angebotspotenzial` | [0.5, 1.0, 0.5] |
-| `bau_einspracherecht_suspensiv` | `markfriktion` | [0.5, 1.0, 0.5] |
+| `bau_einspracherecht_suspensiv` | `marktfriktion` | [0.5, 1.0, 0.5] |
 | `bau_normenharmonisierung` | `angebotspotenzial` | [0.0, 0.5, 1.0] |
 
 ### Gemeinnützig → E1

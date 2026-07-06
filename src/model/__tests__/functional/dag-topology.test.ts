@@ -17,7 +17,16 @@
 import { describe, it, expect } from 'vitest';
 import { getDagTopology } from '../../dag-topology';
 import { PHASE_WEIGHTED_EDGES } from '../../phase-weights';
+import { E2_TERMS } from '../../derived';
 import type { NodeId } from '../../dag-topology';
+
+const NUM_E1E2_EDGES = Object.values(E2_TERMS).reduce((acc, terms) => acc + terms.length, 0);
+
+/** E0/ctx→E1-Teilmenge der Topologie (aus PHASE_WEIGHTED_EDGES projiziert) */
+function e0e1Edges() {
+  const e2Targets = new Set(Object.keys(E2_TERMS));
+  return getDagTopology().filter((e) => !e2Targets.has(e.to));
+}
 
 const E1_NODE_IDS: NodeId[] = [
   'angebotspotenzial',
@@ -25,7 +34,7 @@ const E1_NODE_IDS: NodeId[] = [
   'mietpreis_schutzlevel',
   'verdraengungsrisiko',
   'spekulationshemmung',
-  'markfriktion',
+  'marktfriktion',
   'gemeinnuetzig_kraft',
   'eigentumsquoten_trend',
   'aufwertungsdruck',
@@ -41,9 +50,9 @@ const E2_NODE_IDS: NodeId[] = [
 ];
 
 describe('getDagTopology', () => {
-  it('returns exactly one edge per PHASE_WEIGHTED_EDGES entry', () => {
+  it('returns one edge per PHASE_WEIGHTED_EDGES entry plus one per E2 term', () => {
     const topology = getDagTopology();
-    expect(topology).toHaveLength(PHASE_WEIGHTED_EDGES.length);
+    expect(topology).toHaveLength(PHASE_WEIGHTED_EDGES.length + NUM_E1E2_EDGES);
   });
 
   it('every edge has a valid from key', () => {
@@ -83,10 +92,9 @@ describe('getDagTopology', () => {
     expect(invalid).toHaveLength(0);
   });
 
-  it('time class corresponds to the phase with maximum absolute weight', () => {
-    const topology = getDagTopology();
+  it('time class corresponds to the phase with maximum absolute weight (E0→E1)', () => {
     const sourceEdges = new Map(PHASE_WEIGHTED_EDGES.map((e) => [`${e.from}->${e.to}`, e]));
-    for (const edge of topology) {
+    for (const edge of e0e1Edges()) {
       const source = sourceEdges.get(`${edge.from}->${edge.to}`);
       expect(source).toBeDefined();
       const [p1, p2, p3] = source!.weights;
@@ -138,19 +146,17 @@ describe('getDagTopology — invariants over the full edge set', () => {
     }
   });
 
-  it('preserves the sign of each edge regardless of weight magnitude', () => {
-    const topology = getDagTopology();
+  it('preserves the sign of each edge regardless of weight magnitude (E0→E1)', () => {
     const sourceEdges = new Map(PHASE_WEIGHTED_EDGES.map(e => [`${e.from}->${e.to}`, e]));
-    for (const e of topology) {
+    for (const e of e0e1Edges()) {
       const source = sourceEdges.get(`${e.from}->${e.to}`)!;
       expect(e.sign).toBe(source.sign);
     }
   });
 
-  it('time matches the phase with maximum |weight| in the source edge', () => {
-    const topology = getDagTopology();
+  it('time matches the phase with maximum |weight| in the source edge (E0→E1)', () => {
     const sourceEdges = new Map(PHASE_WEIGHTED_EDGES.map(e => [`${e.from}->${e.to}`, e]));
-    for (const e of topology) {
+    for (const e of e0e1Edges()) {
       const source = sourceEdges.get(`${e.from}->${e.to}`)!;
       const [p1, p2, p3] = source.weights;
       const abs = [Math.abs(p1), Math.abs(p2), Math.abs(p3)];
@@ -163,10 +169,9 @@ describe('getDagTopology — invariants over the full edge set', () => {
     }
   });
 
-  it('weight is the maximum of the 3 phase weights (not the sum)', () => {
-    const topology = getDagTopology();
+  it('weight is the maximum of the 3 phase weights, not the sum (E0→E1)', () => {
     const sourceEdges = new Map(PHASE_WEIGHTED_EDGES.map(e => [`${e.from}->${e.to}`, e]));
-    for (const e of topology) {
+    for (const e of e0e1Edges()) {
       const source = sourceEdges.get(`${e.from}->${e.to}`)!;
       const [p1, p2, p3] = source.weights;
       expect(e.weight).toBe(Math.max(p1, p2, p3));
@@ -181,13 +186,26 @@ describe('getDagTopology — invariants over the full edge set', () => {
 });
 
 describe('getDagTopology — single-source projection', () => {
-  it('reuses the same source edge for every (from, to) pair across calls', () => {
-    const topology = getDagTopology();
+  it('backs every E0→E1 edge by exactly one PHASE_WEIGHTED_EDGES entry', () => {
     const sourceEdges = new Map(PHASE_WEIGHTED_EDGES.map(e => [`${e.from}->${e.to}`, e]));
-    // All edges in the topology must be backed by exactly one source edge
-    for (const e of topology) {
+    for (const e of e0e1Edges()) {
       const source = sourceEdges.get(`${e.from}->${e.to}`);
       expect(source).toBeDefined();
+    }
+  });
+
+  it('backs every E1→E2 edge by exactly one E2_TERMS entry with matching sign', () => {
+    const topology = getDagTopology();
+    for (const [target, terms] of Object.entries(E2_TERMS)) {
+      const incoming = topology.filter((e) => e.to === target);
+      expect(incoming).toHaveLength(terms.length);
+      const maxCoeff = Math.max(...terms.map((t) => t.coeff));
+      for (const t of terms) {
+        const edge = incoming.find((e) => e.from === t.from);
+        expect(edge).toBeDefined();
+        expect(edge!.sign).toBe(t.sign);
+        expect(edge!.weight).toBeCloseTo(t.coeff / maxCoeff, 10);
+      }
     }
   });
 });

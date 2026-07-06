@@ -201,10 +201,10 @@ describe('Mietrecht: CH-003 Anfechtungsrecht — kein messbarer Preiseffekt', ()
     const mit   = phases(BERLIN_BASELINE_V2, BERLIN_CONTEXT, mitAnfechtung);
 
     // CH-003 zeigt: KEIN messbarer Preiseffekt
-    // Im Modell: mietrecht_mietzinstransparenz ↑ sollte allenfalls markfriktion ↑,
+    // Im Modell: mietrecht_mietzinstransparenz ↑ sollte allenfalls marktfriktion ↑,
     // aber NICHT nachfragedruck senken
-    expect(mit[0].marketState.markfriktion)
-      .toBeGreaterThan(ohne[0].marketState.markfriktion);
+    expect(mit[0].marketState.marktfriktion)
+      .toBeGreaterThan(ohne[0].marketState.marktfriktion);
   });
 });
 
@@ -347,8 +347,8 @@ describe('Mietrecht: CH-004 / CH-005 — Kündigungsschutz → Marktfriktion (Sc
    * CHF 372/m²a vs. Bestand CHF 279/m²a — ~33% Differenz.
    *
    * Im Modell:
-   * - mietrecht_kuendigungsschutz ↑ → markfriktion ↑
-   * - markfriktion ↑ → angebotspotenzial ↓ (langfristig)
+   * - mietrecht_kuendigungsschutz ↑ → marktfriktion ↑
+   * - marktfriktion ↑ → angebotspotenzial ↓ (langfristig)
    */
   it('[FACH] CH-004: Kündigungsschutz erhöht Marktfriktion (Mobilitätsbremse)', () => {
     const lockeresMietrecht: CityParams40 = {
@@ -366,8 +366,8 @@ describe('Mietrecht: CH-004 / CH-005 — Kündigungsschutz → Marktfriktion (Sc
     const mit = phases(lockeresMietrecht, BERLIN_CONTEXT, mitKschutz);
 
     // Strenger Kündigungsschutz → höhere Marktfriktion (Fluktuation sinkt)
-    expect(mit[0].marketState.markfriktion)
-      .toBeGreaterThan(ohne[0].marketState.markfriktion);
+    expect(mit[0].marketState.marktfriktion)
+      .toBeGreaterThan(ohne[0].marketState.marktfriktion);
   });
 
   it('[FACH] CH-005: Strenges Mietrecht senkt Fluktuation — Mietdauer steigt', () => {
@@ -386,8 +386,8 @@ describe('Mietrecht: CH-004 / CH-005 — Kündigungsschutz → Marktfriktion (Sc
     };
     const mit = phases(lockeresMietrecht, BERLIN_CONTEXT, genfDiff);
     // Strenges Mietrecht → höhere Marktfriktion → weniger Fluktuation
-    expect(mit[0].marketState.markfriktion)
-      .toBeGreaterThan(ohne[0].marketState.markfriktion);
+    expect(mit[0].marketState.marktfriktion)
+      .toBeGreaterThan(ohne[0].marketState.marktfriktion);
   });
 
   it('[FACH] CH-005: Strenges Mietrecht erhoht Preisspreizung (Neumieter vs. Bestand)', () => {
@@ -403,7 +403,7 @@ describe('Mietrecht: CH-004 / CH-005 — Kündigungsschutz → Marktfriktion (Sc
       mietrecht_mietzinsindex:    { from: 0, to: 2 },
     };
     const mit = phases(lockeresMietrecht, BERLIN_CONTEXT, genfDiff);
-    expect(mit[0].marketState.markfriktion)
-      .toBeGreaterThan(ohne[0].marketState.markfriktion);
+    expect(mit[0].marketState.marktfriktion)
+      .toBeGreaterThan(ohne[0].marketState.marktfriktion);
   });
 });

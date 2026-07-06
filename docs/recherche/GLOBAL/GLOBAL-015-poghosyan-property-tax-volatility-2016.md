@@ -9,10 +9,10 @@ language: "en"
 url: "https://www.imf.org/external/pubs/ft/wp/2016/wp16216.pdf"
 doi: "10.5089/9781513594485.001"
 status: "evaluated"
-dag_nodes: ["steuer_eigenmietwert", "spekulationshemmung", "markfriktion"]
+dag_nodes: ["steuer_eigenmietwert", "spekulationshemmung", "marktfriktion"]
 dag_edges_confirmed:
   - { from: "steuer_eigenmietwert", to: "spekulationshemmung", sign: 1, note: "Höhere Steuersätze reduzieren spekulative Übertreibungen" }
-  - { from: "steuer_eigenmietwert", to: "markfriktion", sign: -1, note: "0.5-5.5% Reduktion der Hauspreisvolatilität pro 0.5%-Punkt Steuersatzerhöhung" }
+  - { from: "steuer_eigenmietwert", to: "marktfriktion", sign: -1, note: "0.5-5.5% Reduktion der Hauspreisvolatilität pro 0.5%-Punkt Steuersatzerhöhung" }
 dag_edges_challenged: []
 relevance: "high"
 duplicate_of: null

@@ -1,9 +1,12 @@
 // ============================================================
 // dag-topology.ts — DAG topology for visualization
-// Provides a simplified Edge interface from PHASE_WEIGHTED_EDGES
+// E0/ctx→E1 aus PHASE_WEIGHTED_EDGES, E1→E2 aus den E2_TERMS
+// von derived.ts — die Visualisierung zeigt damit exakt das
+// Modell, das auch gerechnet wird.
 // ============================================================
 
 import { PHASE_WEIGHTED_EDGES } from './phase-weights';
+import { E2_TERMS } from './derived';
 
 export type NodeId =
   | 'raumplanung_zonenreserve' | 'raumplanung_verdichtung' | 'raumplanung_ausnuetzungsziffer'
@@ -22,7 +25,7 @@ export type NodeId =
   | 'infra_oepnv' | 'infra_schule_kita' | 'infra_oeffentlicher_raum' | 'infra_wirtschaftsansiedlung'
   | 'ctx:zinsniveau' | 'ctx:zuwanderungsdruck' | 'ctx:wirtschaftskraft' | 'ctx:bevoelkerungstrend' | 'ctx:mietbelastungs_grenze'
   | 'angebotspotenzial' | 'nachfragedruck' | 'mietpreis_schutzlevel' | 'verdraengungsrisiko'
-  | 'spekulationshemmung' | 'markfriktion' | 'gemeinnuetzig_kraft'
+  | 'spekulationshemmung' | 'marktfriktion' | 'gemeinnuetzig_kraft'
   | 'eigentumsquoten_trend' | 'aufwertungsdruck' | 'investitionsattraktivitaet'
   | 'angebotspotenzial_regulation'
   | 'gentrifizierungsindex' | 'neubau_hemmnisindex' | 'verdraengungsrisiko_index'
@@ -39,9 +42,12 @@ export interface Edge {
 /**
  * Projects phase-weighted edges to single-weight edges for visualization.
  * Uses the dominant phase's weight as the single weight value.
+ * E1→E2 edges come from derived.ts (E2_TERMS): weight is the coefficient
+ * normalized to the largest coefficient of the same target (Alias-Kanten → 1.0);
+ * E2 is computed instantaneously from E1, therefore time = 'short'.
  */
 export function getDagTopology(): readonly Edge[] {
-  return PHASE_WEIGHTED_EDGES.map(edge => {
+  const e0e1: Edge[] = PHASE_WEIGHTED_EDGES.map(edge => {
     const maxWeight = Math.max(...edge.weights);
     const dominantIndex = edge.weights.indexOf(maxWeight);
     const time: 'short' | 'medium' | 'long' =
@@ -57,4 +63,17 @@ export function getDagTopology(): readonly Edge[] {
       time,
     };
   });
+
+  const e1e2: Edge[] = Object.entries(E2_TERMS).flatMap(([target, terms]) => {
+    const maxCoeff = Math.max(...terms.map(t => t.coeff));
+    return terms.map(t => ({
+      from: t.from as NodeId,
+      to: target as NodeId,
+      sign: t.sign,
+      weight: t.coeff / maxCoeff,
+      time: 'short' as const,
+    }));
+  });
+
+  return [...e0e1, ...e1e2];
 }

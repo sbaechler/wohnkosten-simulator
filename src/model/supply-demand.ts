@@ -8,7 +8,7 @@
 // Drei E1-Treiber:
 //   nachfragedruck:      +1 → Markt enger (steiler)
 //   angebotspotenzial:   +1 → mehr Angebot (flacher)
-//   markfriktion:        +1 → weniger Mobilisierung (steiler)
+//   marktfriktion:        +1 → weniger Mobilisierung (steiler)
 //   gemeinnuetzig_kraft: +1 → mehr Genossenschaften puffern ab (flacher)
 //
 // Quelle: https://wohnmonitor.admin.ch/method-and-source
@@ -42,7 +42,7 @@ export const KNAPPHEIT_GEWICHTE = {
   /** Angebotspotenzial: mehr Angebot = weniger knapp → -X */
   angebotspotenzial:    0.3,
   /** Marktfriktion: weniger Mobilisierung = knapper → +X */
-  markfriktion:         0.15,
+  marktfriktion:         0.15,
   /** Gemeinnützig: Genossenschaften puffern Knappheit → -X */
   gemeinnuetzig_kraft:  0.15,
 } as const;
@@ -70,7 +70,7 @@ export function knappheitSignal(s: MarketState): number {
   return (
     s.nachfragedruck * w.nachfragedruck
     + (-s.angebotspotenzial) * w.angebotspotenzial
-    + s.markfriktion * w.markfriktion
+    + s.marktfriktion * w.marktfriktion
     + (-s.gemeinnuetzig_kraft) * w.gemeinnuetzig_kraft
   );
 }

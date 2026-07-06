@@ -15,9 +15,9 @@
  *      Marktpreisen = strukturelle Preisdämpfung
  *
  * 2. Stockholm Schweden (SE-001):
- *    → mietrecht_kuendigungsschutz → markfriktion: Extrem lange Wartelisten
+ *    → mietrecht_kuendigungsschutz → marktfriktion: Extrem lange Wartelisten
  *      (10-20 Jahre), Schwarzmärkte, fast nur noch gemeinnütziger Neubau
- *    → markfriktion → angebotspotenzial: Trotz Hochbaurate kaum Marktangebot
+ *    → marktfriktion → angebotspotenzial: Trotz Hochbaurate kaum Marktangebot
  *
  * Run: npx vitest run src/model/__tests__/fachlich/international-fachlich.test.ts
  */
@@ -222,7 +222,7 @@ describe('Stockholm Schweden (SE-001): Mietregulierung → Extreme Marktfriktion
    * Wohnungsbaugesellschaften.
    *
    * Im Modell:
-   * - mietrecht_kuendigungsschutz ↑ → markfriktion ↑ stark
+   * - mietrecht_kuendigungsschutz ↑ → marktfriktion ↑ stark
    * - marktfriktion ↑ → angebotspotenzial ↓ (Investitionshemmung)
    */
   it('[FACH] Stockholm-artige Mietregulierung erzeugt extreme Marktfriktion', () => {
@@ -238,8 +238,8 @@ describe('Stockholm Schweden (SE-001): Mietregulierung → Extreme Marktfriktion
     const zuerich = phases(ZUERICH_V2, NEUTRAL_CONTEXT, {});
     const stockholm = phases(ZUERICH_V2, NEUTRAL_CONTEXT, stockholmDiff);
 
-    expect(stockholm[0].marketState.markfriktion)
-      .toBeGreaterThan(zuerich[0].marketState.markfriktion);
+    expect(stockholm[0].marketState.marktfriktion)
+      .toBeGreaterThan(zuerich[0].marketState.marktfriktion);
   });
 
   it('[FACH] Extreme Marktfriktion senkt investitionsattraktivitaet (Stockholm-Effekt)', () => {

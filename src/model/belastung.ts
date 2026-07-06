@@ -58,7 +58,7 @@ export const MIETBELASTUNG_SENSITIVITY = {
   /** Mietpreis-Schutzlevel → -X pp pro +1 (Bestandsmieter geschützt) */
   mietpreis_schutzlevel: 5,
   /** Marktfriktion → +X pp pro +1 (weniger Wechsel = mehr Belastung) */
-  markfriktion:          3,
+  marktfriktion:          3,
 } as const;
 
 /** Floor und Ceiling für Mietbelastungsquote (realistische Extreme) */
@@ -99,7 +99,7 @@ export function computeMieteBelastung(state: MarketState | undefined): number {
     state.nachfragedruck * s.nachfragedruck
     + (-state.angebotspotenzial) * s.angebotspotenzial
     + (-state.mietpreis_schutzlevel) * s.mietpreis_schutzlevel
-    + state.markfriktion * s.markfriktion;
+    + state.marktfriktion * s.marktfriktion;
 
   return Math.max(MIETBELASTUNG_MIN, Math.min(MIETBELASTUNG_MAX, base + delta));
 }

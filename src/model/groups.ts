@@ -1,7 +1,7 @@
 // ============================================================
 // groups.ts — Preistrends pro Bevölkerungsgruppe
 //
-// Berechnet für jede der 8 festen Bevölkerungsgruppen den
+// Berechnet für jede der 9 festen Bevölkerungsgruppen den
 // erwarteten Preistrend (–1 … +1).
 //
 // Granularitätsregel: Effekte sind pro Gruppe granular,
@@ -11,7 +11,7 @@
 import type { MarketState, CityParams40 } from '../types';
 import { clamp } from './utils';
 
-/** Die 8 festen Bevölkerungsgruppen */
+/** Die 9 festen Bevölkerungsgruppen */
 export type GroupId =
   | 'geringverdiener'
   | 'normalverdiener_bestand'
@@ -374,7 +374,7 @@ function makeTooltip(trend: number, drivers: GroupPriceTrend['drivers']): string
 // ── Hauptfunktion ──────────────────────────────────────────────────────────
 
 /**
- * Berechnet die Preistrends für alle 8 Bevölkerungsgruppen.
+ * Berechnet die Preistrends für alle 9 Bevölkerungsgruppen.
  *
  * @param state   Markt-Zustand (E1) aus computePhasesCached()
  * @param baseline Original-Parameter (Ist-Zustand)

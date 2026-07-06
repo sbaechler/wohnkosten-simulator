@@ -153,7 +153,7 @@ export interface MarketState {
   /** Spekulationshemmung — Wie stark hemmen Steuern/Abgaben spekulatives Halten */
   spekulationshemmung: number;        // –1 … +1
   /** Marktfriktion — Wie stark bremst Regulierung den Wohnungswechsel */
-  markfriktion: number;              // –1 … +1
+  marktfriktion: number;              // –1 … +1
   /** Gemeinnützige Kraft — Stärke des gemeinnützigen Sektors */
   gemeinnuetzig_kraft: number;       // –1 … +1
   /** Eigentumsquoten-Trend — Trend zu Wohneigentum vs. Miete */

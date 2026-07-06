@@ -9,7 +9,7 @@ language: "fr"
 url: "https://www.apur.org/sites/default/files/rapport_encadrement_loyers_paris.pdf"
 doi: null
 status: "evaluated"
-dag_nodes: ["mietrecht_anfangsmiete", "mietrecht_mietzinstransparenz", "mietpreis_schutzlevel", "markfriktion"]
+dag_nodes: ["mietrecht_anfangsmiete", "mietrecht_mietzinstransparenz", "mietpreis_schutzlevel", "marktfriktion"]
 dag_edges_confirmed: ["mietrecht_anfangsmiete → mietpreis_schutzlevel (sign: +1)"]
 dag_edges_challenged: []
 relevance: "high"

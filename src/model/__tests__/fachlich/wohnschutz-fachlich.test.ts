@@ -242,12 +242,12 @@ describe('FHNW: Genf-Effekt — strenges Mietrecht erhöht Marktfriktion und sen
     nutzung_umnutzungsverbot:    { from: 1, to: 2 },
   };
 
-  it('[FACH] Genf-Regulierung erhöht markfriktion gegenüber Zürich-Status-quo', () => {
+  it('[FACH] Genf-Regulierung erhöht marktfriktion gegenüber Zürich-Status-quo', () => {
     const zuerich = phases(ZUERICH_V2, ANGESPANNT, {});
     const genf    = phases(ZUERICH_V2, ANGESPANNT, GENF_ZUSATZ_DIFF);
 
-    expect(genf[0].marketState.markfriktion)
-      .toBeGreaterThan(zuerich[0].marketState.markfriktion);
+    expect(genf[0].marketState.marktfriktion)
+      .toBeGreaterThan(zuerich[0].marketState.marktfriktion);
   });
 
   it('[FACH] Genf-Regulierung erhöht mietpreis_schutzlevel gegenüber Zürich-Status-quo', () => {

@@ -57,13 +57,13 @@
 | `mietrecht_anfangsmiete` → `mietpreis_schutzlevel` | +1 | 0.8 | short | mittel |
 | `mietrecht_mietzinstransparenz` → `mietpreis_schutzlevel` | +1 | 0.5 | short | schwach |
 
-### steuer → spekulationshemmung / markfriktion
+### steuer → spekulationshemmung / marktfriktion
 
 | Kante | Sign | Weight | Time | Evidenz |
 |-------|------|--------|------|---------|
 | `boden_bodeneigentumssteuer` → `spekulationshemmung` | +1 | 1.2 | medium | stark |
 | `steuer_leerstandsabgabe` → `spekulationshemmung` | +1 | 1.0 | medium | mittel |
-| `steuer_handaenderung` → `markfriktion` | -1 | 0.8 | short | robust |
+| `steuer_handaenderung` → `marktfriktion` | -1 | 0.8 | short | robust |
 | `steuer_eigenmietwert` → `angebotspotenzial` | ? | 0.5 | long | sehr schwach |
 
 ### gemeinnuetzig → marktbreite Wirkung

@@ -24,15 +24,27 @@ for (const city of raw) {
   }
 }
 
-// Add default ownershipBaseline to context if missing (only in generated TS)
+// Validate ownershipBaseline: must be defined per city inside `context` —
+// a silent default would ship wrong data for the OwnershipDonut.
+const OWNERSHIP_KEYS = ['privat', 'institutionell', 'genossenschaft', 'oeffentlich'] as const;
 for (const city of raw) {
-  if (!city.context.ownershipBaseline || typeof city.context.ownershipBaseline !== 'object') {
-    city.context.ownershipBaseline = {
-      privat: 0.39,
-      institutionell: 0.30,
-      genossenschaft: 0.175,
-      oeffentlich: 0.066
-    };
+  const ob = city.context?.ownershipBaseline;
+  if (!ob || typeof ob !== 'object') {
+    throw new Error(`${city.slug}: context.ownershipBaseline fehlt (muss unter "context:" stehen, nicht auf Stadt-Ebene)`);
+  }
+  for (const key of OWNERSHIP_KEYS) {
+    const v = ob[key];
+    if (typeof v !== 'number' || v <= 0 || v > 1) {
+      throw new Error(`${city.slug}: context.ownershipBaseline.${key} fehlt oder ausserhalb (0, 1]: ${v}`);
+    }
+  }
+  const sum = OWNERSHIP_KEYS.reduce((acc, k) => acc + ob[k], 0);
+  if (sum > 1.001) {
+    throw new Error(`${city.slug}: ownershipBaseline-Summe > 1 (${sum.toFixed(3)})`);
+  }
+  // Anteile < 1 sind erlaubt (Rest = übrige Eigentumsformen), aber grobe Ausreisser melden
+  if (sum < 0.5) {
+    console.warn(`WARN ${city.slug}: ownershipBaseline-Summe nur ${sum.toFixed(3)} — Datenlücke?`);
   }
 }
 

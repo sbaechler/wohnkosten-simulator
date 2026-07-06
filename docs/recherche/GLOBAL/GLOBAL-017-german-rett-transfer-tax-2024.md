@@ -9,7 +9,7 @@ language: "en"
 url: "https://www.sciencedirect.com/science/article/abs/pii/S0094119024000871"
 doi: "10.1016/j.jue.2024.104864"
 status: "evaluated"
-dag_nodes: ["steuer_handaenderung", "markfriktion", "nachfragedruck"]
+dag_nodes: ["steuer_handaenderung", "marktfriktion", "nachfragedruck"]
 dag_edges_confirmed:
   - { from: "steuer_handaenderung", to: "nachfragedruck", sign: -1, note: "Steuersatzerhöhung um 1 Prozentpunkt reduziert Immobilienpreise um ~3% im Durchschnitt" }
 dag_edges_challenged: []
@@ -30,7 +30,7 @@ Grossflächige Studie zur German Grunderwerbsteuer (Real Estate Transfer Tax): S
 - Büroimmobilien: Transaktionen -0,41%, Preise -0,22% pro 1%-Punkt Erhöhung
 
 ## Relevanz für DAG
-Zentrale Evidenz für die Wirkung von steuer_handaenderung auf nachfragedruck und markfriktion. Deutschland-spezifisch, aber auf CH/AT übertragbar.
+Zentrale Evidenz für die Wirkung von steuer_handaenderung auf nachfragedruck und marktfriktion. Deutschland-spezifisch, aber auf CH/AT übertragbar.
 
 ## Notizen
 - Journal of Urban Economics, 2024 (CESifo Working Paper)

@@ -9,9 +9,9 @@ language: "en"
 url: "https://cepr.org/voxeu/columns/effects-transaction-taxes-housing-markets"
 doi: null
 status: "evaluated"
-dag_nodes: ["steuer_handaenderung", "markfriktion"]
+dag_nodes: ["steuer_handaenderung", "marktfriktion"]
 dag_edges_confirmed:
-  - { from: "steuer_handaenderung", to: "markfriktion", sign: -1, note: "Transaktionssteuern reduzieren Mobilität und Transaktionsvolumen" }
+  - { from: "steuer_handaenderung", to: "marktfriktion", sign: -1, note: "Transaktionssteuern reduzieren Mobilität und Transaktionsvolumen" }
 dag_edges_challenged: []
 relevance: "medium"
 duplicate_of: null
@@ -27,7 +27,7 @@ period_covered: "2023"
 - Alternative Reformvorschläge (LVT) zeigen bessere Allokation
 
 ## Relevanz für DAG
-Evidenz für den negativen Effekt von steuer_handaenderung auf markfriktion.
+Evidenz für den negativen Effekt von steuer_handaenderung auf marktfriktion.
 
 ## Notizen
 - CEPR VoxEU, 2023

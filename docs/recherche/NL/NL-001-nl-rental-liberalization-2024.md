@@ -9,9 +9,9 @@ language: "en"
 url: "https://link.springer.com/article/10.1007/s10645-024-09445-3"
 doi: "10.1007/s10645-024-09445-3"
 status: "evaluated"
-dag_nodes: ["mietrecht_kuendigungsschutz", "mietrecht_anfangsmiete", "markfriktion"]
+dag_nodes: ["mietrecht_kuendigungsschutz", "mietrecht_anfangsmiete", "marktfriktion"]
 dag_edges_confirmed:
-  - { from: "mietrecht_kuendigungsschutz", to: "markfriktion", sign: -1, note: "Anteil befristeter Mietverträge stieg von 17.7% (2017) auf 36.6% (2021) nach Liberalisierung" }
+  - { from: "mietrecht_kuendigungsschutz", to: "marktfriktion", sign: -1, note: "Anteil befristeter Mietverträge stieg von 17.7% (2017) auf 36.6% (2021) nach Liberalisierung" }
 dag_edges_challenged: []
 relevance: "medium"
 duplicate_of: null
@@ -28,7 +28,7 @@ Analyse der Liberalisierung des Mietvertragsrechts in den Niederlanden und deren
 - Entsprechende Auswirkungen auf die Mietermarkt-Dynamik
 
 ## Relevanz für DAG
-Zeigt die Wirkung von mietrecht_kuendigungsschutz-Reduktion auf markfriktion. Befristete Verträge als Gegenpol zu Kündigungsschutz.
+Zeigt die Wirkung von mietrecht_kuendigungsschutz-Reduktion auf marktfriktion. Befristete Verträge als Gegenpol zu Kündigungsschutz.
 
 ## Notizen
 - De Economist, Springer, veröffentlicht November 2024

@@ -82,7 +82,7 @@ Parameter ändern  ────▶  ┌─────────────�
 | `mietpreis_schutzlevel` | Wie stark sind Bestandsmieter vor Preiserhöhungen geschützt? |
 | `verdraengungsrisiko` | Gefahr von Kündigung, Sanierung, Umnutzung |
 | `spekulationshemmung` | Wie stark wird kurzfristige Bodenspekulation erschwert? |
-| `markfriktion` | Wie "eingefroren" ist der Immobilienmarkt? |
+| `marktfriktion` | Wie "eingefroren" ist der Immobilienmarkt? |
 | `gemeinnuetzig_kraft` | Stärke des nicht-marktorientierten Wohnsektors |
 | `eigentumsquoten_trend` | Tendenz zu mehr oder weniger Wohneigentum |
 | `aufwertungsdruck` | Tendenz zur Quartier-Aufwertung |
@@ -96,7 +96,7 @@ Parameter ändern  ────▶  ┌─────────────�
 | `gentrifizierungsindex` | `w·aufwertungsdruck + w·(1–mietpreis_schutzlevel) + w·verdraengungsrisiko + w·(1–gemeinnuetzig_kraft)` |
 | `neubau_hemmnisindex` | `–1 × angebotspotenzial` (invertiert) |
 | `verdraengungsrisiko_index` | Alias von `verdraengungsrisiko` (E1) |
-| `fiskalische_wirkung` | `w·spekulationshemmung + w·(1–markfriktion) + w·gemeinnuetzig_kraft + w·aufwertungsdruck` |
+| `fiskalische_wirkung` | `w·spekulationshemmung + w·(1–marktfriktion) + w·gemeinnuetzig_kraft + w·aufwertungsdruck` |
 
 ---
 

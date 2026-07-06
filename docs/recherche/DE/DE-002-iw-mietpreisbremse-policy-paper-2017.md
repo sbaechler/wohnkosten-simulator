@@ -9,7 +9,7 @@ language: "de"
 url: "https://www.iwkoeln.de/fileadmin/publikationen/2017/335632/IW-policy-_paper_2017_5_Mietpreisbremse.pdf"
 doi: null
 status: "evaluated"
-dag_nodes: ["mietrecht_anfangsmiete", "markfriktion"]
+dag_nodes: ["mietrecht_anfangsmiete", "marktfriktion"]
 dag_edges_confirmed:
   - { from: "mietrecht_anfangsmiete", to: "nachfragedruck", sign: 0, note: "Kein signifikanter Rückgang der Angebotsmieten messbar" }
 dag_edges_challenged: []

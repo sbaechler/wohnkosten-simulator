@@ -9,9 +9,9 @@ language: "de"
 url: "https://www.wuestpartner.com"
 doi: null
 status: "evaluated"
-dag_nodes: ["mietrecht_kuendigungsschutz", "mietrecht_anfangsmiete", "markfriktion"]
+dag_nodes: ["mietrecht_kuendigungsschutz", "mietrecht_anfangsmiete", "marktfriktion"]
 dag_edges_confirmed:
-  - { from: "mietrecht_kuendigungsschutz", to: "markfriktion", sign: -1, note: "Genf: Durchschnittliche Mietdauer 13.7 Jahre (Extremwert als Indikator für geringe Fluktuation)" }
+  - { from: "mietrecht_kuendigungsschutz", to: "marktfriktion", sign: -1, note: "Genf: Durchschnittliche Mietdauer 13.7 Jahre (Extremwert als Indikator für geringe Fluktuation)" }
 dag_edges_challenged: []
 relevance: "medium"
 duplicate_of: null
@@ -29,7 +29,7 @@ Fallstudie zu kantonaler Mietregulierung in Genf und Basel-Stadt. LDTR (Genf): M
 - Genf verfolgt aktive Boden- und Wohnungspolitik mit Vorkaufsrecht für Gemeinden
 
 ## Relevanz für DAG
-Schweizer Fallstudie für mietrecht_kuendigungsschutz und markfriktion. Zeigt: extremes Fluktuationsniveau (13.7 Jahre Mietdauer) als Indikator für starke Regulierung.
+Schweizer Fallstudie für mietrecht_kuendigungsschutz und marktfriktion. Zeigt: extremes Fluktuationsniveau (13.7 Jahre Mietdauer) als Indikator für starke Regulierung.
 
 ## Notizen
 - EY Switzerland Real Estate Report 2025; Wüest Partner; Sui Generis Law Journal

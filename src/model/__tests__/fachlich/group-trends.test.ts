@@ -28,7 +28,7 @@ const emptyState: MarketState = {
   mietpreis_schutzlevel: 0,
   verdraengungsrisiko: 0,
   spekulationshemmung: 0,
-  markfriktion: 0,
+  marktfriktion: 0,
   gemeinnuetzig_kraft: 0,
   eigentumsquoten_trend: 0,
   aufwertungsdruck: 0,
@@ -38,14 +38,14 @@ const emptyState: MarketState = {
 
 const allPositive: MarketState = {
   angebotspotenzial: 1, nachfragedruck: 1, mietpreis_schutzlevel: 1,
-  verdraengungsrisiko: 1, spekulationshemmung: 1, markfriktion: 1,
+  verdraengungsrisiko: 1, spekulationshemmung: 1, marktfriktion: 1,
   gemeinnuetzig_kraft: 1, eigentumsquoten_trend: 1, aufwertungsdruck: 1,
   investitionsattraktivitaet: 1, angebotspotenzial_regulation: 1,
 };
 
 const allNegative: MarketState = {
   angebotspotenzial: -1, nachfragedruck: -1, mietpreis_schutzlevel: -1,
-  verdraengungsrisiko: -1, spekulationshemmung: -1, markfriktion: -1,
+  verdraengungsrisiko: -1, spekulationshemmung: -1, marktfriktion: -1,
   gemeinnuetzig_kraft: -1, eigentumsquoten_trend: -1, aufwertungsdruck: -1,
   investitionsattraktivitaet: -1, angebotspotenzial_regulation: -1,
 };
@@ -111,7 +111,7 @@ describe('computeGroupTrends — group divergence (sachlich)', () => {
   it('normalverdiener_angebot is more sensitive to positive market pressure than normalverdiener_bestand', () => {
     const tight: MarketState = {
       ...emptyState,
-      nachfragedruck: 1, markfriktion: 0.5,
+      nachfragedruck: 1, marktfriktion: 0.5,
     };
     const trends = computeGroupTrends(tight, NEUTRAL_PARAMS, NEUTRAL_PARAMS);
     const angebot = trends.find(t => t.group.id === 'normalverdiener_angebot')!;
@@ -247,7 +247,7 @@ describe('computeGroupTrends — driver logic', () => {
 
 describe('computeGroupTrends — tooltip', () => {
   it('tooltip contains "steigend" for high positive trend', () => {
-    const pressure: MarketState = { ...emptyState, nachfragedruck: 1, markfriktion: 1 };
+    const pressure: MarketState = { ...emptyState, nachfragedruck: 1, marktfriktion: 1 };
     const trends = computeGroupTrends(pressure, NEUTRAL_PARAMS, NEUTRAL_PARAMS);
     const hasSteigend = trends.some(t => t.tooltip.includes('steigend'));
     expect(hasSteigend).toBe(true);
