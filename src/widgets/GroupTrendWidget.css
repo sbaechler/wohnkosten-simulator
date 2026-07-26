@@ -131,10 +131,6 @@
   opacity: 1;
 }
 
-.group-trend__row--hovered .group-trend__description {
-  opacity: 0;
-}
-
 .group-trend__drivers {
   display: flex;
   flex-wrap: wrap;
