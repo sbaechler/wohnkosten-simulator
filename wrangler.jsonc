@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "wohnkosten-simulator",
   "compatibility_date": "2026-04-09",
+  "routes": [
+    { "pattern": "wohnkosten-simulator.ch", "custom_domain": true },
+    { "pattern": "www.wohnkosten-simulator.ch", "custom_domain": true }
+  ],
   "observability": {
     "enabled": true
   },
