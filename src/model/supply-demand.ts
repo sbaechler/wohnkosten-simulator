@@ -64,6 +64,27 @@ const DEMAND_SLOPE = 0.8;
 const AXIS_MIN = 0;
 const AXIS_MAX = 10;
 
+/**
+ * Gewicht der Investitionsattraktivität im Angebots-Shift.
+ *
+ * Das Angebot im Diagramm wird nicht nur vom physischen Angebotspotenzial
+ * (Bauland, Verdichtung) getrieben, sondern auch von der Bereitschaft des
+ * Kapitals, tatsächlich zu bauen. Renditebegrenzende Politik (Kostenmiete,
+ * Kapitalregulierung) verschiebt so die Angebotskurve nach links, ohne dass
+ * sich das physische Potenzial ändert. 0.4 = Kapitalbereitschaft wirkt
+ * knapp halb so stark wie das physische Potenzial (GLOBAL-029: Investoren
+ * weichen aus, verschwinden aber nicht vollständig).
+ */
+export const INVEST_SUPPLY_GEWICHT = 0.4;
+
+/**
+ * Horizontaler Shift der Angebotskurve aus dem E1-Zustand.
+ * Kombiniert physisches Angebotspotenzial und Investitionsbereitschaft.
+ */
+export function supplyShiftFromState(s: MarketState): number {
+  return s.angebotspotenzial + s.investitionsattraktivitaet * INVEST_SUPPLY_GEWICHT;
+}
+
 /** Knappheitssignal aus E1-Zustand (Rohwert vor Clamping). */
 export function knappheitSignal(s: MarketState): number {
   const w = KNAPPHEIT_GEWICHTE;
@@ -157,4 +178,65 @@ export function findEquilibrium(
     Math.max(AXIS_MIN, Math.min(AXIS_MAX, q)),
     Math.max(AXIS_MIN, Math.min(AXIS_MAX, p)),
   ];
+}
+
+// ── Mietpreisdeckel ──────────────────────────────────────────────────────────
+
+/**
+ * Preis-Einheiten, um die ein voller Mietpreis-Schutzlevel (+1) den
+ * Deckel unter den Gleichgewichtspreis drückt. 2 von 10 Achseneinheiten
+ * = ein maximal ausgebauter Mietpreisschutz senkt den regulierten Preis
+ * um ~20% der Preisskala unter das Marktgleichgewicht (Sotomo 2025:
+ * Bestandsmieten in stark regulierten Märkten ~18–30% unter Marktmiete).
+ */
+export const MIETPREISDECKEL_FAKTOR = 2;
+
+/**
+ * Unterhalb dieses Schutzlevels wird kein Deckel gezeichnet — vermeidet
+ * einen visuell bedeutungslosen Deckel direkt auf dem Gleichgewichtspunkt.
+ */
+export const MIETPREISDECKEL_MIN_SCHUTZ = 0.02;
+
+export interface Mietpreisdeckel {
+  /** Regulierter Höchstpreis (Deckel-Linie) */
+  p: number;
+  /** Angebotene Menge zum Deckelpreis (auf der Angebotskurve) */
+  qAngebot: number;
+  /** Nachgefragte Menge zum Deckelpreis (auf der Nachfragekurve) */
+  qNachfrage: number;
+}
+
+/**
+ * Mietpreisdeckel als klassische Preisobergrenze im Preis-Mengen-Diagramm.
+ *
+ * Positiver `mietpreis_schutzlevel` (relativ zu heute verschärftes Mietrecht:
+ * Kostenmiete, Anfechtung Anfangsmiete, Mietzinsindex, Transparenz) begrenzt
+ * den erzielbaren Preis unterhalb des Marktgleichgewichts. Lehrbuch-Folge:
+ * Zum gedeckelten Preis wird weniger angeboten (qAngebot) als nachgefragt
+ * (qNachfrage) — die Differenz ist die Angebotslücke (Wohnungsnot trotz
+ * tieferem Preis).
+ *
+ * Gibt `null` zurück, wenn kein (bindender) Deckel besteht
+ * (schutzlevel ≤ MIETPREISDECKEL_MIN_SCHUTZ).
+ */
+export function mietpreisdeckel(
+  supplyShift: number,
+  demandShift: number,
+  regulationBase: number,
+  s: MarketState,
+): Mietpreisdeckel | null {
+  if (s.mietpreis_schutzlevel <= MIETPREISDECKEL_MIN_SCHUTZ) return null;
+
+  const [aS, bS] = supplyLine(supplyShift, regulationBase, s);
+  const [aD, bD] = demandLine(demandShift);
+  const [, pStar] = lineIntersection(aS, bS, aD, bD);
+
+  const clampAxis = (v: number) => Math.max(AXIS_MIN, Math.min(AXIS_MAX, v));
+  const p = clampAxis(pStar - s.mietpreis_schutzlevel * MIETPREISDECKEL_FAKTOR);
+
+  return {
+    p,
+    qAngebot: clampAxis((p - aS) / bS),
+    qNachfrage: clampAxis((p - aD) / bD),
+  };
 }

@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import type { CityParams40, CityContext, ParamsDiff40 } from '../types';
-import { supplyCurve, demandCurve, findEquilibrium } from '../model/supply-demand';
+import { supplyCurve, demandCurve, findEquilibrium, supplyShiftFromState, mietpreisdeckel } from '../model/supply-demand';
 import type { PhaseResult } from '../model/phases';
 import { computePhasesCached } from '../model/compute-phases';
 import './SupplyDemandChart.css';
@@ -27,6 +27,8 @@ const COLORS = {
   demand: '#ff6b6b',
   equilibrium: '#ffd43b',
   baseline: '#555',
+  deckel: '#69db7c',
+  luecke: '#ffa94d',
 };
 
 export function SupplyDemandChart({ context, baseline, modified, diff, phases, baselinePhases }: Props) {
@@ -82,10 +84,11 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
       .curve(d3.curveLinear);
 
     // Baseline curves: always use baseline params for the dashed reference line
-    const [bq, bp] = findEquilibrium(baselineState.angebotspotenzial, baselineState.nachfragedruck, baselineState.angebotspotenzial_regulation, baselineState);
+    const baselineSupplyShift = supplyShiftFromState(baselineState);
+    const [bq, bp] = findEquilibrium(baselineSupplyShift, baselineState.nachfragedruck, baselineState.angebotspotenzial_regulation, baselineState);
 
     // Draw baseline curves (dashed)
-    g.append('path').datum(supplyCurve(baselineState.angebotspotenzial, baselineState.angebotspotenzial_regulation, baselineState))
+    g.append('path').datum(supplyCurve(baselineSupplyShift, baselineState.angebotspotenzial_regulation, baselineState))
       .attr('d', line).attr('fill', 'none')
       .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
     g.append('path').datum(demandCurve(baselineState.nachfragedruck))
@@ -103,10 +106,11 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
     activePhasesForChart.forEach((phase, idx) => {
       const isActive = idx === activePhaseIndex;
       const state = phase.marketState;
-      const [pq, pp] = findEquilibrium(state.angebotspotenzial, state.nachfragedruck, state.angebotspotenzial_regulation, state);
+      const phaseSupplyShift = supplyShiftFromState(state);
+      const [pq, pp] = findEquilibrium(phaseSupplyShift, state.nachfragedruck, state.angebotspotenzial_regulation, state);
 
       // Supply curve — Steigung abhängig von Regulationsgrad
-      g.append('path').datum(supplyCurve(state.angebotspotenzial, state.angebotspotenzial_regulation, state))
+      g.append('path').datum(supplyCurve(phaseSupplyShift, state.angebotspotenzial_regulation, state))
         .attr('d', line).attr('fill', 'none')
         .attr('stroke', COLORS.supply)
         .attr('stroke-width', isActive ? 2.5 : 1)
@@ -134,6 +138,25 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
           .attr('stroke', COLORS.equilibrium).attr('stroke-dasharray', '2').attr('stroke-width', 1);
         g.append('line').attr('x1', 0).attr('y1', y(pp)).attr('x2', x(pq)).attr('y2', y(pp))
           .attr('stroke', COLORS.equilibrium).attr('stroke-dasharray', '2').attr('stroke-width', 1);
+
+        // Mietpreisdeckel: Preisobergrenze durch Mietpreisschutz.
+        // Zum gedeckelten Preis: angebotene Menge < nachgefragte Menge
+        // → oranges Segment = Angebotslücke.
+        const deckel = mietpreisdeckel(phaseSupplyShift, state.nachfragedruck, state.angebotspotenzial_regulation, state);
+        if (deckel) {
+          g.append('line')
+            .attr('x1', 0).attr('y1', y(deckel.p))
+            .attr('x2', x(deckel.qNachfrage)).attr('y2', y(deckel.p))
+            .attr('stroke', COLORS.deckel).attr('stroke-width', 2).attr('stroke-dasharray', '6 3');
+          g.append('line')
+            .attr('x1', x(deckel.qAngebot)).attr('y1', y(deckel.p))
+            .attr('x2', x(deckel.qNachfrage)).attr('y2', y(deckel.p))
+            .attr('stroke', COLORS.luecke).attr('stroke-width', 4).attr('stroke-linecap', 'round');
+          g.append('circle').attr('cx', x(deckel.qAngebot)).attr('cy', y(deckel.p))
+            .attr('r', 3.5).attr('fill', COLORS.deckel);
+          g.append('circle').attr('cx', x(deckel.qNachfrage)).attr('cy', y(deckel.p))
+            .attr('r', 3.5).attr('fill', COLORS.luecke);
+        }
       }
     });
 
@@ -154,6 +177,21 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
 
     legend.append('circle').attr('cx', 10).attr('cy', 64).attr('r', 5).attr('fill', COLORS.equilibrium).attr('stroke', '#fff').attr('stroke-width', 1);
     legend.append('text').attr('x', 25).attr('y', 68).attr('fill', '#ccc').attr('font-size', 11).text('Gleichgewicht');
+
+    // Deckel-Legende nur wenn in der aktiven Phase ein Deckel besteht
+    const activeState = activePhasesForChart[activePhaseIndex]?.marketState;
+    const activeDeckel = activeState
+      ? mietpreisdeckel(supplyShiftFromState(activeState), activeState.nachfragedruck, activeState.angebotspotenzial_regulation, activeState)
+      : null;
+    if (activeDeckel) {
+      legend.append('line').attr('x1', 0).attr('y1', 84).attr('x2', 20).attr('y2', 84)
+        .attr('stroke', COLORS.deckel).attr('stroke-width', 2).attr('stroke-dasharray', '6 3');
+      legend.append('text').attr('x', 25).attr('y', 88).attr('fill', '#ccc').attr('font-size', 11).text('Mietpreisdeckel');
+
+      legend.append('line').attr('x1', 0).attr('y1', 104).attr('x2', 20).attr('y2', 104)
+        .attr('stroke', COLORS.luecke).attr('stroke-width', 4).attr('stroke-linecap', 'round');
+      legend.append('text').attr('x', 25).attr('y', 108).attr('fill', '#ccc').attr('font-size', 11).text('Angebotslücke');
+    }
 
   }, [context, baseline, modified, diff, phases, activePhaseIndex, baselinePhases, viewMode, activePhasesForChart, baselineState]);
 

@@ -26,6 +26,8 @@ import {
   supplyCurve,
   demandCurve,
   findEquilibrium,
+  supplyShiftFromState,
+  mietpreisdeckel,
 } from '../../supply-demand';
 import type { MarketState } from '../../../types';
 
@@ -331,6 +333,80 @@ describe('findEquilibrium — Konsistenz mit Linien-Gleichungen', () => {
     expect(q).toBeLessThanOrEqual(10);
     expect(p).toBeGreaterThanOrEqual(0);
     expect(p).toBeLessThanOrEqual(10);
+  });
+});
+
+describe('supplyShiftFromState', () => {
+  it('entspricht angebotspotenzial bei neutraler Investitionsattraktivität', () => {
+    expect(supplyShiftFromState({ ...emptyState, angebotspotenzial: 0.7 })).toBeCloseTo(0.7, 10);
+  });
+
+  it('sinkt, wenn Investitionsattraktivität sinkt (Kapital baut weniger)', () => {
+    const neutral = supplyShiftFromState(emptyState);
+    const unattraktiv = supplyShiftFromState({ ...emptyState, investitionsattraktivitaet: -1 });
+    expect(unattraktiv).toBeLessThan(neutral);
+  });
+
+  it('Investitionsattraktivität wirkt schwächer als das physische Potenzial', () => {
+    const viaPotenzial = supplyShiftFromState({ ...emptyState, angebotspotenzial: 1 });
+    const viaInvest = supplyShiftFromState({ ...emptyState, investitionsattraktivitaet: 1 });
+    expect(Math.abs(viaInvest)).toBeLessThan(Math.abs(viaPotenzial));
+  });
+});
+
+describe('mietpreisdeckel', () => {
+  it('gibt null zurück ohne Mietpreisschutz (schutzlevel = 0)', () => {
+    expect(mietpreisdeckel(0, 0, 0, emptyState)).toBeNull();
+  });
+
+  it('gibt null zurück bei gelockertem Mietrecht (schutzlevel < 0)', () => {
+    expect(mietpreisdeckel(0, 0, 0, { ...emptyState, mietpreis_schutzlevel: -0.5 })).toBeNull();
+  });
+
+  it('Deckel liegt unter dem Gleichgewichtspreis', () => {
+    const s = { ...emptyState, mietpreis_schutzlevel: 0.5 };
+    const [, pStar] = findEquilibrium(0, 0, 0, s);
+    const deckel = mietpreisdeckel(0, 0, 0, s);
+    expect(deckel).not.toBeNull();
+    expect(deckel!.p).toBeLessThan(pStar);
+  });
+
+  it('höherer Schutz drückt den Deckel tiefer', () => {
+    const low = mietpreisdeckel(0, 0, 0, { ...emptyState, mietpreis_schutzlevel: 0.3 })!;
+    const high = mietpreisdeckel(0, 0, 0, { ...emptyState, mietpreis_schutzlevel: 0.8 })!;
+    expect(high.p).toBeLessThan(low.p);
+  });
+
+  it('zum Deckelpreis: angebotene Menge < nachgefragte Menge (Angebotslücke)', () => {
+    const deckel = mietpreisdeckel(0, 0, 0, { ...emptyState, mietpreis_schutzlevel: 0.5 })!;
+    expect(deckel.qAngebot).toBeLessThan(deckel.qNachfrage);
+  });
+
+  it('höherer Schutz vergrössert die Angebotslücke', () => {
+    const low = mietpreisdeckel(0, 0, 0, { ...emptyState, mietpreis_schutzlevel: 0.3 })!;
+    const high = mietpreisdeckel(0, 0, 0, { ...emptyState, mietpreis_schutzlevel: 0.8 })!;
+    expect(high.qNachfrage - high.qAngebot).toBeGreaterThan(low.qNachfrage - low.qAngebot);
+  });
+
+  it('alle Werte liegen im Achsenbereich [0, 10] — auch bei Extremen', () => {
+    for (const schutz of [0.1, 0.5, 1]) {
+      for (const shift of [-2, 0, 2]) {
+        const d = mietpreisdeckel(shift, -shift, 0, { ...emptyState, mietpreis_schutzlevel: schutz })!;
+        for (const v of [d.p, d.qAngebot, d.qNachfrage]) {
+          expect(v).toBeGreaterThanOrEqual(0);
+          expect(v).toBeLessThanOrEqual(10);
+        }
+      }
+    }
+  });
+
+  it('Deckelpunkte liegen auf den jeweiligen Kurven-Geraden', () => {
+    const s = { ...emptyState, mietpreis_schutzlevel: 0.5 };
+    const d = mietpreisdeckel(0.2, 0.3, 0.1, s)!;
+    const [aS, bS] = supplyLine(0.2, 0.1, s);
+    const [aD, bD] = demandLine(0.3);
+    expect(d.p).toBeCloseTo(aS + bS * d.qAngebot, 10);
+    expect(d.p).toBeCloseTo(aD + bD * d.qNachfrage, 10);
   });
 });
 
