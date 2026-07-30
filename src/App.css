@@ -11,9 +11,9 @@ body {
 }
 
 .app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  height: 100svh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
 }
 
 .app__header {
@@ -76,8 +76,9 @@ body {
 }
 
 .app__main {
-  display: flex;
-  flex: 1;
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -95,7 +96,7 @@ body {
 }
 
 .app__content {
-  flex: 1;
+  min-height: 0;
   overflow: auto;
 }
 
