@@ -46,9 +46,3 @@ Falls du dennoch Fragen hast, kontaktiere uns gerne per E-Mail.
 ## 5. Änderungen dieser Datenschutzerklärung
 
 Wir behalten uns vor, diese Datenschutzerklärung bei Bedarf anzupassen, um sie an geänderte rechtliche Anforderungen oder Änderungen unserer Services anzupassen. Die aktuelle Version findest du immer auf dieser Seite.
-
----
-
-**Hinweis:** Diese Datenschutzerklärung wurde speziell für eine statische Website mit ausschließlich Cloudflare Web Analytics erstellt. Sie ist bewusst einfach und transparent gehalten.
-
-Falls du zusätzliche Funktionen einbaust (z. B. Kontaktformular, Newsletter, Benutzerkonten, lokale Speicherung von Simulationen etc.), muss diese Erklärung entsprechend erweitert werden.
