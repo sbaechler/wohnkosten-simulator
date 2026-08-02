@@ -1,14 +1,28 @@
 import { useState } from 'react';
 import { useUrlState } from './hooks/useUrlState';
+import { useRoute } from './hooks/useRoute';
 import { CitySelector } from './components/CitySelector';
 import { ParameterPanel } from './components/ParameterPanel';
 import { WidgetGrid } from './widgets/WidgetGrid';
 import { DAGVisualization } from './widgets/DAGVisualization';
+import { Rechtliches } from './pages/Rechtliches';
 import './App.css';
 
 type ViewMode = 'widgets' | 'dag';
 
+export const RECHTLICHES_PATH = '/rechtliches';
+
 export default function App() {
+  const { path, navigate, from } = useRoute();
+
+  if (path === RECHTLICHES_PATH) {
+    return <Rechtliches onBack={() => (from ? window.history.back() : navigate('/'))} />;
+  }
+
+  return <Simulator onNavigate={navigate} />;
+}
+
+function Simulator({ onNavigate }: { onNavigate: (to: string) => void }) {
   const { city, context, baseline, modified, diff, setParam, setCity, reset } = useUrlState();
   const [viewMode, setViewMode] = useState<ViewMode>('widgets');
 
@@ -61,7 +75,17 @@ export default function App() {
       </main>
       <footer className="app__footer">
         <span>©2026 Simon Bächler</span>
-        <a href="https://github.com/sbaechler/wohnkosten-simulator/blob/main/docs/datenschutzerklaerung.md" target="_blank">Datenschutzerklärung</a>
+        <a
+          href={RECHTLICHES_PATH}
+          onClick={e => {
+            // Modifier-Klicks (neuer Tab/Fenster) dem Browser überlassen
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+            e.preventDefault();
+            onNavigate(RECHTLICHES_PATH);
+          }}
+        >
+          Rechtliches
+        </a>
       </footer>
     </div>
   );

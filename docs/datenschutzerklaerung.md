@@ -1,5 +1,9 @@
 # Datenschutzerklärung
 
+> **Hinweis:** Die massgebende Fassung steht auf der Website unter `/rechtliches`
+> (Quelle: `src/pages/Rechtliches.tsx`), zusammen mit Impressum und Nutzungsbedingungen.
+> Dieses Dokument ist eine Kopie zur Referenz — bei Änderungen beide Stellen nachführen.
+
 **Stand:** 9. April 2026
 
 ## 1. Verantwortlicher
@@ -11,7 +15,7 @@ E-Mail: laecheln.origami6t@icloud.com
 
 ## 2. Grundsätze
 
-Wir nehmen den Schutz deiner persönlichen Daten sehr ernst. Diese Website (wohnkosten-simulator.b-254.workers.dev) ist eine **rein statische** Anwendung, die auf Cloudflare Pages gehostet wird.
+Wir nehmen den Schutz deiner persönlichen Daten sehr ernst. Diese Website (wohnkosten-simulator.ch) ist eine **rein statische** Anwendung, die bei Cloudflare gehostet wird.
 
 **Wichtig:** Wir erheben, speichern oder verarbeiten **keine personenbezogenen Daten** über diese Website.
 

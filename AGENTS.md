@@ -4,7 +4,7 @@
 
 Ein React/Ts/D3-Widget-Simulator für Schweizer Wohnungsmarktpolitik. Der Benutzer stellt politische Parameter ein (Mietrecht, Bodenrecht, Förderung etc.) und sieht die Auswirkungen auf den Wohnungsmarkt in 3 Zeiträumen (kurz-/mittel-/langfristig).
 
-**Ziel-URL (noch nicht live):** https://wohnkosten-schweiz.ch
+**Ziel-URL:** https://wohnkosten-simulator.ch
 
 ---
 

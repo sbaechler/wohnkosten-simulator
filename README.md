@@ -2,7 +2,7 @@
 
 > Simuliere die Auswirkungen von Wohnbaupolitik auf Mietpreise, Eigentumsquoten und Verdrängungsdynamik in Schweizer Städten.
 
-**Live:** [wohnkosten-simulator.b-254.workers.dev](https://wohnkosten-simulator.b-254.workers.dev/)
+**Live:** [wohnkosten-simulator.ch](https://wohnkosten-simulator.ch/)
 
 ---
 
