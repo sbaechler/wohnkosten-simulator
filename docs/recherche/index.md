@@ -63,6 +63,7 @@ status_counts:
 | DE-007 | Rent Control and Rental Prices — SVR Arbeitspapier | 2018 | government-report | found | mietrecht_anfangsmiete, mietrecht_kuendigungsschutz, angebotspotenzial |
 | DE-008 | Rent Control Does Not Make Housing More Affordable (Manhattan Institute) | 2020 | meta-study | found | mietrecht_kuendigungsschutz, mietrecht_anfangsmiete, angebotspotenzial |
 | DE-009 | Berlin Mietendeckel 2020–2021 — Fallstudie | 2021 | peer-reviewed | evaluated | mietrecht_anfangsmiete, mietrecht_kuendigungsschutz, angebotspotenzial |
+| DE-012 | Wohnen in der DDR. Folge 8 von „Backstage DDR“ | 2025 | gray-literature | evaluated | mietrecht_anfangsmiete, gemeinnuetzig_kraft, angebotspotenzial |
 
 ## AT — Österreich
 
@@ -89,6 +90,8 @@ status_counts:
 | US-013 | New York City Local Law 18 (LL18) — STR Fallstudie | 2024 | government-report | found | nutzung_kurzzeitvermietung, angebotspotenzial, nachfragedruck |
 | US-014 | Santa Monica Home Sharing Ordinance (HSO) — STR Fallstudie | 2024 | peer-reviewed | evaluated | nutzung_kurzzeitvermietung, angebotspotenzial, nachfragedruck |
 | US-015 | Chicago Transit-Oriented Development Upzonings — Fallstudie | 2020 | peer-reviewed | evaluated | raumplanung_ausnuetzungsziffer, aufwertungsdruck, angebotspotenzial |
+| US-019 | Why People Are Fleeing Blue Cities for Red States (Brooks) | 2023 | gray-literature | evaluated | raumplanung_zonenreserve, angebotspotenzial, nachfragedruck |
+| US-020 | Abundance and the Left (Klein / Teachout / Chakrabarti) | 2025 | gray-literature | evaluated | bau_bewilligungsverfahren, gemeinnuetzig_kraft, angebotspotenzial |
 
 ## CA — Kanada
 
