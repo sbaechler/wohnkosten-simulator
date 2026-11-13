@@ -1,8 +1,11 @@
 import type { DerivedIndicators } from '../types';
+import { CompareColumns } from './CompareColumns';
 import './FiskalischeWirkungWidget.css';
 
 interface Props {
   derived: DerivedIndicators;
+  /** Wenn gesetzt: «Heute» neben «Simuliert» */
+  baselineDerived?: DerivedIndicators;
 }
 
 function getColor(value: number): string {
@@ -11,21 +14,19 @@ function getColor(value: number): string {
   return '#51cf66';
 }
 
-function getCHFEstimate(value: number): string {
-  const normalized = (value + 1) / 2; // 0 to 1
-  // Positive: Mehrwertabgabe + Handänderungssteuer
-  // Rough order of magnitude per year for a mid-size city (e.g. Zürich scale)
-  const base = Math.round((normalized - 0.5) * 200); // -100 to +100 Mio CHF/year
-  if (base >= 0) {
-    return `+ca. CHF ${Math.abs(base)} Mio./Jahr`;
-  } else {
-    return `–ca. CHF ${Math.abs(base)} Mio./Jahr`;
-  }
+/**
+ * Anzeige als normierter Index. Eine Umrechnung in CHF pro Jahr gibt es
+ * bewusst nicht: `fiskalische_wirkung` ist ein dimensionsloser Index
+ * (AGENTS.md: keine CHF- oder Prozentwerte), und eine feste Skala wäre für
+ * Biel und Zürich dieselbe Zahl.
+ */
+function formatIndex(v: number): string {
+  return `Index ${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toFixed(2)}`;
 }
 
 function getExplanation(value: number): string {
   if (value < 0) {
-    return 'Steuerliche Verluste durch reduced Immobilienmarktaktivität';
+    return 'Tiefere Einnahmen durch geringere Aktivität am Immobilienmarkt';
   }
   if (value < 0.3) {
     return 'Leicht positive Effekte via Mehrwertabgabe & Handänderungssteuer';
@@ -39,11 +40,11 @@ function valueToAngle(v: number): number {
   return 90 - v * 90;
 }
 
-export function FiskalischeWirkungWidget({ derived }: Props) {
+function FiskalischeWirkungBody({ derived }: { derived: DerivedIndicators }) {
   const value = derived.fiskalische_wirkung;
   const color = getColor(value);
   const angle = valueToAngle(value);
-  const chfText = getCHFEstimate(value);
+  const indexText = formatIndex(value);
   const explanation = getExplanation(value);
 
   // SVG gauge parameters
@@ -64,8 +65,7 @@ export function FiskalischeWirkungWidget({ derived }: Props) {
 
   // Gradient arc - show filled portion
   return (
-    <div className="fiskalische-wirkung-widget">
-      <div className="fiskalische-wirkung-widget__title">Fiskalische Wirkung</div>
+    <>
 
       <div className="fiskalische-wirkung-widget__gauge">
         <svg viewBox="0 0 200 110" className="fiskalische-wirkung-widget__svg">
@@ -103,12 +103,24 @@ export function FiskalischeWirkungWidget({ derived }: Props) {
       </div>
 
       <div className="fiskalische-wirkung-widget__chf" style={{ color }}>
-        {chfText}
+        {indexText}
       </div>
 
       <div className="fiskalische-wirkung-widget__explanation">
         {explanation}
       </div>
+    </>
+  );
+}
+
+export function FiskalischeWirkungWidget({ derived, baselineDerived }: Props) {
+  return (
+    <div className="fiskalische-wirkung-widget">
+      <div className="fiskalische-wirkung-widget__title">Fiskalische Wirkung</div>
+      <CompareColumns
+        baseline={baselineDerived && <FiskalischeWirkungBody derived={baselineDerived} />}
+        current={<FiskalischeWirkungBody derived={derived} />}
+      />
     </div>
   );
 }

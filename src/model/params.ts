@@ -44,6 +44,8 @@ export const PARAM_KEYS_40 = [
   'mietrecht_kuendigungsschutz',
   'mietrecht_mietzinsindex',
   'mietrecht_untervermietung',
+  'mietrecht_kriterium',
+  'mietrecht_durchsetzung',
   // 5. Steuern & Abgaben
   'steuer_grundstueckgewinn',
   'steuer_eigenmietwert',
@@ -260,6 +262,20 @@ export const paramMeta40: ParamMeta40[] = [
     levels: ['Frei (keine Einschränkung)', 'Zustimmung nötig', 'Tageslimit + Kündigungsrecht'],
     group: 'mietrecht',
   },
+  {
+    key: 'mietrecht_kriterium',
+    label: 'Missbrauchskriterium',
+    helpText: 'Provisorisch (CH-012). Welches Kriterium den zulässigen Mietzins bindet. Im heutigen Recht ist die Vergleichsmiete rechtlich rangiert, aber nicht wirksam.',
+    levels: ['Kosten plus Rendite exklusiv', 'Heutiges Recht', 'Vergleichsmiete bindend'],
+    group: 'mietrecht',
+  },
+  {
+    key: 'mietrecht_durchsetzung',
+    label: 'Durchsetzung Mietzins',
+    helpText: 'Provisorisch (CH-012). Zieht nur, wenn eine Mietlücke gesetzt ist. Die ist nicht belegt.',
+    levels: ['Nur auf Klage', 'Erleichterte Anfechtung', 'Automatische periodische Prüfung'],
+    group: 'mietrecht',
+  },
 
   // ── 5. Steuern & Abgaben ──────────────────────────────────────────────────
   {
@@ -389,6 +405,8 @@ export const contextMeta: ContextMeta[] = [
   { key: 'bevoelkerungstrend', label: 'Bevölkerung', levels: ['stark sinkend', 'sinkend', 'stabil', 'wachsend', 'stark wachsend'] },
   { key: 'marktenge', label: 'Marktenge', levels: ['entspannt', 'leicht eng', 'moderat', 'angespannt', 'extrem eng'] },
   { key: 'mietbelastungs_grenze', label: 'Mietbelastungsgrenze', levels: ['sehr tief (<15%)', 'tief (15–20%)', 'mittel (20–25%)', 'hoch (25–30%)', 'sehr hoch (>30%)'] },
+  { key: 'teuerung', label: 'Teuerung (LIK)', levels: ['unter 0 %', '0–0.5 %', '0.5–1.5 %', '1.5–2.5 %', 'über 2.5 %'] },
+  { key: 'referenzzins_aenderung', label: 'Referenzzinssatz (12 Mt.)', levels: ['stark gesenkt', 'gesenkt', 'unverändert', 'erhöht', 'stark erhöht'] },
 ];
 
 // ── Diff-Funktionen ──────────────────────────────────────────────────────────

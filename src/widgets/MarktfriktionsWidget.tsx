@@ -1,8 +1,11 @@
 import type { MarketState } from '../types';
+import { CompareColumns } from './CompareColumns';
 import './MarktfriktionsWidget.css';
 
 interface Props {
   state: MarketState;
+  /** Wenn gesetzt: «Heute» neben «Simuliert» */
+  baselineState?: MarketState;
 }
 
 function getDescription(value: number): string {
@@ -18,13 +21,12 @@ function getDescription(value: number): string {
   }
 }
 
-export function MarktfriktionsWidget({ state }: Props) {
+function MarktfriktionsBody({ state }: { state: MarketState }) {
   const normalized = (state.marktfriktion + 1) / 2;
   const percentage = Math.round(normalized * 100);
 
   return (
-    <div className="marktfriktions-widget">
-      <div className="marktfriktions-widget__title">Marktfriktion</div>
+    <>
 
       <div className="marktfriktions-widget__bar-container">
         <div className="marktfriktions-widget__gradient-bar">
@@ -51,6 +53,18 @@ export function MarktfriktionsWidget({ state }: Props) {
       <div className="marktfriktions-widget__description">
         {getDescription(state.marktfriktion)}
       </div>
+    </>
+  );
+}
+
+export function MarktfriktionsWidget({ state, baselineState }: Props) {
+  return (
+    <div className="marktfriktions-widget">
+      <div className="marktfriktions-widget__title">Marktfriktion</div>
+      <CompareColumns
+        baseline={baselineState && <MarktfriktionsBody state={baselineState} />}
+        current={<MarktfriktionsBody state={state} />}
+      />
     </div>
   );
 }

@@ -192,6 +192,8 @@ function buildNodes(): NodeMeta[] {
     mietrecht_kuendigungsschutz: 'Kündigungsschutz',
     mietrecht_mietzinsindex: 'Mietzinsindex',
     mietrecht_untervermietung: 'Untervermietung',
+    mietrecht_kriterium: 'Kriterium',
+    mietrecht_durchsetzung: 'Durchsetzung',
     steuer_grundstueckgewinn: 'Grundstückgewinnst.',
     steuer_eigenmietwert: 'Eigenmietwert',
     steuer_leerstandsabgabe: 'Leerstandsabgabe',

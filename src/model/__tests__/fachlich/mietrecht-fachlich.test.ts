@@ -45,7 +45,7 @@ const BERLIN_BASELINE_V2: CityParams40 = {
   gemeinnuetzig_mindestanteil: 1, gemeinnuetzig_foerderfonds: 1, gemeinnuetzig_baurecht: 1,
   gemeinnuetzig_belegungsvorschriften: 1, gemeinnuetzig_sozialmischung: 1,
   mietrecht_kostenmiete: 2, mietrecht_anfangsmiete: 2, mietrecht_mietzinstransparenz: 2,
-  mietrecht_kuendigungsschutz: 2, mietrecht_mietzinsindex: 2, mietrecht_untervermietung: 2,
+  mietrecht_kuendigungsschutz: 2, mietrecht_mietzinsindex: 2, mietrecht_kriterium: 1, mietrecht_durchsetzung: 0, mietrecht_untervermietung: 2,
   steuer_grundstueckgewinn: 1, steuer_eigenmietwert: 1, steuer_leerstandsabgabe: 1,
   steuer_handaenderung: 1, steuer_kapitalgewinnprivatpersonen: 1,
   kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 1, kapital_hypothekarregulierung: 1,
@@ -80,7 +80,7 @@ const SF_V2: CityParams40 = {
   gemeinnuetzig_mindestanteil: 1, gemeinnuetzig_foerderfonds: 1, gemeinnuetzig_baurecht: 1,
   gemeinnuetzig_belegungsvorschriften: 1, gemeinnuetzig_sozialmischung: 1,
   mietrecht_kostenmiete: 2, mietrecht_anfangsmiete: 2, mietrecht_mietzinstransparenz: 2,
-  mietrecht_kuendigungsschutz: 2, mietrecht_mietzinsindex: 2, mietrecht_untervermietung: 2,
+  mietrecht_kuendigungsschutz: 2, mietrecht_mietzinsindex: 2, mietrecht_kriterium: 1, mietrecht_durchsetzung: 0, mietrecht_untervermietung: 2,
   steuer_grundstueckgewinn: 1, steuer_eigenmietwert: 1, steuer_leerstandsabgabe: 1,
   steuer_handaenderung: 1, steuer_kapitalgewinnprivatpersonen: 1,
   kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 1, kapital_hypothekarregulierung: 1,
@@ -106,9 +106,9 @@ describe('Mietrecht: Berlin Mietendeckel (2020–2021)', () => {
    * - Abwanderung nach Brandenburg (Spillover)
    *
    * Erwartung ans Modell:
-   * - Phase 1: mietpreis_schutzlevel sollte stark steigen (↑)
-   * - Phase 1: nachfragedruck sollte durch Angebotsrückgang steigen (↑)
-   * - gentrifizierungsindex kurzfristig tiefer (Schutzwirkung)
+   * - Phase 1: mietpreis_schutzlevel steigt über Anfangsmiete und Kündigungsschutz
+   * - Der Mietzinsindex ist nicht dieser Kanal. Die Kante auf das Schutzlevel
+   *   ist entfernt (CH-012). Sie steht deshalb nicht im Diff.
    * - langfristig: investitionsattraktivitaet sinkt deutlich
    *
    * Hinweis: mietrecht_kostenmiete hat KEINE direkte Verbindung zu nachfragedruck
@@ -118,10 +118,8 @@ describe('Mietrecht: Berlin Mietendeckel (2020–2021)', () => {
   it('[FACH] Phase1: mietrecht-Verschärfung erhöht mietpreis_schutzlevel stark', () => {
     const neutral = phases(BERLIN_BASELINE_V2, BERLIN_CONTEXT, {});
     const withDeckel: ParamsDiff40 = {
-      mietrecht_kostenmiete:   { from: 2, to: 2 }, // already max
       mietrecht_anfangsmiete:  { from: 1, to: 2 },
       mietrecht_kuendigungsschutz: { from: 1, to: 2 },
-      mietrecht_mietzinsindex: { from: 1, to: 2 },
     };
     const withDiff = phases(BERLIN_BASELINE_V2, BERLIN_CONTEXT, withDeckel);
 
@@ -245,6 +243,8 @@ describe('Mietrecht: Paris Encadrement des Loyers (FR-002) — −4.2% Mieten', 
    *
    * Im Modell:
    * - mietrecht_anfangsmiete ↑ + kuendigungsschutz ↑ → mietpreis_schutzlevel ↑
+   * - mietrecht_mietzinsindex nicht im Diff: die Kante auf das Schutzlevel
+   *   ist entfernt (CH-012)
    */
   it('[FACH] FR-002: Mietpreisdeckel erhöht mietpreis_schutzlevel deutlich (Paris −4.2%)', () => {
     const parisContext: CityContext = {
@@ -268,7 +268,6 @@ describe('Mietrecht: Paris Encadrement des Loyers (FR-002) — −4.2% Mieten', 
     const mitEncadrement: ParamsDiff40 = {
       mietrecht_anfangsmiete:      { from: 1, to: 2 },
       mietrecht_kuendigungsschutz: { from: 1, to: 2 },
-      mietrecht_mietzinsindex:    { from: 1, to: 2 },
     };
     const mitDeckel = phases(BERLIN_BASELINE_V2, parisContext, mitEncadrement);
 
@@ -331,24 +330,36 @@ describe('Mietrecht: GLOBAL-029 Langzeiteffekt — Neubau wird gehemmt ausser we
     expect(mitRegulierung[2].derived.neubau_hemmnisindex)
       .toBeGreaterThan(ohne[2].derived.neubau_hemmnisindex);
   });
+
+  it('[FACH] GLOBAL-029: Bindende Vergleichsmiete ohne Deckel ist die Ausnahme, nicht Stockholm', () => {
+    /**
+     * Kholodilin & Kohl: Neubau, der von der Kontrolle ausgenommen ist,
+     * zeigt den negativen Effekt nicht. CH-012: kriterium 2 ist dieser Fall.
+     * Stockholm (SE-001) läuft über Kündigungsschutz und Marktfriktion.
+     * Vorzeichen, keine Beträge.
+     */
+    const ohne = phases(BERLIN_BASELINE_V2, BERLIN_CONTEXT, {});
+    const vergleich: ParamsDiff40 = {
+      mietrecht_kriterium: { from: 1, to: 2 },
+    };
+    const mit = phases(BERLIN_BASELINE_V2, BERLIN_CONTEXT, vergleich);
+
+    expect(mit[2].derived.neubau_hemmnisindex)
+      .toBeCloseTo(ohne[2].derived.neubau_hemmnisindex, 5);
+    expect(mit[2].marketState.marktfriktion)
+      .toBeCloseTo(ohne[2].marketState.marktfriktion, 5);
+  });
 });
 
-describe('Mietrecht: CH-004 / CH-005 — Kündigungsschutz → Marktfriktion (Schweiz)', () => {
+describe('Mietrecht: CH-004 — Kündigungsschutz → Marktfriktion (Schweiz)', () => {
   /**
    * Ref: docs/recherche/CH/CH-004-ch-residential-mobility-2021.md
-   * Ref: docs/recherche/CH/CH-005-genf-basel-miete-fallstudie.md
    *
-   * CH-004 Key Finding: Mietrecht fungiert als Mobilitätsbremse — Fluktuation
-   * geringer als in weniger regulierten Märkten. Schweiz hat trotz jahrzehntelanger
-   * Mietregulierung höchste Mieterquoten Europas (Basel 84%, Genf 78%).
-   *
-   * CH-005 Key Finding: Genf: Durchschnittliche Mietdauer 13.7 Jahre (Extremwert
-   * als Indikator für geringe Fluktuation). Durchschnittliche Neuvertragsmiete
-   * CHF 372/m²a vs. Bestand CHF 279/m²a — ~33% Differenz.
-   *
-   * Im Modell:
-   * - mietrecht_kuendigungsschutz ↑ → marktfriktion ↑
-   * - marktfriktion ↑ → angebotspotenzial ↓ (langfristig)
+   * Mietrecht als Mobilitätsbremse: Kündigungsschutz erhöht marktfriktion.
+   * Die Genfer Preisspreizung (CH-005, Abstand Neuvertrag zu Bestand,
+   * Mietdauer 13.7 Jahre) ist hier nicht assertet. anfangsmiete und
+   * bestandsmiete starten gleich, die Vorladung hat keinen Anfang.
+   * Ein Test auf diesen Abstand wäre der Kaltstart, nicht der Befund.
    */
   it('[FACH] CH-004: Kündigungsschutz erhöht Marktfriktion (Mobilitätsbremse)', () => {
     const lockeresMietrecht: CityParams40 = {
@@ -366,43 +377,6 @@ describe('Mietrecht: CH-004 / CH-005 — Kündigungsschutz → Marktfriktion (Sc
     const mit = phases(lockeresMietrecht, BERLIN_CONTEXT, mitKschutz);
 
     // Strenger Kündigungsschutz → höhere Marktfriktion (Fluktuation sinkt)
-    expect(mit[0].marketState.marktfriktion)
-      .toBeGreaterThan(ohne[0].marketState.marktfriktion);
-  });
-
-  it('[FACH] CH-005: Strenges Mietrecht senkt Fluktuation — Mietdauer steigt', () => {
-    const lockeresMietrecht: CityParams40 = {
-      ...BERLIN_BASELINE_V2,
-      mietrecht_kuendigungsschutz: 0,
-      mietrecht_kostenmiete: 0,
-    };
-    const ohne = phases(lockeresMietrecht, BERLIN_CONTEXT, {});
-
-    // Genf-like: Kostenmiete + Kündigungsschutz + Mietzinsindex
-    const genfDiff: ParamsDiff40 = {
-      mietrecht_kuendigungsschutz: { from: 0, to: 2 },
-      mietrecht_kostenmiete:      { from: 0, to: 2 },
-      mietrecht_mietzinsindex:    { from: 0, to: 2 },
-    };
-    const mit = phases(lockeresMietrecht, BERLIN_CONTEXT, genfDiff);
-    // Strenges Mietrecht → höhere Marktfriktion → weniger Fluktuation
-    expect(mit[0].marketState.marktfriktion)
-      .toBeGreaterThan(ohne[0].marketState.marktfriktion);
-  });
-
-  it('[FACH] CH-005: Strenges Mietrecht erhoht Preisspreizung (Neumieter vs. Bestand)', () => {
-    const lockeresMietrecht: CityParams40 = {
-      ...BERLIN_BASELINE_V2,
-      mietrecht_kuendigungsschutz: 0,
-      mietrecht_kostenmiete: 0,
-    };
-    const ohne = phases(lockeresMietrecht, BERLIN_CONTEXT, {});
-    const genfDiff: ParamsDiff40 = {
-      mietrecht_kuendigungsschutz: { from: 0, to: 2 },
-      mietrecht_kostenmiete:      { from: 0, to: 2 },
-      mietrecht_mietzinsindex:    { from: 0, to: 2 },
-    };
-    const mit = phases(lockeresMietrecht, BERLIN_CONTEXT, genfDiff);
     expect(mit[0].marketState.marktfriktion)
       .toBeGreaterThan(ohne[0].marketState.marktfriktion);
   });

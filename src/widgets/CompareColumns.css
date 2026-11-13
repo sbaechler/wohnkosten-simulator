@@ -1,0 +1,29 @@
+.compare-columns {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.compare-columns__col {
+  flex: 1;
+  min-width: 0;
+}
+
+.compare-columns__label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  text-align: center;
+  color: #555;
+}
+
+.compare-columns__label--sim {
+  color: #4dabf7;
+}
+
+.compare-columns__divider {
+  width: 1px;
+  background: #333;
+}

@@ -60,7 +60,7 @@ const NEUTRAL_PARAMS: CityParams40 = Object.fromEntries(
     gemeinnuetzig_mindestanteil: 0, gemeinnuetzig_foerderfonds: 0, gemeinnuetzig_baurecht: 0,
     gemeinnuetzig_belegungsvorschriften: 0, gemeinnuetzig_sozialmischung: 0,
     mietrecht_kostenmiete: 0, mietrecht_anfangsmiete: 0, mietrecht_mietzinstransparenz: 0,
-    mietrecht_kuendigungsschutz: 0, mietrecht_mietzinsindex: 0, mietrecht_untervermietung: 0,
+    mietrecht_kuendigungsschutz: 0, mietrecht_mietzinsindex: 0, mietrecht_kriterium: 1, mietrecht_durchsetzung: 0, mietrecht_untervermietung: 0,
     steuer_grundstueckgewinn: 0, steuer_eigenmietwert: 0, steuer_leerstandsabgabe: 0,
     steuer_handaenderung: 0, steuer_kapitalgewinnprivatpersonen: 0,
     kapital_auslaendische_investoren: 0, kapital_institutionelle_regulierung: 0, kapital_hypothekarregulierung: 0,

@@ -26,7 +26,9 @@
 
 import { describe, it, expect } from 'vitest';
 import { computePhasePipeline, invalidatePhasesCache } from '../../compute-phases';
-import type { CityContext, CityParams40, ParamsDiff40 } from '../../../types';
+import { computeGroupTrends } from '../../groups';
+import { findEquilibrium, supplyShiftFromState } from '../../supply-demand';
+import type { CityContext, CityParams40, MarketState, ParamsDiff40 } from '../../../types';
 
 // Zürich-like baseline
 // V1: raumplanung=2, bauvorschriften=2, energetischeVorgaben=1, mietrecht=1, steuerpolitik=2,
@@ -41,7 +43,7 @@ const ZUERICH_V2: CityParams40 = {
   gemeinnuetzig_mindestanteil: 2, gemeinnuetzig_foerderfonds: 2, gemeinnuetzig_baurecht: 2,
   gemeinnuetzig_belegungsvorschriften: 1, gemeinnuetzig_sozialmischung: 1,
   mietrecht_kostenmiete: 1, mietrecht_anfangsmiete: 1, mietrecht_mietzinstransparenz: 1,
-  mietrecht_kuendigungsschutz: 1, mietrecht_mietzinsindex: 1, mietrecht_untervermietung: 1,
+  mietrecht_kuendigungsschutz: 1, mietrecht_mietzinsindex: 1, mietrecht_kriterium: 1, mietrecht_durchsetzung: 0, mietrecht_untervermietung: 1,
   steuer_grundstueckgewinn: 2, steuer_eigenmietwert: 2, steuer_leerstandsabgabe: 1,
   steuer_handaenderung: 2, steuer_kapitalgewinnprivatpersonen: 1,
   kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 1, kapital_hypothekarregulierung: 1,
@@ -256,24 +258,59 @@ describe('Bodenrecht: CH-007 BWO Raumplanung — Zonenreserve dämpft Kostenanst
    * In Regionen mit mehr Bauland steigen Kosten bei Nachfrageanstieg weniger stark.
    * Lange Bewilligungs- und Einspracheverfahren tragen zur Kostensteigerung bei.
    *
+   * Skala (params.ts): 0 = grosszügige Reserven, 2 = sehr knapp.
+   * Mehr Bauland heisst also: Parameterwert SINKT.
+   *
    * Im Modell:
-   * - raumplanung_zonenreserve ↑ → nachfragedruck ↓ (reagiert auf Anspannung)
-   * - raumplanung_zonenreserve ↑ → angebotspotenzial ↑ (Baulandoffensive)
+   * - raumplanung_zonenreserve ↓ (mehr Bauland) → nachfragedruck ↓
+   * - raumplanung_zonenreserve ↓ (mehr Bauland) → angebotspotenzial ↑
    */
-  it('[FACH] CH-007: Mehr Zonenreserve senkt langfristig den nachfragedruck', () => {
-    const basis: CityParams40 = {
-      ...ZUERICH_V2,
-      raumplanung_zonenreserve: 0,
-    };
-    const ohne = phases(basis, ZUERICH_CONTEXT, {});
+  it('[FACH] CH-007: Mehr Bauland (Zonenreserve 2→0) senkt langfristig den nachfragedruck', () => {
+    const ohne = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
-    const mitReserve: ParamsDiff40 = {
-      raumplanung_zonenreserve: { from: 0, to: 2 },
+    const mehrBauland: ParamsDiff40 = {
+      raumplanung_zonenreserve: { from: 2, to: 0 },
     };
-    const mit = phases(basis, ZUERICH_CONTEXT, mitReserve);
-    // Mehr Bauland → mehr Angebotspotenzial → weniger Nachfragedruck
+    const mit = phases(ZUERICH_V2, ZUERICH_CONTEXT, mehrBauland);
     expect(mit[2].marketState.nachfragedruck)
       .toBeLessThan(ohne[2].marketState.nachfragedruck);
+    expect(mit[2].marketState.angebotspotenzial)
+      .toBeGreaterThan(ohne[2].marketState.angebotspotenzial);
+  });
+
+  it('[FACH] CH-007: Mehr Bauland senkt den Preistrend für Neumieter in jeder Phase', () => {
+    const ohne = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
+    const mit = phases(ZUERICH_V2, ZUERICH_CONTEXT, {
+      raumplanung_zonenreserve: { from: 2, to: 0 },
+    });
+    const neumieter = (s: MarketState) =>
+      computeGroupTrends(s, ZUERICH_V2, ZUERICH_V2)
+        .find(g => g.group.id === 'normalverdiener_angebot')!.value;
+    for (const i of [0, 1, 2]) {
+      expect(neumieter(mit[i].marketState)).toBeLessThan(neumieter(ohne[i].marketState));
+    }
+  });
+
+  /**
+   * Skala (params.ts): 0 = analog/lange Wartezeiten, 2 = volldigital.
+   * Langsamere Verfahren dürfen im Preis-Mengen-Diagramm nicht zu tieferem
+   * Preis und höherer Menge führen (CH-007: lange Verfahren verteuern).
+   */
+  it('[FACH] CH-007: Langsamere Bewilligung (2→0) macht das Angebot unelastischer und teurer', () => {
+    const ohne = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
+    const mit = phases(ZUERICH_V2, ZUERICH_CONTEXT, {
+      bau_bewilligungsverfahren: { from: 2, to: 0 },
+    });
+    const ggw = (s: MarketState) =>
+      findEquilibrium(supplyShiftFromState(s), s.nachfragedruck, s.angebotspotenzial_regulation, s);
+    for (const i of [0, 1, 2]) {
+      expect(mit[i].marketState.angebotspotenzial_regulation)
+        .toBeGreaterThan(ohne[i].marketState.angebotspotenzial_regulation);
+      const [qMit, pMit] = ggw(mit[i].marketState);
+      const [qOhne, pOhne] = ggw(ohne[i].marketState);
+      expect(pMit).toBeGreaterThan(pOhne);
+      expect(qMit).toBeLessThan(qOhne);
+    }
   });
 });
 

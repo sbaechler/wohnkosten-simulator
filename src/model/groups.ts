@@ -238,6 +238,8 @@ function computeDrivers(
     mietrecht_kuendigungsschutz: 'Kündigungsschutz',
     mietrecht_mietzinsindex: 'Mietzinsindex',
     mietrecht_untervermietung: 'Untervermietung',
+    mietrecht_kriterium: 'Missbrauchskriterium',
+    mietrecht_durchsetzung: 'Durchsetzung',
     steuer_grundstueckgewinn: 'Grundstückgewinnsteuer',
     steuer_eigenmietwert: 'Eigenmietwert',
     steuer_leerstandsabgabe: 'Leerstandsabgabe',

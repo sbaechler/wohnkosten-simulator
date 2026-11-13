@@ -9,6 +9,11 @@ import { GroupTrendWidget } from './GroupTrendWidget';
 import { OwnershipDonut } from './OwnershipDonut';
 import { GentrifizierungsWidget } from './GentrifizierungsWidget';
 import { MietbelastungWidget } from './MietbelastungWidget';
+import { FiskalischeWirkungWidget } from './FiskalischeWirkungWidget';
+import { MarktfriktionsWidget } from './MarktfriktionsWidget';
+import { EigentumsquotenWidget } from './EigentumsquotenWidget';
+import { StandortwettbewerbWidget } from './StandortwettbewerbWidget';
+import { GemeinnuetzigSektorWidget } from './GemeinnuetzigSektorWidget';
 import './WidgetGrid.css';
 
 interface Props {
@@ -114,6 +119,13 @@ export function WidgetGrid({ city, modified, diff }: Props) {
         baselineMarketState={hasChanges ? latestBaseline.marketState : undefined}
       />
       <OwnershipDonut city={city} modified={modified} diff={diff} state={latestModified.marketState} baselineState={hasChanges ? latestBaseline.marketState : undefined} />
+
+      {/* -- Einzelwert-Widgets: langfristiger Stand (P3), Heute neben Simuliert -- */}
+      <EigentumsquotenWidget state={latestModified.marketState} baselineState={hasChanges ? latestBaseline.marketState : undefined} />
+      <GemeinnuetzigSektorWidget state={latestModified.marketState} baselineState={hasChanges ? latestBaseline.marketState : undefined} />
+      <MarktfriktionsWidget state={latestModified.marketState} baselineState={hasChanges ? latestBaseline.marketState : undefined} />
+      <StandortwettbewerbWidget state={latestModified.marketState} context={context} baselineState={hasChanges ? latestBaseline.marketState : undefined} />
+      <FiskalischeWirkungWidget derived={latestModified.derived} baselineDerived={hasChanges ? latestBaseline.derived : undefined} />
     </div>
   );
 }

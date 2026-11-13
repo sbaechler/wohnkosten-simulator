@@ -19,7 +19,7 @@ const NEUTRAL_PARAMS: CityParams40 = {
   gemeinnuetzig_mindestanteil: 1 as ParamValue, gemeinnuetzig_foerderfonds: 1 as ParamValue, gemeinnuetzig_baurecht: 1 as ParamValue,
   gemeinnuetzig_belegungsvorschriften: 1 as ParamValue, gemeinnuetzig_sozialmischung: 1 as ParamValue,
   mietrecht_kostenmiete: 1 as ParamValue, mietrecht_anfangsmiete: 1 as ParamValue, mietrecht_mietzinstransparenz: 1 as ParamValue,
-  mietrecht_kuendigungsschutz: 1 as ParamValue, mietrecht_mietzinsindex: 1 as ParamValue, mietrecht_untervermietung: 1 as ParamValue,
+  mietrecht_kuendigungsschutz: 1 as ParamValue, mietrecht_mietzinsindex: 1 as ParamValue, mietrecht_kriterium: 1, mietrecht_durchsetzung: 0, mietrecht_untervermietung: 1 as ParamValue,
   steuer_grundstueckgewinn: 1 as ParamValue, steuer_eigenmietwert: 1 as ParamValue, steuer_leerstandsabgabe: 1 as ParamValue,
   steuer_handaenderung: 1 as ParamValue, steuer_kapitalgewinnprivatpersonen: 1 as ParamValue,
   kapital_auslaendische_investoren: 1 as ParamValue, kapital_institutionelle_regulierung: 1 as ParamValue, kapital_hypothekarregulierung: 1 as ParamValue,

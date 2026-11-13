@@ -28,10 +28,8 @@
  * 3. Wohnungsrationierung > Mietpreisregulierung (als Angebotsbremse):
  *    → Rationierung bremst Neubau deutlich stärker als Mietpreisdeckel
  *
- * 4. Neumieter-Preisspreizung (Genf vs. Zürich):
- *    → Genf: Neumieter zahlen ~30% mehr als Bestandsmieter (372 CHF/m²/Jahr)
- *    → Zürich (kein Mietpreisdeckel): nur ~18% Differenz
- *    → Höchste Angebotsmieten aller 5 grössten Schweizer Städte trotz Regulierung
+ * 4. Genfer Abstand Neuvertrag zu Bestand (~33 Prozent, Mietdauer 13.7 Jahre):
+ *    nicht in dieser Datei assertet. Der Kaltstart erzeugt den Abstand nicht.
  *
  * 5. Basel: Baugesuche −76%, geplante Wohneinheiten −95% (1078 → 67)
  *    → Zürich im selben Zeitraum: +20% Baugesuche
@@ -56,7 +54,7 @@ const ZUERICH_V2: CityParams40 = {
   gemeinnuetzig_mindestanteil: 2, gemeinnuetzig_foerderfonds: 2, gemeinnuetzig_baurecht: 2,
   gemeinnuetzig_belegungsvorschriften: 1, gemeinnuetzig_sozialmischung: 1,
   mietrecht_kostenmiete: 1, mietrecht_anfangsmiete: 1, mietrecht_mietzinstransparenz: 1,
-  mietrecht_kuendigungsschutz: 1, mietrecht_mietzinsindex: 1, mietrecht_untervermietung: 1,
+  mietrecht_kuendigungsschutz: 1, mietrecht_mietzinsindex: 1, mietrecht_kriterium: 1, mietrecht_durchsetzung: 0, mietrecht_untervermietung: 1,
   steuer_grundstueckgewinn: 2, steuer_eigenmietwert: 2, steuer_leerstandsabgabe: 1,
   steuer_handaenderung: 2, steuer_kapitalgewinnprivatpersonen: 1,
   kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 1, kapital_hypothekarregulierung: 1,
@@ -217,27 +215,22 @@ describe('Basel Wohnschutzverordnung (2022): kombinierte Rationierung', () => {
   });
 });
 
-// ── Test-Suite 3: Genf vs. Zürich — Neumieter-Preisspreizung ─────────────────
+// ── Test-Suite 3: Genf vs. Zürich — Friktion und Angebot ─────────────────────
 
 describe('FHNW: Genf-Effekt — strenges Mietrecht erhöht Marktfriktion und senkt Angebot', () => {
   /**
-   * Das Phasen-Modell arbeitet diff-basiert: Es berechnet die Veränderung
-   * relativ zur Baseline, nicht absolute Pegel. Deshalb:
-   * - Genf-vs-Zürich als Diff vom gleichen Ausgangspunkt testen
-   * - Beide Systeme starten von ZUERICH_V2 und erhalten den "Genf-Diff"
-   *   (die zusätzliche Regulierung die Genf auf Basis von Zürich hat)
+   * Diff-basiert, gleicher Ausgangspunkt. Genf-Zusatz gegen Zürich-Baseline.
    *
-   * Genf: Neumieter zahlen ~30% mehr als Bestandsmieter (372 CHF/m²/Jahr)
-   * Zürich (kein Mietpreisdeckel): nur ~18% Differenz
-   * Genf: Durchschnittliche Mietdauer 13.7 Jahre vs. ~6 J. anderswo
+   * Nicht gemessen: der Genfer Abstand Neuvertrag zu Bestand (~33 Prozent)
+   * und die Mietdauer von 13.7 Jahren. Dafür gibt es keinen Anfang im
+   * Kaltstart. Der Index steht nicht im Diff: die Kante auf das Schutzlevel
+   * ist entfernt (CH-012).
    */
 
-  // Diff: was Genf hat, was Zürich nicht hat
   const GENF_ZUSATZ_DIFF: ParamsDiff40 = {
     mietrecht_kostenmiete:       { from: 1, to: 2 },
     mietrecht_anfangsmiete:      { from: 1, to: 2 },
     mietrecht_kuendigungsschutz: { from: 1, to: 2 },
-    mietrecht_mietzinsindex:     { from: 1, to: 2 },
     nutzung_abbruchverbot:       { from: 1, to: 2 },
     nutzung_umnutzungsverbot:    { from: 1, to: 2 },
   };

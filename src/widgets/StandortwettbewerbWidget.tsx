@@ -1,10 +1,12 @@
-import type { MarketState, DerivedIndicators, CityContext } from '../types';
+import type { MarketState, CityContext } from '../types';
+import { CompareColumns } from './CompareColumns';
 import './StandortwettbewerbWidget.css';
 
 interface Props {
   state: MarketState;
-  derived: DerivedIndicators;
   context: CityContext;
+  /** Wenn gesetzt: «Heute» neben «Simuliert» */
+  baselineState?: MarketState;
 }
 
 function getColor(score: number): string {
@@ -13,7 +15,7 @@ function getColor(score: number): string {
   return '#51cf66';
 }
 
-export function StandortwettbewerbWidget({ state, context }: Props) {
+function StandortBody({ state, context }: { state: MarketState; context: CityContext }) {
   // Formula: aufwertungsdruck * 0.4 + investitionsattraktivitaet * 0.3 + (wirtschaftskraft/2) * 0.3
   const rohwert =
     state.aufwertungsdruck * 0.4 +
@@ -26,8 +28,7 @@ export function StandortwettbewerbWidget({ state, context }: Props) {
   const color = getColor(score);
 
   return (
-    <div className="standortwettbewerb-widget">
-      <div className="standortwettbewerb-widget__title">Standortattraktivität</div>
+    <>
 
       <div className="standortwettbewerb-widget__score" style={{ color }}>
         {score}
@@ -56,6 +57,18 @@ export function StandortwettbewerbWidget({ state, context }: Props) {
         <span>Investitionsattr.: {Math.round(state.investitionsattraktivitaet * 100)}%</span>
         <span>Wirtschaftskraft: {context.wirtschaftskraft > 0 ? '+' : ''}{context.wirtschaftskraft}</span>
       </div>
+    </>
+  );
+}
+
+export function StandortwettbewerbWidget({ state, context, baselineState }: Props) {
+  return (
+    <div className="standortwettbewerb-widget">
+      <div className="standortwettbewerb-widget__title">Standortattraktivität</div>
+      <CompareColumns
+        baseline={baselineState && <StandortBody state={baselineState} context={context} />}
+        current={<StandortBody state={state} context={context} />}
+      />
     </div>
   );
 }

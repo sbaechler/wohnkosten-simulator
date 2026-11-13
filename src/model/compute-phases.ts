@@ -7,6 +7,7 @@ import type { Phase, PhaseResult } from './phases';
 import { PHASE_NAMES, PHASE_YEAR_LABELS, PHASES } from './phases';
 import { PHASE_WEIGHTED_EDGES } from './phase-weights';
 import { computeDerivedIndicators } from './derived';
+import { applyMietrechtRegime, type RegimeCarry } from './mietrecht-regime';
 import { clamp } from './utils';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -174,9 +175,13 @@ export function* computePhasePipeline(
   diff: ParamsDiff40,
 ): Generator<PhaseResult, PhaseResult[], void> {
   let carryE1: MarketState | null = null;
+  let regimeCarry: RegimeCarry | null = null;
 
   for (const phase of PHASES) {
-    const e1 = computeE1WithPhaseAndCarry(context, diff, phase, carryE1);
+    const linear = computeE1WithPhaseAndCarry(context, diff, phase, carryE1);
+    const applied = applyMietrechtRegime(linear, context, diff, regimeCarry);
+    const e1 = applied.market;
+    regimeCarry = applied.carry;
     const e2 = computeDerivedIndicators(e1);
     carryE1 = e1;
 

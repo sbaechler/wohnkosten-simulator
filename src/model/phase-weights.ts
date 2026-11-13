@@ -276,14 +276,17 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     // Restriktion ausländischer Käufer reduziert Nachfrage sofort; Markt kompensiert langfristig
   },
 
-  // CH-007 BWO: Zonenreserve dämpft Nachfragedruck durch Angebotsausweitung
+  // CH-007 BWO: Baulandknappheit erhöht den Nachfragedruck
   {
     from: 'raumplanung_zonenreserve',
     to: 'nachfragedruck',
-    sign: -1,
+    sign: +1,
     weights: [0.2, 0.5, 0.8],
-    // Mehr Bauland → mehr Angebot → weniger Knappheit → weniger Nachfragedruck.
+    // Skala des Parameters: 0 = grosszügige Reserven, 2 = sehr knapp
+    // (params.ts). Höherer Wert = WENIGER Bauland → mehr Knappheit → mehr
+    // Nachfragedruck. Umgekehrt: mehr Bauland → weniger Nachfragedruck.
     // Langfristig stärkster Effekt wenn Bauland tatsächlich mobilisiert wird.
+    // Vorzeichen war bis 2026-11 −1 (Skala verkehrt herum gelesen).
   },
   // AT-002 WIFO: Gemeinnütziger Wohnbau als "Public Option" — dämpft Privatmarktnachfrage
   {
@@ -555,13 +558,10 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     // Transparenz schafft kurzfristige Hemmschwelle für Mietzinserhöhungen;
     // langfristig etablieren sich Markenpraktiken als Umgehung.
   },
-  {
-    from: 'mietrecht_mietzinsindex',
-    to: 'mietpreis_schutzlevel',
-    sign: +1,
-    weights: [1.0, 0.9, 0.9],
-    // Mietzinsindex bindet automatisch an Inflation; sofort und dauerhaft wirksam.
-  },
+  // mietrecht_mietzinsindex → mietpreis_schutzlevel entfernt (CH-012).
+  // Vorzeichen +1 hat «Index = mehr Schutz» vorab entschieden. Der
+  // Erhöhungsspielraum lebt in mietrecht-regime.ts. Der Nenner
+  // E1_NORMALIZATION.mietpreis_schutzlevel ist nicht neu kalibriert.
   // ═══════════════════════════════════════════════════════════════════
   // E0 → gemeinnuetzig_kraft (6 edges)
   // Research: RESULT-agent2-weights.md
@@ -847,10 +847,14 @@ export const PHASE_WEIGHTED_EDGES: readonly {
   {
     from: 'bau_bewilligungsverfahren',
     to: 'angebotspotenzial_regulation',
-    sign: +1,
+    sign: -1,
     weights: [0.6, 0.8, 0.5],
-    // Komplexe Verfahren machen Angebotstrist träge → weniger Elastizität.
-    // Kurzfristig stark, da bestehende Projekte nicht schnell reagiert können.
+    // Skala des Parameters: 0 = analog/lange Wartezeiten, 2 = volldigital
+    // (params.ts). Höherer Wert = SCHNELLERES Verfahren → Angebot reagiert
+    // rascher auf Preissignale → elastischer (Knoten sinkt). Komplexe
+    // Verfahren (tiefer Wert) machen das Angebot träge → unelastisch.
+    // Kurzfristig stark, da bestehende Projekte nicht schnell reagieren können.
+    // Vorzeichen war bis 2026-11 +1 (Skala verkehrt herum gelesen).
   },
   {
     from: 'bau_einspracherecht_suspensiv',

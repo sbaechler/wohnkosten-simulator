@@ -1,41 +1,39 @@
 import type { MarketState } from '../types';
+import { CompareColumns } from './CompareColumns';
 import './GemeinnuetzigSektorWidget.css';
 
 interface Props {
   state: MarketState;
+  /** Wenn gesetzt: «Heute» neben «Simuliert» */
+  baselineState?: MarketState;
 }
 
-// Reference points
-const REFERENCES = [
-  { label: 'CH-Schnitt', value: 5 },
-  { label: 'Zürich', value: 26 },
-  { label: 'Wien', value: 60 },
-];
-
-// Map -1...+1 to 0...80% (nonprofit share)
-function valueToPercent(v: number): number {
-  return Math.round(((v + 1) / 2) * 80);
-}
+/**
+ * Schwelle für die Beschriftung, gleiche Konvention wie
+ * TREND_CLASSIFY_THRESHOLD in groups.ts (±0.15 der normierten Skala).
+ */
+const TREND_THRESHOLD = 0.15;
 
 function getColor(v: number): string {
-  const normalized = (v + 1) / 2;
-  if (normalized < 0.33) return '#ff6b6b';
-  if (normalized < 0.66) return '#ffd43b';
-  return '#51cf66';
+  if (v < -TREND_THRESHOLD) return '#ff6b6b';
+  if (v > TREND_THRESHOLD) return '#51cf66';
+  return '#ffd43b';
 }
 
-export function GemeinnuetzigSektorWidget({ state }: Props) {
-  const value = state.gemeinnuetzig_kraft;
-  const predictedPct = valueToPercent(value);
-  const color = getColor(value);
+function formatIndex(v: number): string {
+  return `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toFixed(2)}`;
+}
 
-  // Scale: 0-80% nonprofit share
-  const leftPercent = (predictedPct / 80) * 100;
+function GemeinnuetzigBody({ state }: { state: MarketState }) {
+  // gemeinnuetzig_kraft ist ein normierter Index der Politik-ÄNDERUNG
+  // gegenüber heute, kein Marktanteil. Deshalb keine Prozent-Prognose und
+  // keine Referenzmarken (Zürich, Wien): der Nullpunkt ist «wie heute».
+  const value = state.gemeinnuetzig_kraft;
+  const color = getColor(value);
+  const label = value > TREND_THRESHOLD ? 'wird gestärkt' : value < -TREND_THRESHOLD ? 'wird geschwächt' : 'wie heute';
 
   return (
-    <div className="gemeinnuetzig-widget">
-      <div className="gemeinnuetzig-widget__title">Gemeinnütziger Sektor</div>
-
+    <>
       <div className="gemeinnuetzig-widget__bar-container">
         <div className="gemeinnuetzig-widget__gradient-bar">
           <span style={{ background: '#ff6b6b', flex: 1 }} />
@@ -44,37 +42,28 @@ export function GemeinnuetzigSektorWidget({ state }: Props) {
         </div>
         <div
           className="gemeinnuetzig-widget__indicator"
-          style={{ left: `${leftPercent}%`, borderTopColor: color }}
+          style={{ left: `${((value + 1) / 2) * 100}%`, borderTopColor: color }}
         />
-        {/* Reference markers */}
-        {REFERENCES.map((ref) => (
-          <div
-            key={ref.label}
-            className="gemeinnuetzig-widget__ref"
-            style={{ left: `${(ref.value / 80) * 100}%` }}
-            title={`${ref.label}: ${ref.value}%`}
-          >
-            <div className="gemeinnuetzig-widget__ref-line" />
-          </div>
-        ))}
       </div>
-
       <div className="gemeinnuetzig-widget__labels">
-        <span>schwach</span>
-        <span>stark</span>
+        <span>schwächer</span>
+        <span>stärker</span>
       </div>
-
       <div className="gemeinnuetzig-widget__value" style={{ color }}>
-        {predictedPct}% prognostiziert
+        {label} ({formatIndex(value)})
       </div>
+    </>
+  );
+}
 
-      <div className="gemeinnuetzig-widget__refs">
-        {REFERENCES.map((ref) => (
-          <span key={ref.label} className="gemeinnuetzig-widget__ref-label">
-            {ref.label}: {ref.value}%
-          </span>
-        ))}
-      </div>
+export function GemeinnuetzigSektorWidget({ state, baselineState }: Props) {
+  return (
+    <div className="gemeinnuetzig-widget">
+      <div className="gemeinnuetzig-widget__title">Gemeinnütziger Sektor</div>
+      <CompareColumns
+        baseline={baselineState && <GemeinnuetzigBody state={baselineState} />}
+        current={<GemeinnuetzigBody state={state} />}
+      />
     </div>
   );
 }

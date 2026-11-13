@@ -206,6 +206,7 @@ status_counts:
 | ID | Titel | Jahr | Typ | Status | DAG-Relevanz |
 |----|-------|------|-----|--------|-------------- |
 | CH-010 | Eigenmietwert-Abschaffung: Auswirkungen auf Wohneigentum in der Schweiz (Wüest Partner) | 2026 | working-paper | found | steuer_eigenmietwert, angebotspotenzial, nachfragedruck |
+| CH-012 | Mietpreis-Initiative und indirekter Gegenvorschlag — Kriterien, Uhren, Kontextwerte | 2026 | synthesis | evaluated | mietrecht_kriterium, mietrecht_durchsetzung, ctx:teuerung, vergleichsmiete_aktiv |
 
 ## Verbleibende Lücken nach Gap-Filling (Stand 2026-04-12)
 

@@ -17,7 +17,9 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 2,
       "bevoelkerungstrend": 1,
       "marktenge": 2,
-      "mietbelastungs_grenze": 2
+      "mietbelastungs_grenze": 2,
+      "teuerung": -1,
+      "referenzzins_aenderung": 0
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -44,6 +46,8 @@ export const cities: CityConfig[] = [
       "mietrecht_kuendigungsschutz": 2,
       "mietrecht_mietzinsindex": 0,
       "mietrecht_untervermietung": 1,
+      "mietrecht_kriterium": 1,
+      "mietrecht_durchsetzung": 0,
       "steuer_grundstueckgewinn": 1,
       "steuer_eigenmietwert": 1,
       "steuer_leerstandsabgabe": 0,
@@ -79,7 +83,9 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 2,
       "bevoelkerungstrend": -1,
       "marktenge": 2,
-      "mietbelastungs_grenze": 2
+      "mietbelastungs_grenze": 2,
+      "teuerung": -1,
+      "referenzzins_aenderung": 0
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -106,6 +112,8 @@ export const cities: CityConfig[] = [
       "mietrecht_kuendigungsschutz": 2,
       "mietrecht_mietzinsindex": 0,
       "mietrecht_untervermietung": 1,
+      "mietrecht_kriterium": 1,
+      "mietrecht_durchsetzung": 0,
       "steuer_grundstueckgewinn": 1,
       "steuer_eigenmietwert": 1,
       "steuer_leerstandsabgabe": 0,
@@ -141,7 +149,9 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 2,
       "bevoelkerungstrend": -1,
       "marktenge": 1,
-      "mietbelastungs_grenze": 2
+      "mietbelastungs_grenze": 2,
+      "teuerung": -1,
+      "referenzzins_aenderung": 0
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -168,6 +178,8 @@ export const cities: CityConfig[] = [
       "mietrecht_kuendigungsschutz": 2,
       "mietrecht_mietzinsindex": 0,
       "mietrecht_untervermietung": 1,
+      "mietrecht_kriterium": 1,
+      "mietrecht_durchsetzung": 0,
       "steuer_grundstueckgewinn": 1,
       "steuer_eigenmietwert": 1,
       "steuer_leerstandsabgabe": 0,
@@ -203,7 +215,9 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 2,
       "bevoelkerungstrend": -1,
       "marktenge": 2,
-      "mietbelastungs_grenze": 2
+      "mietbelastungs_grenze": 2,
+      "teuerung": -1,
+      "referenzzins_aenderung": 0
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -230,6 +244,8 @@ export const cities: CityConfig[] = [
       "mietrecht_kuendigungsschutz": 1,
       "mietrecht_mietzinsindex": 0,
       "mietrecht_untervermietung": 1,
+      "mietrecht_kriterium": 1,
+      "mietrecht_durchsetzung": 0,
       "steuer_grundstueckgewinn": 1,
       "steuer_eigenmietwert": 1,
       "steuer_leerstandsabgabe": 0,
@@ -265,7 +281,9 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": -1,
       "marktenge": 2,
-      "mietbelastungs_grenze": 1
+      "mietbelastungs_grenze": 1,
+      "teuerung": -1,
+      "referenzzins_aenderung": 0
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -292,6 +310,8 @@ export const cities: CityConfig[] = [
       "mietrecht_kuendigungsschutz": 1,
       "mietrecht_mietzinsindex": 0,
       "mietrecht_untervermietung": 1,
+      "mietrecht_kriterium": 1,
+      "mietrecht_durchsetzung": 0,
       "steuer_grundstueckgewinn": 1,
       "steuer_eigenmietwert": 1,
       "steuer_leerstandsabgabe": 0,
@@ -327,7 +347,9 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": -1,
       "marktenge": 2,
-      "mietbelastungs_grenze": 1
+      "mietbelastungs_grenze": 1,
+      "teuerung": -1,
+      "referenzzins_aenderung": 0
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -354,6 +376,8 @@ export const cities: CityConfig[] = [
       "mietrecht_kuendigungsschutz": 2,
       "mietrecht_mietzinsindex": 0,
       "mietrecht_untervermietung": 1,
+      "mietrecht_kriterium": 1,
+      "mietrecht_durchsetzung": 0,
       "steuer_grundstueckgewinn": 1,
       "steuer_eigenmietwert": 1,
       "steuer_leerstandsabgabe": 0,
@@ -389,7 +413,9 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": -1,
       "marktenge": 1,
-      "mietbelastungs_grenze": 1
+      "mietbelastungs_grenze": 1,
+      "teuerung": -1,
+      "referenzzins_aenderung": 0
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -416,6 +442,8 @@ export const cities: CityConfig[] = [
       "mietrecht_kuendigungsschutz": 1,
       "mietrecht_mietzinsindex": 0,
       "mietrecht_untervermietung": 1,
+      "mietrecht_kriterium": 1,
+      "mietrecht_durchsetzung": 0,
       "steuer_grundstueckgewinn": 1,
       "steuer_eigenmietwert": 1,
       "steuer_leerstandsabgabe": 0,
@@ -451,7 +479,9 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": -1,
       "marktenge": 0,
-      "mietbelastungs_grenze": 1
+      "mietbelastungs_grenze": 1,
+      "teuerung": -1,
+      "referenzzins_aenderung": 0
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -478,6 +508,8 @@ export const cities: CityConfig[] = [
       "mietrecht_kuendigungsschutz": 1,
       "mietrecht_mietzinsindex": 0,
       "mietrecht_untervermietung": 1,
+      "mietrecht_kriterium": 1,
+      "mietrecht_durchsetzung": 0,
       "steuer_grundstueckgewinn": 1,
       "steuer_eigenmietwert": 1,
       "steuer_leerstandsabgabe": 0,
@@ -513,7 +545,9 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": -1,
       "marktenge": 1,
-      "mietbelastungs_grenze": 1
+      "mietbelastungs_grenze": 1,
+      "teuerung": -1,
+      "referenzzins_aenderung": 0
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -540,6 +574,8 @@ export const cities: CityConfig[] = [
       "mietrecht_kuendigungsschutz": 1,
       "mietrecht_mietzinsindex": 0,
       "mietrecht_untervermietung": 0,
+      "mietrecht_kriterium": 1,
+      "mietrecht_durchsetzung": 0,
       "steuer_grundstueckgewinn": 1,
       "steuer_eigenmietwert": 1,
       "steuer_leerstandsabgabe": 0,
@@ -575,7 +611,9 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": -1,
       "marktenge": 1,
-      "mietbelastungs_grenze": 1
+      "mietbelastungs_grenze": 1,
+      "teuerung": -1,
+      "referenzzins_aenderung": 0
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -602,6 +640,8 @@ export const cities: CityConfig[] = [
       "mietrecht_kuendigungsschutz": 1,
       "mietrecht_mietzinsindex": 0,
       "mietrecht_untervermietung": 0,
+      "mietrecht_kriterium": 1,
+      "mietrecht_durchsetzung": 0,
       "steuer_grundstueckgewinn": 1,
       "steuer_eigenmietwert": 1,
       "steuer_leerstandsabgabe": 0,

@@ -165,7 +165,7 @@ const BERLIN_BASELINE: CityParams40 = {
   gemeinnuetzig_mindestanteil: 1, gemeinnuetzig_foerderfonds: 1, gemeinnuetzig_baurecht: 1,
   gemeinnuetzig_belegungsvorschriften: 1, gemeinnuetzig_sozialmischung: 1,
   mietrecht_kostenmiete: 2, mietrecht_anfangsmiete: 2, mietrecht_mietzinstransparenz: 2,
-  mietrecht_kuendigungsschutz: 2, mietrecht_mietzinsindex: 2, mietrecht_untervermietung: 2,
+  mietrecht_kuendigungsschutz: 2, mietrecht_mietzinsindex: 2, mietrecht_kriterium: 1, mietrecht_durchsetzung: 0, mietrecht_untervermietung: 2,
   steuer_grundstueckgewinn: 1, steuer_eigenmietwert: 1, steuer_leerstandsabgabe: 1,
   steuer_handaenderung: 1, steuer_kapitalgewinnprivatpersonen: 1,
   kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 1, kapital_hypothekarregulierung: 1,
@@ -184,7 +184,7 @@ const ZUERICH_V2: CityParams40 = {
   gemeinnuetzig_mindestanteil: 2, gemeinnuetzig_foerderfonds: 2, gemeinnuetzig_baurecht: 2,
   gemeinnuetzig_belegungsvorschriften: 1, gemeinnuetzig_sozialmischung: 1,
   mietrecht_kostenmiete: 1, mietrecht_anfangsmiete: 1, mietrecht_mietzinstransparenz: 1,
-  mietrecht_kuendigungsschutz: 1, mietrecht_mietzinsindex: 1, mietrecht_untervermietung: 1,
+  mietrecht_kuendigungsschutz: 1, mietrecht_mietzinsindex: 1, mietrecht_kriterium: 1, mietrecht_durchsetzung: 0, mietrecht_untervermietung: 1,
   steuer_grundstueckgewinn: 2, steuer_eigenmietwert: 2, steuer_leerstandsabgabe: 1,
   steuer_handaenderung: 2, steuer_kapitalgewinnprivatpersonen: 1,
   kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 1, kapital_hypothekarregulierung: 1,
@@ -360,11 +360,12 @@ const BASE_CONSTRAINTS: Constraint[] = [
     diffB: { bau_einspracherecht_dritte: { from: 1, to: 2 } },
     phase: 0, field: 'marketState.angebotspotenzial', relation: 'lt',
   },
-  // CH-007: Zonenreserve senkt nachfragedruck (NOTE: this tests zonenreserve which has sign=-1 for angebotspotenzial!)
+  // CH-007: Mehr Bauland senkt nachfragedruck. Skala: 0 = grosszügige
+  // Reserven, 2 = sehr knapp → mehr Bauland ist der Schritt 2→0.
   {
     id: 'boden-ch007-nachfrage-p2',
-    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { raumplanung_zonenreserve: 0 }),
-    diffA: { raumplanung_zonenreserve: { from: 0, to: 2 } },
+    context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { raumplanung_zonenreserve: 2 }),
+    diffA: { raumplanung_zonenreserve: { from: 2, to: 0 } },
     diffB: {},
     phase: 2, field: 'marketState.nachfragedruck', relation: 'lt',
   },

@@ -37,7 +37,7 @@ const SG_LIKE: CityParams40 = {
   gemeinnuetzig_mindestanteil: 2, gemeinnuetzig_foerderfonds: 2, gemeinnuetzig_baurecht: 2,
   gemeinnuetzig_belegungsvorschriften: 2, gemeinnuetzig_sozialmischung: 2,
   mietrecht_kostenmiete: 2, mietrecht_anfangsmiete: 2, mietrecht_mietzinstransparenz: 2,
-  mietrecht_kuendigungsschutz: 2, mietrecht_mietzinsindex: 2, mietrecht_untervermietung: 2,
+  mietrecht_kuendigungsschutz: 2, mietrecht_mietzinsindex: 2, mietrecht_kriterium: 1, mietrecht_durchsetzung: 0, mietrecht_untervermietung: 2,
   steuer_grundstueckgewinn: 2, steuer_eigenmietwert: 1, steuer_leerstandsabgabe: 2,
   steuer_handaenderung: 2, steuer_kapitalgewinnprivatpersonen: 1,
   kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 2, kapital_hypothekarregulierung: 2,
@@ -57,7 +57,7 @@ const STOCKHOLM_LIKE: CityParams40 = {
   gemeinnuetzig_mindestanteil: 2, gemeinnuetzig_foerderfonds: 2, gemeinnuetzig_baurecht: 2,
   gemeinnuetzig_belegungsvorschriften: 2, gemeinnuetzig_sozialmischung: 2,
   mietrecht_kostenmiete: 2, mietrecht_anfangsmiete: 2, mietrecht_mietzinstransparenz: 2,
-  mietrecht_kuendigungsschutz: 2, mietrecht_mietzinsindex: 2, mietrecht_untervermietung: 2,
+  mietrecht_kuendigungsschutz: 2, mietrecht_mietzinsindex: 2, mietrecht_kriterium: 1, mietrecht_durchsetzung: 0, mietrecht_untervermietung: 2,
   steuer_grundstueckgewinn: 2, steuer_eigenmietwert: 1, steuer_leerstandsabgabe: 1,
   steuer_handaenderung: 2, steuer_kapitalgewinnprivatpersonen: 1,
   kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 2, kapital_hypothekarregulierung: 2,
@@ -75,7 +75,7 @@ const ZUERICH_V2: CityParams40 = {
   gemeinnuetzig_mindestanteil: 2, gemeinnuetzig_foerderfonds: 2, gemeinnuetzig_baurecht: 2,
   gemeinnuetzig_belegungsvorschriften: 1, gemeinnuetzig_sozialmischung: 1,
   mietrecht_kostenmiete: 1, mietrecht_anfangsmiete: 1, mietrecht_mietzinstransparenz: 1,
-  mietrecht_kuendigungsschutz: 1, mietrecht_mietzinsindex: 1, mietrecht_untervermietung: 1,
+  mietrecht_kuendigungsschutz: 1, mietrecht_mietzinsindex: 1, mietrecht_kriterium: 1, mietrecht_durchsetzung: 0, mietrecht_untervermietung: 1,
   steuer_grundstueckgewinn: 2, steuer_eigenmietwert: 2, steuer_leerstandsabgabe: 1,
   steuer_handaenderung: 2, steuer_kapitalgewinnprivatpersonen: 1,
   kapital_auslaendische_investoren: 1, kapital_institutionelle_regulierung: 1, kapital_hypothekarregulierung: 1,
@@ -233,7 +233,7 @@ describe('Stockholm Schweden (SE-001): Mietregulierung → Extreme Marktfriktion
       mietrecht_mietzinstransparenz: { from: 1, to: 2 },
       mietrecht_kuendigungsschutz: { from: 1, to: 2 },
       mietrecht_mietzinsindex:     { from: 1, to: 2 },
-      mietrecht_untervermietung:   { from: 1, to: 2 },
+      mietrecht_kriterium: 1, mietrecht_durchsetzung: 0, mietrecht_untervermietung:   { from: 1, to: 2 },
     };
     const zuerich = phases(ZUERICH_V2, NEUTRAL_CONTEXT, {});
     const stockholm = phases(ZUERICH_V2, NEUTRAL_CONTEXT, stockholmDiff);

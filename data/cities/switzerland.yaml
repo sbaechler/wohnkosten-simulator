@@ -19,6 +19,10 @@
     bevoelkerungstrend: 1
     marktenge: 2
     mietbelastungs_grenze: 2
+    # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
+    teuerung: -1
+    # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
+    referenzzins_aenderung: 0
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 2
@@ -44,6 +48,8 @@
     mietrecht_kuendigungsschutz: 2
     mietrecht_mietzinsindex: 0
     mietrecht_untervermietung: 1
+    mietrecht_kriterium: 1
+    mietrecht_durchsetzung: 0
     steuer_grundstueckgewinn: 1
     steuer_eigenmietwert: 1
     steuer_leerstandsabgabe: 0
@@ -76,6 +82,10 @@
     bevoelkerungstrend: -1
     marktenge: 2
     mietbelastungs_grenze: 2
+    # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
+    teuerung: -1
+    # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
+    referenzzins_aenderung: 0
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 2
@@ -101,6 +111,8 @@
     mietrecht_kuendigungsschutz: 2
     mietrecht_mietzinsindex: 0
     mietrecht_untervermietung: 1
+    mietrecht_kriterium: 1
+    mietrecht_durchsetzung: 0
     steuer_grundstueckgewinn: 1
     steuer_eigenmietwert: 1
     steuer_leerstandsabgabe: 0
@@ -133,6 +145,10 @@
     bevoelkerungstrend: -1
     marktenge: 1
     mietbelastungs_grenze: 2
+    # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
+    teuerung: -1
+    # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
+    referenzzins_aenderung: 0
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 2
@@ -158,6 +174,8 @@
     mietrecht_kuendigungsschutz: 2
     mietrecht_mietzinsindex: 0
     mietrecht_untervermietung: 1
+    mietrecht_kriterium: 1
+    mietrecht_durchsetzung: 0
     steuer_grundstueckgewinn: 1
     steuer_eigenmietwert: 1
     steuer_leerstandsabgabe: 0
@@ -190,6 +208,10 @@
     bevoelkerungstrend: -1
     marktenge: 2
     mietbelastungs_grenze: 2
+    # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
+    teuerung: -1
+    # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
+    referenzzins_aenderung: 0
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -215,6 +237,8 @@
     mietrecht_kuendigungsschutz: 1
     mietrecht_mietzinsindex: 0
     mietrecht_untervermietung: 1
+    mietrecht_kriterium: 1
+    mietrecht_durchsetzung: 0
     steuer_grundstueckgewinn: 1
     steuer_eigenmietwert: 1
     steuer_leerstandsabgabe: 0
@@ -247,6 +271,10 @@
     bevoelkerungstrend: -1
     marktenge: 2
     mietbelastungs_grenze: 1
+    # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
+    teuerung: -1
+    # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
+    referenzzins_aenderung: 0
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -272,6 +300,8 @@
     mietrecht_kuendigungsschutz: 1
     mietrecht_mietzinsindex: 0
     mietrecht_untervermietung: 1
+    mietrecht_kriterium: 1
+    mietrecht_durchsetzung: 0
     steuer_grundstueckgewinn: 1
     steuer_eigenmietwert: 1
     steuer_leerstandsabgabe: 0
@@ -304,6 +334,10 @@
     bevoelkerungstrend: -1
     marktenge: 2
     mietbelastungs_grenze: 1
+    # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
+    teuerung: -1
+    # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
+    referenzzins_aenderung: 0
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 1
@@ -329,6 +363,8 @@
     mietrecht_kuendigungsschutz: 2
     mietrecht_mietzinsindex: 0
     mietrecht_untervermietung: 1
+    mietrecht_kriterium: 1
+    mietrecht_durchsetzung: 0
     steuer_grundstueckgewinn: 1
     steuer_eigenmietwert: 1
     steuer_leerstandsabgabe: 0
@@ -361,6 +397,10 @@
     bevoelkerungstrend: -1
     marktenge: 1
     mietbelastungs_grenze: 1
+    # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
+    teuerung: -1
+    # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
+    referenzzins_aenderung: 0
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -386,6 +426,8 @@
     mietrecht_kuendigungsschutz: 1
     mietrecht_mietzinsindex: 0
     mietrecht_untervermietung: 1
+    mietrecht_kriterium: 1
+    mietrecht_durchsetzung: 0
     steuer_grundstueckgewinn: 1
     steuer_eigenmietwert: 1
     steuer_leerstandsabgabe: 0
@@ -418,6 +460,10 @@
     bevoelkerungstrend: -1
     marktenge: 0
     mietbelastungs_grenze: 1
+    # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
+    teuerung: -1
+    # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
+    referenzzins_aenderung: 0
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -443,6 +489,8 @@
     mietrecht_kuendigungsschutz: 1
     mietrecht_mietzinsindex: 0
     mietrecht_untervermietung: 1
+    mietrecht_kriterium: 1
+    mietrecht_durchsetzung: 0
     steuer_grundstueckgewinn: 1
     steuer_eigenmietwert: 1
     steuer_leerstandsabgabe: 0
@@ -475,6 +523,10 @@
     bevoelkerungstrend: -1
     marktenge: 1
     mietbelastungs_grenze: 1
+    # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
+    teuerung: -1
+    # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
+    referenzzins_aenderung: 0
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -500,6 +552,8 @@
     mietrecht_kuendigungsschutz: 1
     mietrecht_mietzinsindex: 0
     mietrecht_untervermietung: 0
+    mietrecht_kriterium: 1
+    mietrecht_durchsetzung: 0
     steuer_grundstueckgewinn: 1
     steuer_eigenmietwert: 1
     steuer_leerstandsabgabe: 0
@@ -532,6 +586,10 @@
     bevoelkerungstrend: -1
     marktenge: 1
     mietbelastungs_grenze: 1
+    # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
+    teuerung: -1
+    # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
+    referenzzins_aenderung: 0
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -557,6 +615,8 @@
     mietrecht_kuendigungsschutz: 1
     mietrecht_mietzinsindex: 0
     mietrecht_untervermietung: 0
+    mietrecht_kriterium: 1
+    mietrecht_durchsetzung: 0
     steuer_grundstueckgewinn: 1
     steuer_eigenmietwert: 1
     steuer_leerstandsabgabe: 0

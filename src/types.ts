@@ -1,8 +1,7 @@
 // ============================================================
 // Domain Types — Wohnkosten-Simulator
-// E0: 40 atomic parameters + 5 context factors
-// E1: 10 MarketState variables (normalized –1…+1)
-// E2: 5 DerivedIndicators
+// E0: 42 atomare Parameter (Name CityParams40 ist historisch) + Kontext
+// E1: lineare Marktvariablen plus provisorische Mietrechts-Zustände (CH-012)
 // ============================================================
 //
 // Sotomo Wohnraumstudie ZH 2025 (Sep.):
@@ -47,6 +46,16 @@ export type CityParams40 = {
   mietrecht_kuendigungsschutz: ParamValue;
   mietrecht_mietzinsindex: ParamValue;
   mietrecht_untervermietung: ParamValue;
+  /**
+   * Welches Missbrauchskriterium bindet. Provisorisch, CH-012.
+   * 0 = Kosten plus Rendite exklusiv, 1 = heutiges Recht, 2 = Vergleichsmiete bindend.
+   */
+  mietrecht_kriterium: ParamValue;
+  /**
+   * Wie stark der Deckel vollzogen wird. Provisorisch, CH-012.
+   * 0 = nur auf Klage, 1 = erleichterte Anfechtung, 2 = automatische Prüfung.
+   */
+  mietrecht_durchsetzung: ParamValue;
   // 5. Steuern & Abgaben
   steuer_grundstueckgewinn: ParamValue;
   steuer_eigenmietwert: ParamValue;
@@ -85,6 +94,30 @@ export interface CityContext {
    * Marktfriktion als strukturelle Rahmenbedingung.
    */
   mietbelastungs_grenze: ContextValue;
+  /**
+   * LIK-Jahresteuerung, national, Bins in TEUERUNG_BINS (mietrecht-regime.ts).
+   * 2025: +0.2 % → −1. CH-012. Fehlend in Tests = neutral (0), nicht der Stadtwert.
+   */
+  teuerung?: ContextValue;
+  /**
+   * ÄNDERUNG des hypothekarischen Referenzzinssatzes in den letzten zwölf
+   * Monaten, national, Bins in REFERENZZINS_BINS (mietrecht-regime.ts).
+   * Nicht das Niveau: ein tiefer, aber unveränderter Satz begründet weder
+   * Erhöhung noch Senkung. Stand 2.9.2026 unverändert bei 1.25 % → 0. CH-012.
+   * Fehlend = unverändert (0).
+   */
+  referenzzins_aenderung?: ContextValue;
+  /**
+   * Anteil Mietwohnungen in Gebäuden mit Baujahr ≤ Stichtag − 30.
+   * BGE 144 III 514. Nicht gefüllt — fehlend heisst «nicht gemessen», nicht 0.
+   */
+  anteil_altliegenschaft?: number;
+  /**
+   * Abstand der Bestandsmiete über dem Kosten-plus-Rendite-Deckel, als Anteil.
+   * Nicht belegt. Nur mit mietlueckeEstimated setzen.
+   */
+  mietluecke?: number;
+  mietlueckeEstimated?: boolean;
   /**
    * Aktuelle Eigentumsverteilung (Anteile aller Wohneinheiten nach Eigentümertyp).
    *
@@ -189,6 +222,19 @@ export interface MarketState {
    * → Hohe Regulation → steilere Kurve (weniger Elastizität)
    */
   angebotspotenzial_regulation: number; // –1 … +1
+  /**
+   * Tor der Vergleichsmiete, 0…1. Provisorisch, CH-012.
+   * Im Status quo 0, auch wenn der Altanteil hoch wäre.
+   */
+  vergleichsmiete_aktiv: number;
+  /** Recht, den laufenden Vertrag zu bewegen. Plus = Erhöhungsspielraum. */
+  erhoehungsspielraum: number;
+  /** Bestandsmiete, plus = teuer. Nicht das Schutzlevel. */
+  bestandsmiete: number;
+  /** Anfangsmiete, plus = teuer. */
+  anfangsmiete: number;
+  /** Verweildauer, plus = länger. Nicht marktfriktion. */
+  verweildauer: number;
 }
 
 // ── E2: Abgeleitete Indikatoren ──────────────────────────────────────────────
