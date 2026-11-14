@@ -1,12 +1,13 @@
 #!/usr/bin/env npx tsx
 /**
- * calibrate.ts — Gradient-Descent Kalibrierung der DAG-Gewichte
+ * calibrate.ts — Kalibrierung der DAG-Gewichte
  *
- * Optimiert die Phasen-Gewichte aller E0/ctx→E1-Kanten (3 pro Kante) so, dass
- * alle fachlichen Tests (research-basierte Constraints) erfüllt werden.
- * Engine-Bausteine (PERSISTENCE, PHASE_BASE_MULTIPLIER, marketModulator,
- * getE0Delta, computeDerivedIndicators) werden aus src/model importiert —
- * Kalibrierung und Laufzeit rechnen damit garantiert identisch.
+ * Prüft die Phasen-Gewichte aller E0/ctx→E1-Kanten (3 pro Kante) gegen
+ * research-basierte Constraints und optimiert sie auf Wunsch per Gradient
+ * Descent. Der Forward-Pass ist die Laufzeit-Engine selbst
+ * (`computePhasePipeline` mit eigenen Kanten, inkl. Mietrechts-Regime,
+ * gemeinsamem Nenner `E1_NENNER` und Übertrag `PERSISTENCE`); Kalibrierung
+ * und Laufzeit rechnen damit garantiert identisch.
  *
  * Usage: npx tsx scripts/calibrate.ts [--dry-run] [--iterations N] [--lr RATE]
  *
@@ -14,45 +15,35 @@
  *   --dry-run       Nur Constraints prüfen, keine Optimierung
  *   --iterations N  Max Iterationen (default: 2000)
  *   --lr RATE       Learning Rate (default: 0.05)
+ *
+ * Stand 2026-11-15 (Verbesserungsplan Fix-13): die Gewichte sind von Hand
+ * gesetzt und mit `--dry-run` geprüft (0 Verletzungen). Der Optimierer hält
+ * Kanten mit `profilQuelle: 'Annahme'` auf gleichem Impuls in allen Phasen
+ * und schreibt nur die Zahlen in `weights: [...]` zurück; Kommentare und
+ * `profilQuelle` bleiben stehen.
  */
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PHASE_WEIGHTED_EDGES } from '../src/model/phase-weights.ts';
-import {
-  E1_NODES,
-  E1_NORMALIZATION,
-  PERSISTENCE,
-  PHASE_BASE_MULTIPLIER,
-  marketModulator,
-  getE0Delta,
-} from '../src/model/compute-phases.ts';
-import { computeDerivedIndicators } from '../src/model/derived.ts';
+import { PHASE_WEIGHTED_EDGES, type PhaseEdge } from '../src/model/phase-weights.ts';
+import { computePhasePipeline } from '../src/model/compute-phases.ts';
+import { computeGroupTrends, type GroupId } from '../src/model/groups.ts';
+import { computeMieteBelastung } from '../src/model/belastung.ts';
 import { cities } from '../src/generated/cities.ts';
 import type { CityContext, CityParams40, ParamsDiff40, MarketState, DerivedIndicators } from '../src/types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 1. FORWARD PASS — Reproduces compute-phases.ts + derived.ts with mutable weights
+// 1. FORWARD PASS — Laufzeit-Engine mit veränderbaren Gewichten
 // ═══════════════════════════════════════════════════════════════════════════════
 
-interface EdgeTemplate {
-  from: string;
-  to: string;
-  sign: 1 | -1;
-}
-
-// Extract the edge structure (immutable) from PHASE_WEIGHTED_EDGES
-const EDGE_TEMPLATES: EdgeTemplate[] = PHASE_WEIGHTED_EDGES.map(e => ({
-  from: e.from,
-  to: e.to,
-  sign: e.sign,
-}));
-
-const NUM_EDGES = EDGE_TEMPLATES.length;
+const NUM_EDGES = PHASE_WEIGHTED_EDGES.length;
 const NUM_WEIGHTS = NUM_EDGES * 3; // 3 phases per edge
+
+/** Kanten, deren Impuls in allen Phasen gleich bleiben muss (profilQuelle 'Annahme'). */
+const NEUTRAL_EDGES: boolean[] = PHASE_WEIGHTED_EDGES.map(e => e.profilQuelle === 'Annahme');
 
 // Extract initial weights as flat array [e0p0, e0p1, e0p2, e1p0, e1p1, e1p2, ...]
 function extractWeights(): number[] {
@@ -63,8 +54,11 @@ function extractWeights(): number[] {
   return w;
 }
 
-function clamp(v: number, lo = -1, hi = 1): number {
-  return Math.max(lo, Math.min(hi, v));
+function edgesFromWeights(weights: number[]): PhaseEdge[] {
+  return PHASE_WEIGHTED_EDGES.map((e, i) => ({
+    ...e,
+    weights: [weights[i * 3], weights[i * 3 + 1], weights[i * 3 + 2]] as const,
+  }));
 }
 
 interface PhaseOutput {
@@ -79,63 +73,29 @@ interface PhaseOutput {
 function forwardPass(
   weights: number[],
   context: CityContext,
-  _params: CityParams40,
   diff: ParamsDiff40,
 ): PhaseOutput[] {
-  const results: PhaseOutput[] = [];
-  let carryE1: MarketState | null = null;
-
-  for (let phase = 0; phase < 3; phase++) {
-    const newState = {} as MarketState;
-    const marketMult = marketModulator(context.marktenge);
-
-    for (const nodeId of E1_NODES) {
-      const prevValue = carryE1 ? carryE1[nodeId] : 0;
-
-      // Find all edges targeting this node
-      const incomingIndices: number[] = [];
-      for (let i = 0; i < NUM_EDGES; i++) {
-        if (EDGE_TEMPLATES[i].to === nodeId) incomingIndices.push(i);
-      }
-
-      if (incomingIndices.length === 0) {
-        newState[nodeId] = clamp(prevValue * PERSISTENCE);
-        continue;
-      }
-
-      let numerator = 0;
-
-      for (const edgeIdx of incomingIndices) {
-        const edge = EDGE_TEMPLATES[edgeIdx];
-        const delta = getE0Delta(edge.from, diff, context);
-        const w = weights[edgeIdx * 3 + phase];
-        numerator += edge.sign * w * delta;
-      }
-
-      // Eingefrorene Normalisierung (siehe E1_NORMALIZATION in compute-phases.ts).
-      // ACHTUNG: Nach einer Re-Kalibrierung, die Gewichte substanziell ändert,
-      // sollte die Tabelle bewusst neu eingefroren werden.
-      const denominator = E1_NORMALIZATION[nodeId][phase];
-      const weightedSum = denominator === 0 ? 0 : numerator / denominator;
-      // Identisch zur Laufzeit-Engine (computeE1WithPhaseAndCarry):
-      // Phase-Basis-Multiplikator + Marktverengungs-Modulator anwenden.
-      newState[nodeId] = clamp(prevValue * PERSISTENCE + weightedSum * PHASE_BASE_MULTIPLIER[phase] * marketMult);
-    }
-
-    // E2 aus der Laufzeit-Engine (Single Source of Truth: derived.ts / E2_TERMS)
-    const derived: DerivedIndicators = computeDerivedIndicators(newState);
-
-    carryE1 = newState;
-    results.push({ marketState: newState, derived });
-  }
-
-  return results;
+  const edges = edgesFromWeights(weights);
+  return [...computePhasePipeline(context, diff, edges)].map(r => ({
+    marketState: r.marketState,
+    derived: r.derived,
+  }));
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 2. CONSTRAINT DEFINITIONS — Extracted from fachlich tests
 // ═══════════════════════════════════════════════════════════════════════════════
 
+/**
+ * Relationen:
+ *   gt / lt / gte / lte   Wert(A) gegen Wert(B) in `phase`.
+ *   abs_gt                |Wert(A) − Wert(∅)| > |Wert(B) − Wert(∅)| in `phase`
+ *                         (Rangfolge zweier Hebel, Richtung egal).
+ *   near                  |Wert(A) − Wert(B)| ≤ `threshold` in `phase`
+ *                         («kein messbarer Effekt»).
+ *   delta_lt_phase        Δ = Wert(A) − Wert(B); Δ in `phase` < Δ in `phaseB`
+ *                         (Effekt wird über die Zeit stärker negativ).
+ */
 interface Constraint {
   id: string;
   context: CityContext;
@@ -143,16 +103,34 @@ interface Constraint {
   diffA: ParamsDiff40;     // "with change" scenario
   diffB: ParamsDiff40;     // "without change" / reference scenario
   phase: 0 | 1 | 2;
-  field: string;           // e.g. "marketState.angebotspotenzial"
-  relation: 'gt' | 'lt' | 'gte' | 'lte'; // A relation B
+  /** z. B. "marketState.angebotspotenzial", "derived.x", "group.<GroupId>", "belastung.miete" */
+  field: string;
+  relation: 'gt' | 'lt' | 'gte' | 'lte' | 'abs_gt' | 'near' | 'delta_lt_phase';
+  threshold?: number;
+  phaseB?: 0 | 1 | 2;
 }
 
 function getField(output: PhaseOutput, field: string): number {
   const [group, key] = field.split('.');
   if (group === 'marketState') return output.marketState[key as keyof MarketState];
   if (group === 'derived') return output.derived[key as keyof DerivedIndicators];
+  if (group === 'group') {
+    const t = computeGroupTrends(output.marketState).find(g => g.group.id === (key as GroupId));
+    if (!t) throw new Error(`Unknown group: ${key}`);
+    return t.value;
+  }
+  if (group === 'belastung' && key === 'miete') return computeMieteBelastung(output.marketState);
   throw new Error(`Unknown field: ${field}`);
 }
+
+/**
+ * Schwelle für «kein messbarer Preiseffekt» (US-007 Minneapolis: in den
+ * ersten Jahren nach dem Upzoning kein messbarer Preiseffekt). 0.02
+ * Index-Punkte auf der Trendskala −1…+1 sind eine Setzung: ein Achtel der
+ * Schwelle 0.15, ab der der Gruppen-Trend als «steigend»/«sinkend» angezeigt
+ * wird (groups.ts), und viermal die Treiber-Anzeigeschwelle 0.005.
+ */
+const KEIN_MESSBARER_EFFEKT = 0.02;
 
 // ── City baselines and contexts used in tests ─────────────────────────────────
 
@@ -209,6 +187,17 @@ function withOverrides(base: CityParams40, overrides: Partial<CityParams40>): Ci
 }
 
 // ── Constraints from all fachlich tests ───────────────────────────────────────
+//
+// Skalenrichtung geprüft am 2026-11-15 (Verbesserungsplan Fix-13, Lehre aus
+// Fix 0.1): jeder der 56 bestehenden Constraints gegen `hoeherBedeutet` in
+// params.ts gelesen. Kein weiterer Constraint liest die Skala verkehrt herum.
+// Angepasst wurden nur die zwei, die eine gestrichene Kante prüften
+// (CH-007, AT-002, siehe dort). Fachlich strittig, aber richtig gelesen:
+// 'mietrecht-ch003-marktfriktion-p0' (Offenlegung → mehr Friktion) und
+// 'steuer-ch006-angebot-p2' (Zweitwohnungsgrenze → weniger Angebot), beide
+// im Verbesserungsplan Fix-1 als strittig vermerkt. Doppelt vorhanden, aber
+// harmlos: 'mietrecht-berlin-schutzlevel-p0' = 'mietrecht-paris-schutzlevel-p0',
+// 'mietrecht-ch005-fluktuation-p0' = 'mietrecht-ch005-preisspreizung-p0'.
 
 const BASE_CONSTRAINTS: Constraint[] = [
   // ═══ mietrecht-fachlich.test.ts ═══
@@ -360,14 +349,17 @@ const BASE_CONSTRAINTS: Constraint[] = [
     diffB: { bau_einspracherecht_dritte: { from: 1, to: 2 } },
     phase: 0, field: 'marketState.angebotspotenzial', relation: 'lt',
   },
-  // CH-007: Mehr Bauland senkt nachfragedruck. Skala: 0 = grosszügige
+  // CH-007: Mehr Bauland erhöht das Angebotspotenzial. Skala: 0 = grosszügige
   // Reserven, 2 = sehr knapp → mehr Bauland ist der Schritt 2→0.
+  // Bis 2026-11-15 'boden-ch007-nachfrage-p2' (nachfragedruck sinkt); die
+  // Kante zonenreserve → nachfragedruck ist als Doppelzählung gestrichen
+  // (Verbesserungsplan Fix-12).
   {
-    id: 'boden-ch007-nachfrage-p2',
+    id: 'boden-ch007-angebot-p2',
     context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { raumplanung_zonenreserve: 2 }),
     diffA: { raumplanung_zonenreserve: { from: 2, to: 0 } },
     diffB: {},
-    phase: 2, field: 'marketState.nachfragedruck', relation: 'lt',
+    phase: 2, field: 'marketState.angebotspotenzial', relation: 'gt',
   },
   // CH-008: Verdichtung erhöht Verdrängungsrisiko
   {
@@ -484,13 +476,16 @@ const BASE_CONSTRAINTS: Constraint[] = [
     diffB: {},
     phase: 2, field: 'marketState.angebotspotenzial', relation: 'lt',
   },
-  // AT-002: Gemeinnützig senkt nachfragedruck
+  // AT-002: Gemeinnützig dämpft die Marktmiete der Neumieter.
+  // Bis 2026-11-15 'steuer-at002-nachfrage-p0' (nachfragedruck sinkt); die
+  // Kanten gemeinnuetzig_* → nachfragedruck sind gestrichen (Fix-12), der
+  // Effekt läuft über gemeinnuetzig_kraft → Neumieter-Trend (Fix-11).
   {
-    id: 'steuer-at002-nachfrage-p0',
+    id: 'steuer-at002-neumieter-p0',
     context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { gemeinnuetzig_mindestanteil: 0, gemeinnuetzig_foerderfonds: 0, gemeinnuetzig_baurecht: 0 }),
     diffA: { gemeinnuetzig_mindestanteil: { from: 0, to: 2 }, gemeinnuetzig_foerderfonds: { from: 0, to: 2 }, gemeinnuetzig_baurecht: { from: 0, to: 2 } },
     diffB: {},
-    phase: 0, field: 'marketState.nachfragedruck', relation: 'lt',
+    phase: 0, field: 'group.normalverdiener_angebot', relation: 'lt',
   },
 
   // ═══ gemeinnuetzig-fachlich.test.ts ═══
@@ -686,6 +681,74 @@ const BASE_CONSTRAINTS: Constraint[] = [
   },
 ];
 
+// ═══ Rangfolge-Constraints (Verbesserungsplan Fix-13, 2026-11-15) ═══
+// Je eine Stufe. Auch als fachliche Tests in
+// src/model/__tests__/fachlich/rangfolge-fachlich.test.ts.
+
+/** Angebotshebel in der Richtung «mehr Angebot». */
+const ANGEBOTSHEBEL: Array<[string, ParamsDiff40]> = [
+  ['zonierung', { raumplanung_zonenreserve: { from: 2, to: 1 } }],
+  ['verdichtung', { raumplanung_verdichtung: { from: 1, to: 2 } }],
+  ['ausnuetzung', { raumplanung_ausnuetzungsziffer: { from: 1, to: 2 } }],
+];
+const VERGLEICHSHEBEL: Array<[string, ParamsDiff40]> = [
+  ['foerderfonds', { gemeinnuetzig_foerderfonds: { from: 1, to: 2 } }],
+  ['oev', { infra_oepnv: { from: 1, to: 2 } }],
+];
+/** GLOBAL-027/-029: Kostenmiete und Kündigungsschutz je eine Stufe strenger. */
+const MIETREGULIERUNG: ParamsDiff40 = {
+  mietrecht_kostenmiete: { from: 1, to: 2 },
+  mietrecht_kuendigungsschutz: { from: 1, to: 2 },
+};
+
+const RANG_CONSTRAINTS: Constraint[] = [
+  // summary.md: Angebot ist der dominante Hebel. Zonierung, Verdichtung und
+  // Ausnützung wirken auf Neumieter-Preise in P3 stärker als Förderfonds und ÖV.
+  ...ANGEBOTSHEBEL.flatMap(([a, diffA]) => VERGLEICHSHEBEL.map(([b, diffB]): Constraint => ({
+    id: `rang-${a}-vs-${b}-neumieter-p2`,
+    context: ZH_CTX, baseline: ZUERICH_V2,
+    diffA, diffB,
+    phase: 2, field: 'group.normalverdiener_angebot', relation: 'abs_gt',
+  }))),
+  // CH-003: Anfechtung der Anfangsmiete wirkt auf die Mietbelastung schwächer
+  // als die Kostenmiete (Betrag des Effekts in P3).
+  {
+    id: 'rang-kostenmiete-vs-anfangsmiete-belastung-p2',
+    context: ZH_CTX, baseline: ZUERICH_V2,
+    diffA: { mietrecht_kostenmiete: { from: 1, to: 2 } },
+    diffB: { mietrecht_anfangsmiete: { from: 1, to: 2 } },
+    phase: 2, field: 'belastung.miete', relation: 'abs_gt',
+  },
+  // GLOBAL-027/-029: Mietregulierung senkt die Bestandsmieten, hebt die
+  // Neumieter-Preise und senkt das Angebot in P3 stärker als in P1.
+  {
+    id: 'rang-mietregulierung-bestand-p2',
+    context: ZH_CTX, baseline: ZUERICH_V2,
+    diffA: MIETREGULIERUNG, diffB: {},
+    phase: 2, field: 'group.normalverdiener_bestand', relation: 'lt',
+  },
+  {
+    id: 'rang-mietregulierung-neumieter-p2',
+    context: ZH_CTX, baseline: ZUERICH_V2,
+    diffA: MIETREGULIERUNG, diffB: {},
+    phase: 2, field: 'group.normalverdiener_angebot', relation: 'gt',
+  },
+  {
+    id: 'rang-mietregulierung-angebot-p2-vs-p0',
+    context: ZH_CTX, baseline: ZUERICH_V2,
+    diffA: MIETREGULIERUNG, diffB: {},
+    phase: 2, phaseB: 0, field: 'marketState.angebotspotenzial', relation: 'delta_lt_phase',
+  },
+  // US-007 Minneapolis: Upzoning (Ausnützung) zeigt in P1 keinen messbaren
+  // Preiseffekt für Neumieter.
+  {
+    id: 'rang-upzoning-neumieter-p0',
+    context: ZH_CTX, baseline: ZUERICH_V2,
+    diffA: { raumplanung_ausnuetzungsziffer: { from: 1, to: 2 } }, diffB: {},
+    phase: 0, field: 'group.normalverdiener_angebot', relation: 'near', threshold: KEIN_MESSBARER_EFFEKT,
+  },
+];
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // 3. DYNAMIC CITY EXPANSION — Multiply constraints by all 10 cities
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -723,28 +786,42 @@ function expandConstraintsForCities(base: Constraint[]): Constraint[] {
 
 const EPSILON = 0.001; // Minimum margin
 
+const EMPTY_DIFF: ParamsDiff40 = {};
+
+/** Marge eines Constraints: > 0 heisst erfüllt (mit Mindestabstand EPSILON bei strikten Relationen). */
+function constraintMargin(weights: number[], c: Constraint): number {
+  const resultA = forwardPass(weights, c.context, c.diffA);
+  const resultB = forwardPass(weights, c.context, c.diffB);
+  const valA = getField(resultA[c.phase], c.field);
+  const valB = getField(resultB[c.phase], c.field);
+
+  switch (c.relation) {
+    case 'gt': return valA - valB;
+    case 'lt': return valB - valA;
+    case 'gte': return valA - valB + EPSILON; // gte needs no strict margin
+    case 'lte': return valB - valA + EPSILON;
+    case 'abs_gt': {
+      const ref = getField(forwardPass(weights, c.context, EMPTY_DIFF)[c.phase], c.field);
+      return Math.abs(valA - ref) - Math.abs(valB - ref);
+    }
+    case 'near':
+      return (c.threshold ?? 0) - Math.abs(valA - valB) + EPSILON;
+    case 'delta_lt_phase': {
+      if (c.phaseB === undefined) throw new Error(`${c.id}: phaseB fehlt`);
+      const deltaLater = valA - valB;
+      const deltaEarlier = getField(resultA[c.phaseB], c.field) - getField(resultB[c.phaseB], c.field);
+      return deltaEarlier - deltaLater;
+    }
+  }
+}
+
 function computeLoss(weights: number[], constraints: Constraint[]): { total: number; violations: number; details: { id: string; margin: number }[] } {
   let total = 0;
   let violations = 0;
   const details: { id: string; margin: number }[] = [];
 
   for (const c of constraints) {
-    const resultA = forwardPass(weights, c.context, c.baseline, c.diffA);
-    const resultB = forwardPass(weights, c.context, c.baseline, c.diffB);
-    const valA = getField(resultA[c.phase], c.field);
-    const valB = getField(resultB[c.phase], c.field);
-
-    let margin: number;
-    if (c.relation === 'gt') {
-      margin = valA - valB;
-    } else if (c.relation === 'lt') {
-      margin = valB - valA;
-    } else if (c.relation === 'gte') {
-      margin = valA - valB + EPSILON; // gte needs no strict margin
-    } else { // lte
-      margin = valB - valA + EPSILON;
-    }
-
+    const margin = constraintMargin(weights, c);
     const loss = Math.max(0, EPSILON - margin);
     if (loss > 0) {
       violations++;
@@ -805,6 +882,13 @@ function optimize(
       weights[i] -= currentLr * grad[i];
       weights[i] = Math.max(0, Math.min(1, weights[i])); // Box constraint
     }
+    // Kanten mit profilQuelle 'Annahme' behalten den neutralen Impuls
+    // (gleich in allen Phasen, phase-weights.ts).
+    for (let e = 0; e < NUM_EDGES; e++) {
+      if (!NEUTRAL_EDGES[e]) continue;
+      const mean = (weights[e * 3] + weights[e * 3 + 1] + weights[e * 3 + 2]) / 3;
+      weights[e * 3] = weights[e * 3 + 1] = weights[e * 3 + 2] = mean;
+    }
 
     currentLr *= lrDecay;
 
@@ -840,74 +924,36 @@ function optimize(
 // 6. OUTPUT — Write optimized weights back to phase-weights.ts
 // ═══════════════════════════════════════════════════════════════════════════════
 
+/**
+ * Ersetzt in phase-weights.ts nur die Zahlen in `weights: [...]`, Kante für
+ * Kante in Dateireihenfolge. Kommentare, `profilQuelle` und Struktur bleiben
+ * unverändert. Bricht ab, wenn die Zahl der gefundenen Vektoren nicht zur
+ * Zahl der Kanten passt.
+ */
 function writeWeights(weights: number[]): void {
   const filePath = resolve(__dirname, '../src/model/phase-weights.ts');
   const original = readFileSync(filePath, 'utf-8');
-
-  // Reconstruct PHASE_WEIGHTED_EDGES with new weights
-  const edges = PHASE_WEIGHTED_EDGES.map((edge, i) => ({
-    from: edge.from,
-    to: edge.to,
-    sign: edge.sign,
-    weights: [
-      +weights[i * 3].toFixed(4),
-      +weights[i * 3 + 1].toFixed(4),
-      +weights[i * 3 + 2].toFixed(4),
-    ] as const,
-  }));
-
-  // Find comment blocks for each edge in original file
-  void original; // unused — kept for documentation of original approach
-
-  // Simpler approach: rebuild the file preserving comments
-  // Find the array start and end, replace edge objects
   const arrayStart = original.indexOf('export const PHASE_WEIGHTED_EDGES');
-  const arrayEnd = original.lastIndexOf('] as const;');
-
-  if (arrayStart === -1 || arrayEnd === -1) {
+  if (arrayStart === -1) {
     console.error('❌ Could not find PHASE_WEIGHTED_EDGES in file');
     return;
   }
-
-  const header = original.slice(0, arrayStart);
-  const footer = original.slice(arrayEnd);
-
-  // Generate new array content with original comments preserved
-  let newContent = 'export const PHASE_WEIGHTED_EDGES: readonly {\n';
-  newContent += '  from: string;\n  to: string;\n  sign: 1 | -1;\n  weights: readonly [number, number, number];\n}[] = [\n';
-
-  // Extract comments from original
-  void edgeRegex;
-  void commentRegex; // unused — kept for documentation of original approach
-  
-  // Parse original to extract per-edge comments
-  const arrayContent = original.slice(arrayStart, arrayEnd);
-  const edgeBlocks = arrayContent.split(/(?=\{\s*from:)/g).filter(b => b.includes('from:'));
-
-  for (let i = 0; i < edges.length; i++) {
-    const e = edges[i];
-    const block = edgeBlocks[i] || '';
-    
-    // Extract section comments (lines before the edge object)
-    const preComments = block.split('{')[0]?.trim();
-    if (preComments) {
-      newContent += '\n' + preComments.split('\n').map(l => '  ' + l.trim()).join('\n') + '\n';
-    }
-
-    // Extract inline/block comments within the edge
-    const inlineComment = block.match(/weights:\s*\[[^\]]+\],?\s*(\/\/[^\n]*)/)?.[1] || '';
-    
-    newContent += `  {\n`;
-    newContent += `    from: '${e.from}',\n`;
-    newContent += `    to: '${e.to}',\n`;
-    newContent += `    sign: ${e.sign > 0 ? '+1' : '-1'},\n`;
-    newContent += `    weights: [${e.weights.join(', ')}],${inlineComment ? ' ' + inlineComment : ''}\n`;
-    newContent += `  },\n`;
+  const head = original.slice(0, arrayStart);
+  const body = original.slice(arrayStart);
+  const pattern = /weights: \[[^\]]*\]/g;
+  const found = body.match(pattern)?.length ?? 0;
+  if (found !== NUM_EDGES) {
+    console.error(`❌ ${found} weights-Vektoren gefunden, ${NUM_EDGES} Kanten erwartet — nichts geschrieben.`);
+    return;
   }
-
-  newContent += '\n';
-
-  writeFileSync(filePath, header + newContent + footer, 'utf-8');
+  let i = 0;
+  const fmt = (v: number) => String(+v.toFixed(2));
+  const newBody = body.replace(pattern, () => {
+    const w = [weights[i * 3], weights[i * 3 + 1], weights[i * 3 + 2]].map(fmt).join(', ');
+    i++;
+    return `weights: [${w}]`;
+  });
+  writeFileSync(filePath, head + newBody, 'utf-8');
   console.log(`\n💾 Written optimized weights to ${filePath}`);
 }
 
@@ -925,10 +971,10 @@ console.log('  Wohnkosten-Simulator — DAG Weight Calibration');
 console.log('═══════════════════════════════════════════════════════════');
 console.log(`\n📊 Edge templates: ${NUM_EDGES}`);
 console.log(`📊 Total weights:  ${NUM_WEIGHTS}`);
-console.log(`📊 Base constraints: ${BASE_CONSTRAINTS.length}`);
+console.log(`📊 Base constraints: ${BASE_CONSTRAINTS.length} + ${RANG_CONSTRAINTS.length} Rangfolge`);
 
 // Expand for all cities
-const allConstraints = expandConstraintsForCities(BASE_CONSTRAINTS);
+const allConstraints = expandConstraintsForCities([...BASE_CONSTRAINTS, ...RANG_CONSTRAINTS]);
 console.log(`📊 Total constraints (with city expansion): ${allConstraints.length}`);
 
 const initialWeights = extractWeights();
@@ -985,7 +1031,7 @@ for (let i = 0; i < NUM_EDGES; i++) {
     const delta = Math.abs(optimized[idx] - initialWeights[idx]);
     if (delta > 0.001) {
       changes.push({
-        edge: `${EDGE_TEMPLATES[i].from} → ${EDGE_TEMPLATES[i].to}`,
+        edge: `${PHASE_WEIGHTED_EDGES[i].from} → ${PHASE_WEIGHTED_EDGES[i].to}`,
         phase: p + 1,
         from: initialWeights[idx],
         to: optimized[idx],

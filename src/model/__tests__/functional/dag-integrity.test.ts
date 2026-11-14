@@ -91,4 +91,35 @@ describe('DAG integrity', () => {
     const e1ToE2 = PHASE_WEIGHTED_EDGES.filter(e => E1_NODE_IDS.includes(e.from as never));
     expect(e1ToE2).toHaveLength(0);
   });
+
+  // Verbesserungsplan Fix-10 (2026-11-15): Verlaufs-Audit der Politik-Kanten.
+  describe('profilQuelle', () => {
+    // Vite-Glob statt node:fs: die App-tsconfig kennt keine Node-Typen.
+    const studienIds = new Set(
+      Object.keys(import.meta.glob('../../../../docs/recherche/*/*.md'))
+        .map(pfad => pfad.split('/').pop()!.match(/^([A-Z]+-\d{3})/)?.[1])
+        .filter((id): id is string => !!id),
+    );
+    const politik = PHASE_WEIGHTED_EDGES.filter(e => !e.from.startsWith('ctx:'));
+
+    it('jede Politik-Kante nennt eine Verlaufsquelle (Studien-ID oder Annahme)', () => {
+      const ohne = politik.filter(e => !e.profilQuelle).map(e => `${e.from} → ${e.to}`);
+      expect(ohne).toEqual([]);
+    });
+
+    it('jede Studien-ID existiert in docs/recherche/', () => {
+      const unbekannt = politik
+        .filter(e => e.profilQuelle && e.profilQuelle !== 'Annahme' && !studienIds.has(e.profilQuelle))
+        .map(e => `${e.from} → ${e.to}: ${e.profilQuelle}`);
+      expect(unbekannt).toEqual([]);
+    });
+
+    it("Kanten mit 'Annahme' haben einen neutralen Impuls (gleich in allen Phasen)", () => {
+      const nichtNeutral = politik
+        .filter(e => e.profilQuelle === 'Annahme')
+        .filter(e => e.weights[0] !== e.weights[1] || e.weights[1] !== e.weights[2])
+        .map(e => `${e.from} → ${e.to}: ${e.weights.join('/')}`);
+      expect(nichtNeutral).toEqual([]);
+    });
+  });
 });

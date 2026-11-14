@@ -85,10 +85,10 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
 
     // Baseline curves: always use baseline params for the dashed reference line
     const baselineSupplyShift = supplyShiftFromState(baselineState);
-    const [bq, bp] = findEquilibrium(baselineSupplyShift, baselineState.nachfragedruck, baselineState.angebotspotenzial_regulation, baselineState);
+    const [bq, bp] = findEquilibrium(baselineSupplyShift, baselineState.nachfragedruck, baselineState.angebotspotenzial_regulation);
 
     // Draw baseline curves (dashed)
-    g.append('path').datum(supplyCurve(baselineSupplyShift, baselineState.angebotspotenzial_regulation, baselineState))
+    g.append('path').datum(supplyCurve(baselineSupplyShift, baselineState.angebotspotenzial_regulation))
       .attr('d', line).attr('fill', 'none')
       .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
     g.append('path').datum(demandCurve(baselineState.nachfragedruck))
@@ -107,10 +107,10 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
       const isActive = idx === activePhaseIndex;
       const state = phase.marketState;
       const phaseSupplyShift = supplyShiftFromState(state);
-      const [pq, pp] = findEquilibrium(phaseSupplyShift, state.nachfragedruck, state.angebotspotenzial_regulation, state);
+      const [pq, pp] = findEquilibrium(phaseSupplyShift, state.nachfragedruck, state.angebotspotenzial_regulation);
 
       // Supply curve — Steigung abhängig von Regulationsgrad
-      g.append('path').datum(supplyCurve(phaseSupplyShift, state.angebotspotenzial_regulation, state))
+      g.append('path').datum(supplyCurve(phaseSupplyShift, state.angebotspotenzial_regulation))
         .attr('d', line).attr('fill', 'none')
         .attr('stroke', COLORS.supply)
         .attr('stroke-width', isActive ? 2.5 : 1)
@@ -140,8 +140,10 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
           .attr('stroke', COLORS.equilibrium).attr('stroke-dasharray', '2').attr('stroke-width', 1);
 
         // Mietpreisdeckel: Preisobergrenze durch Mietpreisschutz.
-        // Zum gedeckelten Preis: angebotene Menge < nachgefragte Menge
-        // → oranges Segment = Angebotslücke.
+        // Zum gedeckelten Preis: nachgefragte Menge > angebotene Menge
+        // → oranges Segment = Angebotslücke. Die angebotene Menge ist die
+        // Gleichgewichtsmenge; der Angebotsrückgang steckt schon in der
+        // verschobenen Angebotskurve (supply-demand.ts, mietpreisdeckel).
         const deckel = mietpreisdeckel(phaseSupplyShift, state.nachfragedruck, state.angebotspotenzial_regulation, state);
         if (deckel) {
           g.append('line')

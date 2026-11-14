@@ -262,20 +262,22 @@ describe('Bodenrecht: CH-007 BWO Raumplanung — Zonenreserve dämpft Kostenanst
    * Mehr Bauland heisst also: Parameterwert SINKT.
    *
    * Im Modell:
-   * - raumplanung_zonenreserve ↓ (mehr Bauland) → nachfragedruck ↓
    * - raumplanung_zonenreserve ↓ (mehr Bauland) → angebotspotenzial ↑
+   * Die frühere zweite Kante → nachfragedruck ist seit 2026-11-15 gestrichen
+   * (Verbesserungsplan Fix-12: Doppelzählung desselben Effekts). Der
+   * Nachfragedruck bleibt deshalb unverändert.
    */
-  it('[FACH] CH-007: Mehr Bauland (Zonenreserve 2→0) senkt langfristig den nachfragedruck', () => {
+  it('[FACH] CH-007: Mehr Bauland (Zonenreserve 2→0) erhöht langfristig das Angebotspotenzial', () => {
     const ohne = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
     const mehrBauland: ParamsDiff40 = {
       raumplanung_zonenreserve: { from: 2, to: 0 },
     };
     const mit = phases(ZUERICH_V2, ZUERICH_CONTEXT, mehrBauland);
-    expect(mit[2].marketState.nachfragedruck)
-      .toBeLessThan(ohne[2].marketState.nachfragedruck);
     expect(mit[2].marketState.angebotspotenzial)
       .toBeGreaterThan(ohne[2].marketState.angebotspotenzial);
+    expect(mit[2].marketState.nachfragedruck)
+      .toBeCloseTo(ohne[2].marketState.nachfragedruck, 10);
   });
 
   it('[FACH] CH-007: Mehr Bauland senkt den Preistrend für Neumieter in jeder Phase', () => {
@@ -302,7 +304,7 @@ describe('Bodenrecht: CH-007 BWO Raumplanung — Zonenreserve dämpft Kostenanst
       bau_bewilligungsverfahren: { from: 2, to: 0 },
     });
     const ggw = (s: MarketState) =>
-      findEquilibrium(supplyShiftFromState(s), s.nachfragedruck, s.angebotspotenzial_regulation, s);
+      findEquilibrium(supplyShiftFromState(s), s.nachfragedruck, s.angebotspotenzial_regulation);
     for (const i of [0, 1, 2]) {
       expect(mit[i].marketState.angebotspotenzial_regulation)
         .toBeGreaterThan(ohne[i].marketState.angebotspotenzial_regulation);

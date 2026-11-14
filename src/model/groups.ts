@@ -140,7 +140,7 @@ export interface GroupPriceTrend {
  * |----------------------------|-------------|---------------|-------------|---------------|-----------|
  * | geringverdiener            | 0.5         | -1.0          | —           | —             | Sozialhilfe/EL entkoppeln vom Markt; voller Schutz |
  * | normalverdiener_bestand    | 0.4         | -1.2          | —           | —             | Regulierung schützt stark; reagiert träge |
- * | normalverdiener_angebot    | 1.2         | +0.2          | —           | —             | Volle Marktdynamik; Spillover vom Bestandsschutz |
+ * | normalverdiener_angebot    | 1.2         | +0.2          | —           | -gemkraft*0.25| Volle Marktdynamik; Spillover vom Bestandsschutz; gemeinnützige Konkurrenz dämpft die Marktmiete (AT-002) |
  * | glueckspilze               | 0.1         | —             | —           | —             | Fast vollständig markt-entkoppelt |
  * | normalverdiener_eigentuemer| 0.5         | —             | —           | -angebot*0.3  | Vermögensaufbau, aber Neubau-Kosten |
  * | junge_familien             | 1.1         | +0.1          | —           | —             | Preissensitiv, grosser Bedarf |
@@ -178,7 +178,15 @@ function basePriceTrend(state: MarketState, group: GroupId): { trend: number } {
   } else if (group === 'normalverdiener_angebot') {
     // Neumieter: Volle Marktdynamik, kaum Schutz durch Bestandshürden
     // Hoher Mietschutz für den Bestand kann das Angebot für Neumieter sogar verknappen (Spillover)
-    groupBase = base * 1.2 + protectionEffect * 0.2;
+    // Gemeinnützige Konkurrenz (Fix-11, 2026-11-15): AT-002 (WIFO) findet eine
+    // preisdämpfende Wirkung des gemeinnützigen Wohnbaus auch auf den privaten
+    // Mietmarkt («Public Option»; Wien: Gemeindewohnung ø 5.10 €/m² gegenüber
+    // deutlich höheren Marktmieten). Diese Wirkung lief bis 2026-11 als
+    // Nachfragedämpfung über nachfragedruck; jene Kanten sind gestrichen
+    // (Fix-12). Faktor 0.25 ist eine Setzung: halb so stark wie der direkte
+    // Schutz der Genossenschafter (0.5), weil Neumieter nur indirekt über die
+    // Konkurrenz profitieren. AT-002 quantifiziert den Spillover nicht.
+    groupBase = base * 1.2 + protectionEffect * 0.2 - state.gemeinnuetzig_kraft * 0.25;
   } else if (group === 'glueckspilze') {
     // Glückspilze sind fast vollständig vom Markt entkoppelt
     // Ihre "Preise" (Kostenlimite) steigen nur minimal mit dem Markt

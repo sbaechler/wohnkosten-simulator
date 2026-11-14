@@ -5,11 +5,16 @@
 // Misst die Abweichung der Insertionsdauer vom Gleichgewicht.
 // Werte: –5 (Überangebot) … 0 (Gleichgewicht) … +5 (Nachfrageüberhang)
 //
-// Drei E1-Treiber:
-//   nachfragedruck:      +1 → Markt enger (steiler)
-//   angebotspotenzial:   +1 → mehr Angebot (flacher)
-//   marktfriktion:        +1 → weniger Mobilisierung (steiler)
-//   gemeinnuetzig_kraft: +1 → mehr Genossenschaften puffern ab (flacher)
+// Knappheitssignal aus vier E1-Treibern (nur Kennzahl, nicht mehr in der
+// Kurvensteigung, siehe knappheitSignal):
+//   nachfragedruck:      +1 → Markt enger
+//   angebotspotenzial:   +1 → mehr Angebot
+//   marktfriktion:       +1 → weniger Mobilisierung
+//   gemeinnuetzig_kraft: +1 → Genossenschaften puffern ab
+//
+// Kurven: Nachfrage verschoben durch nachfragedruck; Angebot verschoben
+// durch angebotspotenzial + investitionsattraktivitaet, Steigung aus
+// angebotspotenzial_regulation.
 //
 // Quelle: https://wohnmonitor.admin.ch/method-and-source
 // ============================================================
@@ -47,18 +52,28 @@ export const KNAPPHEIT_GEWICHTE = {
   gemeinnuetzig_kraft:  0.15,
 } as const;
 
-/** Skalierungsfaktor: wie stark das Knappheitssignal die Regulation verstärkt. */
-const KNAPPHEIT_REGULATION_FAKTOR = 0.4;
-
 /** Basis-Steigung der Angebotskurve (Punkte/Mengeneinheit). */
 const SUPPLY_BASE_SLOPE = 0.8;
 /** Modulationsfaktor: wie stark die Regulation die Angebotssteigung beeinflusst. */
 const SUPPLY_SLOPE_REGULATION_FAKTOR = 0.5;
+/** Preis der neutralen Angebotskurve bei q=0 (Darstellungskonvention). */
+const SUPPLY_NEUTRAL_INTERCEPT = 1;
 
 /** Achsenabschnitt der Nachfragekurve bei q=0 (Preis-Achse). */
 const DEMAND_INTERCEPT = 9;
 /** Steigung der Nachfragekurve. */
 const DEMAND_SLOPE = 0.8;
+
+/**
+ * Drehpunkt der Angebotskurve: das Gleichgewicht des neutralen Marktes
+ * (kein Shift, Regulation 0), hier q = 5, p = 5. Eine andere Steigung dreht
+ * die Kurve um diesen Punkt (verschoben um den Angebots-Shift), nicht um q=0.
+ * Mehr oder weniger Regulierung ändert damit nur die Elastizität und
+ * verschiebt das Gleichgewicht nicht für sich allein (Verbesserungsplan
+ * Fix-12, Punkt 5). Abgeleitet aus den Kurvenkonstanten, kein eigener Wert.
+ */
+const PIVOT_Q = (DEMAND_INTERCEPT - SUPPLY_NEUTRAL_INTERCEPT) / (SUPPLY_BASE_SLOPE + DEMAND_SLOPE);
+const PIVOT_P = SUPPLY_NEUTRAL_INTERCEPT + SUPPLY_BASE_SLOPE * PIVOT_Q;
 
 /** p-Bereich in der Achse. */
 const AXIS_MIN = 0;
@@ -85,7 +100,14 @@ export function supplyShiftFromState(s: MarketState): number {
   return s.angebotspotenzial + s.investitionsattraktivitaet * INVEST_SUPPLY_GEWICHT;
 }
 
-/** Knappheitssignal aus E1-Zustand (Rohwert vor Clamping). */
+/**
+ * Knappheitssignal aus E1-Zustand (Rohwert vor Clamping).
+ *
+ * Fliesst seit 2026-11-15 nicht mehr in die Steigung der Angebotskurve
+ * (Fix-12, Punkt 4): mehr Nachfrage verschob die Nachfragekurve UND machte
+ * die Angebotskurve steiler, der Nachfragedruck wirkte so doppelt auf den
+ * Preis. Die Steigung kommt nur noch aus `angebotspotenzial_regulation`.
+ */
 export function knappheitSignal(s: MarketState): number {
   const w = KNAPPHEIT_GEWICHTE;
   return (
@@ -96,9 +118,9 @@ export function knappheitSignal(s: MarketState): number {
   );
 }
 
-/** Effektiver Regulationsgrad für die Angebotskurven-Steigung. */
-export function regulationEffective(baseReg: number, s: MarketState): number {
-  return Math.max(-1, Math.min(1, baseReg + knappheitSignal(s) * KNAPPHEIT_REGULATION_FAKTOR));
+/** Effektiver Regulationsgrad für die Angebotskurven-Steigung, auf −1…+1 begrenzt. */
+export function regulationEffective(baseReg: number): number {
+  return Math.max(-1, Math.min(1, baseReg));
 }
 
 /** Steilheit der Angebotskurve aus effektivem Regulationsgrad. */
@@ -111,10 +133,13 @@ export function supplySlope(regEff: number): number {
  * Single source of truth — wird von `supplyCurve` UND `findEquilibrium`
  * verwendet, damit der Gleichgewichts-Punkt mathematisch garantiert
  * auf der gezeichneten Angebotslinie liegt.
+ *
+ * Die Kurve geht durch (PIVOT_Q + SHIFT_SCALE·shift, PIVOT_P): der Shift
+ * verschiebt sie waagrecht, die Steigung dreht sie um diesen Punkt.
  */
-export function supplyLine(supplyShift: number, regulationBase: number, s: MarketState): [number, number] {
-  const slope = supplySlope(regulationEffective(regulationBase, s));
-  return [1 - slope * SHIFT_SCALE * supplyShift, slope];
+export function supplyLine(supplyShift: number, regulationBase: number): [number, number] {
+  const slope = supplySlope(regulationEffective(regulationBase));
+  return [PIVOT_P - slope * (PIVOT_Q + SHIFT_SCALE * supplyShift), slope];
 }
 
 /**
@@ -140,8 +165,8 @@ function lineIntersection(a1: number, b1: number, a2: number, b2: number): [numb
 }
 
 /** Angebotskurve (Preis-Mengen) als Punkte-Array. */
-export function supplyCurve(shift: number, regulationBase: number, s: MarketState): [number, number][] {
-  const [a, b] = supplyLine(shift, regulationBase, s);
+export function supplyCurve(shift: number, regulationBase: number): [number, number][] {
+  const [a, b] = supplyLine(shift, regulationBase);
   return Array.from({ length: CURVE_POINTS }, (_, i) => {
     const q = (i / (CURVE_POINTS - 1)) * AXIS_MAX;
     const p = a + b * q;
@@ -169,9 +194,8 @@ export function findEquilibrium(
   supplyShift: number,
   demandShift: number,
   regulationBase: number,
-  s: MarketState,
 ): [number, number] {
-  const [aS, bS] = supplyLine(supplyShift, regulationBase, s);
+  const [aS, bS] = supplyLine(supplyShift, regulationBase);
   const [aD, bD] = demandLine(demandShift);
   const [q, p] = lineIntersection(aS, bS, aD, bD);
   return [
@@ -200,21 +224,32 @@ export const MIETPREISDECKEL_MIN_SCHUTZ = 0.02;
 export interface Mietpreisdeckel {
   /** Regulierter Höchstpreis (Deckel-Linie) */
   p: number;
-  /** Angebotene Menge zum Deckelpreis (auf der Angebotskurve) */
+  /**
+   * Angebotene Menge zum Deckelpreis. Gleich der Gleichgewichtsmenge der
+   * (bereits verschobenen) Kurven, nicht der Punkt auf der Angebotskurve.
+   */
   qAngebot: number;
   /** Nachgefragte Menge zum Deckelpreis (auf der Nachfragekurve) */
   qNachfrage: number;
 }
 
 /**
- * Mietpreisdeckel als klassische Preisobergrenze im Preis-Mengen-Diagramm.
+ * Mietpreisdeckel als Preisobergrenze im Preis-Mengen-Diagramm.
  *
- * Positiver `mietpreis_schutzlevel` (relativ zu heute verschärftes Mietrecht:
- * Kostenmiete, Anfechtung Anfangsmiete, Mietzinsindex, Transparenz) begrenzt
- * den erzielbaren Preis unterhalb des Marktgleichgewichts. Lehrbuch-Folge:
- * Zum gedeckelten Preis wird weniger angeboten (qAngebot) als nachgefragt
- * (qNachfrage) — die Differenz ist die Angebotslücke (Wohnungsnot trotz
- * tieferem Preis).
+ * Positiver `mietpreis_schutzlevel` (relativ zu heute verschärftes Mietrecht)
+ * begrenzt den erzielbaren Preis unterhalb des Marktgleichgewichts. Zum
+ * gedeckelten Preis wird mehr nachgefragt als angeboten; die Differenz ist
+ * die Angebotslücke (Wohnungsnot trotz tieferem Preis).
+ *
+ * Fix-12, Punkt 3 (2026-11-15): der Angebotsrückgang durch Mietregulierung
+ * wird nur einmal gezeigt, als Verschiebung der Angebotskurve. Er steckt in
+ * `angebotspotenzial` und `investitionsattraktivitaet` (Kanten der
+ * Mietrechts-Parameter, GLOBAL-029, phasenabhängig und kalibriert). Früher
+ * sank die Menge zusätzlich entlang der Angebotskurve bis zum Deckelpreis;
+ * das zählte denselben Effekt doppelt. Gewählt ist die Kurvenverschiebung,
+ * weil nur sie aus der Rechnung kommt und einen zeitlichen Verlauf hat; die
+ * Bewegung entlang der Kurve wäre eine statische Lehrbuchannahme ohne
+ * eigene Kalibrierung. `qAngebot` ist darum die Gleichgewichtsmenge.
  *
  * Gibt `null` zurück, wenn kein (bindender) Deckel besteht
  * (schutzlevel ≤ MIETPREISDECKEL_MIN_SCHUTZ).
@@ -227,16 +262,16 @@ export function mietpreisdeckel(
 ): Mietpreisdeckel | null {
   if (s.mietpreis_schutzlevel <= MIETPREISDECKEL_MIN_SCHUTZ) return null;
 
-  const [aS, bS] = supplyLine(supplyShift, regulationBase, s);
+  const [aS, bS] = supplyLine(supplyShift, regulationBase);
   const [aD, bD] = demandLine(demandShift);
-  const [, pStar] = lineIntersection(aS, bS, aD, bD);
+  const [qStar, pStar] = lineIntersection(aS, bS, aD, bD);
 
   const clampAxis = (v: number) => Math.max(AXIS_MIN, Math.min(AXIS_MAX, v));
   const p = clampAxis(pStar - s.mietpreis_schutzlevel * MIETPREISDECKEL_FAKTOR);
 
   return {
     p,
-    qAngebot: clampAxis((p - aS) / bS),
+    qAngebot: clampAxis(qStar),
     qNachfrage: clampAxis((p - aD) / bD),
   };
 }

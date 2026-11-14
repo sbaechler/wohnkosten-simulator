@@ -14,7 +14,11 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { computePhasePipeline, computePhasesCached, invalidatePhasesCache } from '../../compute-phases';
+import {
+  computePhasePipeline, computePhasesCached, invalidatePhasesCache,
+  E1_NENNER, E1_NODES, PERSISTENCE, marketModulator,
+} from '../../compute-phases';
+import { PHASE_WEIGHTED_EDGES, type PhaseEdge } from '../../phase-weights';
 import type { CityContext, ParamsDiff40 } from '../../../types';
 
 const ZUERICH_CONTEXT: CityContext = {
@@ -139,5 +143,55 @@ describe('computePhasesCached', () => {
       EMPTY_DIFF,
     );
     expect(zuerich).not.toEqual(winterthur);
+  });
+});
+
+// Verbesserungsplan Fix-9/Fix-10 (2026-11-15)
+describe('Generator: Stand = PERSISTENCE · Vorstand + Impuls / E1_NENNER', () => {
+  const NEUTRAL: CityContext = {
+    ownershipBaseline: ZUERICH_CONTEXT.ownershipBaseline,
+    zinsniveau: 0, zuwanderungsdruck: 0, wirtschaftskraft: 0,
+    bevoelkerungstrend: 0, marktenge: 0, mietbelastungs_grenze: 0,
+  };
+
+  it('eine Kante, ein Schritt: Stand folgt der Formel ohne weiteren Phasenfaktor', () => {
+    const kante: PhaseEdge = {
+      from: 'infra_oepnv', to: 'nachfragedruck', sign: 1, weights: [0.3, 0.6, 0.9],
+    };
+    const diff: ParamsDiff40 = { infra_oepnv: { from: 0, to: 2 } };
+    const stand = [...computePhasePipeline(NEUTRAL, diff, [kante])].map(r => r.marketState.nachfragedruck);
+    let erwartet = 0;
+    kante.weights.forEach((w, p) => {
+      erwartet = PERSISTENCE * erwartet + w / E1_NENNER;
+      expect(stand[p]).toBeCloseTo(erwartet, 12);
+    });
+  });
+
+  it('gleiches Gewicht → gleicher Impuls, unabhängig von der Kantenzahl des Zielknotens', () => {
+    const diff: ParamsDiff40 = { infra_oepnv: { from: 0, to: 2 } };
+    const allein: PhaseEdge[] = [{ from: 'infra_oepnv', to: 'nachfragedruck', sign: 1, weights: [0.5, 0.5, 0.5] }];
+    const mitAnderen: PhaseEdge[] = [
+      ...allein,
+      ...Array.from({ length: 10 }, (): PhaseEdge => ({ from: 'infra_schule_kita', to: 'nachfragedruck', sign: 1, weights: [1, 1, 1] })),
+      { from: 'infra_oepnv', to: 'mietpreis_schutzlevel', sign: 1, weights: [0.5, 0.5, 0.5] },
+    ];
+    const a = [...computePhasePipeline(NEUTRAL, diff, allein)];
+    const b = [...computePhasePipeline(NEUTRAL, diff, mitAnderen)];
+    for (const p of [0, 1, 2]) {
+      expect(b[p].marketState.nachfragedruck).toBeCloseTo(a[p].marketState.nachfragedruck, 12);
+      expect(b[p].marketState.mietpreis_schutzlevel).toBeCloseTo(a[p].marketState.nachfragedruck, 12);
+    }
+  });
+
+  it('E1_NENNER entspricht der dokumentierten Herleitung (Kontext am Rand → P3 höchstens 1)', () => {
+    const mult = marketModulator(2);
+    const p3 = E1_NODES.map(node => {
+      const ctx = PHASE_WEIGHTED_EDGES.filter(e => e.to === node && e.from.startsWith('ctx:'));
+      const sum = (p: 0 | 1 | 2) => ctx.reduce((acc, e) => acc + Math.abs(e.weights[p]), 0);
+      return mult * (PERSISTENCE ** 2 * sum(0) + PERSISTENCE * sum(1) + sum(2));
+    });
+    const max = Math.max(...p3);
+    expect(E1_NENNER).toBeGreaterThanOrEqual(max);
+    expect(E1_NENNER).toBeCloseTo(Math.ceil(max * 10) / 10, 10);
   });
 });

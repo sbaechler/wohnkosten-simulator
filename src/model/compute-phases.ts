@@ -5,7 +5,7 @@
 import type { CityContext, CityParams40, ParamsDiff40, MarketState } from '../types';
 import type { Phase, PhaseResult } from './phases';
 import { PHASE_NAMES, PHASE_YEAR_LABELS, PHASES } from './phases';
-import { PHASE_WEIGHTED_EDGES } from './phase-weights';
+import { PHASE_WEIGHTED_EDGES, type PhaseEdge } from './phase-weights';
 import { computeDerivedIndicators } from './derived';
 import { applyMietrechtRegime, type RegimeCarry } from './mietrecht-regime';
 import { clamp } from './utils';
@@ -40,32 +40,33 @@ export const E1_NODES = [
 ] as const;
 
 /**
- * Eingefrorene Normalisierungskonstanten pro E1-Node und Phase.
+ * Gemeinsamer Nenner aller E1-Knoten (Verbesserungsplan Fix-9, 2026-11-15).
  *
- * Entspricht Σ|weights[phase]| aller eingehenden Kanten zum Kalibrierungs-
- * stand 2026-07. Früher wurde diese Summe dynamisch berechnet — dann hätte
- * jede NEUE Kante alle bestehenden Effekte auf denselben Node stillschweigend
- * abgeschwächt (Re-Skalierung durch grösseren Nenner). Mit den eingefrorenen
- * Konstanten addiert eine neue Kante ihren Effekt, statt die anderen zu
- * verwässern.
+ * Zweck: ein Gewicht bedeutet an jeder Kante dasselbe, nämlich die
+ * Effektgrösse eines vollen Schritts (Δ = 1) auf der Skala −1…+1. Die Zahl
+ * der Kanten eines Knotens verdünnt nichts mehr. Vorher wurde jeder Knoten
+ * durch Σ|w| seiner eigenen Kanten geteilt (`angebotspotenzial` 12.4,
+ * `mietpreis_schutzlevel` 3.0); ein Mietrechts-Schritt bewegte seinen Knoten
+ * dadurch rund fünfmal stärker als ein gleich gewichteter Angebots-Schritt.
  *
- * NUR zusammen mit einer Re-Kalibrierung ändern (scripts/calibrate.ts
- * importiert diese Tabelle). Werte neu erzeugen:
- *   Σ|weights[p]| über alle Kanten mit to === node, p = 0..2.
+ * Herleitung (Setzung mit Rechenweg): der ungünstigste denkbare Kontext soll
+ * einen Knoten in P3 gerade an den Rand ±1 bringen, nicht darüber. Dafür
+ * stehen alle Kontextfaktoren am Rand und alle in Richtung des Knotens
+ * (Δ = 1 je Kontextkante), `marktenge` = +2 (marketModulator 1.6), ohne
+ * Politik-Änderung. Mit Nenner 1 ist der P3-Stand eines Knotens
+ *     1.6 · (0.64·Σ|w₁| + 0.8·Σ|w₂| + Σ|w₃|)   (Summen über seine ctx-Kanten).
+ * Grösster Wert: `nachfragedruck` mit 11.17 (Σ|w| = 3.6 / 3.1 / 2.2), knapp
+ * vor `eigentumsquoten_trend` mit 11.12. Aufgerundet auf eine Stelle: 11.2.
+ * Reale Städte liegen darunter (Zürich: Nachfragedruck P3 ≈ 0.75), Politik-
+ * Effekte bleiben so ausserhalb der Sättigung sichtbar.
+ *
+ * Gilt für den Stand der Kontextkanten vom 2026-11-15. Ändern sich deren
+ * Gewichte, muss der Wert neu hergeleitet werden; ein Test
+ * (`phase-pipeline.test.ts`) rechnet die Herleitung nach.
+ * `scripts/calibrate.ts` rechnet über dieselbe Engine und damit mit
+ * demselben Nenner.
  */
-export const E1_NORMALIZATION: Record<(typeof E1_NODES)[number], readonly [number, number, number]> = {
-  angebotspotenzial: [7.70, 12.00, 12.40],
-  nachfragedruck: [8.40, 9.60, 9.20],
-  mietpreis_schutzlevel: [3.80, 3.30, 3.00],
-  verdraengungsrisiko: [7.30, 7.60, 6.60],
-  spekulationshemmung: [7.20, 7.40, 6.90],
-  marktfriktion: [4.60, 5.00, 5.00],
-  gemeinnuetzig_kraft: [4.50, 5.30, 5.20],
-  eigentumsquoten_trend: [5.30, 5.40, 5.20],
-  aufwertungsdruck: [5.20, 5.90, 6.20],
-  investitionsattraktivitaet: [8.40, 8.90, 8.50],
-  angebotspotenzial_regulation: [4.40, 5.10, 4.60],
-};
+export const E1_NENNER = 11.2;
 
 // ── getE0Delta ────────────────────────────────────────────────────────────────
 
@@ -89,36 +90,27 @@ export function getE0Delta(
 // ── computeE1WithPhaseAndCarry ────────────────────────────────────────────────
 
 /**
- * Carry-over-Faktor: wie stark der Wert einer Phase auf die nächste Phase
- * übertragen wird. 0.8 = 80% des Vorwerts bleibt erhalten, 20% werden durch
- * den neuen gewichteten Input ersetzt.
+ * Übertrag: Anteil des Standes der Vorphase, der in die nächste Phase
+ * mitgenommen wird. Der neue Impuls kommt dazu, er ersetzt nichts:
  *
- * Wird von `scripts/calibrate.ts` importiert, damit Kalibrierung und
- * Laufzeit-Engine identisch rechnen.
+ *     Stand[p] = PERSISTENCE · Stand[p−1] + Impuls[p]
  *
- * Höher = mehr Trägheit (Modell reagiert langsamer auf Policy-Wechsel).
- * Niedriger = mehr unmittelbare Reaktion pro Phase.
+ * 0.8 heisst: ohne neuen Impuls verliert ein Stand 20 % pro Phase. Wie früh
+ * ein Effekt kommt, steht im Impulsvektor der Kante (`phase-weights.ts`);
+ * wie lange er hält, hier.
+ *
+ * Annahme (Verbesserungsplan Fix-10, Schritt 7): die Phasen sind 2, 3 und
+ * 5 Jahre lang, der Übertrag ist trotzdem pro Phase gleich. Ein an die
+ * Phasenlänge gekoppelter Übertrag (z. B. 0.9^Jahre) würde frühe Effekte in
+ * P3 stärker abklingen lassen. Bewusst nicht gekoppelt: die Phasen sind
+ * Anzeigeabschnitte, die Kantenvektoren sind je Phase gesetzt und
+ * kalibriert, und keine Studie der Sammlung gibt eine Abklingrate pro Jahr
+ * an. Wird das geändert, sind alle Vektoren neu zu prüfen.
+ *
+ * Wird von `scripts/calibrate.ts` über die Engine mitbenutzt.
+ * `REGIME_PERSISTENCE` in mietrecht-regime.ts muss gleich sein.
  */
 export const PERSISTENCE = 0.8;
-
-/**
- * Per-Phase Basis-Multiplikator: P1=0.4, P2=0.7, P3=1.0
- *
- * Der Wohnungsmarkt hat massive strukturelle Trägheit:
- * - P1 (0-2 Jahre): Verträge, Bewilligungen, Kapital allokiert — Reaktion minimal
- * - P2 (2-5 Jahre): Projekte werden angepasst, neue Investitionen fliessen
- * - P3 (5-10 Jahre): Langfristiges Gleichgewicht — alle Effekte voll wirksam
- *
- * Dieser Faktor skaliert ALLE Kantengewichte über alle Phasen hinweg.
- *
- * Kalibrierungs-Historie: Die Edge-Gewichte wurden ursprünglich mit einem
- * Forward-Pass OHNE diesen Multiplikator (und ohne marketModulator) gefittet.
- * `scripts/calibrate.ts` importiert inzwischen diese Engine 1:1; ein Dry-Run
- * mit der vereinheitlichten Engine erfüllt weiterhin alle Constraints
- * (0/446 Verletzungen, Stand 2026-07).
- * NICHT willkürlich ändern — würde alle Edge-Gewichte re-skalieren.
- */
-export const PHASE_BASE_MULTIPLIER: readonly [number, number, number] = [0.4, 0.7, 1.0];
 
 /**
  * Marktverengungs-Multiplikator: -2→0.4× (entspannt), 0→1.0× (normal), +2→1.6× (extrem eng)
@@ -134,11 +126,19 @@ export function marketModulator(marktenge: number): number {
   return 1.0 + marktenge * 0.3;
 }
 
+/**
+ * Stand aller E1-Knoten in einer Phase:
+ * `clamp(PERSISTENCE · Vorstand + Σ sign·w·Δ · marketModulator / E1_NENNER)`.
+ *
+ * @param edges Kanten; Standard sind die Laufzeit-Kanten. `scripts/calibrate.ts`
+ *              übergibt Kanten mit veränderten Gewichten.
+ */
 export function computeE1WithPhaseAndCarry(
   context: CityContext,
   diff: ParamsDiff40,
   phase: Phase,
   carryE1: MarketState | null,
+  edges: readonly PhaseEdge[] = PHASE_WEIGHTED_EDGES,
 ): MarketState {
   const phaseIndex = phase - 1; // 0, 1, 2
   const marketMult = marketModulator(context.marktenge);
@@ -148,23 +148,14 @@ export function computeE1WithPhaseAndCarry(
   for (const nodeId of E1_NODES) {
     const prevValue = carryE1 ? carryE1[nodeId] : 0;
 
-    const incomingEdges = PHASE_WEIGHTED_EDGES.filter(e => e.to === nodeId);
-    if (incomingEdges.length === 0) {
-      newState[nodeId] = clamp(prevValue * PERSISTENCE);
-      continue;
-    }
-
-    let numerator = 0;
-
-    for (const edge of incomingEdges) {
+    let impuls = 0;
+    for (const edge of edges) {
+      if (edge.to !== nodeId) continue;
       const delta = getE0Delta(edge.from, diff, context);
-      const weight = edge.weights[phaseIndex];
-      numerator += edge.sign * weight * delta;
+      impuls += edge.sign * edge.weights[phaseIndex] * delta;
     }
 
-    const denominator = E1_NORMALIZATION[nodeId][phaseIndex];
-    const weightedSum = denominator === 0 ? 0 : numerator / denominator;
-    newState[nodeId] = clamp(prevValue * PERSISTENCE + weightedSum * PHASE_BASE_MULTIPLIER[phaseIndex] * marketMult);
+    newState[nodeId] = clamp(prevValue * PERSISTENCE + (impuls / E1_NENNER) * marketMult);
   }
 
   return newState;
@@ -172,15 +163,20 @@ export function computeE1WithPhaseAndCarry(
 
 // ── computePhasePipeline ───────────────────────────────────────────────────────
 
+/**
+ * @param edges Kanten; Standard sind die Laufzeit-Kanten. `scripts/calibrate.ts`
+ *              rechnet mit derselben Pipeline und eigenen Gewichten.
+ */
 export function* computePhasePipeline(
   context: CityContext,
   diff: ParamsDiff40,
+  edges: readonly PhaseEdge[] = PHASE_WEIGHTED_EDGES,
 ): Generator<PhaseResult, PhaseResult[], void> {
   let carryE1: MarketState | null = null;
   let regimeCarry: RegimeCarry | null = null;
 
   for (const phase of PHASES) {
-    const linear = computeE1WithPhaseAndCarry(context, diff, phase, carryE1);
+    const linear = computeE1WithPhaseAndCarry(context, diff, phase, carryE1, edges);
     const applied = applyMietrechtRegime(linear, context, diff, regimeCarry);
     const e1 = applied.market;
     regimeCarry = applied.carry;

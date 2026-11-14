@@ -10,8 +10,8 @@
 // - anteil_altliegenschaft und mietluecke sind nicht belegt und
 //   fehlen im Stadt-Kontext. Fehlend ist nicht «null Prozent».
 // - FRONTLOAD, VERWEIL_GEWICHT, CAP_INVEST_WEIGHT sind nicht kalibriert.
-// - E1_NORMALIZATION wurde nach dem Entfernen der Index-Kante
-//   nicht neu gerechnet.
+// - Die Regime-Zustände laufen nicht über den gemeinsamen Nenner
+//   (E1_NENNER, compute-phases.ts) und sind nicht kalibriert.
 // ============================================================
 
 import type { CityContext, MarketState, ParamsDiff40, ParamValue } from '../types';

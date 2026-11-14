@@ -47,7 +47,7 @@ function quelle(from: string): { name: string; hoeher: string } {
 }
 
 function gewichte(w: readonly [number, number, number]): string {
-  return w.map(v => v.toFixed(1)).join(' / ');
+  return w.map(v => v.toFixed(2)).join(' / ');
 }
 
 /** Markdown der Kanten-Referenz. Deterministisch, ohne Datum. */
@@ -62,7 +62,8 @@ export function renderEdgeDoc(): string {
   out.push('');
   out.push('- **Höhere Stufe bedeutet:** was ein Schritt des Schiebers nach rechts (0 → 2) inhaltlich heisst. Bei Kontextfaktoren der Wert +2.');
   out.push('- **Wirkung:** was mit dem Zielknoten geschieht, wenn die Stufe steigt. Sinkt die Stufe, kehrt sich die Wirkung um.');
-  out.push(`- **Impulse:** neuer Anstoss je Phase (${PHASE_YEAR_LABELS.join(', ')}), 0.0 = keiner, 1.0 = voller. Der Stand einer Phase ist das Resultat der Vorphase plus der Impuls dieser Phase (Generator in \`compute-phases.ts\`). Ein Impuls ist also nicht das erreichte Niveau.`);
+  out.push(`- **Impulse:** neuer Anstoss je Phase (${PHASE_YEAR_LABELS.join(', ')}), 0.0 = keiner, 1.0 = voller. Der Stand einer Phase ist \`PERSISTENCE · Stand der Vorphase + Impuls\` (Generator in \`compute-phases.ts\`), der Impuls geteilt durch den für alle Knoten gleichen Nenner \`E1_NENNER\`. Ein Impuls ist also nicht das erreichte Niveau.`);
+  out.push('- **Verlauf:** Herkunft des Impulsvektors (`profilQuelle`): Studien-ID aus `docs/recherche/` oder «Annahme» (dann gleicher Impuls in allen Phasen). Kontextkanten: —.');
   out.push('');
   out.push(`Kanten gesamt: ${PHASE_WEIGHTED_EDGES.length}.`);
   out.push('');
@@ -75,12 +76,12 @@ export function renderEdgeDoc(): string {
     out.push('');
     out.push(`Positiver Wert: ${E1_PLUS_BEDEUTET[node]}. Eingehende Kanten: ${edges.length}.`);
     out.push('');
-    out.push('| Quelle | Höhere Stufe bedeutet | Wirkung | Impulse P1 / P2 / P3 |');
-    out.push('|---|---|---|---|');
+    out.push('| Quelle | Höhere Stufe bedeutet | Wirkung | Impulse P1 / P2 / P3 | Verlauf |');
+    out.push('|---|---|---|---|---|');
     for (const e of edges) {
       const q = quelle(e.from);
       const wirkung = e.sign === 1 ? `erhöht → ${E1_PLUS_BEDEUTET[node]}` : `senkt → weniger: ${E1_PLUS_BEDEUTET[node]}`;
-      out.push(`| ${q.name} | ${q.hoeher} | ${wirkung} | ${gewichte(e.weights)} |`);
+      out.push(`| ${q.name} | ${q.hoeher} | ${wirkung} | ${gewichte(e.weights)} | ${e.profilQuelle ?? '—'} |`);
     }
   }
 

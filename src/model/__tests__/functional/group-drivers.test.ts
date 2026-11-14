@@ -51,15 +51,21 @@ describe('Gruppen-Treiber aus der Rechnung', () => {
     expect(geprueft).toBeGreaterThan(100);
   });
 
-  it('strengere Anfangsmiete-Regel erscheint bei Neumietern als preistreibend, wie gerechnet', () => {
+  it('strengere Anfangsmiete-Regel wirkt bei Neumietern preistreibend, wie gerechnet', () => {
     // Die alte Handliste führte sie als «senkend»; die Rechnung (Spillover des
     // Bestandsschutzes auf Neumieter, groups.ts) hebt den Trend.
+    // Seit 2026-11-15 (CH-003: kein messbarer Effekt der Anfechtung) liegt
+    // der Beitrag einer Stufe unter der Anzeigeschwelle DRIVER_MIN_BEITRAG.
+    // Geprüft wird darum die Richtung der Rechnung und, falls angezeigt, die
+    // Richtung des Treibers.
     const from = ZH.params.mietrecht_anfangsmiete;
     const to = (from === 2 ? 0 : 2) as ParamValue;
-    const phase2 = computeGroupDrivers(ZH.context, { mietrecht_anfangsmiete: { from, to } })[1];
+    const diff: ParamsDiff40 = { mietrecht_anfangsmiete: { from, to } };
+    const delta = trends(diff)[1].normalverdiener_angebot - trends({})[1].normalverdiener_angebot;
+    expect(Math.sign(delta)).toBe(to > from ? 1 : -1);
+    const phase2 = computeGroupDrivers(ZH.context, diff)[1];
     const d = phase2.normalverdiener_angebot.find(x => x.paramKey === 'mietrecht_anfangsmiete');
-    expect(d, 'Anfangsmiete ist Treiber für Neumieter').toBeDefined();
-    expect(d!.direction).toBe(to > from ? 'up' : 'down');
+    if (d) expect(d.direction).toBe(to > from ? 'up' : 'down');
   });
 
   it('ein Parameter ohne Wirkung auf den Trend erscheint nicht als Treiber', () => {

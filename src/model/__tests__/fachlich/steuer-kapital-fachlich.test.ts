@@ -25,7 +25,8 @@
 
 import { describe, it, expect } from 'vitest';
 import { computePhasePipeline, invalidatePhasesCache } from '../../compute-phases';
-import type { CityContext, CityParams40, ParamsDiff40 } from '../../../types';
+import { computeGroupTrends } from '../../groups';
+import type { CityContext, CityParams40, MarketState, ParamsDiff40 } from '../../../types';
 
 // Zürich-like baseline
 // V1: raumplanung=2, bauvorschriften=2, energetischeVorgaben=1, mietrecht=1, steuerpolitik=2,
@@ -306,11 +307,13 @@ describe('Steuern: AT-002 — Gemeinnütziger Wohnbau dämpft Mietpreise', () =>
    * Wien: Gemeindewohnung €5.10/m² vs. Privatmarkt deutlich höher.
    * 60% aller Wiener Wohnungen sozial/gemeinnützig → strukturelle Marktdämpfung.
    *
-   * Im Modell:
-   * - gemeinnuetzig_mindestanteil ↑ → mietpreis_schutzlevel ↑
-   * - gemeinnuetzig_kraft ↑ → nachfragedruck ↓ (Konkurrenzeffekt)
+   * Im Modell (seit 2026-11-15, Verbesserungsplan Fix-11/Fix-12):
+   * - gemeinnuetzig_* ↑ → gemeinnuetzig_kraft ↑
+   * - gemeinnuetzig_kraft ↑ → Marktmiete der Neumieter ↓ (Konkurrenzeffekt,
+   *   groups.ts). Bis 2026-11 lief der Effekt als Nachfragedämpfung über
+   *   nachfragedruck; diese Kanten sind als Doppelzählung gestrichen.
    */
-  it('[FACH] AT-002: Hoher Gemeinnützig-Anteil senkt nachfragedruck', () => {
+  it('[FACH] AT-002: Hoher Gemeinnützig-Anteil senkt den Preistrend der Neumieter', () => {
     const ohneGemeinnuetzig: CityParams40 = {
       ...ZUERICH_V2,
       gemeinnuetzig_mindestanteil: 0,
@@ -325,9 +328,13 @@ describe('Steuern: AT-002 — Gemeinnütziger Wohnbau dämpft Mietpreise', () =>
       gemeinnuetzig_baurecht:      { from: 0, to: 2 },
     };
     const mit = phases(ohneGemeinnuetzig, ZUERICH_CONTEXT, mitGemeinnuetzig);
-    // Grosser Gemeinnützig-Sektor → Konkurrenz dämpft Privatmarktnachfrage
-    expect(mit[0].marketState.nachfragedruck)
-      .toBeLessThan(ohne[0].marketState.nachfragedruck);
+    // Grosser Gemeinnützig-Sektor → Konkurrenz dämpft die Marktmiete
+    const neumieter = (s: MarketState) =>
+      computeGroupTrends(s).find(g => g.group.id === 'normalverdiener_angebot')!.value;
+    expect(mit[0].marketState.gemeinnuetzig_kraft)
+      .toBeGreaterThan(ohne[0].marketState.gemeinnuetzig_kraft);
+    expect(neumieter(mit[0].marketState))
+      .toBeLessThan(neumieter(ohne[0].marketState));
   });
 });
 

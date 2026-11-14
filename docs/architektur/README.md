@@ -65,15 +65,17 @@ Parameter ändern  ────▶  ┌─────────────�
 ## Schichten (Layers)
 
 ### E0 — Rohdaten
-- **6 Kontextfaktoren** (`CityContext`): Zinsniveau, Zuwanderungsdruck, Wirtschaftskraft, Bevölkerungstrend, Marktenge, Mietbelastungs-Grenze — Skala –2…+2 (+ `ownershipBaseline`-Anteile)
-- **41 steuerbare Parameter** (`CityParams40` — Name historisch, seit bau_ersatzneubau_effizienz sind es 41): Atomare Policies in 8 Kategorien — Skala 0/1/2
+- **8 Kontextfaktoren** (`CityContext`), Skala –2…+2: Zinsniveau, Zuwanderungsdruck, Wirtschaftskraft, Bevölkerungstrend, Marktenge, Mietbelastungs-Grenze (nur Anzeige, keine Kante), Teuerung und Referenzzins-Änderung (beide national, nur im Mietrecht-Regime). Dazu die `ownershipBaseline`-Anteile.
+- **43 steuerbare Parameter** (`CityParams40`, der Name ist historisch): atomare Policies, Skala 0/1/2
 - **Baseline** (Ist-Zustand der gewählten Stadt) vs. **Modified** (Nutzer-Szenario)
 - **Diff** (`ParamsDiff40`): Geänderte Parameter mit `from`/`to`-Werten
 
 ### E1 — Markt-Zustandsvariablen
-11 Variablen, jeweils normiert auf **–1 … +1**:
-- Positiv = angebotsreduzierend / preistreibend / verdrängend
-- Negativ = angebotsfördernd / preissenkend / schützend
+11 Variablen, jeweils normiert auf **–1 … +1**. Das Vorzeichen folgt dem
+Namen der Variable: positiv heisst «mehr davon» (`angebotspotenzial` > 0 =
+mehr Angebot, `mietpreis_schutzlevel` > 0 = mehr Schutz,
+`nachfragedruck` > 0 = mehr Druck). Ob das für eine Gruppe gut oder schlecht
+ist, entscheidet erst `groups.ts`.
 
 | Variable | Bedeutung |
 |----------|-----------|
@@ -110,7 +112,7 @@ in `src/model/derived.ts`.
 ```
 src/
 ├── model/
-│   ├── params.ts          Metadaten der 40 Parameter (Labels, Stufen, Gruppen)
+│   ├── params.ts          Metadaten der 43 Parameter (Labels, Stufen, Gruppen)
 │   ├── derived.ts         E1→E2 Berechnung (E2_TERMS = Source of Truth)
 │   ├── phases.ts          Typ-Definitionen für Phase-Pipeline
 │   ├── phase-weights.ts   Phase-gewichtete Graph-Kanten (P1/P2/P3 weights)
@@ -135,31 +137,66 @@ src/
 
 ## Berechnungspipeline
 
-Die Berechnung läuft über die **Phase-Pipeline** in `compute-phases.ts`:
+Die Berechnung läuft über die **Phase-Pipeline** in `compute-phases.ts`
+(Stand 2026-11-15, Verbesserungsplan Fix-9 und Fix-10):
 
-1. **E0 → E1 pro Phase:** Für jede Phase wird `computeE1WithPhaseAndCarry()` aufgerufen
-2. **Carry-Akkumulation:** Der E1-State der vorherigen Phase (`carryE1`) fliesst als "Gedächtnis" in die nächste Phase ein: `newValue = prevValue × 0.8 + newEffects`
-3. **E1 → E2:** Nach jeder Phase wird `computeDerivedIndicators()` aufgerufen
-4. **Generator:** `computePhasePipeline()` liefert die Resultate für Phase 1, 2 und 3
+1. **E0 → E1 pro Phase:** `computeE1WithPhaseAndCarry()` rechnet für jeden
+   E1-Knoten den Stand der Phase.
+2. **Mietrecht-Regime:** `applyMietrechtRegime()` legt Kostenmiete und
+   Bestandsregime auf den linearen Stand (`mietrecht-regime.ts`).
+3. **E1 → E2:** `computeDerivedIndicators()` nach jeder Phase.
+4. **Generator:** `computePhasePipeline()` liefert Phase 1, 2 und 3.
+   `scripts/calibrate.ts` rechnet über dieselbe Funktion, mit eigenen
+   Gewichten (Parameter `edges`).
 
-**Phase-Gewichte** (`phase-weights.ts`): Jede Kante hat drei Gewichte `[P1, P2, P3]`:
-- `0.0` = keine Wirkung in dieser Phase
-- `1.0` = volle Wirkung
-- Werte dazwischen = anteilige Wirkung
+**Formel je Knoten und Phase p:**
 
-**Persistenz-Faktor:** `0.8` — Der E1-Wert der Vorphase wird zu 80% beibehalten und nur zu 20% durch neue Effekte überschrieben.
+```
+Stand[p] = clamp( PERSISTENCE · Stand[p−1]
+                  + Σ_Kanten sign · w[p] · Δ · marketModulator / E1_NENNER )
+```
+
+- `Δ` = Parameter-Diff / 2 (ein Stufenschritt = 0.5) bzw. Kontextwert / 2.
+- `w[p]` ist der **Impuls** der Kante in Phase p, nicht ihr Anteil am
+  Endwert. Er kommt zum übertragenen Stand dazu.
+- `PERSISTENCE = 0.8`: ohne neuen Impuls verliert ein Stand 20 % pro Phase.
+  Übertragen wird der lineare Stand vor dem Regime-Abzug.
+- `marketModulator = 1 + 0.3 · marktenge` (0.4…1.6).
+- `E1_NENNER = 11.2`, gleich für alle Knoten. Ein Gewicht bedeutet damit an
+  jeder Kante dasselbe, unabhängig von der Zahl der Kanten am Knoten.
+  Hergeleitet so, dass der extremste Kontext einen Knoten in P3 gerade an
+  ±1 bringt (Rechenweg im JSDoc, nachgerechnet in `phase-pipeline.test.ts`).
+
+**Impulsvektoren** (`phase-weights.ts`, Kopf der Datei):
+
+| Form | Vektor | Verlauf des Standes |
+|---|---|---|
+| neutral | `[w, w, w]` | wächst, P1 ≈ 41 % von P3 |
+| Sprung und Halten | `[w, 0.2w, 0.2w]` | voller Effekt ab P1, bleibt stehen |
+| verzögert | z. B. `[0, 0.6, 1]` | in P1 fast nichts, Hauptteil in P3 |
+
+Jede Politik-Kante nennt in `profilQuelle` die Studie, aus der ihr Verlauf
+stammt, oder `'Annahme'`. Annahme-Kanten haben den neutralen Vektor; ein
+Test (`dag-integrity.test.ts`) prüft das. Der Verlauf am Stand wird in
+`verlauf-fachlich.test.ts` gegen FR-003, DE-004, NZ-001 und KR-003 geprüft.
+
+**Phasenlänge:** P1 = 0–2, P2 = 2–5, P3 = 5–10 Jahre. Der Übertrag ist pro
+Phase gleich und nicht an die Länge gekoppelt. Das ist eine Annahme; die
+Begründung steht beim JSDoc von `PERSISTENCE`.
 
 ---
 
-## 8 Bevölkerungsgruppen
+## 9 Bevölkerungsgruppen
 
-Die Preistrends werden für 8 fest definierte Gruppen berechnet:
+Die Preistrends werden für 9 fest definierte Gruppen berechnet (`GROUPS` in
+`groups.ts`):
 
 | Gruppe | Beschreibung |
 |--------|---------------|
-| Geringverdiener | Soziahilfe / stark geförderte Wohnung |
-| Normalverdiener Mieter | Mittleres Einkommen, freier Mietmarkt |
-| Glückspilze | Preisgebundene/Genossenschaftswohnung |
+| Geringverdiener | Sozialhilfe / stark geförderte Wohnung |
+| Bestandsmieter | Normalverdiener mit laufendem Mietvertrag |
+| Neumieter (Angebot) | Normalverdiener auf Wohnungssuche |
+| Glückspilze | Preisgebundene Wohnung |
 | Normalverdiener Eigentümer | Mit Hypothek |
 | Junge Familien | Familiengründungsphase |
 | Genossenschafter | Genossenschaftsmitglieder |
@@ -182,6 +219,6 @@ Folgende Abweichungen vom Ist-Stand:
 | 4 E2-Indikatoren (zeit_bis_wirkung entfernt) | ✅ 4 Indikatoren | ✅ Implementiert |
 | Phase-Aware Kanten-Gewichte | ✅ `PHASE_WEIGHTED_EDGES` in `phase-weights.ts` | ✅ Implementiert |
 | Generator-Pipeline | ✅ `computePhasePipeline()` | ✅ Implementiert |
-| 8 Bevölkerungsgruppen | ✅ `groups.ts` | ✅ Implementiert |
-| 40 atomare Parameter | ✅ `CityParams40` | ✅ Implementiert |
-| 4 Kontextfaktoren | ✅ `CityContext` | ✅ Implementiert |
+| 8 Bevölkerungsgruppen | 9 Gruppen in `groups.ts` (Bestand und Neumieter getrennt) | Abweichung |
+| 40 atomare Parameter | 43 Parameter in `CityParams40` | Abweichung |
+| 4 Kontextfaktoren | 8 Kontextfaktoren in `CityContext` | Abweichung |

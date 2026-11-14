@@ -1,8 +1,9 @@
 # Verbesserungsplan nach fachlichem Review (2026-11-13)
 
-> **Status:** Entscheide 1, 2, 3 und 5 gefällt (2026-11-13, siehe Abschnitt 9); alle Entscheide gefällt. Sprint 0, 1 und 2 sind umgesetzt auf `feat/mietrecht-regime-2026` (Sprint 0 und Fix-8 in Commit `238b6cd`, Sprint 1 in `46036cc`, Sprint 2 am 2026-11-14 umgesetzt). Offen: Sprint 3 und 4.
+> **Status:** Entscheide 1, 2, 3 und 5 gefällt (2026-11-13, siehe Abschnitt 9); alle Entscheide gefällt. Sprint 0, 1 und 2 sind umgesetzt auf `feat/mietrecht-regime-2026` (Sprint 0 und Fix-8 in Commit `238b6cd`, Sprint 1 in `46036cc`, Sprint 2 am 2026-11-14 umgesetzt). Sprint 3 Fix-9 bis Fix-13 am 2026-11-15 umgesetzt (nicht committet). Offen: Fix-14, Optimierer-Lauf (Fix-13), Sprint 4.
 > **Grundlage:** Fachliches Review vom 2026-11-13: Code in `src/model`, gerenderte Widgets, `docs/recherche/summary.md`, CH-012, Nachrechnung aller 43 Parameter für Zürich (je ±1 Stufe, Wirkung in P3).
-> **Teststand:** 225 passed, 1 skipped. Kalibrierungs-Dry-Run 0/446 Verletzungen. `tsc -b` meldet 10 Typfehler, alle in Testdateien (Fixtures ohne die neuen Regime-Felder von `MarketState`, dazu `international-fachlich.test.ts:236`); damit läuft `npm run build` nicht durch. Die Fehler stammen aus den Regime-Änderungen des Branches, nicht aus den Fixes dieses Plans.
+> **Teststand 2026-11-15:** 371 passed, 1 skipped. Kalibrierungs-Dry-Run 0/567 Verletzungen. `tsc -b`, `npm run build` und `npm run lint` ohne Fehler.
+> **Teststand 2026-11-13:** 225 passed, 1 skipped. Kalibrierungs-Dry-Run 0/446 Verletzungen. `tsc -b` meldet 10 Typfehler, alle in Testdateien (Fixtures ohne die neuen Regime-Felder von `MarketState`, dazu `international-fachlich.test.ts:236`); damit läuft `npm run build` nicht durch. Die Fehler stammen aus den Regime-Änderungen des Branches, nicht aus den Fixes dieses Plans.
 
 ## 1. Ausgangslage
 
@@ -12,7 +13,7 @@ Die Engine rechnet technisch sauber. Fachlich gab es drei Klassen von Problemen:
 |---|---|---|
 | Vorzeichen | `raumplanung_zonenreserve → nachfragedruck` und `bau_bewilligungsverfahren → angebotspotenzial_regulation` lasen die Parameterskala verkehrt herum | ✅ behoben |
 | Regime | Referenzzins-Regime las das Zinsniveau statt der Zinsänderung | ✅ behoben |
-| Struktur | Normalisierung pro Knoten verzerrt die Rangfolge der Hebel; der Phasenmultiplikator drückt alle frühen Effekte (Fix-10); mehrere Schieber und Evidenzpfade laufen ins Leere | offen |
+| Struktur | Normalisierung pro Knoten verzerrt die Rangfolge der Hebel; der Phasenmultiplikator drückt alle frühen Effekte (Fix-10); mehrere Schieber und Evidenzpfade laufen ins Leere | ✅ Nenner, Multiplikator, Evidenzpfade behoben (Sprint 3, 2026-11-15); Gruppenmodell offen (Fix-14) |
 
 ### Die Verzerrung in Zahlen (Zürich, 1 Stufe, P3, vor Sprint 0)
 
@@ -131,7 +132,7 @@ Offen: Vorzeichen `gemeinnuetzig_kraft: +1` in `fiskalische_wirkung` (Förderfon
 
 ---
 
-## 5. Sprint 3 — Modellstruktur (braucht Entscheide und Neukalibrierung)
+## 5. Sprint 3 — Modellstruktur — ✅ Fix-9 bis Fix-13 umgesetzt (2026-11-15), Fix-14 offen
 
 Fix-9 bis Fix-12 gehören zusammen und enden in **einer** Neukalibrierung (Fix-13). Nicht einzeln ausliefern.
 
@@ -141,6 +142,8 @@ Fix-9 bis Fix-12 gehören zusammen und enden in **einer** Neukalibrierung (Fix-1
 - **Entschieden:** ein gemeinsamer Nenner für alle Knoten. Ein Gewicht bedeutet dann überall dasselbe: Effektgrösse eines vollen Schritts auf der Skala −1…+1. Die Zahl der Kanten eines Knotens verdünnt nichts mehr.
 - Verworfen: Nenner pro Knoten behalten und die Rangfolge nur über Constraints erzwingen.
 - Der veraltete Nenner von `mietpreis_schutzlevel` (3.8 statt 2.8) erledigt sich damit.
+
+**Umgesetzt (2026-11-15):** `E1_NENNER = 11.2` in `compute-phases.ts` ersetzt `E1_NORMALIZATION`. Herleitung: der extremste Kontext (alle Kontextfaktoren am Rand und in Richtung des Knotens, `marktenge` +2) bringt den Knoten in P3 gerade an ±1. Grösster Wert `nachfragedruck` mit 11.17, knapp vor `eigentumsquoten_trend` mit 11.12; aufgerundet. `phase-pipeline.test.ts` rechnet die Herleitung nach. `scripts/calibrate.ts` rechnet über die Engine und damit mit demselben Nenner.
 
 #### Fix-10: Zeitprofil
 **Dateien:** `src/model/compute-phases.ts`, `src/model/phase-weights.ts`, `docs/architektur/README.md`
@@ -186,6 +189,15 @@ Nicht einzeln ausliefern: ohne Multiplikator wächst jeder Stand (P1 um den Fakt
 6. Kontext-Antrieb: läuft über denselben Generator und akkumuliert weiter. Die Frage vom Vortag ist damit erledigt.
 7. Hinweis für die Doku: die Phasen sind 2, 3 und 5 Jahre lang, der Übertrag ist pro Phase gleich. Entweder begründen oder an die Phasenlänge koppeln; kein Fehler, aber eine Annahme.
 
+**Umgesetzt (2026-11-15):**
+- `PHASE_BASE_MULTIPLIER` entfernt. Stand = `0.8 · Vorresultat + Σ sign·w·Δ·marketModulator / E1_NENNER`. Semantik im Kopf von `phase-weights.ts` und in `docs/architektur/README.md` (Abschnitt Berechnungspipeline, neu geschrieben).
+- Feld `profilQuelle` an allen 83 Politik-Kanten. Mit Studie: Zonenreserve, Verdichtung, Ausnützung → Angebot (AU-002, NZ-001, US-005, verzögert); Kündigungsschutz und Kostenmiete → Angebot (GLOBAL-029, kumulativ); Leerstandsabgabe → Angebot und → Spekulationshemmung (CA-001); Hypothekarregulierung → Nachfrage (KR-003, nur P1); Kostenmiete → Schutz (DE-004, Sprung und Halten); Anfangsmiete → Schutz (FR-003, wachsend); Verdichtung und Ausnützung → Aufwertung (US-010, US-008, Sprung und Halten). Alle übrigen sind `'Annahme'` mit neutralem Impuls `[w, w, w]`; `w` ist so gewählt, dass der P3-Stand gleich bleibt wie mit dem alten Vektor. `dag-integrity.test.ts` prüft Feld, Studien-ID und Neutralität.
+- Schritt 4 (negativer Impuls für schnelles Abklingen): keine Kante umgestellt. KR-003 ist mit Impuls nur in P1 abgebildet und klingt über den Übertrag ab; für einen negativen Impuls fehlt in der Sammlung eine Abklingrate.
+- Verlaufstests am Stand: `verlauf-fachlich.test.ts` (Paris wächst, Berlin ≥ 80 % in P1, Auckland ≤ 10 % in P1, dazu US-005 und KR-003).
+- Phasenlänge: Übertrag bleibt pro Phase gleich, Begründung im JSDoc von `PERSISTENCE` und in der README.
+
+**Offen:** `dag-topology.ts` liest neutrale Vektoren für die Ansicht als «kurzfristig». Der Kopfkommentar von `mietrecht-regime.ts` nennt noch `E1_NORMALIZATION` (Datei bewusst nicht angefasst).
+
 #### Fix-11: Fehlende Evidenzpfade
 **Datei:** `src/model/phase-weights.ts`
 **Aufwand:** 0.5 Tag plus Recherche-Abgleich
@@ -201,6 +213,13 @@ Die veraltete `docs/architektur/01-graph-kanten.md` führt vier dieser Kanten no
 
 Heute laufen Bodensteuer, Vorkaufsrecht, Belegungsvorschriften, Sozialmischung und Untervermietung praktisch ins Leere. Für Vorkaufsrecht und Bauverpflichtung fehlt laut `summary.md` die Evidenz; dort keine Kante erfinden. **Entschieden:** diese Parameter bleiben und werden im UI als «Wirkung nicht belegt» gekennzeichnet (Feld in `paramMeta40`, Hinweis am Schieber). Die Kennzeichnung selbst ist klein und kann schon in Sprint 2 kommen.
 
+**Umgesetzt (2026-11-15):** alle fünf Pfade eingebaut, keiner für Vorkaufsrecht oder Bauverpflichtung.
+- `steuer_leerstandsabgabe → angebotspotenzial` `[0.05, 0.15, 0.15]`, Verlauf CA-001; Grösse Setzung (CA-001 misst Leerstand, nicht Neubau).
+- `nutzung_kurzzeitvermietung → angebotspotenzial` `[0.1, 0.1, 0.1]`, Annahme; Grösse Setzung.
+- `boden_bodeneigentumssteuer → angebotspotenzial` `[0.1, 0.1, 0.1]`, Annahme; Grösse Setzung.
+- `mietrecht_kuendigungsschutz → mietpreis_schutzlevel` `[0.6, 0.6, 0.6]`, Annahme; Grösse Setzung.
+- `gemeinnuetzig_kraft` → Neumieter-Trend: Term `−0.25 · gemeinnuetzig_kraft` in `groups.ts`, Quelle AT-002; 0.25 ist Setzung (halber Faktor der Genossenschafter).
+
 #### Fix-12: Doppelzählungen
 **Dateien:** `src/model/phase-weights.ts`, `src/model/supply-demand.ts`
 **Aufwand:** 0.5 Tag
@@ -209,6 +228,13 @@ Heute laufen Bodensteuer, Vorkaufsrecht, Belegungsvorschriften, Sozialmischung u
 3. Mietpreisdeckel im Diagramm: die Menge sinkt entlang der Kurve, und die Mietrechts-Kanten verschieben zusätzlich die Kurve. Einen der beiden Wege wählen.
 4. `knappheitSignal` macht bei mehr Nachfrage auch die Angebotskurve steiler. Aus der Steigung herausnehmen.
 5. Angebotskurve um das Baseline-Gleichgewicht drehen statt um q=0, damit mehr Regulierung nur die Elastizität ändert.
+
+**Umgesetzt (2026-11-15):**
+1. `raumplanung_zonenreserve → nachfragedruck` gestrichen.
+2. Kanal gewählt: **Angebot**. Gestrichen sind `gemeinnuetzig_mindestanteil`, `gemeinnuetzig_foerderfonds`, `gemeinnuetzig_baurecht → nachfragedruck`. Begründung: AT-002 beschreibt die Wirkung als preisgünstiges Angebot, das die Marktmiete dämpft; für eine eigene Nachfragedämpfung fand sich in der Sammlung keine Quelle. Die Wirkung auf die Marktmiete läuft neu über `gemeinnuetzig_kraft` im Neumieter-Trend (Fix-11). `foerderfonds → angebotspotenzial` auf 0.35 gesenkt (Setzung).
+3. Weg gewählt: **Kurvenverschiebung**. `mietpreisdeckel()` setzt `qAngebot` auf die Gleichgewichtsmenge; die Mengenwirkung der Mietregulierung kommt nur aus den Mietrechts-Kanten auf `angebotspotenzial`. Begründung: diese Kanten sind mit GLOBAL-029 belegt und phasenweise kalibriert, der Weg entlang der Kurve hätte dieselbe Wirkung ein zweites Mal gezählt.
+4. `KNAPPHEIT_REGULATION_FAKTOR` entfernt; `regulationEffective()` klemmt nur noch. `knappheitSignal()` bleibt als Kennzahl, wird in der App aber nicht mehr verwendet.
+5. Angebotskurve dreht um den neutralen Punkt (`PIVOT_Q = 5`, `PIVOT_P = 5`); mehr Regulierung ändert nur die Steigung, das neutrale Gleichgewicht bleibt.
 
 #### Fix-13: Neukalibrierung mit Rangfolge-Constraints
 **Datei:** `scripts/calibrate.ts`
@@ -220,6 +246,44 @@ Heute laufen Bodensteuer, Vorkaufsrecht, Belegungsvorschriften, Sozialmischung u
    - Mietregulierung: Bestand sinkt, Neumieter steigt, Angebot sinkt in P3 stärker als in P1 (GLOBAL-027, GLOBAL-029).
    - Upzoning: in P1 kein messbarer Preiseffekt (US-007 Minneapolis).
 3. Kalibrieren, Sensitivitätstabelle aus Abschnitt 1 neu rechnen und hier ablegen.
+
+**Umgesetzt (2026-11-15):**
+- Der Vorwärtsrechner von `calibrate.ts` ist jetzt die Engine selbst (`computePhasePipeline` mit eigenen Kanten, inkl. Regime). `writeWeights` ersetzt die Gewichte an Ort und Stelle (der alte Pfad warf einen ReferenceError). Annahme-Kanten bleiben im Optimierer neutral.
+- Skalenrichtung der Basis-Constraints geprüft (Kommentar über `BASE_CONSTRAINTS`). Zwei Constraints folgen den gestrichenen Kanten aus Fix-12: `boden-ch007-nachfrage-p2` heisst neu `boden-ch007-angebot-p2` (Angebot steigt), `steuer-at002-nachfrage-p0` heisst neu `steuer-at002-neumieter-p0` (Neumieter-Trend sinkt).
+- Neue Relationen `abs_gt`, `near`, `delta_lt_phase` und Felder `group.<id>`, `belastung.miete`. Elf Rangfolge-Constraints (sechs Angebot gegen Förderfonds/ÖV, CH-003, drei Mietregulierung, US-007 mit `KEIN_MESSBARER_EFFEKT = 0.02`), über zehn Städte expandiert. Dieselben Rangfolgen als `rangfolge-fachlich.test.ts`.
+- Dry-Run: **0/567 Verletzungen**.
+
+**Offen:** der Optimierer wurde nicht laufen gelassen. Die Gewichte sind von Hand gesetzt (Fix-10 bis Fix-12) und erfüllen alle Constraints; ein Optimierer-Lauf würde sie ohne neuen fachlichen Grund verschieben.
+
+**Sensitivität neu (Zürich, 1 Stufe, P3, nach Sprint 3):**
+
+| Hebel (Stufe) | Δ Neumieter P3 | Δ Bestand P3 | Δ Mietbelastung (pp) | Δ Neumieter P1 |
+|---|---|---|---|---|
+| Einsprache suspensiv (2→1) | −0.142 | −0.047 | −0.71 | −0.058 |
+| Zonenreserve (2→1) | −0.139 | −0.046 | −0.70 | −0.009 |
+| Kostenmiete (1→2) | +0.128 | +0.007 | +0.67 | +0.023 |
+| Abbruchverbot (2→1) | −0.128 | −0.043 | −0.64 | −0.052 |
+| Verdichtung (2→1) | +0.127 | +0.042 | +0.63 | 0.000 |
+| Ausnützungsziffer (2→1) | +0.125 | +0.042 | +0.63 | +0.009 |
+| Förderfonds (2→1) | +0.108 | +0.024 | +0.37 | +0.044 |
+| ÖV-Ausbau (2→1) | −0.105 | −0.035 | −0.70 | −0.043 |
+| Kündigungsschutz (2→1) | −0.086 | +0.024 | −0.23 | −0.012 |
+| Hypothekarregulierung (1→2) | −0.049 | −0.016 | −0.33 | −0.077 |
+| Leerstandsabgabe (0→1) | −0.026 | −0.009 | −0.13 | −0.004 |
+| Bodeneigentumssteuer (0→1) | −0.021 | −0.007 | −0.11 | −0.009 |
+| Kurzzeitvermietung (1→2) | −0.021 | −0.007 | −0.11 | −0.009 |
+| Anfechtung Anfangsmiete (1→2) | +0.003 | −0.017 | −0.18 | +0.001 |
+| Mietzinstransparenz (1→2) | +0.002 | −0.013 | +0.08 | +0.001 |
+
+Vor Sprint 3 (Abschnitt 1): Förderfonds 0.186, ÖV 0.152, Kostenmiete 0.130, Ausnützung 0.115, Verdichtung 0.104, Anfangsmiete 0.028 (1.75 pp). Jetzt liegen die drei Angebotshebel vor Förderfonds und ÖV, und die Anfechtung der Anfangsmiete ist praktisch wirkungslos (CH-003).
+
+Ohne Wirkung auf Gruppen und Mietbelastung bleiben `boden_mehrwertabgabe`, `mietrecht_mietzinsindex`, `mietrecht_untervermietung`, `mietrecht_kriterium`, `mietrecht_durchsetzung` (nur mit Senkungsanspruch) und `kapital_institutionelle_regulierung`. Die drei Steuern auf Gewinne und Handänderung bewegen nur die Mietbelastung (über `marktfriktion`).
+
+**Befunde für Fix-14 (nicht behoben):**
+- Kostenmiete hebt die Mietbelastung (+0.67 pp). Ursache liegt in den Sensitivitäten von `belastung.ts`; im Detail nicht untersucht.
+- Gemeinnützige Instrumente (Baurecht, Belegung, Sozialmischung, Vorkaufsrecht über `gemeinnuetzig_kraft`) bewegen den Neumieter-Trend, aber nicht mehr die Mietbelastung, weil ihre Nachfrage-Kanten gestrichen sind.
+- Das Vorzeichen von `gemeinnuetzig_kraft` in `fiskalische_wirkung` ist nicht entschieden.
+- Einsprache suspensiv ist jetzt so stark wie die Zonenreserve; das Gewicht ist eine übernommene Setzung ohne eigene Quelle.
 
 #### Fix-14: Gruppenmodell
 **Dateien:** `src/model/groups.ts`, `src/model/belastung.ts`

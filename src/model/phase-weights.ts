@@ -1,201 +1,315 @@
 /**
- * Phase-Weighted DAG Edges — Phase 2 Research Results
- * =====================================================
- * Replaces the old single-weight + time-class schema with three phase weights.
+ * Phasen-gewichtete Kanten E0/ctx → E1
+ * ====================================
  *
- * Phase 1: 0–2 years (short-term)
- * Phase 2: 2–5 years (medium-term)
- * Phase 3: 5–10 years (long-term)
+ * Phase 1: 0–2 Jahre, Phase 2: 2–5 Jahre, Phase 3: 5–10 Jahre.
  *
- * Weight: 0.0 = no effect, 1.0 = full effect in this phase.
- * sign:  +1 = increases target,  -1 = decreases target
+ * ## Was ein Gewicht bedeutet (Fix-9/Fix-10, Stand 2026-11-15)
  *
- * Diese Datei enthält ausschliesslich E0/ctx → E1 Kanten.
- * E1 → E2 wird in `derived.ts` berechnet (dortige Koeffizienten sind die
- * Source of Truth; `dag-topology.ts` projiziert sie für die Visualisierung).
+ * `weights[p]` ist der **Impuls** der Kante in Phase p, nicht das in dieser
+ * Phase erreichte Niveau. Der Stand eines E1-Knotens entsteht im Generator
+ * (`compute-phases.ts`):
  *
- * Research sources:
- *   - RESULT-agent1-weights.md   (27 edges: angebotspotenzial + nachfragedruck)
- *   - RESULT-agent2-weights.md   (46 edges: verdrängungsrisiko, spekulationshemmung,
- *                                 marktfriktion, mietpreis_schutzlevel, gemeinnuetzig_kraft,
- *                                 eigentumsquoten_trend, aufwertungsdruck, investitionsattraktivitaet)
+ *     Stand[p] = PERSISTENCE · Stand[p−1] + Impuls[p]
+ *     Impuls[p] = Σ sign · weights[p] · Δ · marketModulator / E1_NENNER
  *
- * Research principles:
- *   - Uncertainty → tend toward 0.0 rather than 0.5
- *   - Lower values preferred when unsure
- *   - Phases: P1=immediate, P2=cumulative, P3=long-run equilibrium
+ * Δ ist die Änderung des Parameters, normiert auf −1…+1 (ein voller Schritt
+ * 0 → 2 ergibt Δ = 1, eine Stufe Δ = 0.5). `E1_NENNER` ist für alle Knoten
+ * gleich. Ein Gewicht bedeutet darum überall dasselbe: die Effektgrösse eines
+ * vollen Schritts, unabhängig davon, wie viele Kanten der Zielknoten hat.
+ * Es gibt keinen weiteren Phasenfaktor (der frühere `PHASE_BASE_MULTIPLIER`
+ * ist gestrichen).
+ *
+ * Wie früh ein Effekt kommt, steht nur im Vektor; wie lange er hält, im
+ * Übertrag. Mit PERSISTENCE = 0.8 gilt für einen Impulsvektor [a, b, c]:
+ *
+ *     Stand P1 = a
+ *     Stand P2 = 0.8·a + b
+ *     Stand P3 = 0.64·a + 0.8·b + c
+ *
+ * Drei Verlaufsformen kommen vor:
+ *   - Neutral `[w, w, w]`: gleicher Impuls in jeder Phase, der Stand wächst
+ *     1 : 1.8 : 2.44. Pflicht für jede Kante mit `profilQuelle: 'Annahme'`
+ *     (keine Verlaufsevidenz → kein erfundener Verlauf).
+ *   - Sprung und Halten `[w, 0.2·w, 0.2·w]`: der volle Stand sofort, danach
+ *     ersetzt der Impuls genau den Verlust durch den Übertrag (1 − 0.8).
+ *   - Verzögert `[≈0, b, c]`: erst ab P2 nennenswert.
+ * Ein Stand ohne neuen Impuls verliert 20 % pro Phase. Schneller abklingende
+ * Effekte bräuchten einen negativen Impuls; das Schema (Gewichte in [0, 1],
+ * festes Vorzeichen) sieht das derzeit nicht vor, und keine Kante belegt es.
+ *
+ * ## profilQuelle
+ *
+ * Jede Politik-Kante (Quelle ist ein Parameter, nicht `ctx:*`) nennt, woher
+ * ihr Verlauf über die Phasen stammt: eine Studien-ID aus `docs/recherche/`
+ * oder ausdrücklich `'Annahme'`. Die Quelle für Richtung und Grösse steht im
+ * Kommentar der Kante; sie ist oft eine andere als die Verlaufsquelle.
+ * Kontextkanten (`ctx:*`) sind nicht Teil des Verlaufs-Audits und tragen kein
+ * Feld.
+ *
+ * ## Herkunft der Zahlen
+ *
+ * Kanten mit `'Annahme'` haben den Impuls w = (0.64·a + 0.8·b + c) / 2.44 des
+ * früheren Vektors [a, b, c] erhalten: derselbe P3-Stand ohne Multiplikator,
+ * aber gleichmässig verteilt. Wo ein Gewicht anders gesetzt ist, sagt der
+ * Kommentar warum. Grössen ohne Beleg sind als «Setzung» gekennzeichnet.
+ * Kalibriert gegen die Constraints in `scripts/calibrate.ts`
+ * (Dry-Run 0 Verletzungen, Stand 2026-11-15).
+ *
+ * Diese Datei enthält ausschliesslich E0/ctx → E1. E1 → E2 steht in
+ * `derived.ts` (E2_TERMS).
  */
 
-export const PHASE_WEIGHTED_EDGES: readonly {
+export interface PhaseEdge {
   from: string;
   to: string;
   sign: 1 | -1;
+  /** Impuls je Phase [P1, P2, P3], je in [0, 1]. */
   weights: readonly [number, number, number];
-}[] = [
+  /**
+   * Herkunft des Verlaufs über die Phasen: Studien-ID aus `docs/recherche/`
+   * oder `'Annahme'` (dann gleicher Impuls in allen Phasen). Pflicht für
+   * Politik-Kanten, fehlt bei Kontextkanten (`ctx:*`).
+   */
+  profilQuelle?: string;
+}
+
+export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → angebotspotenzial (20 edges)
-  // Research: RESULT-agent1-weights.md
+  // E0 → angebotspotenzial
   // ═══════════════════════════════════════════════════════════════════
 
   {
     from: 'raumplanung_zonenreserve',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.8, 0.5, 0.3],
-    // Sofortige Wirkung durch Land-Entzug; langfristig relativ konstant
-    // (Gegenargument: Reserve wird nie mobilisiert → P3 tiefer)
+    weights: [0.1, 0.7, 1.0],
+    profilQuelle: 'AU-002',
+    // Skala: höher = weniger Bauland-Reserven → weniger Angebot.
+    // Richtung CH-007 (mehr Bauland dämpft den Kostenanstieg), Grösse
+    // summary.md (Angebot dominanter Hebel, Zonenreserve «sehr robust»).
+    // Verlauf AU-002: mehrjährige Anpassungsverzögerung. Bis 2026-11 als
+    // «sofort» [0.8, 0.5, 0.3] geführt, ohne Quelle für den Verlauf.
   },
   {
     from: 'raumplanung_verdichtung',
     to: 'angebotspotenzial',
     sign: +1,
     weights: [0.0, 0.6, 1.0],
-    // Verdichtung braucht Planungs- und Bauphase; erst nach 5+ Jahren voll wirksam
+    profilQuelle: 'NZ-001',
+    // NZ-001 Auckland: Upzoning erhöht den Neubau, Wirkung nach 2–4 Jahren.
   },
   {
     from: 'raumplanung_ausnuetzungsziffer',
     to: 'angebotspotenzial',
     sign: +1,
-    weights: [0.2, 0.7, 1.0],
-    // Ausnützungsziffer-Erhöhung benötigt Zeit bis Baugesuch; langfristig voll effektiv
+    weights: [0.1, 0.5, 1.0],
+    profilQuelle: 'US-005',
+    // US-005 (Kanton Zürich, 1996–2020): +9 % Wohnungen 5–10 Jahre nach der
+    // Erhöhung der Ausnützung, rund 10 Jahre vom Beschluss bis zu messbar
+    // mehr Neubau. US-007: Angebot steigt, Preise in den ersten Jahren nicht
+    // messbar.
   },
   {
     from: 'boden_bauverpflichtung',
     to: 'angebotspotenzial',
     sign: +1,
-    weights: [0.1, 0.5, 0.8],
-    // Verpflichtung braucht Enforcement-Jahre; langfristig starker Effekt durch erzwungene Projekte
+    weights: [0.52, 0.52, 0.52],
+    profilQuelle: 'Annahme',
+    // Wirkung nicht belegt (summary.md, Feld `evidenz` in params.ts).
+    // Bestehende Kante, Grösse unverändert übernommen; keine neue Evidenz.
   },
   {
     from: 'bau_energievorgaben',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.2, 0.6, 0.4],
-    // Erhöhte Baukosten hemmen Angebot nach 2-3 Jahren;
-    // langfristig durch Technologie-Rückgang teilweise kompensiert
+    weights: [0.41, 0.41, 0.41],
+    profilQuelle: 'Annahme',
+    // Höhere Baukosten hemmen das Angebot. Grösse Setzung.
   },
   {
     from: 'bau_sanierungspflicht',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.9, 0.6, 0.3],
-    // Kapital wird SOFORT umgelenkt (Renovation vs. Neubau); langfristig weniger relevant
+    weights: [0.56, 0.56, 0.56],
+    profilQuelle: 'Annahme',
+    // Kapital wird in die Renovation statt in den Neubau gelenkt. Grösse Setzung.
   },
-  // Sotomo 2025: Ersatzneubau-Effizienz (Zürich 2.8x, Lausanne 6.5x)
   {
     from: 'bau_ersatzneubau_effizienz',
     to: 'angebotspotenzial',
     sign: +1,
-    weights: [0.1, 0.5, 0.8],
-    // Effizienter Ersatzneubau → mehr Netto-Neubau pro Abriss → höheres Angebot.
-    // Kurzfristig gering (laufende Projekte); mittelfristig und langfristig volle Wirkung.
+    weights: [0.52, 0.52, 0.52],
+    profilQuelle: 'Annahme',
+    // Sotomo 2025: Ersatzneubau-Effizienz (Zürich 2.8×, Lausanne 6.5×).
+    // Mehr Netto-Neubau pro Abriss → mehr Angebot. Grösse Setzung.
   },
   {
     from: 'bau_einspracherecht_dritte',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.5, 0.7, 0.4],
-    // Verzögerung sofort spürbar; mittelfristig grösstes Hemmnis; langfristig Projekte angepasst
+    weights: [0.52, 0.52, 0.52],
+    profilQuelle: 'Annahme',
+    // NO-001: Einspracherechte verzögern Bewilligungen, ohne quantitative
+    // Schätzung. Grösse Setzung.
   },
   {
     from: 'bau_einspracherecht_suspensiv',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.7, 0.9, 0.5],
-    // Veto-Recht stark verzögernd (Projekt-Stopp möglich); mittelfristig intensivste Hemmnis
+    weights: [0.68, 0.68, 0.68],
+    profilQuelle: 'Annahme',
+    // Aufschiebende Wirkung kann Projekte stoppen; stärker als das blosse
+    // Einspracherecht. Grösse Setzung.
   },
   {
     from: 'bau_bewilligungsverfahren',
     to: 'angebotspotenzial',
     sign: +1,
-    weights: [0.4, 0.6, 0.3],
-    // Vereinfachung zeigt kurzfristig begrenzte Wirkung; mittelfristig stärker
+    weights: [0.42, 0.42, 0.42],
+    profilQuelle: 'Annahme',
+    // Skala: höher = schnelleres Verfahren. CH-007: lange Verfahren verteuern.
   },
   {
     from: 'bau_normenharmonisierung',
     to: 'angebotspotenzial',
     sign: +1,
-    weights: [0.0, 0.5, 0.8],
-    // Harmonisierung braucht Umsetzungszeit; langfristig substantielle Erleichterung
+    weights: [0.49, 0.49, 0.49],
+    profilQuelle: 'Annahme',
+    // Einheitlichere Vorschriften senken Planungskosten. Grösse Setzung.
   },
   {
     from: 'gemeinnuetzig_mindestanteil',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.4, 0.6, 0.5],
-    // Kontingentierung reduziert privates Angebot sofort; bleibt konstant
+    weights: [0.51, 0.51, 0.51],
+    profilQuelle: 'Annahme',
+    // Kontingentierung reduziert das private Angebot. Grösse Setzung.
   },
   {
     from: 'gemeinnuetzig_foerderfonds',
     to: 'angebotspotenzial',
     sign: +1,
-    weights: [0.1, 0.5, 0.8],
-    // Förderfonds braucht Aufbauphase; langfristig substantielle Angebotssteigerung
+    weights: [0.35, 0.35, 0.35],
+    profilQuelle: 'Annahme',
+    // Fördermittel ermöglichen zusätzlichen gemeinnützigen Neubau.
+    // Fix-12: einziger Angebots-/Nachfragekanal des Förderfonds; die
+    // Kante → nachfragedruck ist gestrichen (siehe dort). Grösse Setzung,
+    // gesenkt von 0.52 (P3-Stand des alten Vektors), damit die Rangfolge
+    // aus summary.md hält: Zonierung, Verdichtung und Ausnützung wirken auf
+    // Neumieter stärker als der Förderfonds (Fix-13, Rangfolge-Constraint).
   },
   {
     from: 'nutzung_abbruchverbot',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.5, 0.7, 0.6],
-    // FHNW-Studie (Ters/Kholodilin 2025, Genf): Wohnungsrationierung = stärkste Angebotsbremse.
-    // Abbruchverbot verhindert Ersatzneubau → institutionelle Investoren stornieren Projekte.
-    // Basel: Baugesuche −76%, geplante Wohneinheiten −95% (1078→67) nach Wohnschutz-Initiative.
-    // Dominanter Effekt: Neubau-Verhinderung > Bestandsschutz.
-    // P2 peak: Max. Projektstornierungen; P3 leicht abnehmend wenn Markt sich angepasst hat.
+    weights: [0.61, 0.61, 0.61],
+    profilQuelle: 'Annahme',
+    // FHNW-Studie (Ters/Kholodilin 2025, Genf; nicht in docs/recherche):
+    // Wohnungsrationierung = stärkste Angebotsbremse. Basel: Baugesuche −76 %,
+    // geplante Wohneinheiten −95 % (1078 → 67) nach der Wohnschutz-Initiative.
+    // Ohne Verlaufsangabe in der Sammlung → neutraler Impuls.
   },
   {
     from: 'nutzung_umnutzungsverbot',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.4, 0.7, 0.6],
-    // Umnutzungsverbot verhindert Neuentwicklung (Industrie→Wohnen, Aufstockung).
-    // Gleicher Mechanismus wie Abbruchverbot, etwas schwächer da weniger Neubau-Anteil.
+    weights: [0.58, 0.58, 0.58],
+    profilQuelle: 'Annahme',
+    // Gleicher Mechanismus wie das Abbruchverbot, etwas schwächer.
   },
   {
     from: 'ctx:zinsniveau',
     to: 'angebotspotenzial',
     sign: -1,
     weights: [1.0, 0.8, 0.5],
-    // Zinserhöhung sofortiger Effekt auf Rentabilität; langfristig Anpassung an neue Realität
+    // Zinserhöhung wirkt sofort auf die Rentabilität.
   },
   {
     from: 'ctx:wirtschaftskraft',
     to: 'angebotspotenzial',
     sign: +1,
     weights: [0.8, 0.6, 0.4],
-    // Wirtschaftskraft ermöglicht sofortige Investitionen; langfristig abnehmende Grenzrerträge
+    // Wirtschaftskraft ermöglicht Investitionen.
   },
-
-  // Mietrecht hat starken langfristigen negativen Effekt auf Angebot (GLOBAL-029, Kholodilin & Kohl 2023)
   {
     from: 'mietrecht_kuendigungsschutz',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.1, 0.4, 0.8],
-    // Restriktives Mietrecht reduziert Neubau langfristig deutlich.
-    // Kurzfristig wenig Effekt; langfristig stark (Investoren meiden Markt).
+    weights: [0.1, 0.3, 0.6],
+    profilQuelle: 'GLOBAL-029',
+    // GLOBAL-027/-029: restriktives Mietrecht senkt den Neubau, kumulativ
+    // über Jahrzehnte. P2/P3 gegenüber [0.1, 0.4, 0.8] gesenkt (Setzung):
+    // sonst überwiegt der Angebotsverlust den Schutz der Bestandsmieter, und
+    // die Rangfolge GLOBAL-027 (Bestand sinkt, Neumieter steigt) kippt.
   },
   {
     from: 'mietrecht_kostenmiete',
     to: 'angebotspotenzial',
     sign: -1,
     weights: [0.2, 0.5, 0.9],
-    // Kostenmietregulierung senkt Renditeerwartung → Neubau wird unattraktiv.
-    // GLOBAL-029: 16 Länder 1910–2016 — stärkster langfristiger Effekt.
+    profilQuelle: 'GLOBAL-029',
+    // Kostenmiete senkt die Renditeerwartung → Neubau unattraktiv.
+    // GLOBAL-029: 16 Länder 1910–2016, Wirkung wächst über die Zeit.
   },
   {
     from: 'nutzung_zweitwohnungen',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.3, 0.5, 0.7],
-    // CH-006 Lex Weber: Zweitwohnungsbeschränkung senkt paradoxerweise
-    // Gesamtbauaktivität (weniger Bauprojekte insgesamt).
+    weights: [0.53, 0.53, 0.53],
+    profilQuelle: 'Annahme',
+    // CH-006 Lex Weber: Beschränkung senkt die Bautätigkeit insgesamt.
+    // Fachlich strittig für Städte (Verbesserungsplan Fix-1).
+  },
+  // Fix-11 (2026-11-15): drei Kanten, die beim Umbau auf Phasengewichte
+  // verloren gegangen waren.
+  {
+    from: 'steuer_leerstandsabgabe',
+    to: 'angebotspotenzial',
+    sign: +1,
+    weights: [0.05, 0.15, 0.15],
+    profilQuelle: 'CA-001',
+    // CA-001 bis CA-003 (Vancouver Empty Homes Tax, BC Speculation and
+    // Vacancy Tax): Leerstand 0.90 % → 0.49 %, rund 2'900 Wohnungen
+    // (Vancouver) bzw. 20'000 Condos (Metro Vancouver) zurück auf dem Markt.
+    // Verlauf CA-001: erste Effekte nach 1–2 Jahren, deutlich nach 3–5.
+    // Grösse Setzung, bewusst klein: die Leerstandsquote sank um 0.4
+    // Prozentpunkte, also um einen kleinen Teil des Bestands, und der
+    // mobilisierbare Leerstand in den
+    // angespannten Schweizer Städten ist tief (für die Städte in
+    // switzerland.yaml nicht erfasst). Mietpreiseffekte sind laut
+    // CA-001/CA-003 umstritten.
+  },
+  {
+    from: 'nutzung_kurzzeitvermietung',
+    to: 'angebotspotenzial',
+    sign: +1,
+    weights: [0.1, 0.1, 0.1],
+    profilQuelle: 'Annahme',
+    // Skala: höher = strengere Regeln. US-003 (Los Angeles): Kurzzeitmiete
+    // entzieht Wohnungen dem Dauermarkt, +2 % Mieten; Regulierung auf den
+    // Hauptwohnsitz hebt das nahezu auf. ES-001 (Barcelona): +1.9 % Mieten.
+    // summary.md: STR-Literatur, Evidenz mittel. Gegenbefund US-013 (NYC)
+    // und US-014 (Santa Monica): Inserate −90 % bzw. −60 %, aber keine
+    // messbare Mietwirkung, entfernte Einheiten kamen nicht zwingend auf den
+    // Dauermarkt. Grösse Setzung, klein.
+  },
+  {
+    from: 'boden_bodeneigentumssteuer',
+    to: 'angebotspotenzial',
+    sign: +1,
+    weights: [0.1, 0.1, 0.1],
+    profilQuelle: 'Annahme',
+    // GLOBAL-028: Bodenwertsteuer lenkt Boden in produktivere Nutzung
+    // (Theorie und Übersicht). DK-001/DK-002: volle Kapitalisierung in tiefere
+    // Bodenpreise; DK-001 findet aber keine messbare Wirkung auf die
+    // Entwicklung. Der Angebotseffekt ist damit schwach belegt. Grösse
+    // Setzung, klein.
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → nachfragedruck (15 edges)
-  // Research: RESULT-agent1-weights.md
+  // E0 → nachfragedruck
   // ═══════════════════════════════════════════════════════════════════
 
   {
@@ -203,696 +317,707 @@ export const PHASE_WEIGHTED_EDGES: readonly {
     to: 'nachfragedruck',
     sign: +1,
     weights: [1.0, 0.8, 0.6],
-    // Zuwanderung wirkt SOFORT auf Nachfrage; langfristig Dämpfung durch Marktanspannung
+    // Zuwanderung wirkt sofort auf die Nachfrage.
   },
   {
     from: 'ctx:wirtschaftskraft',
     to: 'nachfragedruck',
     sign: +1,
     weights: [0.9, 0.7, 0.5],
-    // Wirtschaftskraft erhöht sofort Kaufkraft; langfristig Sättigungseffekte
+    // Wirtschaftskraft erhöht sofort die Kaufkraft.
   },
   {
     from: 'ctx:bevoelkerungstrend',
     to: 'nachfragedruck',
     sign: +1,
     weights: [0.8, 0.9, 0.7],
-    // Bevölkerungswachstum treibt Nachfrage mit Verzögerung (Familiengründung etc.)
+    // Bevölkerungswachstum treibt die Nachfrage, teils verzögert.
   },
   {
     from: 'ctx:zinsniveau',
     to: 'nachfragedruck',
     sign: -1,
     weights: [0.9, 0.7, 0.4],
-    // Zinserhöhung verteuert Finanzierung sofort; langfristig Anpassung des Konsumentenverhaltens
+    // Zinserhöhung verteuert die Finanzierung sofort.
   },
   {
     from: 'infra_oepnv',
     to: 'nachfragedruck',
     sign: +1,
-    weights: [0.3, 0.7, 1.0],
-    // OEPNV-Ausbau zeigt langfristig volle Wirksamkeit auf Lagequalität; kurzfristig kaum Effekt
+    weights: [0.5, 0.5, 0.5],
+    profilQuelle: 'Annahme',
+    // Bessere Erschliessung erhöht die Lagequalität. Grösse Setzung, gesenkt
+    // von 0.72 (P3-Stand des alten Vektors): summary.md nennt das Angebot als
+    // dominanten Hebel; ÖV darf auf Neumieter in P3 nicht stärker wirken als
+    // Zonierung, Verdichtung, Ausnützung (Fix-13). Die übrigen Infrastruktur-
+    // Kanten sind im selben Verhältnis (≈ 0.7) gesenkt.
   },
   {
     from: 'infra_schule_kita',
     to: 'nachfragedruck',
     sign: +1,
-    weights: [0.2, 0.6, 0.9],
-    // Schul-Infrastruktur wird erst bei Familien relevant; stark verzögerter Effekt
+    weights: [0.43, 0.43, 0.43],
+    profilQuelle: 'Annahme',
+    // Schul-Infrastruktur zieht Familien an. Grösse Setzung (siehe ÖV).
   },
   {
     from: 'infra_oeffentlicher_raum',
     to: 'nachfragedruck',
     sign: +1,
-    weights: [0.4, 0.8, 0.7],
-    // Aufwertung des öffentlichen Raums wirkt mittelfristig am stärksten
+    weights: [0.45, 0.45, 0.45],
+    profilQuelle: 'Annahme',
+    // Aufwertung des öffentlichen Raums. Grösse Setzung (siehe ÖV).
   },
   {
     from: 'infra_wirtschaftsansiedlung',
     to: 'nachfragedruck',
     sign: +1,
-    weights: [0.6, 0.9, 0.7],
-    // Ansiedlungseffekt auf Nachfrage zeigt sich mit Verzögerung
+    weights: [0.51, 0.51, 0.51],
+    profilQuelle: 'Annahme',
+    // Ansiedlung schafft Arbeitsplätze und Nachfrage. Grösse Setzung (siehe ÖV).
   },
   {
     from: 'steuer_eigenmietwert',
     to: 'nachfragedruck',
     sign: -1,
-    weights: [0.8, 0.6, 0.4],
-    // Eigenmietwert-Besteuerung reduziert Wohneigentumsnachfrage sofort; langfristig Anpassung
+    weights: [0.57, 0.57, 0.57],
+    profilQuelle: 'Annahme',
+    // Eigenmietwert-Besteuerung reduziert die Wohneigentumsnachfrage.
+    // CH-010: Industrie-Report, keine Peer-Review-Evidenz.
   },
   {
     from: 'kapital_hypothekarregulierung',
     to: 'nachfragedruck',
     sign: -1,
-    weights: [0.9, 0.6, 0.3],
-    // Regulierung dämpft Nachfrage unmittelbar; langfristig finden Akteure Alternativen
+    weights: [0.9, 0.0, 0.0],
+    profilQuelle: 'KR-003',
+    // GLOBAL-003 (BIS/CGFS): LTV-Verschärfungen senken Transaktionen und
+    // kurzfristig die Preise, Verschärfungen wirken schneller als Lockerungen.
+    // KR-003: kurzfristig wirksam, nicht auf das langfristige Preisniveau.
+    // Darum nur ein P1-Impuls; der Stand klingt über den Übertrag ab
+    // (0.9 / 0.72 / 0.58). Ein vollständiges Abklingen bräuchte einen
+    // negativen Impuls; GLOBAL-003 nennt langfristige Effekte «variierend»,
+    // das reicht dafür nicht.
   },
   {
     from: 'kapital_auslaendische_investoren',
     to: 'nachfragedruck',
     sign: -1,
-    weights: [0.8, 0.5, 0.2],
-    // Restriktion ausländischer Käufer reduziert Nachfrage sofort; Markt kompensiert langfristig
+    weights: [0.46, 0.46, 0.46],
+    profilQuelle: 'Annahme',
+    // Lex Koller: weniger ausländische Käufer, weniger Nachfrage. Grösse Setzung.
   },
-
-  // CH-007 BWO: Baulandknappheit erhöht den Nachfragedruck
-  {
-    from: 'raumplanung_zonenreserve',
-    to: 'nachfragedruck',
-    sign: +1,
-    weights: [0.2, 0.5, 0.8],
-    // Skala des Parameters: 0 = grosszügige Reserven, 2 = sehr knapp
-    // (params.ts). Höherer Wert = WENIGER Bauland → mehr Knappheit → mehr
-    // Nachfragedruck. Umgekehrt: mehr Bauland → weniger Nachfragedruck.
-    // Langfristig stärkster Effekt wenn Bauland tatsächlich mobilisiert wird.
-    // Vorzeichen war bis 2026-11 −1 (Skala verkehrt herum gelesen).
-  },
-  // AT-002 WIFO: Gemeinnütziger Wohnbau als "Public Option" — dämpft Privatmarktnachfrage
-  {
-    from: 'gemeinnuetzig_mindestanteil',
-    to: 'nachfragedruck',
-    sign: -1,
-    weights: [0.3, 0.5, 0.7],
-    // Wien-Effekt: 60% Sozialwohnungen → strukturelle Marktdämpfung.
-    // Kurzfristig begrenzt; langfristig wenn Bestand wächst.
-  },
-  {
-    from: 'gemeinnuetzig_foerderfonds',
-    to: 'nachfragedruck',
-    sign: -1,
-    weights: [0.1, 0.4, 0.7],
-    // Förderfonds braucht Aufbauphase; langfristig alternative Wohnangebote.
-  },
-  {
-    from: 'gemeinnuetzig_baurecht',
-    to: 'nachfragedruck',
-    sign: -1,
-    weights: [0.2, 0.4, 0.6],
-    // Baurechte für Gemeinnützige erweitern Angebot; mittelfristig wirksam.
-  },
+  // Fix-12 (2026-11-15) gestrichen:
+  // - raumplanung_zonenreserve → nachfragedruck. Der Effekt liegt auf
+  //   angebotspotenzial (CH-007); die zweite Kante zählte ihn doppelt und
+  //   machte die Zonenreserve zum stärksten Einzelhebel.
+  // - gemeinnuetzig_mindestanteil / _foerderfonds / _baurecht →
+  //   nachfragedruck (AT-002 «Public Option»). Die preisdämpfende Wirkung
+  //   des gemeinnützigen Sektors auf die Marktmiete läuft jetzt über
+  //   gemeinnuetzig_kraft → Neumieter-Trend (groups.ts, Fix-11). Der
+  //   Förderfonds behält seinen physischen Kanal (angebotspotenzial).
+  //   Wahl: der Nachfragekanal war die Doppelzählung, weil AT-002 eine
+  //   Preiswirkung über Konkurrenz beschreibt, keine sinkende Nachfrage.
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → verdrängungsrisiko (9 edges)
-  // Research: RESULT-agent2-weights.md
+  // E0 → verdraengungsrisiko
   // ═══════════════════════════════════════════════════════════════════
 
   {
     from: 'mietrecht_kuendigungsschutz',
     to: 'verdraengungsrisiko',
     sign: -1,
-    weights: [1.0, 0.9, 0.7],
-    // Sofortiger Schutz; mittelfristig finden Vermieter Umgehungsmöglichkeiten.
+    weights: [0.84, 0.84, 0.84],
+    profilQuelle: 'Annahme',
+    // GLOBAL-027: weniger Mobilität und Verdrängung der Bestandsmieter.
   },
   {
     from: 'nutzung_abbruchverbot',
     to: 'verdraengungsrisiko',
     sign: -1,
-    weights: [0.8, 0.8, 0.7],
-    // Sofortiger Schutz gegen Abbruch-Verdrängung;
-    // langfristig weichen Marktteilnehmer auf andere Kanäle aus.
+    weights: [0.76, 0.76, 0.76],
+    profilQuelle: 'Annahme',
+    // Schutz gegen Verdrängung durch Abbruch.
   },
   {
     from: 'nutzung_umnutzungsverbot',
     to: 'verdraengungsrisiko',
     sign: -1,
-    weights: [0.9, 0.8, 0.7],
-    // Umnutzungsverbote greifen sofort; bei langfristig hoher Profitabilität
-    // weicht man auf Luxussanierung aus.
+    weights: [0.79, 0.79, 0.79],
+    profilQuelle: 'Annahme',
+    // Umnutzungsverbote verhindern Verdrängung durch Umwandlung.
   },
   {
     from: 'bau_sanierungspflicht',
     to: 'verdraengungsrisiko',
     sign: +1,
-    weights: [0.7, 0.9, 0.8],
-    // Sanierungspflicht verdrängt kurzfristig durch Baulärm/Leerstand;
-    // mittelfristig vollständiger Effekt.
+    weights: [0.81, 0.81, 0.81],
+    profilQuelle: 'Annahme',
+    // Sanierungen führen zu Leerkündigungen.
   },
   {
     from: 'mietrecht_untervermietung',
     to: 'verdraengungsrisiko',
     sign: -1,
-    weights: [0.8, 0.7, 0.6],
-    // Untermietverbote reduzieren kurzfristig eine Verdrängungsstrategie;
-    // Vermieter weichen mittelfristig aus.
+    weights: [0.69, 0.69, 0.69],
+    profilQuelle: 'Annahme',
+    // Fachlich strittig (Verbesserungsplan Fix-1): Stufe 2 enthält ein
+    // Kündigungsrecht des Vermieters. Nicht Teil von Fix-9 bis Fix-13.
   },
   {
     from: 'raumplanung_verdichtung',
     to: 'verdraengungsrisiko',
     sign: +1,
-    weights: [0.5, 0.7, 0.5],
-    // CH-008 ETH SPUR: Verdichtung via Ersatzneubau verdrängt vulnerable Bewohnende.
-    // Mittelfristig stärkster Effekt bei Bauboom; langfristig leichte Dämpfung.
+    weights: [0.57, 0.57, 0.57],
+    profilQuelle: 'Annahme',
+    // CH-008 ETH SPUR: Verdichtung via Ersatzneubau verdrängt vulnerable
+    // Bewohnende. Ohne Verlaufsangabe.
   },
   {
     from: 'ctx:zuwanderungsdruck',
     to: 'verdraengungsrisiko',
     sign: +1,
     weights: [1.0, 1.0, 1.0],
-    // Zuwanderungsdruck wirkt durchgehend stark – keine zeitliche Abschwächung.
+    // Zuwanderungsdruck wirkt durchgehend.
   },
   {
     from: 'ctx:wirtschaftskraft',
     to: 'verdraengungsrisiko',
     sign: +1,
     weights: [0.7, 1.0, 0.9],
-    // Kurzfristig moderat; mittelfristig voller Effekt wenn Konjunktur Mietniveaus antreibt.
+    // Konjunktur treibt Mietniveaus.
   },
   {
     from: 'nutzung_kurzzeitvermietung',
     to: 'verdraengungsrisiko',
     sign: -1,
-    weights: [0.9, 0.8, 0.7],
-    // NYC LL18: 90% Airbnb-Inserate-Rückgang nach Regulierung.
-    // Weniger Konkurrenz durch Ferienwohnungen → weniger Verdrängung von Mietern.
-    // Sofortiger Effekt; langfristig passt sich der Markt an.
+    weights: [0.79, 0.79, 0.79],
+    profilQuelle: 'Annahme',
+    // US-013 NYC LL18: Inserate −90 % nach der Regulierung. Weniger
+    // Ferienwohnungen → weniger Verdrängung.
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → spekulationshemmung (9 edges)
-  // Research: RESULT-agent2-weights.md
+  // E0 → spekulationshemmung
   // ═══════════════════════════════════════════════════════════════════
 
   {
     from: 'steuer_grundstueckgewinn',
     to: 'spekulationshemmung',
     sign: +1,
-    weights: [0.9, 0.8, 0.7],
-    // Sofortige Transaktionskosten-Erhöhung; langfristig passen sich Spekulanten an.
+    weights: [0.79, 0.79, 0.79],
+    profilQuelle: 'Annahme',
+    // GLOBAL-005: Grundstückgewinnsteuern dämpfen kurzfristige Spekulation.
+    // «Kurzfristig» bezeichnet dort die Art der Spekulation, nicht den Verlauf.
   },
   {
     from: 'steuer_handaenderung',
     to: 'spekulationshemmung',
     sign: +1,
-    weights: [0.9, 0.8, 0.7],
-    // Gleichartiger Effekt wie Grundstückgewinnsteuer.
+    weights: [0.79, 0.79, 0.79],
+    profilQuelle: 'Annahme',
+    // SG-002: Seller's Stamp Duty reduziert kurzfristige Spekulation.
   },
   {
     from: 'steuer_kapitalgewinnprivatpersonen',
     to: 'spekulationshemmung',
     sign: +1,
-    weights: [0.8, 0.8, 0.7],
-    // Kapgewinnbesteuerung verteuert kurzfristig;
-    // langfristig bleiben Anreize durch Hebelwirkung.
+    weights: [0.76, 0.76, 0.76],
+    profilQuelle: 'Annahme',
+    // Kapitalgewinnbesteuerung verteuert spekulative Verkäufe.
   },
   {
     from: 'boden_mehrwertabgabe',
     to: 'spekulationshemmung',
     sign: +1,
-    weights: [0.9, 0.8, 0.7],
-    // Trifft Spekulanten direkt bei Wertsteigerungen;
-    // über Zeit leicht abnehmend da Alternativstrategien existieren.
+    weights: [0.79, 0.79, 0.79],
+    profilQuelle: 'Annahme',
+    // Schöpft planungsbedingte Wertsteigerungen ab.
   },
   {
     from: 'boden_bodeneigentumssteuer',
     to: 'spekulationshemmung',
     sign: +1,
-    weights: [0.7, 0.8, 0.9],
-    // Laufende Steuer auf Bodeneigentum – je länger gehalten, desto teurer;
-    // Effekt wächst über Zeit.
+    weights: [0.81, 0.81, 0.81],
+    profilQuelle: 'Annahme',
+    // GLOBAL-028, DK-001: Bodenwertsteuer reduziert Spekulation.
   },
   {
     from: 'boden_bauverpflichtung',
     to: 'spekulationshemmung',
     sign: +1,
-    weights: [0.8, 0.9, 0.8],
-    // Sofortiger Entwicklungsdruck;
-    // mittelfristig vollständiger wenn Grundstückseigner handeln müssen.
+    weights: [0.83, 0.83, 0.83],
+    profilQuelle: 'Annahme',
+    // Wirkung nicht belegt (summary.md). Bestehende Kante, Grösse übernommen.
   },
   {
     from: 'nutzung_zweitwohnungen',
     to: 'spekulationshemmung',
     sign: +1,
-    weights: [0.7, 0.8, 0.7],
-    // Beschränkt Spekulation mit Zweitwohnungen;
-    // mittelfristig am stärksten wenn Markt sich anpasst.
+    weights: [0.73, 0.73, 0.73],
+    profilQuelle: 'Annahme',
+    // Beschränkt Spekulation mit Zweitwohnungen.
   },
   {
     from: 'nutzung_kurzzeitvermietung',
     to: 'spekulationshemmung',
     sign: +1,
-    weights: [0.8, 0.9, 0.8],
-    // Unterbindet Kurzzeit-Vermietung als Spekulationskanal;
-    // mittelfristig stärkster Effekt wenn Vollzug greift.
+    weights: [0.83, 0.83, 0.83],
+    profilQuelle: 'Annahme',
+    // Unterbindet Kurzzeitvermietung als Renditekanal.
   },
   {
     from: 'steuer_leerstandsabgabe',
     to: 'spekulationshemmung',
     sign: +1,
-    weights: [0.7, 0.8, 0.9],
-    // Vancouver EHT (Leerstand 0.9%→0.49%, 20k Einheiten zum Mietmarkt).
-    // Leerstandsabgabe macht Horten direkt unrentabel → Spekulation sinkt.
-    // Kurzfristig Vollzugsverzögerung; langfristig stärkster Effekt.
+    weights: [0.3, 0.9, 0.9],
+    profilQuelle: 'CA-001',
+    // CA-001/CA-002: Leerstand halbiert, Hausverkäufe in steuerpflichtigen
+    // Regionen −12.5 %. Verlauf CA-001: erste Effekte nach 1–2 Jahren,
+    // deutlich nach 3–5. Gleicher P3-Stand wie der alte Vektor [0.7, 0.8, 0.9].
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → marktfriktion (7 edges)
-  // Research: RESULT-agent2-weights.md + FHNW-Studie (Ters/Kholodilin 2025)
+  // E0 → marktfriktion
   // ═══════════════════════════════════════════════════════════════════
 
   {
     from: 'steuer_grundstueckgewinn',
     to: 'marktfriktion',
     sign: +1,
-    weights: [0.8, 0.7, 0.6],
-    // Transaktionssteuern erzeugen sofort Reibung;
-    // Märkte finden mittelfristig Workarounds.
+    weights: [0.69, 0.69, 0.69],
+    profilQuelle: 'Annahme',
+    // Transaktionssteuern erzeugen Reibung (GLOBAL-016: Handänderungssteuern
+    // senken die Mobilität).
   },
   {
     from: 'steuer_handaenderung',
     to: 'marktfriktion',
     sign: +1,
-    weights: [0.8, 0.7, 0.6],
-    // Identischer Effekt wie Grundstückgewinnsteuer.
+    weights: [0.69, 0.69, 0.69],
+    profilQuelle: 'Annahme',
+    // GLOBAL-016 (Hilber): Handänderungssteuern senken die Mobilität.
   },
   {
     from: 'steuer_kapitalgewinnprivatpersonen',
     to: 'marktfriktion',
     sign: +1,
-    weights: [0.6, 0.7, 0.7],
-    // Kapgewinnsteuer moderater Effekt;
-    // leicht zunehmend da sie Verkaufsentscheide stärker beeinflusst.
+    weights: [0.67, 0.67, 0.67],
+    profilQuelle: 'Annahme',
+    // Lock-in: Verkäufe werden aufgeschoben.
   },
   {
     from: 'ctx:zinsniveau',
     to: 'marktfriktion',
     sign: +1,
     weights: [1.0, 1.0, 0.9],
-    // Zinsniveau ist fundamentaler Markttreiber;
-    // kaum abschwächend über Zeit da strukturelle Determinante.
+    // Zinsniveau als strukturelle Determinante.
   },
   {
     from: 'mietrecht_kostenmiete',
     to: 'marktfriktion',
     sign: +1,
-    weights: [0.6, 0.8, 0.9],
-    // FHNW: In stark regulierten Märkten wie Genf sinkt die Marktrotation drastisch.
-    // Bestandsmieter bleiben durchschnittlich 13.7 Jahre (vs. ~6 J. in weniger regulierten Märkten).
-    // Neumieter zahlen ~30% mehr als Bestandsmieter (Genf), vs. ~18% in Zürich.
-    // Kostenmiete = rigideste Form → maximale Marktstarrheit, wächst über Zeit.
+    weights: [0.79, 0.79, 0.79],
+    profilQuelle: 'Annahme',
+    // FHNW (Genf): in stark regulierten Märkten sinkt die Marktrotation,
+    // Bestandsmieter bleiben im Mittel 13.7 Jahre (vs. ~6 Jahre).
+    // CH-004: Mietrecht als Mobilitätsbremse.
   },
   {
     from: 'mietrecht_kuendigungsschutz',
     to: 'marktfriktion',
     sign: +1,
-    weights: [0.5, 0.7, 0.8],
-    // Starker Kündigungsschutz reduziert Fluktuation → Marktstarrheit steigt.
-    // Mieter bleiben in Wohnungen, die nicht mehr zum Lebensstil passen.
-    // Kumulative Wirkung nimmt über Zeit zu (P3 stärker als P1).
+    weights: [0.69, 0.69, 0.69],
+    profilQuelle: 'Annahme',
+    // CH-004, GLOBAL-027: weniger Fluktuation, stay-put-Effekt.
   },
   {
     from: 'mietrecht_mietzinstransparenz',
     to: 'marktfriktion',
     sign: +1,
-    weights: [0.3, 0.4, 0.5],
-    // CH-003: Anfechtungsrecht erhöht Transaktionskosten für Vermieter;
-    // strategische Preissetzung trotzdem möglich, aber Friktion steigt.
+    weights: [0.41, 0.41, 0.41],
+    profilQuelle: 'Annahme',
+    // Fachlich strittig (Verbesserungsplan Fix-1): mehr Information senkt
+    // gewöhnlich Friktion; CH-003 behandelt die Anfangsmiete, nicht die
+    // Offenlegung. Nicht Teil von Fix-9 bis Fix-13.
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → mietpreis_schutzlevel (4 edges)
-  // Research: RESULT-agent2-weights.md
+  // E0 → mietpreis_schutzlevel
   // ═══════════════════════════════════════════════════════════════════
 
   {
     from: 'mietrecht_kostenmiete',
     to: 'mietpreis_schutzlevel',
     sign: +1,
-    weights: [1.0, 0.9, 0.8],
-    // Kostenmieten-System sofort wirksam; mittelfristig leicht abnehmend
-    // durch Marktumgehung bei profitabren Neubauten.
+    weights: [1.0, 0.2, 0.2],
+    profilQuelle: 'DE-004',
+    // Verlauf DE-004 (Berliner Mietendeckel): regulierte Mieten sinken
+    // mechanisch mit Inkrafttreten. Sprung und Halten: voller Stand in P1,
+    // danach ersetzt 0.2 = 1 − PERSISTENCE den Übertragsverlust, der Stand
+    // bleibt bei 1.0. GLOBAL-027: Mieten im regulierten Sektor sinken.
   },
   {
     from: 'mietrecht_anfangsmiete',
     to: 'mietpreis_schutzlevel',
     sign: +1,
-    weights: [1.0, 0.8, 0.7],
-    // Regulierung der Erstmieten greift sofort;
-    // langfristig passen sich Vermieter via Umgehungsmodelle an.
+    weights: [0.18, 0.26, 0.18],
+    profilQuelle: 'FR-003',
+    // Verlauf FR-003 (Paris): −2.5 % im ersten Jahr, −5.9 % im vierten,
+    // −8.2 % im fünften; der Stand wächst. Der Vektor ergibt 0.18 / 0.40 /
+    // 0.50, also 36 % / 80 % / 100 % des P3-Standes.
+    // Grösse: CH-003 findet für die Anfechtung der Anfangsmiete in der Schweiz
+    // keinen messbaren Effekt auf die Neuvertragsmieten. Darum klein
+    // (Setzung); Paris ist ein Deckel, keine Anfechtung.
   },
   {
     from: 'mietrecht_mietzinstransparenz',
     to: 'mietpreis_schutzlevel',
     sign: +1,
-    weights: [0.8, 0.7, 0.6],
-    // Transparenz schafft kurzfristige Hemmschwelle für Mietzinserhöhungen;
-    // langfristig etablieren sich Markenpraktiken als Umgehung.
+    weights: [0.15, 0.15, 0.15],
+    profilQuelle: 'Annahme',
+    // DE-006: Mietspiegel mit begrenzter, nachweisbarer Wirkung. summary.md:
+    // Evidenz schwach (0.5 gegenüber 0.8 für die Anfangsmiete). Grösse
+    // Setzung, gesenkt von 0.69, damit die Offenlegung nicht stärker schützt
+    // als die Anfechtung der Anfangsmiete.
   },
-  // mietrecht_mietzinsindex → mietpreis_schutzlevel entfernt (CH-012).
-  // Vorzeichen +1 hat «Index = mehr Schutz» vorab entschieden. Der
-  // Erhöhungsspielraum lebt in mietrecht-regime.ts. Der Nenner
-  // E1_NORMALIZATION.mietpreis_schutzlevel ist nicht neu kalibriert.
+  {
+    from: 'mietrecht_kuendigungsschutz',
+    to: 'mietpreis_schutzlevel',
+    sign: +1,
+    weights: [0.6, 0.6, 0.6],
+    profilQuelle: 'Annahme',
+    // Fix-11 (2026-11-15). summary.md: Kündigungsschutz → Schutzlevel +1,
+    // «robust». GLOBAL-027: Konsens, Mieten im regulierten Sektor sinken.
+    // Grösse Setzung: mindestens so gross, dass der Schutz der Bestandsmieter
+    // den Angebotsverlust aus GLOBAL-029 überwiegt (Rangfolge GLOBAL-027).
+  },
+  // mietrecht_mietzinsindex → mietpreis_schutzlevel entfernt (CH-012). Der
+  // Erhöhungsspielraum lebt in mietrecht-regime.ts. Seit Fix-9 gibt es keinen
+  // Nenner pro Knoten mehr, der dadurch veraltet wäre.
+
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → gemeinnuetzig_kraft (6 edges)
-  // Research: RESULT-agent2-weights.md
+  // E0 → gemeinnuetzig_kraft
   // ═══════════════════════════════════════════════════════════════════
 
   {
     from: 'gemeinnuetzig_mindestanteil',
     to: 'gemeinnuetzig_kraft',
     sign: +1,
-    weights: [0.9, 1.0, 1.0],
-    // Politik greift sofort; mittelfristig voll wenn Bestand wächst.
+    weights: [0.97, 0.97, 0.97],
+    profilQuelle: 'Annahme',
+    // AT-002: Sektorgrösse entscheidet über die Wirkung.
   },
   {
     from: 'gemeinnuetzig_foerderfonds',
     to: 'gemeinnuetzig_kraft',
     sign: +1,
-    weights: [0.5, 0.8, 1.0],
-    // Kapital braucht Aufbauphase; Effekt wächst über Zeit bis volle Förderkraft erreicht.
+    weights: [0.8, 0.8, 0.8],
+    profilQuelle: 'Annahme',
+    // Kapital für gemeinnützige Träger.
   },
   {
     from: 'gemeinnuetzig_baurecht',
     to: 'gemeinnuetzig_kraft',
     sign: +1,
-    weights: [0.9, 1.0, 0.9],
-    // Baurechte werden sofort zugeteilt;
-    // langfristig weniger neu wenn Bestand gesättigt.
+    weights: [0.93, 0.93, 0.93],
+    profilQuelle: 'Annahme',
+    // Land im Baurecht für gemeinnützige Träger.
   },
   {
     from: 'boden_vorkaufsrecht',
     to: 'gemeinnuetzig_kraft',
     sign: +1,
-    weights: [0.7, 0.9, 0.8],
-    // Recht besteht sofort, nutzt aber nur bei Marktchancen;
-    // mittelfristig stärkster Effekt.
+    weights: [0.81, 0.81, 0.81],
+    profilQuelle: 'Annahme',
+    // Wirkung nicht belegt (summary.md). Bestehende Kante, Grösse übernommen;
+    // keine Kante zum Angebot (Fix-11: keine Kante erfinden).
   },
   {
     from: 'gemeinnuetzig_belegungsvorschriften',
     to: 'gemeinnuetzig_kraft',
     sign: +1,
-    weights: [0.8, 0.8, 0.7],
-    // Direkte Steuerung sofort; langfristig etwas erodierend wenn Durchsetzung nachlässt.
+    weights: [0.76, 0.76, 0.76],
+    profilQuelle: 'Annahme',
+    // Direkte Steuerung der Belegung.
   },
   {
     from: 'gemeinnuetzig_sozialmischung',
     to: 'gemeinnuetzig_kraft',
     sign: +1,
-    weights: [0.7, 0.8, 0.8],
-    // Sozialmischung braucht Umsetzungszeit;
-    // Effekt mittel- bis langfristig am stärksten.
+    weights: [0.77, 0.77, 0.77],
+    profilQuelle: 'Annahme',
+    // Verbindliche Sozialmischung.
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → eigentumsquoten_trend (6 edges)
-  // Research: RESULT-agent2-weights.md
+  // E0 → eigentumsquoten_trend
   // ═══════════════════════════════════════════════════════════════════
 
   {
     from: 'steuer_eigenmietwert',
     to: 'eigentumsquoten_trend',
     sign: -1,
-    weights: [0.9, 0.8, 0.7],
-    // Unmittelbare steuerliche Belastung des Wohneigentums;
-    // langfristig weicht man auf Kapitalanlagen aus.
+    weights: [0.79, 0.79, 0.79],
+    profilQuelle: 'Annahme',
+    // Steuerliche Belastung des Wohneigentums.
   },
   {
     from: 'kapital_hypothekarregulierung',
     to: 'eigentumsquoten_trend',
     sign: -1,
-    weights: [1.0, 0.9, 0.8],
-    // Regulatorische Kreditbeschränkung sofort spürbar;
-    // Märkte finden mittelfristig Umgehung.
+    weights: [0.89, 0.89, 0.89],
+    profilQuelle: 'Annahme',
+    // Kreditbeschränkung erschwert den Zugang zu Eigentum, solange sie gilt.
   },
   {
     from: 'ctx:zinsniveau',
     to: 'eigentumsquoten_trend',
     sign: -1,
     weights: [1.0, 1.0, 0.9],
-    // Zinsen fundamental für Kaufkraft; dauerhafter Effekt als strukturelle Determinante.
+    // Zinsen bestimmen die Kaufkraft.
   },
   {
     from: 'mietrecht_kostenmiete',
     to: 'eigentumsquoten_trend',
     sign: -1,
-    weights: [0.7, 0.8, 0.8],
-    // Kostenmieten machen Mietwohnungen attraktiver vs. Kaufen; mittelfristig stabil.
+    weights: [0.77, 0.77, 0.77],
+    profilQuelle: 'Annahme',
+    // Kostenmieten machen Mieten gegenüber Kaufen attraktiver.
   },
   {
     from: 'ctx:zuwanderungsdruck',
     to: 'eigentumsquoten_trend',
     sign: -1,
     weights: [1.0, 1.0, 1.0],
-    // Zuwanderung erhöht Mietnachfrage dauerhaft; Kaufquote sinkt unter Druck.
+    // Zuwanderung erhöht die Mietnachfrage.
   },
   {
     from: 'ctx:wirtschaftskraft',
     to: 'eigentumsquoten_trend',
     sign: +1,
     weights: [0.7, 0.9, 1.0],
-    // Wohlstand stärkt Kaufkraft erst mittelfristig;
-    // langfristig voll wenn Einkommen steigen.
+    // Wohlstand stärkt die Kaufkraft.
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → aufwertungsdruck (7 edges)
-  // Research: RESULT-agent2-weights.md
+  // E0 → aufwertungsdruck
   // ═══════════════════════════════════════════════════════════════════
 
   {
     from: 'infra_oepnv',
     to: 'aufwertungsdruck',
     sign: +1,
-    weights: [0.6, 0.9, 1.0],
-    // OEV-Ausbau braucht Zeit bis Aufwertung eintritt; Effekt wächst über Zeit.
+    weights: [0.86, 0.86, 0.86],
+    profilQuelle: 'Annahme',
+    // UK-001 Crossrail: Erschliessung wird in Bodenwerte kapitalisiert.
   },
   {
     from: 'infra_wirtschaftsansiedlung',
     to: 'aufwertungsdruck',
     sign: +1,
-    weights: [0.7, 0.9, 1.0],
-    // Ansiedlung zeigt erst mittelfristig Effekt wenn Arbeitsplätze entstehen.
+    weights: [0.89, 0.89, 0.89],
+    profilQuelle: 'Annahme',
+    // Ansiedlung zieht kaufkräftige Haushalte an.
   },
   {
     from: 'ctx:wirtschaftskraft',
     to: 'aufwertungsdruck',
     sign: +1,
     weights: [0.8, 0.9, 1.0],
-    // Konjunktur treibt Aufwertung;
-    // langfristig stärkster Effekt wenn Boom nachhaltig.
+    // Konjunktur treibt Aufwertung.
   },
   {
     from: 'raumplanung_verdichtung',
     to: 'aufwertungsdruck',
     sign: +1,
-    weights: [0.8, 0.9, 1.0],
-    // Verdichtung verändert Quartiercharakter sofort in Antragstellung;
-    // Effekt wächst mit Fertigstellungen.
+    weights: [0.9, 0.18, 0.18],
+    profilQuelle: 'US-010',
+    // US-010 Minneapolis 2040: Optionswert-Effekt, Property Values +3–5 % im
+    // Umkreis schon kurzfristig. Sprung und Halten (0.18 = 0.2 · 0.9).
   },
   {
     from: 'raumplanung_ausnuetzungsziffer',
     to: 'aufwertungsdruck',
     sign: +1,
-    weights: [0.9, 0.9, 0.8],
-    // Höhere Ausnützung sofort in Bodenpreisen eingepreist;
-    // langfristig weniger Zusatz Effekt wenn Marktnähe erreicht.
+    weights: [0.9, 0.18, 0.18],
+    profilQuelle: 'US-008',
+    // US-008 Chicago TOD: Verkaufspreise +15–23 % auf den upgezonten
+    // Parzellen, bevor das Angebot steigt. Sprung und Halten.
   },
   {
     from: 'boden_bodeneigentumssteuer',
     to: 'aufwertungsdruck',
     sign: -1,
-    weights: [0.6, 0.7, 0.8],
-    // Bodensteuer verteuert Halten;
-    // Effekt nimmt zu je länger spekulativ vorgehalten wird.
+    weights: [0.71, 0.71, 0.71],
+    profilQuelle: 'Annahme',
+    // DK-001: Bodensteuer wird in tiefere Bodenpreise kapitalisiert.
   },
   {
     from: 'gemeinnuetzig_mindestanteil',
     to: 'aufwertungsdruck',
     sign: -1,
-    weights: [0.8, 0.7, 0.6],
-    // Gemeinnütziger Anteil bremst Aufwertung;
-    // langfristig weniger wirksam wenn Markt sich anpasst.
+    weights: [0.69, 0.69, 0.69],
+    profilQuelle: 'Annahme',
+    // Gemeinnütziger Anteil bremst Aufwertung.
   },
 
   // ═══════════════════════════════════════════════════════════════════
-  // E0 → investitionsattraktivitaet (11 edges)
-  // Research: RESULT-agent2-weights.md + FHNW-Studie (Ters/Kholodilin 2025)
+  // E0 → investitionsattraktivitaet
   // ═══════════════════════════════════════════════════════════════════
 
   {
     from: 'mietrecht_kostenmiete',
     to: 'investitionsattraktivitaet',
     sign: -1,
-    weights: [0.9, 0.9, 0.8],
-    // Kostenmietregulierung begrenzt Rendite sofort;
-    // Markt passt sich teilweise an.
+    weights: [0.86, 0.86, 0.86],
+    profilQuelle: 'Annahme',
+    // Kostenmiete begrenzt die Rendite.
   },
   {
     from: 'kapital_institutionelle_regulierung',
     to: 'investitionsattraktivitaet',
     sign: -1,
-    weights: [0.8, 0.9, 0.9],
-    // Regulierung institutioneller Investoren sofort;
-    // dauerhaft restriktiv wenn Durchsetzung hoch.
+    weights: [0.87, 0.87, 0.87],
+    profilQuelle: 'Annahme',
+    // Regulierung institutioneller Anleger.
   },
   {
     from: 'steuer_grundstueckgewinn',
     to: 'investitionsattraktivitaet',
     sign: -1,
-    weights: [0.8, 0.7, 0.6],
-    // Transaktionssteuer verteuert Ein-/Ausstieg;
-    // Markt findet mittelfristig Workarounds.
+    weights: [0.69, 0.69, 0.69],
+    profilQuelle: 'Annahme',
+    // Verteuert den Ausstieg.
   },
   {
     from: 'boden_mehrwertabgabe',
     to: 'investitionsattraktivitaet',
     sign: -1,
-    weights: [0.8, 0.8, 0.7],
-    // Mehrwertabgabe schmälert Rendite bei Veräusserung;
-    // nachhaltig aber mit Anpassungseffekten.
+    weights: [0.76, 0.76, 0.76],
+    profilQuelle: 'Annahme',
+    // Schmälert die Rendite bei Einzonung oder Aufzonung.
   },
   {
     from: 'kapital_auslaendische_investoren',
     to: 'investitionsattraktivitaet',
     sign: -1,
-    weights: [0.8, 0.9, 0.9],
-    // Ausländerbeschränkungen reduzieren Käuferpool sofort;
-    // nachhaltig da politikbeständig.
+    weights: [0.87, 0.87, 0.87],
+    profilQuelle: 'Annahme',
+    // Kleinerer Käuferpool.
   },
   {
     from: 'steuer_handaenderung',
     to: 'investitionsattraktivitaet',
     sign: -1,
-    weights: [0.7, 0.7, 0.6],
-    // Handaänderungssteuer moderate Transaktionshürde;
-    // langfristig weniger relevant da einmalig.
+    weights: [0.66, 0.66, 0.66],
+    profilQuelle: 'Annahme',
+    // Transaktionshürde.
   },
   {
     from: 'ctx:wirtschaftskraft',
     to: 'investitionsattraktivitaet',
     sign: +1,
     weights: [0.9, 1.0, 1.0],
-    // Wirtschaftskraft treibt Miet- und Kaufpreise;
-    // anhaltend starker Magnet für Investoren.
+    // Wirtschaftskraft zieht Investoren an.
   },
   {
     from: 'ctx:zinsniveau',
     to: 'investitionsattraktivitaet',
     sign: -1,
     weights: [1.0, 1.0, 0.9],
-    // Zinsniveau fundamental für Renditeerwartungen;
-    // sofortiger und nachhaltiger Effekt.
+    // Zinsniveau bestimmt die Renditeerwartung.
   },
   {
     from: 'nutzung_kurzzeitvermietung',
     to: 'investitionsattraktivitaet',
     sign: -1,
-    weights: [0.8, 0.7, 0.6],
-    // Barcelona Paradox: Airbnb-Regulierung → +1.9% Miete, +4.6% Kaufpreise.
-    // Vermieter weichen auf Kaufmarkt aus → Renditeerwartungen sinken.
-    // Sofortiger Effekt auf Investoren-Pool; langfristig Markt-Anpassung.
+    weights: [0.69, 0.69, 0.69],
+    profilQuelle: 'Annahme',
+    // ES-001 Barcelona: Kurzzeitvermietung hebt Kaufpreise (+4.6 %);
+    // Regulierung nimmt diesen Renditekanal weg.
   },
   {
     from: 'nutzung_abbruchverbot',
     to: 'investitionsattraktivitaet',
     sign: -1,
-    weights: [0.5, 0.7, 0.8],
-    // FHNW-Studie (Genf 1994–2022): Rationierungsschocks → institutionelle Neubauinvestitionen −400 Mio. CHF.
-    // Bewilligungsrisiken steigen, Projektlaufzeiten verlängern sich, Bodenwerte sinken →
-    // grossflächige Ersatzneubauten werden unattraktiv.
-    // Langfristig stärkster Effekt (P3=0.8) da Investoren Markt dauerhaft meiden.
+    weights: [0.69, 0.69, 0.69],
+    profilQuelle: 'Annahme',
+    // FHNW (Genf 1994–2022): Rationierungsschocks → institutionelle
+    // Neubauinvestitionen −400 Mio. CHF.
   },
   {
     from: 'nutzung_umnutzungsverbot',
     to: 'investitionsattraktivitaet',
     sign: -1,
-    weights: [0.4, 0.6, 0.7],
-    // Ergänzend zu Abbruchverbot: Umnutzungsverbot verhindert Redevelopment-Projekte.
-    // Etwas schwächerer Effekt, da Umnutzungen seltener sind als Ersatzneubauten.
+    weights: [0.59, 0.59, 0.59],
+    profilQuelle: 'Annahme',
+    // Verhindert Redevelopment; seltener als Ersatzneubau.
   },
 
   // ═══════════════════════════════════════════════════════════════════
   // E0 → angebotspotenzial_regulation
-  // Bestimmt die Elastizität des Angebots in Bezug auf Preisänderungen.
-  // Wirkt primär in P3 (langfristige Anpassung des Bauvolumens an Preissignale).
-  // Starke Regulierung → unelastische Angebotskurve → Preise reagieren stark, Menge wenig.
-  // Schwache Regulierung → elastische Angebotskurve → Menge reagiert stark, Preise wenig.
+  // Elastizität des Angebots (Steigung der Angebotskurve). Starke
+  // Regulierung → unelastisch: Preise reagieren stark, Menge wenig.
   // ═══════════════════════════════════════════════════════════════════
 
   {
     from: 'mietrecht_kostenmiete',
     to: 'angebotspotenzial_regulation',
     sign: +1,
-    weights: [0.7, 0.9, 1.0],
-    // Kostenmietregulierung macht Preissignale irrelevant für Anleger → unelastisch.
-    // GLOBAL-029: Stärkster Effekt bei langfristiger Regulierung.
+    weights: [0.89, 0.89, 0.89],
+    profilQuelle: 'Annahme',
+    // Preissignale werden für Anleger irrelevant → unelastisch.
   },
   {
     from: 'mietrecht_kuendigungsschutz',
     to: 'angebotspotenzial_regulation',
     sign: +1,
-    weights: [0.5, 0.7, 0.9],
-    // Kündigungsschutz reduziert Exit-Optionen → Investoren reagieren weniger auf Preisänderungen.
+    weights: [0.73, 0.73, 0.73],
+    profilQuelle: 'Annahme',
+    // Weniger Exit-Optionen → Investoren reagieren weniger auf Preise.
   },
   {
     from: 'bau_bewilligungsverfahren',
     to: 'angebotspotenzial_regulation',
     sign: -1,
-    weights: [0.6, 0.8, 0.5],
-    // Skala des Parameters: 0 = analog/lange Wartezeiten, 2 = volldigital
-    // (params.ts). Höherer Wert = SCHNELLERES Verfahren → Angebot reagiert
-    // rascher auf Preissignale → elastischer (Knoten sinkt). Komplexe
-    // Verfahren (tiefer Wert) machen das Angebot träge → unelastisch.
-    // Kurzfristig stark, da bestehende Projekte nicht schnell reagieren können.
-    // Vorzeichen war bis 2026-11 +1 (Skala verkehrt herum gelesen).
+    weights: [0.62, 0.62, 0.62],
+    profilQuelle: 'Annahme',
+    // Skala: höher = schnelleres Verfahren → Angebot reagiert rascher →
+    // elastischer (Knoten sinkt). Vorzeichen war bis 2026-11 +1.
   },
   {
     from: 'bau_einspracherecht_suspensiv',
     to: 'angebotspotenzial_regulation',
     sign: +1,
-    weights: [0.5, 0.7, 0.6],
-    // Veto-Recht schafft Unsicherheit → Anleger meiden den Markt bei Preisänderungen.
+    weights: [0.61, 0.61, 0.61],
+    profilQuelle: 'Annahme',
+    // Veto-Recht schafft Unsicherheit.
   },
   {
     from: 'nutzung_abbruchverbot',
     to: 'angebotspotenzial_regulation',
     sign: +1,
-    weights: [0.6, 0.8, 0.7],
-    // Rationierung blockiert den physischen Reaktionskanal → Angebot reagiert kaum auf Preise.
-    // FHNW: Basel Baugesuche −76% zeigt diese Unelastizität.
+    weights: [0.71, 0.71, 0.71],
+    profilQuelle: 'Annahme',
+    // Rationierung blockiert den physischen Reaktionskanal.
   },
   {
     from: 'ctx:zinsniveau',
     to: 'angebotspotenzial_regulation',
     sign: +1,
     weights: [0.8, 0.6, 0.4],
-    // Zinserhöhung verteuert Finanzierung → selbst bei hohen Preisen kein Angebot.
-    // Kurzfristig starker Effekt, da Kapital sofort teurer wird.
+    // Teure Finanzierung → auch bei hohen Preisen kein Angebot.
   },
   {
     from: 'ctx:marktenge',
     to: 'angebotspotenzial_regulation',
     sign: +1,
     weights: [0.7, 0.6, 0.5],
-    // Enger Markt hat weniger Ausweichoptionen → selbst bei Preisreiz kein Angebot möglich.
-    // Entspannter Markt: mehr Spielraum für Angebotsreaktion.
-    //
-    // Bewusste Koexistenz mit `marketModulator` (compute-phases.ts): marktenge
-    // wirkt dort GLOBAL als Reaktions-Verstärker ("enge Märkte reagieren
-    // stärker auf alles"), hier LOKAL als Elastizitäts-Treiber der
-    // Angebotskurve ("enge Märkte haben unelastisches Angebot"). Zwei
-    // verschiedene Mechanismen, die sich nur auf diesem einen Node überlagern —
-    // beide zusammen kalibriert (0/446 Constraint-Verletzungen).
+    // Enger Markt hat weniger Ausweichoptionen.
+    // Bewusste Koexistenz mit `marketModulator` (compute-phases.ts):
+    // marktenge wirkt dort global als Reaktions-Verstärker, hier lokal als
+    // Elastizitäts-Treiber der Angebotskurve.
   },
 
-] as const;
+];
