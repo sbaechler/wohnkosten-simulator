@@ -58,7 +58,7 @@ export function MietbelastungWidget({ params, baseline, marketState, baselineMar
 
   return (
     <div className="mietbelastung-widget">
-      <div className="mietbelastung-widget__title">Mietbelastung</div>
+      <div className="mietbelastung-widget__title">Mietbelastung einkommensschwacher Haushalte</div>
 
       {hasComparison ? (
         <div className="mietbelastung-widget__comparison">
@@ -128,7 +128,7 @@ export function MietbelastungWidget({ params, baseline, marketState, baselineMar
       </div>
 
       <div className="mietbelastung-widget__reference-text">
-        ↳ Wohnmonitor BWO 2026
+        ↳ Ausgangswert: CH-Schnitt einkommensschwacher Mieter (44.8 %, Wohnmonitor BWO), nicht stadtspezifisch
       </div>
     </div>
   );

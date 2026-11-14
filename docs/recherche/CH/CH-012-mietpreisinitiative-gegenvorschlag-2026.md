@@ -74,7 +74,7 @@ Jetzt: Veränderung des Referenzzinssatzes über die letzten zwölf Monate, nati
 
 Nicht abgebildet: Senkungen aus früheren Jahren, die Mieter nie eingefordert haben. Das ist die verpasste Senkung unter der relativen Methode und gehört zur Mietlücke, nicht in diesen Kontextwert.
 
-Offen: die Vorladung vergleicht weiterhin `Teuerung − Spielraum`, im Referenzzins-Regime also einen Teuerungs-Bin mit einem Zinsänderungs-Bin. Die Einheiten passen nicht zusammen. Das war schon mit dem Zinsniveau so.
+Die Vorladung rechnet seit November 2026 in Teuerungs-Einheiten: gesperrt ist der Teil der Teuerung, den das Regime im laufenden Vertrag nicht zulässt. Referenzzins-Regime 60 Prozent (40 Prozent sind überwälzbar[18], `REFERENZ_TEUERUNG_PASS_THROUGH`), Landesindex 15 Prozent, Kostenbindung 100 Prozent. Vorher wurde im Referenzzins-Regime ein Teuerungs-Bin gegen einen Zins-Bin verrechnet. Offen: der Erhöhungsspielraum im Referenzzins-Regime enthält die 40 Prozent Teuerung selbst noch nicht, nur die Zinsänderung.
 
 ### `ctx:anteil_altliegenschaft` — Messvorschrift, nicht gefüllt
 
@@ -118,7 +118,7 @@ Neue Zustände, ausserhalb der linearen Kantensumme, eine Phase Verzug, kein Fix
 5. Durchsetzung ist die Intensität 0 / 0.5 / 1 und multipliziert die Überhöhung. Ohne gesetzte Lücke ist der Abzug 0.
 6. `verweildauer` liest die Mietlücke der Vorperiode. Nicht `marktfriktion` umdeuten.
 
-Vorladung, innen in der Anfangsmiete: `max(0, Teuerung − Spielraum) × Verweildauer der Vorperiode × (1 − Durchsetzung)`. `FRONTLOAD` ist 0.4 und nicht kalibriert. Zielgrösse, nicht eingesetzt: der Genfer Abstand aus dem bestehenden Kommentar in `phase-weights.ts` (lange Verweildauer, deutlicher Neuaufschlag).
+Vorladung, innen in der Anfangsmiete: `gesperrte Teuerung × max(0, Verweildauer der Vorperiode) × (1 − Durchsetzung)`. Eine negative Verweildauer lädt nichts vor. Der Abzug auf Investition und Angebot wird pro Phase neu angesetzt und nicht übertragen. `FRONTLOAD` ist 0.4 und nicht kalibriert. Zielgrösse, nicht eingesetzt: der Genfer Abstand aus dem bestehenden Kommentar in `phase-weights.ts` (lange Verweildauer, deutlicher Neuaufschlag).
 
 Rückkopplung der Vergleichsbasis nur in die nächste Phase, und nur bei offenem Tor. Investition und Angebot bekommen provisorisch einen Abzug nur, wenn der Deckel bindet, die Durchsetzung über 0 liegt und eine Lücke gesetzt ist. Der Gegenvorschlag hat kein festes Vorzeichen auf die Investition.
 

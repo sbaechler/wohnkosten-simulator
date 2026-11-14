@@ -86,6 +86,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Verfügbares Bauland',
     helpText: 'Wie gross ist das Reservoir an ungenutztem Bauland?',
     levels: ['Grosszügige Reserven', 'Knapp bemessen', 'Sehr knapp'],
+    hoeherBedeutet: 'weniger Bauland-Reserven',
     group: 'bodenrecht',
   },
   {
@@ -93,6 +94,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Pflicht zur Innenverdichtung',
     helpText: 'Innenverdichtung vs. Arealüberbauungen am Stadtrand',
     levels: ['Freiwillig', 'RPG-konform empfohlen', 'Gesetzlich verpflichtend'],
+    hoeherBedeutet: 'stärkere Pflicht zur Innenverdichtung',
     group: 'bodenrecht',
   },
   {
@@ -100,6 +102,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Bebauungsdichte',
     helpText: 'Wie dicht darf in der Zone gebaut werden?',
     levels: ['Lockere Bebauung', 'Städtisch mittel', 'Dichte Überbauung'],
+    hoeherBedeutet: 'dichtere Bebauung erlaubt',
     group: 'bodenrecht',
   },
   {
@@ -107,6 +110,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Kommunales Vorkaufsrecht',
     helpText: 'Kann die Gemeinde Land vorkaufen, bevor es am Markt verkauft wird?',
     levels: ['Kein Vorkaufsrecht', 'Für gemeinnützige Zwecke', 'Umfassendes Recht'],
+    hoeherBedeutet: 'umfassenderes Vorkaufsrecht der Gemeinde',
     group: 'bodenrecht',
   },
   {
@@ -114,6 +118,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Baulandhortung',
     helpText: 'Massnahmen gegen das Horten von unbebautem Land',
     levels: ['Hortung erlaubt', 'Mehrwertabgabe bei Nicht-Bebauung', 'Bauverpflichtung mit Frist'],
+    hoeherBedeutet: 'strengere Massnahmen gegen Baulandhortung',
     group: 'bodenrecht',
   },
   {
@@ -121,6 +126,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Mehrwertabgabe',
     helpText: 'Anteil des Planungsmehrwerts, der bei Umzonung abgeschöpft wird',
     levels: ['Keine Abgabe', '20% (RPG-Minimum)', '50% oder mehr'],
+    hoeherBedeutet: 'höhere Mehrwertabgabe',
     group: 'bodenrecht',
   },
   {
@@ -128,6 +134,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Bodensteuer',
     helpText: 'Separate Steuer auf den Bodenwert (unabhängig vom Gebäudeertrag)',
     levels: ['Keine Bodensteuer', 'Leichte Steuer', 'Hohe Steuer (Hortung unrentabel)'],
+    hoeherBedeutet: 'höhere Bodensteuer',
     group: 'bodenrecht',
   },
 
@@ -137,6 +144,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Energetische Neubau-Anforderungen',
     helpText: 'Energetische Pflichten für Neubauten',
     levels: ['Keine Pflicht', 'Minergie empfohlen', 'Netto-Null-Pflicht'],
+    hoeherBedeutet: 'strengere Energievorgaben für Neubauten',
     group: 'bau',
   },
   {
@@ -144,6 +152,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Sanierungspflicht Bestand',
     helpText: 'Gesetzliche Pflicht zur energetischen Sanierung von Bestandsbauten',
     levels: ['Keine Pflicht', 'Zielwert empfohlen', 'Gesetzliche Pflicht mit Frist'],
+    hoeherBedeutet: 'strengere Sanierungspflicht im Bestand',
     group: 'bau',
   },
   {
@@ -151,6 +160,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Ersatzneubau-Effizienz',
     helpText: 'Wie viele Netto-Neubauwohnungen entstehen pro abgerissener Wohnung? (Zürich: 2.8x, Lausanne: 6.5x)',
     levels: ['Ineffizient (2–3x)', 'Mittel (3–5x)', 'Effizient (5x+)'],
+    hoeherBedeutet: 'mehr Netto-Wohnungen pro Abriss',
     group: 'bau',
   },
   {
@@ -158,6 +168,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Einspracherecht Dritter',
     helpText: 'Wer darf gegen ein Baugesuch Einsprache erheben?',
     levels: ['Nur direkt Betroffene', 'Anrainer im Umkreis', 'Jedermann'],
+    hoeherBedeutet: 'mehr Einspracheberechtigte',
     group: 'bau',
   },
   {
@@ -165,6 +176,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Suspensiveffekt von Einsprachen',
     helpText: 'Hält eine Einsprache den Bau auf?',
     levels: ['Kein Baustopp', 'Baustopp in begründeten Fällen', 'Automatischer Baustopp'],
+    hoeherBedeutet: 'stärkere aufschiebende Wirkung von Einsprachen',
     group: 'bau',
   },
   {
@@ -172,6 +184,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Baubewilligungsverfahren',
     helpText: 'Effizienz und Geschwindigkeit des Verfahrens',
     levels: ['Analog, lange Wartezeiten', 'Teildigital, moderat', 'Volldigital, standardisiert'],
+    hoeherBedeutet: 'schnelleres, einfacheres Verfahren',
     group: 'bau',
   },
   {
@@ -179,6 +192,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Harmonisierung Bauvorschriften',
     helpText: 'Harmonisierung kantonaler Bauvorschriften',
     levels: ['26 kantonale Systeme', 'Teilweise harmonisiert', 'Einheitlicher CH-Standard (SIA)'],
+    hoeherBedeutet: 'einheitlichere Bauvorschriften',
     group: 'bau',
   },
 
@@ -188,6 +202,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Mindestanteil Neubauten',
     helpText: 'Wie viel Prozent der Neubauten müssen gemeinnützig sein?',
     levels: ['0% (kein Mindestanteil)', '10% (Volksinitiative)', '33% (Stadtratsziel)'],
+    hoeherBedeutet: 'höherer gemeinnütziger Pflichtanteil',
     group: 'gemeinnuetzig',
   },
   {
@@ -195,6 +210,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Wohnbauförderungsfonds',
     helpText: 'Staatlicher Fonds zur Förderung des gemeinnützigen Wohnungsbaus',
     levels: ['Kein Fonds', 'Kantonaler Fonds, begrenzt', 'Nationaler Fonds, gut ausgestattet'],
+    hoeherBedeutet: 'mehr Fördermittel',
     group: 'gemeinnuetzig',
   },
   {
@@ -202,6 +218,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Landvergabe im Baurecht',
     helpText: 'Vergabe von Land im Baurecht an Genossenschaften',
     levels: ['Selten, kein Vorrang', 'Aktiv bei freiem Land', 'Systematisches Prioritätsprinzip'],
+    hoeherBedeutet: 'mehr Land im Baurecht für Gemeinnützige',
     group: 'gemeinnuetzig',
   },
   {
@@ -209,6 +226,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Belegungsvorschriften',
     helpText: 'Regeln zur effizienten Nutzung von Wohnraum',
     levels: ['Keine', 'Empfehlung (freiwillig)', 'Verbindliche Pflicht mit Kontrolle'],
+    hoeherBedeutet: 'verbindlichere Belegungsvorschriften',
     group: 'gemeinnuetzig',
   },
   {
@@ -216,6 +234,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Sozialmischung bei Aufzonung',
     helpText: 'Pflicht zu preisgünstigem Wohnanteil bei Quartier-Aufwertung',
     levels: ['Keine Auflage', 'Empfehlung (freiwillig)', 'Gesetzliche Pflicht'],
+    hoeherBedeutet: 'verbindlichere Sozialmischung',
     group: 'gemeinnuetzig',
   },
 
@@ -225,6 +244,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Mietzinsprinzip',
     helpText: 'Wie wird der maximal zulässige Mietzins bestimmt?',
     levels: ['Freie Marktmiete', 'Rendite gedeckelt (OR)', 'Kostenmiete (BV verankert)'],
+    hoeherBedeutet: 'stärkere Bindung der Miete an die Kosten',
     group: 'mietrecht',
   },
   {
@@ -232,6 +252,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Anfechtung Anfangsmietzins',
     helpText: 'Unter welchen Bedingungen kann der Anfangsmietzins angefochten werden?',
     levels: ['Nur bei persönlicher Notlage', 'Bei angespanntem Markt', 'Generell anfechtbar'],
+    hoeherBedeutet: 'leichtere Anfechtung der Anfangsmiete',
     group: 'mietrecht',
   },
   {
@@ -239,6 +260,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Mietzins-Transparenz',
     helpText: 'Welche Informationen über die Mietgeschichte müssen offengelegt werden?',
     levels: ['Keine Pflicht', 'Formular mit Vormietzins + Referenzzinssatz', 'Vollständige Mietzinsgeschichte'],
+    hoeherBedeutet: 'mehr Offenlegungspflicht',
     group: 'mietrecht',
   },
   {
@@ -246,6 +268,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Kündigungsschutz',
     helpText: 'Schutz vor Kündigung wegen Eigenbedarf oder Sanierung',
     levels: ['Schwacher Schutz', 'Erstreckungsrecht + Entschädigung', 'Vorabprüfung bei Massenkündigungen'],
+    hoeherBedeutet: 'stärkerer Kündigungsschutz',
     group: 'mietrecht',
   },
   {
@@ -253,6 +276,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Mietzinsanpassungs-Mechanismus',
     helpText: 'Wonach darf die Miete bei Indexierung angepasst werden?',
     levels: ['Referenzzinssatz (heute)', 'Landesindex der Konsumentenpreise (LIK)', 'Gesetzliche Kostenbindung'],
+    hoeherBedeutet: 'kein Mehr oder Weniger: anderer Anpassungsmechanismus (Referenzzins, Landesindex, Kostenbindung)',
     group: 'mietrecht',
   },
   {
@@ -260,6 +284,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Untervermietung / Airbnb',
     helpText: 'Regulierung von Kurzzeitvermietung und Untervermietung',
     levels: ['Frei (keine Einschränkung)', 'Zustimmung nötig', 'Tageslimit + Kündigungsrecht'],
+    hoeherBedeutet: 'strengere Regeln für Untervermietung',
     group: 'mietrecht',
   },
   {
@@ -267,6 +292,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Missbrauchskriterium',
     helpText: 'Provisorisch (CH-012). Welches Kriterium den zulässigen Mietzins bindet. Im heutigen Recht ist die Vergleichsmiete rechtlich rangiert, aber nicht wirksam.',
     levels: ['Kosten plus Rendite exklusiv', 'Heutiges Recht', 'Vergleichsmiete bindend'],
+    hoeherBedeutet: 'kein Mehr oder Weniger: anderes bindendes Kriterium (Kosten, heutiges Recht, Vergleichsmiete)',
     group: 'mietrecht',
   },
   {
@@ -274,6 +300,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Durchsetzung Mietzins',
     helpText: 'Provisorisch (CH-012). Zieht nur, wenn eine Mietlücke gesetzt ist. Die ist nicht belegt.',
     levels: ['Nur auf Klage', 'Erleichterte Anfechtung', 'Automatische periodische Prüfung'],
+    hoeherBedeutet: 'stärkerer Vollzug',
     group: 'mietrecht',
   },
 
@@ -283,6 +310,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Grundstückgewinnsteuer',
     helpText: 'Steuer auf den Gewinn beim Verkauf von Liegenschaften',
     levels: ['Tief, zeitunabhängig', 'Progressiv (lange Haltung = tiefer)', 'Hoch, auch bei langer Haltung'],
+    hoeherBedeutet: 'höhere Grundstückgewinnsteuer',
     group: 'steuern',
   },
   {
@@ -290,6 +318,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Eigenmietwert',
     helpText: 'Besteuerung des fiktiven Mietwerts von Wohneigentum',
     levels: ['Abgeschafft', 'Heutiges System', 'Erhöhter Ansatz'],
+    hoeherBedeutet: 'höhere Besteuerung des Eigenmietwerts',
     group: 'steuern',
   },
   {
@@ -297,6 +326,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Leerstandsabgabe',
     helpText: 'Abgabe auf leer stehende Wohnungen',
     levels: ['Keine', 'Kommunal möglich', 'Gesetzlich verpflichtend'],
+    hoeherBedeutet: 'verbindlichere Leerstandsabgabe',
     group: 'steuern',
   },
   {
@@ -304,6 +334,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Handänderungssteuer',
     helpText: 'Steuer beim Kauf/Verkauf einer Liegenschaft',
     levels: ['Keine', 'Moderat (1–2%)', 'Hoch (3%+)'],
+    hoeherBedeutet: 'höhere Handänderungssteuer',
     group: 'steuern',
   },
   {
@@ -311,6 +342,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Kapitalgewinnbesteuerung',
     helpText: 'Besteuerung von Kapitalgewinnen aus Liegenschaften für Privatpersonen',
     levels: ['Keine (CH-Standard)', 'Ab einem Schwellenwert', 'Vollständige Besteuerung'],
+    hoeherBedeutet: 'umfassendere Kapitalgewinnsteuer',
     group: 'steuern',
   },
 
@@ -320,6 +352,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Lex Koller',
     helpText: 'Beschränkung des Kaufs von Schweizer Liegenschaften durch Ausländer',
     levels: ['Aufgehoben / offen', 'Heutiger Standard (bewilligungspflichtig)', 'Verschärft restriktiv'],
+    hoeherBedeutet: 'strengere Beschränkung ausländischer Käufer',
     group: 'kapital',
   },
   {
@@ -327,6 +360,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Institutionelle Anleger',
     helpText: 'Regulierung von Fonds, REITs und Pensionskassen',
     levels: ['Keine Regulierung', 'Transparenzpflicht', 'Gesetzliche Renditebegrenzung'],
+    hoeherBedeutet: 'strengere Regulierung institutioneller Anleger',
     group: 'kapital',
   },
   {
@@ -334,6 +368,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Hypothekarregulierung',
     helpText: 'Regulierung der Kreditvergabe für Immobilienkäufe (LTV, Tragbarkeit)',
     levels: ['Locker (hohe Belehnung)', 'FINMA-Standard (80% LTV)', 'Streng (tieferer LTV, mehr EK)'],
+    hoeherBedeutet: 'strengere Kreditvergabe',
     group: 'kapital',
   },
 
@@ -343,6 +378,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Kurzzeitvermietung (Airbnb)',
     helpText: 'Regulierung von gewerblicher Kurzzeitvermietung',
     levels: ['Vollständig frei', 'Meldepflicht + Tageslimit', 'Bewilligungspflicht, strikte Beschränkung'],
+    hoeherBedeutet: 'strengere Regeln für Kurzzeitvermietung',
     group: 'nutzung',
   },
   {
@@ -350,6 +386,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Umwandlungsverbot',
     helpText: 'Verbot der Umwandlung von Wohn- in Nicht-Wohnraum',
     levels: ['Ohne Einschränkung', 'Bewilligungspflicht', 'In Wohnzonen grundsätzlich verboten'],
+    hoeherBedeutet: 'strengeres Umwandlungsverbot',
     group: 'nutzung',
   },
   {
@@ -357,6 +394,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Abbruchschutz',
     helpText: 'Schutz von Wohnraum vor Abriss bei Wohnungsknappheit',
     levels: ['Kein Schutz', 'Prüfpflicht', 'Nur mit gleichwertigem Ersatzneubau'],
+    hoeherBedeutet: 'stärkerer Abbruchschutz',
     group: 'nutzung',
   },
   {
@@ -364,6 +402,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Zweitwohnungen',
     helpText: 'Regulierung des Anteils zulässiger Zweitwohnungen',
     levels: ['Unbegrenzt', '20%-Deckel (Weber-Initiative)', 'Strengere kommunale Limits'],
+    hoeherBedeutet: 'strengere Zweitwohnungsgrenze',
     group: 'nutzung',
   },
 
@@ -373,6 +412,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Öffentlicher Verkehr',
     helpText: 'Ausbau des ÖV-Angebots (Tram, Bus, S-Bahn)',
     levels: ['Kein Ausbau', 'Moderater Ausbau', 'Starker Ausbau, neue Linien'],
+    hoeherBedeutet: 'stärkerer ÖV-Ausbau',
     group: 'infrastruktur',
   },
   {
@@ -380,6 +420,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Schulen & Kinderbetreuung',
     helpText: 'Angebot an Schulplätzen und Kitas',
     levels: ['Unterdurchschnittlich', 'Bedarfsgerecht', 'Überdurchschnittlich'],
+    hoeherBedeutet: 'besseres Schul- und Kita-Angebot',
     group: 'infrastruktur',
   },
   {
@@ -387,6 +428,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Öffentlicher Raum',
     helpText: 'Qualität von Parks, Plätzen und Grünflächen',
     levels: ['Minimal, wenig Aufenthaltsqualität', 'Bedarfsgerecht', 'Hochwertig, begrünte Quartiere'],
+    hoeherBedeutet: 'hochwertigerer öffentlicher Raum',
     group: 'infrastruktur',
   },
   {
@@ -394,6 +436,7 @@ export const paramMeta40: ParamMeta40[] = [
     label: 'Wirtschaftsförderung',
     helpText: 'Aktive Ansiedlung von Gewerbe und Unternehmen',
     levels: ['Keine aktive Förderung', 'Moderate Anreize', 'Starke Förderung (Gewerbezonen)'],
+    hoeherBedeutet: 'stärkere Wirtschaftsförderung',
     group: 'infrastruktur',
   },
 ];

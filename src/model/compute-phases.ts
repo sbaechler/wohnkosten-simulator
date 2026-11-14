@@ -124,7 +124,9 @@ export const PHASE_BASE_MULTIPLIER: readonly [number, number, number] = [0.4, 0.
  * Marktverengungs-Multiplikator: -2→0.4× (entspannt), 0→1.0× (normal), +2→1.6× (extrem eng)
  * Ein enger Markt reagiert stärker auf Policies weil wenig Ausgleich vorhanden ist.
  *
- * Kalibrierung: 0.3 entspricht einer ±30% Reaktion bei extremem Marktengpass.
+ * `marktenge` kommt hier als Rohwert −2…+2 an (nicht normalisiert). 0.3 pro
+ * Stufe ergibt also ±60 % bei extremem Markt, ±30 % bei einer Stufe.
+ * Der Faktor skaliert auch den Kontext-Antrieb, nicht nur die Politik-Effekte.
  * Forschungsbasis: Sotomo ZH-Wohnraumstudie 2025 + CH-007 (Zonenreserve-Wirkung
  * ist in angespannten Märkten ~3× stärker als in entspannten).
  */
@@ -183,7 +185,11 @@ export function* computePhasePipeline(
     const e1 = applied.market;
     regimeCarry = applied.carry;
     const e2 = computeDerivedIndicators(e1);
-    carryE1 = e1;
+    // Übertragen wird der lineare Stand, nicht der Stand nach Regime. Der
+    // Regime-Abzug auf Investition und Angebot wird in jeder Phase neu auf
+    // den linearen Stand gelegt. Mit `carryE1 = e1` wurde er zusätzlich
+    // übertragen und wuchs über die Phasen auf das 2.44-Fache.
+    carryE1 = linear;
 
     const result: PhaseResult = {
       phase,

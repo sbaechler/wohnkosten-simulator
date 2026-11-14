@@ -1,6 +1,6 @@
 // ============================================================
 // Domain Types — Wohnkosten-Simulator
-// E0: 42 atomare Parameter (Name CityParams40 ist historisch) + Kontext
+// E0: 43 atomare Parameter (Name CityParams40 ist historisch) + Kontext
 // E1: lineare Marktvariablen plus provisorische Mietrechts-Zustände (CH-012)
 // ============================================================
 //
@@ -15,7 +15,7 @@ export type ContextValue = -2 | -1 | 0 | 1 | 2;
 
 // ── E0: Rohparameter ─────────────────────────────────────────────────────────
 
-/** 40 atomare Parameter */
+/** 43 atomare Parameter (Typname historisch) */
 export type CityParams40 = {
   // 1. Bodenrecht & Landnutzung
   raumplanung_zonenreserve: ParamValue;
@@ -90,8 +90,13 @@ export interface CityContext {
    * Quelle: Sotomo Wohnraumstudie ZH 2025 — tiefes Einkommen ~30%, Viertel >40%.
    *
    * Semantik: Read-only Kontextfaktor (nicht via Slider editierbar).
-   * Default pro Stadt aus data/cities/switzerland.yaml. Steuert die
-   * Marktfriktion als strukturelle Rahmenbedingung.
+   * Default pro Stadt aus data/cities/switzerland.yaml.
+   *
+   * Wird heute nur angezeigt (ContextIndicators). Es gibt KEINE Kante und
+   * keine Rechnung, die den Wert liest: die frühere Kante auf die
+   * Marktfriktion wurde im Review 2026-06 entfernt, und die Mietbelastung
+   * (belastung.ts) startet für jede Stadt beim CH-Wert. Siehe
+   * docs/review/2026-11-13-verbesserungsplan.md, Fix-14.
    */
   mietbelastungs_grenze: ContextValue;
   /**
@@ -178,6 +183,15 @@ export interface ParamMeta40 {
   label: string;
   helpText: string;
   levels: [string, string, string];
+  /**
+   * Was eine HÖHERE Stufe (0 → 2) inhaltlich bedeutet, in einem Halbsatz.
+   * Pflichtfeld, damit das Vorzeichen einer Kante gegen die Skala gelesen
+   * wird und nicht gegen den Namen des Parameters. Zwei Kanten hatten bis
+   * 2026-11 das falsche Vorzeichen, weil «Zonenreserve ↑» als «mehr Bauland»
+   * gelesen wurde (die Skala läuft umgekehrt). Erscheint in der generierten
+   * docs/architektur/01-graph-kanten.md.
+   */
+  hoeherBedeutet: string;
   group: ParamGroup;
 }
 

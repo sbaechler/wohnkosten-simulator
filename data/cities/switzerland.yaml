@@ -4,6 +4,12 @@
 # Last updated: 2026-06-06
 # New param: bau_ersatzneubau_effizienz (Sotomo ZH-Wohnraumstudie 2025)
 # New context: mietbelastungs_grenze (Sotomo ZH-Wohnraumstudie 2025)
+#
+# bevoelkerungstrend: Wachstum der ständigen Wohnbevölkerung pro Jahr, 2019–2024,
+# BFS STATPOP (STAT-TAB px-x-0102020000_201, Bestand am 31. Dezember).
+# Bins (Setzung, 2026-11): unter −0.5 % → −2 | −0.5 bis −0.1 % → −1 |
+# −0.1 bis +0.4 % → 0 | +0.4 bis +1.0 % → +1 | über +1.0 % → +2.
+# Zum Vergleich: Schweiz rund +0.9 % pro Jahr.
 
 - slug: zuerich
   name: "Zürich"
@@ -16,6 +22,7 @@
     zinsniveau: -1
     zuwanderungsdruck: 2
     wirtschaftskraft: 2
+    # BFS STATPOP, ständige Wohnbevölkerung 31.12.: 420217 (2019) → 436551 (2024), +0.77 % pro Jahr.
     bevoelkerungstrend: 1
     marktenge: 2
     mietbelastungs_grenze: 2
@@ -79,7 +86,8 @@
     zinsniveau: -1
     zuwanderungsdruck: 2
     wirtschaftskraft: 2
-    bevoelkerungstrend: -1
+    # BFS STATPOP, ständige Wohnbevölkerung 31.12.: 203951 (2019) → 209061 (2024), +0.50 % pro Jahr.
+    bevoelkerungstrend: 1
     marktenge: 2
     mietbelastungs_grenze: 2
     # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
@@ -142,7 +150,8 @@
     zinsniveau: -1
     zuwanderungsdruck: 1
     wirtschaftskraft: 2
-    bevoelkerungstrend: -1
+    # BFS STATPOP, ständige Wohnbevölkerung 31.12.: 173232 (2019) → 177571 (2024), +0.50 % pro Jahr.
+    bevoelkerungstrend: 1
     marktenge: 1
     mietbelastungs_grenze: 2
     # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
@@ -205,7 +214,8 @@
     zinsniveau: -1
     zuwanderungsdruck: 2
     wirtschaftskraft: 2
-    bevoelkerungstrend: -1
+    # BFS STATPOP, ständige Wohnbevölkerung 31.12.: 139408 (2019) → 144873 (2024), +0.77 % pro Jahr.
+    bevoelkerungstrend: 1
     marktenge: 2
     mietbelastungs_grenze: 2
     # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
@@ -268,7 +278,8 @@
     zinsniveau: -1
     zuwanderungsdruck: 1
     wirtschaftskraft: 1
-    bevoelkerungstrend: -1
+    # BFS STATPOP, ständige Wohnbevölkerung 31.12.: 134591 (2019) → 137995 (2024), +0.50 % pro Jahr.
+    bevoelkerungstrend: 1
     marktenge: 2
     mietbelastungs_grenze: 1
     # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
@@ -331,7 +342,8 @@
     zinsniveau: -1
     zuwanderungsdruck: 2
     wirtschaftskraft: 1
-    bevoelkerungstrend: -1
+    # BFS STATPOP, ständige Wohnbevölkerung 31.12.: 113173 (2019) → 120376 (2024), +1.24 % pro Jahr.
+    bevoelkerungstrend: 2
     marktenge: 2
     mietbelastungs_grenze: 1
     # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
@@ -394,7 +406,8 @@
     zinsniveau: -1
     zuwanderungsdruck: 1
     wirtschaftskraft: 1
-    bevoelkerungstrend: -1
+    # BFS STATPOP, ständige Wohnbevölkerung 31.12.: 82257 (2019) → 86234 (2024), +0.95 % pro Jahr.
+    bevoelkerungstrend: 1
     marktenge: 1
     mietbelastungs_grenze: 1
     # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
@@ -457,7 +470,8 @@
     zinsniveau: -1
     zuwanderungsdruck: 0
     wirtschaftskraft: 1
-    bevoelkerungstrend: -1
+    # BFS STATPOP, ständige Wohnbevölkerung 31.12.: 76090 (2019) → 78863 (2024), +0.72 % pro Jahr.
+    bevoelkerungstrend: 1
     marktenge: 0
     mietbelastungs_grenze: 1
     # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
@@ -520,7 +534,8 @@
     zinsniveau: -1
     zuwanderungsdruck: 0
     wirtschaftskraft: 1
-    bevoelkerungstrend: -1
+    # BFS STATPOP, ständige Wohnbevölkerung 31.12.: 62615 (2019) → 63629 (2024), +0.32 % pro Jahr.
+    bevoelkerungstrend: 0
     marktenge: 1
     mietbelastungs_grenze: 1
     # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.
@@ -583,7 +598,8 @@
     zinsniveau: -1
     zuwanderungsdruck: 1
     wirtschaftskraft: 1
-    bevoelkerungstrend: -1
+    # BFS STATPOP, ständige Wohnbevölkerung 31.12.: 55602 (2019) → 56896 (2024), +0.46 % pro Jahr.
+    bevoelkerungstrend: 1
     marktenge: 1
     mietbelastungs_grenze: 1
     # BFS LIK Jahresdurchschnitt 2025: +0.2% → Bin −1. CH-012. Nationaler Index.

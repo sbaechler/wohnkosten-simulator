@@ -13,6 +13,7 @@
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "build:data": "npx tsx scripts/build-city-data.ts",
+    "build:docs": "npx tsx scripts/build-edge-docs.ts",
     "prebuild": "npm run build:data",
     "predev": "npm run build:data",
     "deploy": "npm run build && wrangler deploy",

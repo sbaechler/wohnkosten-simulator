@@ -64,6 +64,25 @@ export const VERWEIL_GEWICHT = 0.5;
 export const CAP_INVEST_WEIGHT = 0.3;
 
 /**
+ * Anteil des Investitionsabzugs, der auf das Angebotspotenzial durchschlägt.
+ * Nicht kalibriert. 0.5 = ein bindender, vollzogener Deckel trifft das
+ * Angebot halb so stark wie die Investitionsbereitschaft. Richtung nach
+ * GLOBAL-029 (restriktives Mietrecht drückt den Neubau), Grösse eine Setzung:
+ * die Studie nimmt Neubau, der vom Deckel ausgenommen ist, ausdrücklich aus.
+ */
+export const CAP_ANGEBOT_ANTEIL = 0.5;
+
+/**
+ * Anteil der Teuerung, der im Referenzzins-Regime (Index 0) auf den
+ * laufenden Mietzins überwälzt werden darf: 40 Prozent, entsprechend dem
+ * angenommenen Eigenkapitalanteil des geltenden Modells (CH-012, NZZ
+ * 18.1.2025 zur IAZI-Studie: «Die Teuerung fliesst heute zu 40 Prozent ein»).
+ * Der Rest ist gesperrte Teuerung und kann in die Anfangsmiete vorgeladen
+ * werden.
+ */
+export const REFERENZ_TEUERUNG_PASS_THROUGH = 0.4;
+
+/**
  * Bins für `ctx:teuerung`, geeicht an der BFS-LIK-Jahresteuerung
  * 2016–2025. Siehe CH-012. 2025 (+0.2 %) → −1.
  */
@@ -184,8 +203,21 @@ export function applyMietrechtRegime(
     REGIME_PERSISTENCE * prevBestand + (1 - REGIME_PERSISTENCE) * bestandZiel,
   );
 
-  const gesperrt = Math.max(0, teuerung - erhoehungsspielraum);
-  const vorladung = FRONTLOAD * gesperrt * prevVerweil * (1 - enf);
+  // Gesperrte Teuerung: der Teil der Teuerung, den das Regime im laufenden
+  // Vertrag NICHT zulässt. In Teuerungs-Einheiten gerechnet, für jedes
+  // Regime gleich. Früher `teuerung − erhoehungsspielraum`: im
+  // Referenzzins-Regime wurde so ein Teuerungs-Bin gegen einen Zins-Bin
+  // verrechnet.
+  const teuerungsUeberwaelzung = index === 1
+    ? LIK_PASS_THROUGH
+    : index === 2
+      ? 0
+      : REFERENZ_TEUERUNG_PASS_THROUGH;
+  const gesperrt = Math.max(0, teuerung) * (1 - teuerungsUeberwaelzung);
+  // Nur eine positive Verweildauer lädt vor. Bei negativer Verweildauer
+  // (Anfangsmiete unter Bestandsmiete) würde gesperrte Teuerung sonst die
+  // Anfangsmiete SENKEN.
+  const vorladung = FRONTLOAD * gesperrt * Math.max(0, prevVerweil) * (1 - enf);
   let anfangZiel = bestandsmiete + vorladung;
   if (vergleichsmiete_aktiv > 0) {
     anfangZiel += vergleichsmiete_aktiv * (prevBasis - anfangZiel);
@@ -210,7 +242,7 @@ export function applyMietrechtRegime(
   let angebotDelta = 0;
   if (deckelBindet && enf > 0 && lueckeBekannt) {
     investDelta = -CAP_INVEST_WEIGHT * enf * (context.mietluecke as number);
-    angebotDelta = investDelta * 0.5;
+    angebotDelta = investDelta * CAP_ANGEBOT_ANTEIL;
   }
 
   const market: MarketState = {

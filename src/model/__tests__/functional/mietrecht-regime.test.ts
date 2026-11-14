@@ -97,6 +97,35 @@ describe('Mietrecht-Regime, provisorisch', () => {
       .toBeLessThan(offen.marketState.investitionsattraktivitaet);
   });
 
+  it('Regime-Abzug auf die Investition wird nicht über die Phasen aufsummiert', () => {
+    const ctx: CityContext = { ...ZH, mietluecke: 0.2, mietlueckeEstimated: true };
+    const diff: ParamsDiff40 = { mietrecht_durchsetzung: { from: 0, to: 2 } };
+    invalidatePhasesCache();
+    const ohne = [...computePhasePipeline(ctx, {})];
+    const mit = [...computePhasePipeline(ctx, diff)];
+    const abzug = mit.map((p, i) =>
+      p.marketState.investitionsattraktivitaet - ohne[i].marketState.investitionsattraktivitaet);
+    // CAP_INVEST_WEIGHT (0.3) × Durchsetzung (1) × Mietlücke (0.2) = −0.06, in jeder Phase gleich.
+    for (const a of abzug) expect(a).toBeCloseTo(-0.06, 5);
+  });
+
+  it('Gesperrte Teuerung senkt die Anfangsmiete nicht, wenn die Verweildauer negativ ist', () => {
+    // Hohe Teuerung, Kostenbindung (Index 2) sperrt sie ganz. Die Lücke startet
+    // die Bestandsmiete über der Anfangsmiete → Verweildauer wird negativ.
+    const ctx: CityContext = { ...ZH, teuerung: 2, mietluecke: 0.5, mietlueckeEstimated: true };
+    const diff: ParamsDiff40 = {
+      mietrecht_mietzinsindex: { from: 0, to: 2 },
+      mietrecht_durchsetzung: { from: 0, to: 1 },
+    };
+    invalidatePhasesCache();
+    const phasen = [...computePhasePipeline(ctx, diff)];
+    const ohneTeuerung = [...computePhasePipeline({ ...ctx, teuerung: 0 }, diff)];
+    phasen.forEach((p, i) => {
+      expect(p.marketState.anfangsmiete)
+        .toBeGreaterThanOrEqual(ohneTeuerung[i].marketState.anfangsmiete - 1e-9);
+    });
+  });
+
   it('Index auf LIK erhöht das Schutzlevel nicht mehr', () => {
     const base = last(ZH);
     const lik = last(ZH, { mietrecht_mietzinsindex: { from: 0, to: 1 } });

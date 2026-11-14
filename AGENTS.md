@@ -45,7 +45,7 @@ docs/
 
 ## Datenmodell (3 Ebenen)
 
-### E0 — Rohparameter (40 Stück)
+### E0 — Rohparameter (43 Stück)
 Politisch steuerbare Parameter, Werte 0/1/2. Beispiel: `mietrecht_kostenmiete`, `boden_vorkaufsrecht`.
 
 ### E1 — Marktvariablen (11 Stück)
@@ -55,7 +55,7 @@ Aus E0 berechnet, normalisiert –1…+1. Beispiel: `angebotspotenzial`, `nachfr
 Aus E1 berechnet (`E2_TERMS` in derived.ts): `gentrifizierungsindex`, `neubau_hemmnisindex`, `verdraengungsrisiko_index`, `fiskalische_wirkung`.
 
 **Wichtige Modell-Annahmen:**
-- Die 40 E0-Parameter wirken als **Diffs** (Änderung vs. Stadt-Baseline). Die absoluten Parameter-Werte einer Stadt beeinflussen die Baseline-E1-Werte NICHT — die Baseline wird nur von den Kontextfaktoren (`ctx:*`) getrieben.
+- Die 43 E0-Parameter wirken als **Diffs** (Änderung vs. Stadt-Baseline). Die absoluten Parameter-Werte einer Stadt beeinflussen die Baseline-E1-Werte NICHT — die Baseline wird nur von den Kontextfaktoren (`ctx:*`) getrieben.
 - Kontextfaktoren wirken als konstanter Antrieb in jeder Phase → auch die Baseline ("Heutige Situation") entwickelt sich über die 3 Phasen weiter.
 - Alle E1/E2-Werte sind normierte Indizes (–1…+1), keine CHF- oder Prozentwerte.
 
@@ -93,7 +93,7 @@ npm run build:data        # regeneriert cities.ts
 npm run dev               # startet mit neuen Daten
 ```
 
-Aktuell: 10 Schweizer Städte (>40k Einwohner) mit allen 40 Parameter-Werten + 4 Kontextfaktoren.
+Aktuell: 10 Schweizer Städte (>40k Einwohner) mit allen 43 Parameter-Werten + 8 Kontextfaktoren (Typ- und Variablennamen mit «40» sind historisch).
 
 ---
 

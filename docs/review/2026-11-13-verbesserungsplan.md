@@ -1,8 +1,8 @@
 # Verbesserungsplan nach fachlichem Review (2026-11-13)
 
-> **Status:** Entscheide 1, 2, 3 und 5 gefällt (2026-11-13, siehe Abschnitt 9); alle fünf Entscheide gefällt. Sprint 0 und Fix-8 (Widgets) sind umgesetzt (uncommittet auf `feat/mietrecht-regime-2026`), alles andere offen.
+> **Status:** Entscheide 1, 2, 3 und 5 gefällt (2026-11-13, siehe Abschnitt 9); alle Entscheide gefällt. Sprint 0, Sprint 1 und Fix-8 (Widgets) sind umgesetzt auf `feat/mietrecht-regime-2026` (Sprint 0 und Fix-8 in Commit `238b6cd`, Sprint 1 noch uncommittet), alles andere offen.
 > **Grundlage:** Fachliches Review vom 2026-11-13: Code in `src/model`, gerenderte Widgets, `docs/recherche/summary.md`, CH-012, Nachrechnung aller 43 Parameter für Zürich (je ±1 Stufe, Wirkung in P3).
-> **Teststand:** 220 passed, 1 skipped. Kalibrierungs-Dry-Run 0/446 Verletzungen. `tsc -b` meldet 10 Typfehler, alle in Testdateien (Fixtures ohne die neuen Regime-Felder von `MarketState`, dazu `international-fachlich.test.ts:236`); damit läuft `npm run build` nicht durch. Die Fehler stammen aus den Regime-Änderungen des Branches, nicht aus den Fixes dieses Plans.
+> **Teststand:** 225 passed, 1 skipped. Kalibrierungs-Dry-Run 0/446 Verletzungen. `tsc -b` meldet 10 Typfehler, alle in Testdateien (Fixtures ohne die neuen Regime-Felder von `MarketState`, dazu `international-fachlich.test.ts:236`); damit läuft `npm run build` nicht durch. Die Fehler stammen aus den Regime-Änderungen des Branches, nicht aus den Fixes dieses Plans.
 
 ## 1. Ausgangslage
 
@@ -12,7 +12,7 @@ Die Engine rechnet technisch sauber. Fachlich gab es drei Klassen von Problemen:
 |---|---|---|
 | Vorzeichen | `raumplanung_zonenreserve → nachfragedruck` und `bau_bewilligungsverfahren → angebotspotenzial_regulation` lasen die Parameterskala verkehrt herum | ✅ behoben |
 | Regime | Referenzzins-Regime las das Zinsniveau statt der Zinsänderung | ✅ behoben |
-| Struktur | Normalisierung pro Knoten verzerrt die Rangfolge der Hebel; Zeitprofile der Kanten gehen verloren; mehrere Schieber und Evidenzpfade laufen ins Leere | offen |
+| Struktur | Normalisierung pro Knoten verzerrt die Rangfolge der Hebel; der Phasenmultiplikator drückt alle frühen Effekte (Fix-10); mehrere Schieber und Evidenzpfade laufen ins Leere | offen |
 
 ### Die Verzerrung in Zahlen (Zürich, 1 Stufe, P3, vor Sprint 0)
 
@@ -41,41 +41,59 @@ Lehre aus 0.1: der falsche Test und der falsche Kalibrierungs-Constraint hatten 
 
 ---
 
-## 3. Sprint 1 — Korrektheit ohne Modellumbau
+## 3. Sprint 1 — Korrektheit ohne Modellumbau — ✅ erledigt (2026-11-14)
 
-Kleine, voneinander unabhängige Fixes. Keine Neukalibrierung nötig.
+Uncommittet. 225 Tests grün, Kalibrierungs-Dry-Run 0/446.
 
-#### Fix-1: Skalenrichtung aller Kanten absichern
-**Dateien:** `src/model/params.ts`, `src/model/__tests__/functional/dag-integrity.test.ts`, `docs/architektur/01-graph-kanten.md`
-**Aufwand:** 2–3 h
-1. Pro Parameter die Skalenrichtung in `paramMeta40` festhalten (z. B. `richtung: 'restriktiver' | 'permissiver' | 'mehr_foerderung'`), damit «Stufe 2» nicht mehr aus dem Label erraten werden muss.
-2. Alle 100 Kanten einmal gegen diese Richtung durchgehen. Im Review fielen nur die zwei behobenen auf; das war eine Lektüre, kein systematischer Abgleich.
-3. `01-graph-kanten.md` aus `PHASE_WEIGHTED_EDGES` generieren. Die Datei ist veraltet (nennt z. B. `bau_bewilligungsverfahren → marktfriktion`, die es nicht gibt).
+#### Fix-1: Skalenrichtung aller Kanten absichern — ✅
+**Dateien:** `src/types.ts`, `src/model/params.ts`, `src/model/edge-doc.ts` (neu), `scripts/build-edge-docs.ts` (neu), `edge-doc.test.ts` (neu), `docs/architektur/01-graph-kanten.md`, `package.json`
+1. `ParamMeta40.hoeherBedeutet`: Pflichtfeld, sagt für jeden der 43 Parameter in einem Halbsatz, was eine höhere Stufe heisst.
+2. `docs/architektur/01-graph-kanten.md` wird aus dem Code generiert (`npm run build:docs`) und nennt je Kante die Skalenbedeutung und die Wirkung in Worten. Ein Test schlägt fehl, wenn die Datei nicht auf dem Stand des Codes ist.
+3. Alle 100 Kanten gegen diese Tabelle gelesen. **Kein weiteres Vorzeichen steht gegen die Skala.** Drei Kanten sind fachlich strittig und gehören in den Recherche-Abgleich von Sprint 3, nicht in eine Vorzeichenkorrektur:
+   - `nutzung_zweitwohnungen → angebotspotenzial` (−): die Quelle CH-006 (Lex Weber) betrifft Tourismusgemeinden. In Städten über 40'000 Einwohnern gibt eine strengere Grenze eher Erstwohnungen frei.
+   - `mietrecht_untervermietung → verdraengungsrisiko` (−): Stufe 2 heisst «Tageslimit + Kündigungsrecht». Ein Kündigungsrecht des Vermieters ist für Mieter ein zusätzlicher Kündigungsgrund. Überschneidet sich ausserdem mit `nutzung_kurzzeitvermietung`.
+   - `mietrecht_mietzinstransparenz → marktfriktion` (+): mehr Information senkt gewöhnlich Friktion. Der Kommentar stützt sich auf CH-003, das die Anfechtung der Anfangsmiete behandelt, nicht die Offenlegung.
 
-#### Fix-2: Regime-Restfehler
-**Datei:** `src/model/mietrecht-regime.ts`
-**Aufwand:** 1 h
-1. `investDelta` wird in `carryE1` geschrieben und jede Phase neu addiert (Faktor 1 / 1.8 / 2.44). Abzug getrennt vom Übertrag führen. Heute inaktiv, weil keine Mietlücke gesetzt ist.
-2. `angebotDelta = investDelta * 0.5`: benannte Konstante mit JSDoc (Konvention AGENTS.md).
-3. Vorladung bei negativer Verweildauer auf 0 begrenzen (sonst senkt gesperrte Teuerung die Anfangsmiete).
-4. Vorladung vergleicht Teuerungs-Bin mit Zinsänderungs-Bin. Einheit klären oder im Referenzzins-Regime abschalten.
+Nicht gemacht: die Sensitivitätstabelle als fester Test (Abschnitt 8). Sie ist erst nach Fix-5 sinnvoll, weil heute vier Schieber erwartbar ohne Wirkung sind.
 
-#### Fix-3: Städtedaten prüfen
+#### Fix-2: Regime-Restfehler — ✅
+**Dateien:** `src/model/mietrecht-regime.ts`, `src/model/compute-phases.ts`, `mietrecht-regime.test.ts`, CH-012
+1. Der Regime-Abzug auf Investition und Angebot wird pro Phase neu angesetzt. Übertragen wird der lineare Stand (`carryE1 = linear`). Vorher wuchs der Abzug über die Phasen auf das 2.44-Fache.
+2. `CAP_ANGEBOT_ANTEIL = 0.5` als benannte Konstante mit JSDoc.
+3. Eine negative Verweildauer lädt keine Teuerung mehr vor.
+4. Gesperrte Teuerung wird in Teuerungs-Einheiten gerechnet: Referenzzins-Regime 60 % (40 % überwälzbar, neu `REFERENZ_TEUERUNG_PASS_THROUGH`), Landesindex 15 %, Kostenbindung 100 %. Für Landesindex und Kostenbindung ist das Ergebnis dasselbe wie vorher.
+
+Offen: der Erhöhungsspielraum im Referenzzins-Regime enthält die 40 % Teuerung selbst nicht. Mit dem heutigen Teuerungs-Bin (0–0.5 % → −1) würde das einen Senkungsanspruch erzeugen, obwohl die Teuerung positiv ist. Erst die Bins klären (Sprint 4).
+
+#### Fix-3: Städtedaten — ✅ Bevölkerungstrend korrigiert
 **Datei:** `data/cities/switzerland.yaml`
-**Aufwand:** 1–2 h (Recherche BFS STATPOP)
-1. `bevoelkerungstrend: -1` bei 9 von 10 Städten, gleichzeitig Zuwanderung +1/+2. Gegen BFS-Bevölkerungsentwicklung prüfen.
-2. Genf und Lausanne haben identische Kontexte und damit identische Baselines. Prüfen, ob das stimmt.
-3. Quelle und Stichjahr pro Kontextwert in den YAML-Kommentar.
+Quelle: BFS STATPOP über STAT-TAB (`px-x-0102020000_201`, Bestand am 31. Dezember), abgerufen 2026-11-14.
 
-#### Fix-4: Doku und Beschriftung
-**Aufwand:** 30 min
-1. Parameterzahl: 43 (AGENTS.md sagt 40, `types.ts` 42).
-2. `marketModulator`: Kommentar nennt ±30 %, gerechnet werden ±60 %.
-3. `mietbelastungs_grenze`: Kommentar in `types.ts` sagt «steuert die Marktfriktion», es gibt keine Kante.
-4. Widget «Mietbelastung» zeigt den Wert einkommensschwacher Haushalte (Basis 44.8 %, CH). So beschriften.
-5. `docs/architektur/README.md`: zwei widersprüchliche Übertragsformeln; `PHASE_BASE_MULTIPLIER`, `marketModulator`, `E1_NORMALIZATION` fehlen; Vorzeichenkonvention «positiv = angebotsreduzierend» widerspricht `types.ts`; Zahlen veraltet (41 Parameter, 6 Kontextfaktoren, 8 Gruppen, 4 Kontextfaktoren am Schluss). Nach Fix-9/10 neu schreiben, nicht vorher.
-6. `docs/architektur/01-graph-kanten.md`: nennt das gelöschte `graph.ts` als Quelle, rund 60 statt 100 Kanten, Gewichte weichen fast überall ab (z. B. Zonenreserve `[0, 0.5, 1]`, im Code `[0.8, 0.5, 0.3]`), E1→E2 mit Phasengewichten, die es nicht gibt. Generieren (Fix-1).
-7. `docs/architektur/02-widget-katalog.md`: beschreibt `SupplyDemandChart` als zwei Trendlinien und 8 Gruppen.
+| Stadt | 2019 | 2024 | % pro Jahr | alt | neu |
+|---|---:|---:|---:|---:|---:|
+| Zürich | 420'217 | 436'551 | +0.77 | +1 | +1 |
+| Genf | 203'951 | 209'061 | +0.50 | −1 | +1 |
+| Basel | 173'232 | 177'571 | +0.50 | −1 | +1 |
+| Lausanne | 139'408 | 144'873 | +0.77 | −1 | +1 |
+| Bern | 134'591 | 137'995 | +0.50 | −1 | +1 |
+| Winterthur | 113'173 | 120'376 | +1.24 | −1 | +2 |
+| Luzern | 82'257 | 86'234 | +0.95 | −1 | +1 |
+| St. Gallen | 76'090 | 78'863 | +0.72 | −1 | +1 |
+| Lugano | 62'615 | 63'629 | +0.32 | −1 | 0 |
+| Biel | 55'602 | 56'896 | +0.46 | −1 | +1 |
+
+Neun Städte standen auf «sinkend», keine schrumpft. Die Bins sind eine Setzung und stehen im Kopf der YAML: unter −0.5 % → −2, bis −0.1 % → −1, bis +0.4 % → 0, bis +1.0 % → +1, darüber +2. Biel (+0.46) und Lugano (+0.32) liegen nahe an einer Grenze.
+
+Folge: die Baselines von neun Städten zeigen mehr Nachfragedruck. Zürich, Genf und Lausanne haben jetzt identische Kontextwerte und damit identische Baselines. Das liegt an der groben Skala (fünf Stufen, fünf wirksame Faktoren), nicht an einem Fehler.
+
+Nicht geändert, aber auffällig: `zuwanderungsdruck`. Der internationale Wanderungssaldo 2020–2024 (BFS, in % des Bestands pro Jahr) liegt für St. Gallen bei +1.37 und für Lugano bei +1.52; beide stehen auf 0 («stabil»). Winterthur (+0.96) steht auf +2. Der Wert hat keine dokumentierte Messvorschrift, deshalb keine Korrektur ohne Definition.
+
+#### Fix-4: Doku und Beschriftung — ✅ teilweise
+Erledigt: Parameterzahl 43 in AGENTS.md und `types.ts`; Kommentar `marketModulator` (±60 %, skaliert auch den Kontext); Kommentar `mietbelastungs_grenze` (wird nur angezeigt); Widget heisst «Mietbelastung einkommensschwacher Haushalte» und nennt den CH-Ausgangswert; `01-graph-kanten.md` generiert (Fix-1).
+
+Zurückgestellt, bis Fix-9/10 die Rechnung ändern:
+- `docs/architektur/README.md`: zwei widersprüchliche Übertragsformeln (richtig ist die erste, siehe Fix-10); `PHASE_BASE_MULTIPLIER`, `marketModulator`, `E1_NORMALIZATION` fehlen; Vorzeichenkonvention «positiv = angebotsreduzierend» widerspricht `types.ts`; Zahlen veraltet.
+- `docs/architektur/02-widget-katalog.md`: beschreibt `SupplyDemandChart` als zwei Trendlinien und 8 Gruppen.
 
 ---
 
@@ -125,36 +143,48 @@ Fix-9 bis Fix-12 gehören zusammen und enden in **einer** Neukalibrierung (Fix-1
 - Der veraltete Nenner von `mietpreis_schutzlevel` (3.8 statt 2.8) erledigt sich damit.
 
 #### Fix-10: Zeitprofil
-**Dateien:** `src/model/compute-phases.ts`, `src/model/phase-weights.ts`
-**Aufwand:** 1.5–2 Tage (vorher 0.5–1; die Profile müssen mit)
+**Dateien:** `src/model/compute-phases.ts`, `src/model/phase-weights.ts`, `docs/architektur/README.md`
+**Aufwand:** 1–1.5 Tage
 
-**Entschieden:** das Gewicht ist das Niveau des Effekts in der Phase. Entscheid am 2026-11-13 nochmals gegen Doku und Studien geprüft; er hält, hat aber eine Folge, die vorher fehlte.
+**Entschieden (2026-11-14, ersetzt die Fassung vom Vortag):** die Pipeline bleibt ein Generator. Der Wert einer Phase ist die Kombination aus dem Resultat der Vorphase und dem Vektor dieser Phase. Der Vektor trägt das Zeitprofil **nicht** allein. Der Übertrag (`PERSISTENCE`) bleibt.
 
-*Was die Doku sagt.* `docs/architektur/README.md` und der Kopf von `phase-weights.ts` beschreiben das Gewicht als Wirkung **in** der Phase («0.0 = keine Wirkung in dieser Phase, 1.0 = volle Wirkung»). Das ist die Niveau-Lesart. Dieselbe README beschreibt den Übertrag auf zwei Arten, die sich widersprechen (`prev × 0.8 + newEffects` und «80 % beibehalten, 20 % überschrieben»), und erwähnt `PHASE_BASE_MULTIPLIER`, `marketModulator` und `E1_NORMALIZATION` gar nicht. Der Code rechnet eine dritte Variante: `prev × 0.8 + Effekt × Multiplikator`.
+Damit ist das Gewicht der **neue Impuls** der Phase, nicht das erreichte Niveau. Das Niveau entsteht erst mit dem Übertrag:
 
-*Was der Code daraus macht.* Von 83 Politik-Kanten haben 33 ein fallendes Profil (`w1 > w3`) und 45 ein steigendes. Effektiv fällt keine einzige: das Verhältnis P1 zu P3 liegt für alle Kanten zwischen 0.00 und 0.47. Die Engine legt über jedes Profil dieselbe Rampe.
+```
+x[p] = PERSISTENCE · x[p−1] + Impuls[p]
+```
 
-| Kante | Vektor | effektiv (P3 = 1) |
+*Korrektur am Review.* Der Befund «sofort, dann abnehmend gibt es nicht» las die Vektoren als Niveau und war so nicht richtig. Als Impuls gelesen heisst `[0.9, 0.6, 0.3]`: der grösste Schub kommt sofort, danach kommt weniger dazu, und der Stand bleibt über den Übertrag erhalten. Das ist ein sättigender Verlauf und passt zu den Kommentaren an den Kanten. Der Vorschlag vom Vortag, den Übertrag für Politik-Effekte zu streichen, ist verworfen.
+
+*Was vom Befund bleibt.* Zwischen Vektor und Übertrag sitzt ein drittes Element, `PHASE_BASE_MULTIPLIER` (0.4 / 0.7 / 1.0). Es skaliert jeden Impuls nach Phase und drückt alle frühen Impulse. Verlauf des Standes, P3 = 1, über die 83 Politik-Kanten:
+
+| Vektor (Impuls) | mit Multiplikator | ohne Multiplikator |
 |---|---|---|
-| `mietrecht_kuendigungsschutz → verdraengungsrisiko` | 1.0 / 0.9 / 0.7 | 0.27 / 0.65 / 1.00 |
-| `mietrecht_anfangsmiete → mietpreis_schutzlevel` | 1.0 / 0.8 / 0.7 | 0.28 / 0.63 / 1.00 |
-| `raumplanung_verdichtung → angebotspotenzial` | 0.0 / 0.6 / 1.0 | 0.00 / 0.31 / 1.00 |
+| 0.9 / 0.6 / 0.3 («sofort») | 0.42 / 0.82 / 1.00 | 0.66 / 0.97 / 1.00 |
+| 1.0 / 0.8 / 0.7 | 0.28 / 0.63 / 1.00 | 0.51 / 0.81 / 1.00 |
+| 0.0 / 0.6 / 1.0 («verzögert») | 0.00 / 0.31 / 1.00 | 0.00 / 0.41 / 1.00 |
+| Spanne P1 zu P3, alle Kanten | 0.00 bis 0.47 | 0.00 bis 0.72 |
 
-*Was die Studien sagen.* Die Verläufe sind nicht einheitlich, eine Rampe für alles ist also falsch:
-- Sofort: Berlin, regulierte Mieten sinken mechanisch mit Inkrafttreten, Inserate gehen im ersten Jahr zurück (DE-004). San Francisco, Schutz vor Verdrängung kurzfristig wirksam (US-001).
-- Wachsend: Paris −2.5 % im ersten Jahr, −5.9 % im vierten, −8.2 % im fünften (FR-003). Auckland, Neubau reagiert nach 2–4 Jahren (NZ-001). Vancouver, erste Effekte nach 1–2 Jahren, deutlich nach 3–5 (CA-001).
-- Kumulativ über Jahrzehnte: Angebotsverlust unter Mietregulierung (GLOBAL-029; US-001: −15 % Angebot, +7 % Marktmieten).
+Mit dem Multiplikator erreicht keine Kante in P1 mehr als 47 % ihres P3-Standes, egal wie «sofort» der Vektor ist. Trägheit ist damit doppelt eingebaut: einmal im Übertrag, einmal im Multiplikator. Der Kommentar an `PHASE_BASE_MULTIPLIER` hält selbst fest, dass die Gewichte ursprünglich ohne ihn gefittet wurden.
 
-*Die Folge.* Mit der Niveau-Lesart trägt der Vektor das Zeitprofil allein. Dann müssen die Vektoren stimmen, und mehrere tun es nicht. `mietrecht_anfangsmiete → mietpreis_schutzlevel` fällt im Vektor (Begründung im Kommentar: Umgehung), Paris zeigt für genau diesen Mechanismus einen Anstieg auf mehr als das Dreifache. Heute verdeckt die Rampe der Engine den Widerspruch. Wird nur die Engine umgestellt, wird er sichtbar.
+*Was die Studien als Mass geben.* Geprüft wird der Verlauf des **Standes**, nicht der Vektor:
+- Paris, Mietdeckel: −2.5 % im ersten Jahr, −5.9 % im vierten, −8.2 % im fünften (FR-003). Grob 0.35 / 1.0 nach zwei und fünf Jahren. Die Kante `mietrecht_anfangsmiete → mietpreis_schutzlevel` liefert heute 0.28 / 0.63 / 1.00 und liegt damit nahe.
+- Berlin: regulierte Mieten sinken mechanisch mit Inkrafttreten, Inserate gehen im ersten Jahr zurück (DE-004). Verlangt einen hohen Stand schon in P1; mit Multiplikator nicht darstellbar.
+- Auckland: Neubau reagiert nach 2–4 Jahren (NZ-001). Vancouver: erste Effekte nach 1–2 Jahren, deutlich nach 3–5 (CA-001). Passt zu verzögerten Vektoren.
+- Mietregulierung und Angebot: kumulativ über Jahrzehnte (GLOBAL-029, US-001). Passt zum Übertrag.
+
+**Entschieden (2026-11-14):** `PHASE_BASE_MULTIPLIER` wird gestrichen. Stand = Vektor plus Vorresultat, nichts Drittes. Wie früh ein Effekt kommt, steht nur im Vektor; wie lange er hält, im Übertrag.
+
+Nicht einzeln ausliefern: ohne Multiplikator wächst jeder Stand (P1 um den Faktor 2.5, P3 bei flachem Vektor um rund 1.3). Mit den heutigen Nennern laufen angespannte Städte dann in den Clamp; Zürichs Verdrängungsrisiko steht in P3 schon heute bei 0.79. Der gemeinsame Nenner aus Fix-9 wird deshalb im selben Schritt gesetzt.
 
 **Schritte:**
-1. Engine: Politik-Anteil ohne Übertrag und ohne Phasenmultiplikator. Der Effekt in Phase p ist `Σ sign · w[p] · Δ / Nenner · marketModulator`.
-2. Profil-Audit: jede der 83 Politik-Kanten bekommt eine Quelle für ihren Verlauf. Feld `profilQuelle` an der Kante (Studien-ID) oder ausdrücklich `'Annahme'`. Bestands- und Flussgrössen unterscheiden: Regeln (Schutzlevel, Steuern) gelten ab Inkrafttreten, Bestände (Angebot, gemeinnütziger Anteil, Eigentumsquote) bauen sich auf und brauchen ein steigendes Profil.
-3. Kanten ohne Verlaufsevidenz bekommen ein flaches Profil statt eines erfundenen Verlaufs. Das folgt dem Grundsatz im Kopf von `phase-weights.ts` («Uncertainty → tend toward 0.0»), übertragen auf die Form.
-4. Tests: für jede Kante mit `w1 > w3` ist der Effekt auf den Zielknoten in P1 grösser als in P3. Dazu je ein Verlaufstest pro Studie oben (Paris steigend, Berlin sofort, Auckland verzögert).
-5. Grösse: ohne Übertrag sinkt P3 um etwa den Faktor 1.8 und P1 steigt um 2.5. Der gemeinsame Nenner aus Fix-9 wird deshalb zusammen mit Fix-10 gesetzt.
-6. Kontext-Antrieb (offen, Empfehlung): ebenfalls als Niveau lesen. Sonst läuft die «Heutige Situation» weiter über eine Rampe, die Politik-Effekte aber nicht, und der Vergleich Heute/Simuliert verschiebt sich zwischen den Phasen ohne fachlichen Grund. Die Baseline aller Städte ändert sich dadurch; die Kontext-Vektoren fallen heute fast alle und haben keine Studienquelle.
-7. Die Phasen sind 2, 3 und 5 Jahre lang. Mit Niveau-Gewichten ist das unproblematisch; in der Doku festhalten, dass ein Gewicht den Stand am Ende der Phase meint.
+1. Semantik festschreiben: Gewicht = Impuls der Phase; Stand = `PERSISTENCE · Vorresultat + Impuls`. Im Kopf von `phase-weights.ts` und in `docs/architektur/README.md`. Die README beschreibt den Übertrag heute auf zwei widersprüchliche Arten und erwähnt den Multiplikator nicht.
+2. `PHASE_BASE_MULTIPLIER` entfernen, zusammen mit dem neuen Nenner (Fix-9). `scripts/calibrate.ts` importiert die Engine und zieht automatisch mit.
+3. Verlaufs-Audit: für jede der 83 Politik-Kanten den Stand über die drei Phasen ausrechnen und gegen eine Studie halten. Feld `profilQuelle` an der Kante (Studien-ID) oder ausdrücklich `'Annahme'`. Wo keine Verlaufsevidenz vorliegt, einen neutralen Impuls wählen statt eines erfundenen Verlaufs.
+4. Abklingende Effekte: mit `PERSISTENCE = 0.8` verliert ein Stand ohne neuen Impuls 20 % pro Phase. Schnelleres Abklingen (Umgehung, Markt passt sich an) braucht einen negativen Impuls. Das Schema lässt das zu (im Review vom 2026-06-05 als Ausweg offengehalten). Pro Fall entscheiden und mit Quelle belegen.
+5. Tests am Stand, nicht am Vektor: je ein Verlaufstest pro Studie oben (Paris wächst, Berlin wirkt in P1, Auckland verzögert).
+6. Kontext-Antrieb: läuft über denselben Generator und akkumuliert weiter. Die Frage vom Vortag ist damit erledigt.
+7. Hinweis für die Doku: die Phasen sind 2, 3 und 5 Jahre lang, der Übertrag ist pro Phase gleich. Entweder begründen oder an die Phasenlänge koppeln; kein Fehler, aber eine Annahme.
 
 #### Fix-11: Fehlende Evidenzpfade
 **Datei:** `src/model/phase-weights.ts`
@@ -212,9 +242,9 @@ Heute laufen Bodensteuer, Vorkaufsrecht, Belegungsvorschriften, Sozialmischung u
 | Sprint | Inhalt | Aufwand | Abhängigkeit |
 |---|---|---|---|
 | 0 | Vorzeichen, Regime | erledigt | — |
-| 1 | Fix-1 bis Fix-4 | ca. 1 Tag | keine |
+| 1 | Fix-1 bis Fix-4 | erledigt | — |
 | 2 | Fix-5 bis Fix-7 (Fix-8 erledigt) | ca. 1 Tag | keine |
-| 3 | Fix-9 bis Fix-14 | ca. 5–6 Tage | Fix-1 vorher |
+| 3 | Fix-9 bis Fix-14 | ca. 5 Tage | keine |
 | 4 | Regime-Kalibrierung | offen | Daten |
 
 Sprint 1 und 2 können parallel laufen. Sprint 3 ändert alle Zahlen im UI und sollte als ein Release mit Hinweis ausgeliefert werden.
@@ -230,11 +260,13 @@ Sprint 1 und 2 können parallel laufen. Sprint 3 ändert alle Zahlen im UI und s
 Stand 2026-11-13:
 
 1. **Normalisierung (Fix-9):** ✅ gemeinsamer Nenner.
-2. **Zeitprofil (Fix-10):** ✅ Niveau pro Phase. Das war die ursprüngliche Absicht des Gewichtsvektors. Nachgeprüft gegen Doku und Studien: hält, verlangt aber ein Audit der 83 Profile gegen die Studien (in Fix-10 aufgenommen).
+2. **Zeitprofil (Fix-10):** ✅ Generator bleibt (2026-11-14). Stand der Phase = Resultat der Vorphase plus Vektor dieser Phase; das Gewicht ist der Impuls, nicht das Niveau. Die Fassung vom 2026-11-13 («Niveau pro Phase, Übertrag streichen») ist verworfen.
 3. **Regime-Schieber (Fix-5):** ✅ eigenes provisorisches Widget.
 4. **Ungenutzt:** zwei getrennte Dinge.
    - Schieber ohne Wirkung: ✅ auskommentieren, bis sie angebunden sind (Fix-5).
    - Fünf nicht eingebundene Widget-Komponenten (Fix-8): ✅ eingebaut.
 5. **Parameter ohne Evidenz** (Vorkaufsrecht, Bauverpflichtung): ✅ im UI kennzeichnen (Fix-11).
 
-Offen aus Entscheid 2: akkumuliert der Kontext-Antrieb weiter, oder wird auch er als Niveau gelesen (Fix-10, Schritt 6; Empfehlung: Niveau)?
+6. **Phasenmultiplikator (Fix-10):** ✅ streichen (2026-11-14), zusammen mit Fix-9.
+
+Keine offenen Entscheide.
