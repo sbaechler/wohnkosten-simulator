@@ -233,7 +233,9 @@ describe('Stockholm Schweden (SE-001): Mietregulierung → Extreme Marktfriktion
       mietrecht_mietzinstransparenz: { from: 1, to: 2 },
       mietrecht_kuendigungsschutz: { from: 1, to: 2 },
       mietrecht_mietzinsindex:     { from: 1, to: 2 },
-      mietrecht_kriterium: 1, mietrecht_durchsetzung: 0, mietrecht_untervermietung:   { from: 1, to: 2 },
+      mietrecht_kriterium:         { from: 1, to: 1 },
+      mietrecht_durchsetzung:      { from: 0, to: 0 },
+      mietrecht_untervermietung:   { from: 1, to: 2 },
     };
     const zuerich = phases(ZUERICH_V2, NEUTRAL_CONTEXT, {});
     const stockholm = phases(ZUERICH_V2, NEUTRAL_CONTEXT, stockholmDiff);

@@ -22,6 +22,7 @@ import {
   belastungLevel,
 } from '../../belastung';
 import type { MarketState } from '../../../types';
+import { REGIME_NEUTRAL } from '../market-state-fixtures';
 
 const emptyState: MarketState = {
   angebotspotenzial: 0,
@@ -35,6 +36,7 @@ const emptyState: MarketState = {
   aufwertungsdruck: 0,
   investitionsattraktivitaet: 0,
   angebotspotenzial_regulation: 0,
+  ...REGIME_NEUTRAL,
 };
 
 const allPositive: MarketState = {
@@ -42,6 +44,7 @@ const allPositive: MarketState = {
   verdraengungsrisiko: 1, spekulationshemmung: 1, marktfriktion: 1,
   gemeinnuetzig_kraft: 1, eigentumsquoten_trend: 1, aufwertungsdruck: 1,
   investitionsattraktivitaet: 1, angebotspotenzial_regulation: 1,
+  ...REGIME_NEUTRAL,
 };
 
 const allNegative: MarketState = {
@@ -49,6 +52,7 @@ const allNegative: MarketState = {
   verdraengungsrisiko: -1, spekulationshemmung: -1, marktfriktion: -1,
   gemeinnuetzig_kraft: -1, eigentumsquoten_trend: -1, aufwertungsdruck: -1,
   investitionsattraktivitaet: -1, angebotspotenzial_regulation: -1,
+  ...REGIME_NEUTRAL,
 };
 
 describe('computeMieteBelastung', () => {

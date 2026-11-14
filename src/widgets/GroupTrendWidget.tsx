@@ -38,6 +38,8 @@ export function GroupTrendWidget({ title, phases, baselinePhases, computeGroupTr
 
   // Use Phase 2 (index 1) as primary for driver display — stable sort order
   const primaryTrends = allTrends[1] ?? allTrends[0] ?? [];
+  // Only re-sort when group identity changes, not values
+  const groupIdKey = primaryTrends.map(t => t.group.id).join(',');
   const sorted = useMemo(() => {
     const items = [...primaryTrends];
     // Sort once and keep stable — don't re-sort when values change
@@ -47,9 +49,8 @@ export function GroupTrendWidget({ title, phases, baselinePhases, computeGroupTr
       return a.group.shortLabel.localeCompare(b.group.shortLabel);
     });
     return items;
-    // Only re-sort when group identity changes, not values
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [primaryTrends.map(t => t.group.id).join(',')]);
+  }, [groupIdKey]);
 
   return (
     <div className="group-trend">
