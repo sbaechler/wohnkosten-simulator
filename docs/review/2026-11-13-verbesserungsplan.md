@@ -86,7 +86,7 @@ Neun Städte standen auf «sinkend», keine schrumpft. Die Bins sind eine Setzun
 
 Folge: die Baselines von neun Städten zeigen mehr Nachfragedruck. Zürich, Genf und Lausanne haben jetzt identische Kontextwerte und damit identische Baselines. Das liegt an der groben Skala (fünf Stufen, fünf wirksame Faktoren), nicht an einem Fehler.
 
-Nicht geändert, aber auffällig: `zuwanderungsdruck`. Der internationale Wanderungssaldo 2020–2024 (BFS, in % des Bestands pro Jahr) liegt für St. Gallen bei +1.37 und für Lugano bei +1.52; beide stehen auf 0 («stabil»). Winterthur (+0.96) steht auf +2. Der Wert hat keine dokumentierte Messvorschrift, deshalb keine Korrektur ohne Definition.
+Nachtrag `zuwanderungsdruck` (2026-11-14): Messvorschrift festgelegt und im Kopf der YAML dokumentiert (internationaler Wanderungssaldo inkl. Typwechsel, BFS, Durchschnitt 2019–2024, in % des Bestands pro Jahr; Bins als Setzung). Geändert: Basel +1 → +2 (1.60 %), Winterthur +2 → +1 (0.88 %), St. Gallen 0 → +1 (1.26 %), Lugano 0 → +1 (1.32 %). Grenzfälle: Winterthur, Biel, Basel. Ohne Typwechsel (Sondereffekt 2023) lägen fast alle Städte eine Stufe tiefer.
 
 #### Fix-4: Doku und Beschriftung — ✅ teilweise
 Erledigt: Parameterzahl 43 in AGENTS.md und `types.ts`; Kommentar `marketModulator` (±60 %, skaliert auch den Kontext); Kommentar `mietbelastungs_grenze` (wird nur angezeigt); Widget heisst «Mietbelastung einkommensschwacher Haushalte» und nennt den CH-Ausgangswert; `01-graph-kanten.md` generiert (Fix-1).
