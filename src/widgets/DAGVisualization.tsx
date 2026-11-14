@@ -546,56 +546,10 @@ export function DAGVisualization({ context, diff }: Props) {
         .attr('marker-end', `url(#arrow-${suffix})`);
     }
 
-    // ── Feedback / Rückkopplungs-Bögen ───────────────────────────────────
-
-    const FEEDBACK_EDGES: Array<{ from: NodeId; to: NodeId; sign: 1 | -1 }> = [
-      { from: 'gentrifizierungsindex',  to: 'nachfragedruck',           sign: +1 },
-      { from: 'gentrifizierungsindex',  to: 'angebotspotenzial',         sign: +1 },
-      { from: 'investitionsattraktivitaet', to: 'angebotspotenzial',     sign: +1 },
-      { from: 'angebotspotenzial',      to: 'nachfragedruck',             sign: -1 },
-      { from: 'nachfragedruck',         to: 'investitionsattraktivitaet', sign: +1 },
-      { from: 'gentrifizierungsindex',  to: 'mietrecht_kuendigungsschutz', sign: +1 },
-      { from: 'angebotspotenzial',      to: 'eigentumsquoten_trend',      sign: -1 },
-      { from: 'aufwertungsdruck',        to: 'spekulationshemmung',        sign: -1 },
-    ];
-
-    const FEEDBACK_Y_OFFSET = -40;
-
-    for (const fb of FEEDBACK_EDGES) {
-      const fromLayout = nodeLayoutMap.get(fb.from);
-      const toLayout = nodeLayoutMap.get(fb.to);
-      if (!fromLayout || !toLayout) continue;
-
-      defs.append('marker')
-        .attr('id', `fb-${fb.from}-${fb.to}`)
-        .attr('viewBox', '0 0 10 10')
-        .attr('refX', 8)
-        .attr('refY', 5)
-        .attr('markerWidth', 4)
-        .attr('markerHeight', 4)
-        .attr('orient', 'auto-start-reverse')
-        .append('path')
-        .attr('d', 'M 0 0 L 10 5 L 0 10 z')
-        .attr('fill', fb.sign > 0 ? '#74c0fc' : '#ffd43b');
-
-      const fromY = fromLayout.y + NODE_HEIGHT / 2;
-      const toY = toLayout.y + NODE_HEIGHT / 2;
-      const fromX = fromLayout.x + LAYER_WIDTH[fromLayout.layerIndex] / 2;
-      const toX = toLayout.x - LAYER_WIDTH[toLayout.layerIndex] / 2;
-      const arcY = Math.min(fromY, toY) + FEEDBACK_Y_OFFSET;
-      const cpY = arcY - 20;
-
-      const pathD = `M ${fromX} ${fromY} C ${fromX} ${cpY}, ${toX} ${cpY}, ${toX} ${toY}`;
-
-      g.append('path')
-        .attr('d', pathD)
-        .attr('fill', 'none')
-        .attr('stroke', fb.sign > 0 ? '#74c0fc' : '#ffd43b')
-        .attr('stroke-width', 1)
-        .attr('opacity', 0.45)
-        .attr('stroke-dasharray', '4,3')
-        .attr('marker-end', `url(#fb-${fb.from}-${fb.to})`);
-    }
+    // Rückkopplungen (z. B. Gentrifizierung → Nachfrage) werden nicht gezeichnet:
+    // Die Engine rechnet einen azyklischen Graphen, E0 → E1 → E2, ohne Rückwirkung
+    // von E2 oder E1 auf frühere Knoten. Bis 2026-11 standen hier acht gestrichelte
+    // Bögen, die es in der Rechnung nicht gibt.
 
     // Draw nodes
     for (const nl of nodeLayouts) {
@@ -817,14 +771,6 @@ export function DAGVisualization({ context, diff }: Props) {
         <span className="dag-viz__legend-item">
           <span className="dag-viz__legend-line" style={{ background: '#3d5a80' }} />
           <span className="dag-viz__legend-label">+/−</span>
-        </span>
-        <span className="dag-viz__legend-item">
-          <span className="dag-viz__legend-line dag-viz__legend-line--dashed" style={{ borderColor: '#74c0fc' }} />
-          <span className="dag-viz__legend-label">Rückkopplung+</span>
-        </span>
-        <span className="dag-viz__legend-item">
-          <span className="dag-viz__legend-line dag-viz__legend-line--dashed" style={{ borderColor: '#ffd43b' }} />
-          <span className="dag-viz__legend-label">Rückkopplung−</span>
         </span>
       </div>
     </div>

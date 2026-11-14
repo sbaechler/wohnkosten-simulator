@@ -101,7 +101,9 @@ export interface CityContext {
   mietbelastungs_grenze: ContextValue;
   /**
    * LIK-Jahresteuerung, national, Bins in TEUERUNG_BINS (mietrecht-regime.ts).
-   * 2025: +0.2 % → −1. CH-012. Fehlend in Tests = neutral (0), nicht der Stadtwert.
+   * 2025: +0.2 % → −1. CH-012. Die Stufe ist eine Lage in der Reihe, keine
+   * Grösse: Stufe 0 ist 0.5–1.5 %, nicht null Teuerung (TEUERUNG_STUFE_PROZENT).
+   * Fehlend in Tests = keine Teuerung, nicht der Stadtwert.
    */
   teuerung?: ContextValue;
   /**
@@ -192,6 +194,12 @@ export interface ParamMeta40 {
    * docs/architektur/01-graph-kanten.md.
    */
   hoeherBedeutet: string;
+  /**
+   * 'nicht_belegt': Für die Wirkung dieses Parameters fehlt in
+   * docs/recherche/summary.md die empirische Evidenz. Der Schieber bleibt,
+   * wird im Panel aber gekennzeichnet (Entscheid 5, Verbesserungsplan 2026-11).
+   */
+  evidenz?: 'nicht_belegt';
   group: ParamGroup;
 }
 

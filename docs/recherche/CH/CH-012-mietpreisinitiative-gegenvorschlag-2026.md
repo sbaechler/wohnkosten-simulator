@@ -64,7 +64,11 @@ Bins, an dieser Reihe geeicht, im Code als `TEUERUNG_BINS` dokumentiert: unter 0
 
 Falle: 2025 kam der grösste Beitrag zur Jahresteuerung von der Wohnungsmiete selbst (0.364 Punkte).[12] Für den rechtlichen Nachzug bleibt der Gesamtindex richtig. Als unabhängiger Kostenschock ist er es nicht.
 
-Mit Teuerung −1 und Überwälzung 0.85 ist der Erhöhungsspielraum im Indexregime leicht negativ. Eine Spirale aus der Teuerung 2025 erzeugt der Code nicht. Das ist der Befund der Reihe, kein fehlendes Gewicht.
+Die Stufe ist eine Lage in der Reihe, keine Grösse. Stufe 0 ist der Normalfall (0.5 bis 1.5 Prozent), nicht null Teuerung; null liegt an der Grenze zwischen −2 und −1. Bis November 2026 rechnete der Code mit der Stufe selbst. Stufe −1 ergab im Indexregime einen Erhöhungsspielraum von −0.42, also einen Senkungsanspruch bei einer Teuerung von +0.2 Prozent. Das war ein Fehler der Skala, kein Befund der Reihe.
+
+Jetzt übersetzt `TEUERUNG_STUFE_PROZENT` jede Stufe in eine Jahresteuerung: −0.5, 0.25, 1.0, 2.0 und 3.0 Prozent. Die drei mittleren Werte sind die Bin-Mitten. Die beiden Randwerte sind eine Setzung, je eine halbe Bin-Breite jenseits der Grenze; die Reihe hat dort −0.4 und −0.7 beziehungsweise 2.8 Prozent. Geteilt wird durch `TEUERUNG_REFERENZ_PROZENT` (3.0), damit die oberste Stufe wie bisher bei 1 liegt.
+
+Mit Teuerung −1 und Überwälzung 0.85 ist der Erhöhungsspielraum im Indexregime jetzt leicht positiv (0.07). Ein Senkungsanspruch entsteht nur bei Stufe −2. Eine Spirale aus der Teuerung 2025 erzeugt der Code weiterhin nicht: die Bestandsmiete steigt in Zürich über drei Phasen auf 0.04. Offen: das Verhältnis einer Teuerungseinheit zu einem Schritt des Referenzzinssatzes ist nicht geeicht.
 
 ### `ctx:referenzzins_aenderung` — belegt, Bins provisorisch
 

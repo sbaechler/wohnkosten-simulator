@@ -111,6 +111,7 @@ export const paramMeta40: ParamMeta40[] = [
     helpText: 'Kann die Gemeinde Land vorkaufen, bevor es am Markt verkauft wird?',
     levels: ['Kein Vorkaufsrecht', 'Für gemeinnützige Zwecke', 'Umfassendes Recht'],
     hoeherBedeutet: 'umfassenderes Vorkaufsrecht der Gemeinde',
+    evidenz: 'nicht_belegt',
     group: 'bodenrecht',
   },
   {
@@ -119,6 +120,7 @@ export const paramMeta40: ParamMeta40[] = [
     helpText: 'Massnahmen gegen das Horten von unbebautem Land',
     levels: ['Hortung erlaubt', 'Mehrwertabgabe bei Nicht-Bebauung', 'Bauverpflichtung mit Frist'],
     hoeherBedeutet: 'strengere Massnahmen gegen Baulandhortung',
+    evidenz: 'nicht_belegt',
     group: 'bodenrecht',
   },
   {

@@ -13,7 +13,17 @@ export function ParameterSlider({ meta, value, defaultValue, onChange }: Props) 
 
   return (
     <div className={`param-slider ${isChanged ? 'param-slider--changed' : ''}`}>
-      <div className="param-slider__label">{meta.label}</div>
+      <div className="param-slider__label">
+        {meta.label}
+        {meta.evidenz === 'nicht_belegt' && (
+          <span
+            className="param-slider__evidenz"
+            title="Für die Wirkung dieses Instruments fehlt in den ausgewerteten Studien die Evidenz. Die gezeigte Wirkung ist eine Modellannahme."
+          >
+            Wirkung nicht belegt
+          </span>
+        )}
+      </div>
       <div className="param-slider__help">{meta.helpText}</div>
       <input
         type="range"

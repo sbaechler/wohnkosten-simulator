@@ -85,6 +85,8 @@ export const REFERENZ_TEUERUNG_PASS_THROUGH = 0.4;
 /**
  * Bins für `ctx:teuerung`, geeicht an der BFS-LIK-Jahresteuerung
  * 2016–2025. Siehe CH-012. 2025 (+0.2 %) → −1.
+ * Die Stufe ist eine Lage in der Reihe, keine Grösse: gerechnet wird mit
+ * `TEUERUNG_STUFE_PROZENT`.
  */
 export const TEUERUNG_BINS = {
   minus2: 'unter 0 %',
@@ -93,6 +95,36 @@ export const TEUERUNG_BINS = {
   plus1: '1.5 bis 2.5 %',
   plus2: 'über 2.5 %',
 } as const;
+
+/**
+ * Jahresteuerung in Prozent, für die jede Stufe von `ctx:teuerung` steht.
+ * Nötig, weil die Stufe 0 NICHT null Teuerung ist: sie ist der Normalfall
+ * der Reihe (0.5 bis 1.5 %). Null Teuerung liegt an der Grenze zwischen
+ * −2 und −1. Wer die Stufe direkt als Grösse liest, rechnet eine tiefe,
+ * aber positive Teuerung (2025: +0.2 %, Stufe −1) als Preisrückgang und
+ * damit als Senkungsanspruch.
+ *
+ * Werte: Mitte des Bins aus `TEUERUNG_BINS` (0.25, 1.0, 2.0). Die beiden
+ * offenen Rand-Bins sind eine Setzung, je eine halbe Bin-Breite jenseits
+ * der Grenze: −0.5 % (BFS-LIK 2016: −0.4 %, 2020: −0.7 %) und 3.0 %
+ * (2022: 2.8 %). Reihe in CH-012.
+ */
+export const TEUERUNG_STUFE_PROZENT: Record<-2 | -1 | 0 | 1 | 2, number> = {
+  [-2]: -0.5,
+  [-1]: 0.25,
+  0: 1.0,
+  1: 2.0,
+  2: 3.0,
+};
+
+/**
+ * Teuerung in Prozent, die im Regime dem Wert 1 entspricht: der Wert der
+ * obersten Stufe. Damit bleibt Stufe +2 wie vor der Korrektur bei 1, und
+ * die Skala bleibt in [−1, +1]. Setzung, nicht kalibriert: das Verhältnis
+ * zu einem Schritt des Referenzzinssatzes (0.25 Punkte = 0.5) ist damit
+ * nicht geeicht.
+ */
+export const TEUERUNG_REFERENZ_PROZENT = 3.0;
 
 /**
  * Bins für `ctx:referenzzins_aenderung`: Veränderung des hypothekarischen
@@ -120,6 +152,18 @@ export interface RegimeCarry {
 function normContext(value: number | undefined, fallback = 0): number {
   if (typeof value !== 'number') return fallback;
   return value / 2;
+}
+
+/**
+ * Teuerung als Grösse mit echtem Nullpunkt: 0 = keine Teuerung,
+ * 1 = `TEUERUNG_REFERENZ_PROZENT`. Fehlt der Kontextwert, gilt keine
+ * Teuerung (0), nicht die Stufe 0.
+ */
+export function teuerungAlsGroesse(stufe: number | undefined): number {
+  if (typeof stufe !== 'number') return 0;
+  const prozent = TEUERUNG_STUFE_PROZENT[stufe as -2 | -1 | 0 | 1 | 2];
+  if (typeof prozent !== 'number') return 0;
+  return prozent / TEUERUNG_REFERENZ_PROZENT;
 }
 
 function levelFromDiff(
@@ -172,7 +216,8 @@ export function applyMietrechtRegime(
   // wenn der Index auf dem Landesindex steht.
   const vergleich_bestand = kriterium === 2 && index === 1 ? 1 : 0;
 
-  const teuerung = normContext(context.teuerung, 0);
+  // Teuerung als Grösse, nicht als Stufe: Stufe −1 ist positive Teuerung.
+  const teuerung = teuerungAlsGroesse(context.teuerung);
   // Referenzzins-Regime (Index 0): der Anspruch entsteht aus der ÄNDERUNG
   // des Satzes, nicht aus `ctx:zinsniveau`. Ein tiefes, unverändertes
   // Niveau ist kein laufender Senkungsanspruch.

@@ -4,6 +4,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { computePhasePipeline, invalidatePhasesCache } from '../../compute-phases';
+import { teuerungAlsGroesse } from '../../mietrecht-regime';
 import type { CityContext, ParamsDiff40 } from '../../../types';
 
 const ZH: CityContext = {
@@ -131,6 +132,41 @@ describe('Mietrecht-Regime, provisorisch', () => {
     const lik = last(ZH, { mietrecht_mietzinsindex: { from: 0, to: 1 } });
     expect(lik.marketState.mietpreis_schutzlevel)
       .toBeCloseTo(base.marketState.mietpreis_schutzlevel, 5);
-    expect(lik.marketState.erhoehungsspielraum).toBeLessThanOrEqual(0);
+  });
+
+  it('Tiefe, positive Teuerung (Stufe −1) ist im LIK-Regime kein Senkungsanspruch', () => {
+    // LIK 2025: +0.2 %. Die Stufe −1 heisst «0 bis 0.5 %», nicht «Preise sinken».
+    const diff: ParamsDiff40 = {
+      mietrecht_mietzinsindex: { from: 0, to: 1 },
+      mietrecht_durchsetzung: { from: 0, to: 2 },
+    };
+    const phase = last(ZH, diff);
+    expect(phase.marketState.erhoehungsspielraum).toBeGreaterThan(0);
+    expect(phase.marketState.bestandsmiete).toBeGreaterThanOrEqual(0);
+  });
+
+  it('Nur negative Teuerung (Stufe −2) gibt im LIK-Regime einen Senkungsanspruch', () => {
+    const diff: ParamsDiff40 = {
+      mietrecht_mietzinsindex: { from: 0, to: 1 },
+      mietrecht_durchsetzung: { from: 0, to: 2 },
+    };
+    const phase = last({ ...ZH, teuerung: -2 }, diff);
+    expect(phase.marketState.erhoehungsspielraum).toBeLessThan(0);
+    expect(phase.marketState.bestandsmiete).toBeLessThan(0);
+  });
+
+  it('Erhöhungsspielraum im LIK-Regime steigt mit jeder Teuerungsstufe', () => {
+    const lik: ParamsDiff40 = { mietrecht_mietzinsindex: { from: 0, to: 1 } };
+    const werte = ([-2, -1, 0, 1, 2] as const).map(
+      stufe => last({ ...ZH, teuerung: stufe }, lik).marketState.erhoehungsspielraum,
+    );
+    for (let i = 1; i < werte.length; i++) expect(werte[i]).toBeGreaterThan(werte[i - 1]);
+  });
+
+  it('Teuerung als Grösse: null liegt zwischen Stufe −2 und −1, fehlender Wert = keine Teuerung', () => {
+    expect(teuerungAlsGroesse(-2)).toBeLessThan(0);
+    expect(teuerungAlsGroesse(-1)).toBeGreaterThan(0);
+    expect(teuerungAlsGroesse(2)).toBeCloseTo(1, 9);
+    expect(teuerungAlsGroesse(undefined)).toBe(0);
   });
 });

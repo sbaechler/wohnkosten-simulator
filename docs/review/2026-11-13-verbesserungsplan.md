@@ -1,6 +1,6 @@
 # Verbesserungsplan nach fachlichem Review (2026-11-13)
 
-> **Status:** Entscheide 1, 2, 3 und 5 gefällt (2026-11-13, siehe Abschnitt 9); alle Entscheide gefällt. Sprint 0, Sprint 1 und Fix-8 (Widgets) sind umgesetzt auf `feat/mietrecht-regime-2026` (Sprint 0 und Fix-8 in Commit `238b6cd`, Sprint 1 noch uncommittet), alles andere offen.
+> **Status:** Entscheide 1, 2, 3 und 5 gefällt (2026-11-13, siehe Abschnitt 9); alle Entscheide gefällt. Sprint 0, 1 und 2 sind umgesetzt auf `feat/mietrecht-regime-2026` (Sprint 0 und Fix-8 in Commit `238b6cd`, Sprint 1 in `46036cc`, Sprint 2 am 2026-11-14 umgesetzt). Offen: Sprint 3 und 4.
 > **Grundlage:** Fachliches Review vom 2026-11-13: Code in `src/model`, gerenderte Widgets, `docs/recherche/summary.md`, CH-012, Nachrechnung aller 43 Parameter für Zürich (je ±1 Stufe, Wirkung in P3).
 > **Teststand:** 225 passed, 1 skipped. Kalibrierungs-Dry-Run 0/446 Verletzungen. `tsc -b` meldet 10 Typfehler, alle in Testdateien (Fixtures ohne die neuen Regime-Felder von `MarketState`, dazu `international-fachlich.test.ts:236`); damit läuft `npm run build` nicht durch. Die Fehler stammen aus den Regime-Änderungen des Branches, nicht aus den Fixes dieses Plans.
 
@@ -63,7 +63,7 @@ Nicht gemacht: die Sensitivitätstabelle als fester Test (Abschnitt 8). Sie ist 
 3. Eine negative Verweildauer lädt keine Teuerung mehr vor.
 4. Gesperrte Teuerung wird in Teuerungs-Einheiten gerechnet: Referenzzins-Regime 60 % (40 % überwälzbar, neu `REFERENZ_TEUERUNG_PASS_THROUGH`), Landesindex 15 %, Kostenbindung 100 %. Für Landesindex und Kostenbindung ist das Ergebnis dasselbe wie vorher.
 
-Offen: der Erhöhungsspielraum im Referenzzins-Regime enthält die 40 % Teuerung selbst nicht. Mit dem heutigen Teuerungs-Bin (0–0.5 % → −1) würde das einen Senkungsanspruch erzeugen, obwohl die Teuerung positiv ist. Erst die Bins klären (Sprint 4).
+Offen: der Erhöhungsspielraum im Referenzzins-Regime enthält die 40 % Teuerung selbst nicht. Der Teuerungs-Nullpunkt ist seit 2026-11-15 korrigiert (siehe Fix-5), das Hindernis ist weg. Offen bleibt die Einheit: eine Teuerungseinheit und ein Schritt des Referenzzinssatzes sind nicht gegeneinander geeicht, die Summe wäre deshalb noch nicht belastbar (Sprint 4).
 
 #### Fix-3: Städtedaten — ✅ Bevölkerungstrend korrigiert
 **Datei:** `data/cities/switzerland.yaml`
@@ -97,28 +97,28 @@ Zurückgestellt, bis Fix-9/10 die Rechnung ändern:
 
 ---
 
-## 4. Sprint 2 — Was der Nutzer sieht, muss zur Rechnung passen
+## 4. Sprint 2 — Was der Nutzer sieht, muss zur Rechnung passen — ✅ erledigt (2026-11-14)
 
-#### Fix-5: Wirkungslose Schieber
-**Dateien:** `src/widgets/`, `src/model/groups.ts`
-**Aufwand:** 3–4 h
-`mietrecht_mietzinsindex`, `mietrecht_kriterium`, `mietrecht_durchsetzung` und `steuer_leerstandsabgabe` bewegen kein gerendertes Widget.
-- **Entschieden — Regime:** eigenes kleines Widget «Mietrecht-Regime (provisorisch)» mit Bestandsmiete, Anfangsmiete und Verweildauer über die drei Phasen. Macht die drei Schieber sichtbar, ohne unkalibrierte Zustände in Gruppen-Trends und Mietbelastung zu mischen.
-- **Entschieden — übrige Schieber ohne Wirkung:** im Panel auskommentieren, bis sie angebunden sind. Betrifft heute `steuer_leerstandsabgabe`; der Schieber kommt mit der Kante aus Fix-11 zurück. Der Parameter bleibt in Typen, YAML und URL-Schema, damit bestehende Links nicht brechen.
-- Nach dem Sensitivitätstest aus Abschnitt 8 gilt die Regel dauerhaft: ein Schieber ohne sichtbare Wirkung ist ein Testfehler.
+#### Fix-5: Wirkungslose Schieber — ✅ erledigt (2026-11-14)
+**Dateien:** `src/widgets/MietrechtRegimeWidget.tsx` (neu), `WidgetGrid.tsx`, `src/model/__tests__/functional/schieber-wirkung.test.ts` (neu), `ParameterSlider.tsx`, `params.ts`, `types.ts`
+- **Regime-Widget:** «Mietrecht-Regime (provisorisch)» zeigt Erhöhungsspielraum, Bestandsmiete, Anfangsmiete und Verweildauer je Phase sowie den Zustand des Vergleichsmieten-Tors, bei Änderungen «Heute» neben «Simuliert». Die Zustände bleiben aus Gruppen-Trends und Mietbelastung draussen.
+- **Leerstandsabgabe bleibt sichtbar.** Der Entscheid lautete, Schieber ohne Wirkung auszublenden. Seit dem Einbau des Fiskal-Widgets (Fix-8) bewegt `steuer_leerstandsabgabe` über `spekulationshemmung` die fiskalische Wirkung; der Schieber ist nicht mehr wirkungslos. Die fehlende Kante zum Angebot bleibt Fix-11.
+- **Sensitivitätstest:** `schieber-wirkung.test.ts` prüft für alle 43 Parameter, dass mindestens eine angezeigte Grösse sich bewegt. Einzige dokumentierte Ausnahme: `mietrecht_durchsetzung` wirkt nur zusammen mit einem Senkungsanspruch (eigener Test).
+- **«Wirkung nicht belegt»:** Feld `evidenz` in `ParamMeta40`, gesetzt für Vorkaufsrecht und Bauverpflichtung (summary.md: keine Wirkungsstudien); der Schieber trägt den Hinweis.
 
-#### Fix-6: Treiber-Anzeige aus der Rechnung ableiten
-**Datei:** `src/model/groups.ts`
-**Aufwand:** 3–4 h
-Die Liste `groupKeyParams` ist von Hand gepflegt und widerspricht der Rechnung (Anfangsmiete bei Neumietern «senkend», gerechnet erhöhend; `mietrecht_mietzinsindex` ohne Kante; `ctx:`-Einträge feuern nie).
-1. Beitrag je geändertem Parameter per Leave-one-out bestimmen: Pipeline mit vollem Diff gegen Diff ohne diesen Parameter, Differenz im Gruppen-Trend.
-2. Richtung und Gewicht daraus ableiten, Top 3 anzeigen.
-3. `groupKeyParams` löschen. Test: Treiberrichtung stimmt für jede Gruppe mit dem Vorzeichen der Trendänderung überein.
+Beim Bau des Widgets aufgefallen, **nicht behoben** (braucht eine Definition, gehört zu Sprint 4):
+- Mit den heutigen Stadtdaten (Referenzzins unverändert, keine Mietlücke erfasst) stehen fast alle Regime-Zustände auf 0. Bewegung gibt es nur über den Mietzinsindex auf LIK.
+- ✅ **Behoben am 2026-11-15** (`TEUERUNG_STUFE_PROZENT`, `teuerungAlsGroesse` in mietrecht-regime.ts, vier neue Tests, CH-012 nachgeführt): Die Stufe wird in eine Jahresteuerung übersetzt (−0.5 / 0.25 / 1.0 / 2.0 / 3.0 %), null Teuerung liegt zwischen −2 und −1. Stufe −1 gibt im LIK-Regime jetzt +0.07 statt −0.42. Die Randwerte und die Referenz 3 % sind Setzungen. Die Durchsetzung wirkt mit LIK weiterhin, aber über den Deckel (gestiegene Miete), nicht mehr über einen Senkungsanspruch. Ursprünglicher Befund: Dort rechnete das Regime `teuerung = −1` als negativen Erhöhungsspielraum (−0.42), also als Senkungsanspruch. Die Stufe −1 heisst aber «tiefe Teuerung» (LIK 2025: +0.2 %), nicht «sinkende Preise». Gleiche Fehlerklasse wie Zinsniveau statt Zinsänderung: Der Nullpunkt der Skala ist nicht der Nullpunkt der Grösse.
 
-#### Fix-7: DAG-Ansicht ehrlich machen
+#### Fix-6: Treiber-Anzeige aus der Rechnung ableiten — ✅ erledigt (2026-11-14)
+**Dateien:** `src/model/group-drivers.ts` (neu), `src/model/groups.ts`, `WidgetGrid.tsx`, `src/model/__tests__/functional/group-drivers.test.ts` (neu)
+`groupKeyParams` und die doppelte Label-Liste sind gelöscht. `computeGroupDrivers(context, diff)` bestimmt je Phase und Gruppe den Beitrag jedes geänderten Parameters per Leave-one-out und liefert die drei grössten. `computeGroupTrends(state, drivers?)` braucht `baseline`/`modified` nicht mehr. Labels kommen aus `paramMeta40`. Die zustandsbasierten Pseudo-Treiber «Aufwertungsdruck»/«Verdrängungsrisiko» entfallen: Sie waren keine Parameter.
+Test: Für jede Einzeländerung jedes Parameters stimmt die Treiberrichtung in allen Gruppen und Phasen mit dem Vorzeichen der Trendänderung überein.
+Nebenbefund: Die zwei Tests in `gruppen-divergenz.test.ts` rechneten mit leerem Diff; ihr Szenario kam nie in der Pipeline an. Sie übergeben den Diff jetzt und bestehen weiterhin.
+
+#### Fix-7: DAG-Ansicht ehrlich machen — ✅ erledigt (2026-11-14)
 **Datei:** `src/widgets/DAGVisualization.tsx`
-**Aufwand:** 1 h
-`FEEDBACK_EDGES` zeichnet acht Rückkopplungen, die die Engine nicht rechnet. Entfernen oder sichtbar als «nicht modelliert» kennzeichnen.
+Die acht Rückkopplungs-Bögen und ihre zwei Legendeneinträge sind entfernt; ein Kommentar hält fest, dass die Engine azyklisch rechnet.
 
 #### Fix-8: Nicht eingebaute Widgets — ✅ erledigt (2026-11-13)
 **Dateien:** `WidgetGrid.tsx`, `CompareColumns.tsx` (neu), `FiskalischeWirkungWidget`, `MarktfriktionsWidget`, `EigentumsquotenWidget`, `StandortwettbewerbWidget`, `GemeinnuetzigSektorWidget`

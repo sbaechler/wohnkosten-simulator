@@ -62,3 +62,14 @@
   color: #ccc;
   font-size: 12px;
 }
+
+.param-slider__evidenz {
+  margin-left: 6px;
+  padding: 1px 5px;
+  font-size: 9px;
+  color: #ffd43b;
+  border: 1px solid rgba(255, 212, 59, 0.4);
+  border-radius: 3px;
+  white-space: nowrap;
+  cursor: help;
+}

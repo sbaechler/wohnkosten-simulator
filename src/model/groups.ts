@@ -8,7 +8,7 @@
 // dort wo eine Aufsplittung inhaltlich Sinn macht.
 // ============================================================
 
-import type { MarketState, CityParams40 } from '../types';
+import type { MarketState } from '../types';
 import { clamp } from './utils';
 
 /** Die 9 festen Bevölkerungsgruppen */
@@ -97,13 +97,26 @@ export const GROUPS: GroupMeta[] = [
   },
 ];
 
+/**
+ * Ein geänderter Parameter und sein Beitrag zum Preistrend einer Gruppe.
+ * Wird in group-drivers.ts per Leave-one-out aus der Pipeline bestimmt.
+ */
+export interface GroupDriver {
+  paramKey: string;
+  label: string;
+  /** 'up' = dieser Parameter hebt den Preistrend der Gruppe, 'down' = er senkt ihn */
+  direction: 'up' | 'down';
+  /** Betrag des Beitrags zum Trend (Index-Punkte) */
+  weight: number;
+}
+
 /** Ergebnis pro Gruppe */
 export interface GroupPriceTrend {
   group: GroupMeta;
   /** Preistrend: –1 = stark sinkend, 0 = stabil, +1 = stark steigend */
   value: number;
-  /** Die wichtigsten Treiber für diese Gruppe (paramKey → Einflussstärke) */
-  drivers: Array<{ paramKey: string; label: string; direction: 'up' | 'down'; weight: number }>;
+  /** Die wichtigsten Treiber für diese Gruppe, aus der Rechnung abgeleitet (group-drivers.ts) */
+  drivers: GroupDriver[];
   /** Kurzer Text für Tooltip */
   tooltip: string;
 }
@@ -201,165 +214,6 @@ function basePriceTrend(state: MarketState, group: GroupId): { trend: number } {
 }
 
 /**
- * Berechnet die wichtigsten Treiber für eine Gruppe.
- * Gibt die Parameter zurück, die den grössten Einfluss auf diese Gruppe haben.
- */
-function computeDrivers(
-  state: MarketState,
-  baseline: CityParams40,
-  modified: CityParams40,
-  group: GroupId,
-): Array<{ paramKey: string; label: string; direction: 'up' | 'down'; weight: number }> {
-  const drivers: Array<{ paramKey: string; label: string; direction: 'up' | 'down'; weight: number }> = [];
-
-  // Parameter-Labels für Tooltips
-  const paramLabels: Record<string, string> = {
-    raumplanung_zonenreserve: 'Zonenreserve',
-    raumplanung_verdichtung: 'Verdichtung',
-    raumplanung_ausnuetzungsziffer: 'Ausnützungsziffer',
-    boden_vorkaufsrecht: 'Vorkaufsrecht',
-    boden_bauverpflichtung: 'Bauverpflichtung',
-    boden_mehrwertabgabe: 'Mehrwertabgabe',
-    boden_bodeneigentumssteuer: 'Bodeneigentumssteuer',
-    bau_energievorgaben: 'Energievorgaben',
-    bau_sanierungspflicht: 'Sanierungspflicht',
-    bau_einspracherecht_dritte: 'Einsprache Dritte',
-    bau_einspracherecht_suspensiv: 'Einsprache suspensiv',
-    bau_bewilligungsverfahren: 'Bewilligungsverfahren',
-    bau_normenharmonisierung: 'Normenharmonisierung',
-    gemeinnuetzig_mindestanteil: 'Mindestanteil',
-    gemeinnuetzig_foerderfonds: 'Förderfonds',
-    gemeinnuetzig_baurecht: 'Baurecht',
-    gemeinnuetzig_belegungsvorschriften: 'Belegungsvorschriften',
-    gemeinnuetzig_sozialmischung: 'Sozialmischung',
-    mietrecht_kostenmiete: 'Kostenmiete',
-    mietrecht_anfangsmiete: 'Anfangsmiete',
-    mietrecht_mietzinstransparenz: 'Mietspiegel',
-    mietrecht_kuendigungsschutz: 'Kündigungsschutz',
-    mietrecht_mietzinsindex: 'Mietzinsindex',
-    mietrecht_untervermietung: 'Untervermietung',
-    mietrecht_kriterium: 'Missbrauchskriterium',
-    mietrecht_durchsetzung: 'Durchsetzung',
-    steuer_grundstueckgewinn: 'Grundstückgewinnsteuer',
-    steuer_eigenmietwert: 'Eigenmietwert',
-    steuer_leerstandsabgabe: 'Leerstandsabgabe',
-    steuer_handaenderung: 'Handänderungssteuer',
-    steuer_kapitalgewinnprivatpersonen: 'Kapitalgewinnsteuer',
-    kapital_auslaendische_investoren: 'Ausländ. Investoren',
-    kapital_institutionelle_regulierung: 'Instit. Regulierung',
-    kapital_hypothekarregulierung: 'Hypothekarregulierung',
-    nutzung_kurzzeitvermietung: 'Kurzzeitvermietung',
-    nutzung_umnutzungsverbot: 'Umnutzungsverbot',
-    nutzung_abbruchverbot: 'Abbruchverbot',
-    nutzung_zweitwohnungen: 'Zweitwohnungen',
-    infra_oepnv: 'ÖV',
-    infra_schule_kita: 'Schule/Kita',
-    infra_oeffentlicher_raum: 'Öfftl. Raum',
-    infra_wirtschaftsansiedlung: 'Wirtschaftsansiedlung',
-  };
-
-  // Gruppe-spezifische Schlüssel-Parameter und ihre Richtungen
-  const groupKeyParams: Record<GroupId, Array<{ key: string; direction: 'up' | 'down'; weight: number }>> = {
-    geringverdiener: [
-      { key: 'mietrecht_kostenmiete', direction: 'down', weight: 1.5 },
-      { key: 'mietrecht_kuendigungsschutz', direction: 'down', weight: 1.0 },
-      { key: 'nutzung_abbruchverbot', direction: 'down', weight: 0.8 },
-      { key: 'bau_sanierungspflicht', direction: 'up', weight: 1.0 },
-    ],
-    normalverdiener_bestand: [
-      { key: 'mietrecht_kuendigungsschutz', direction: 'down', weight: 1.5 },
-      { key: 'mietrecht_mietzinsindex', direction: 'down', weight: 1.0 },
-      { key: 'mietrecht_kostenmiete', direction: 'down', weight: 0.8 },
-    ],
-    normalverdiener_angebot: [
-      { key: 'raumplanung_verdichtung', direction: 'down', weight: 1.2 },
-      { key: 'mietrecht_anfangsmiete', direction: 'down', weight: 1.0 },
-      { key: 'bau_ersatzneubau_effizienz', direction: 'down', weight: 1.0 },
-    ],
-    glueckspilze: [
-      { key: 'gemeinnuetzig_foerderfonds', direction: 'down', weight: 1.0 },
-      { key: 'gemeinnuetzig_baurecht', direction: 'down', weight: 0.8 },
-    ],
-    normalverdiener_eigentuemer: [
-      { key: 'steuer_eigenmietwert', direction: 'up', weight: 1.5 },
-      { key: 'ctx:zinsniveau', direction: 'up', weight: 1.0 },
-      { key: 'kapital_hypothekarregulierung', direction: 'down', weight: 0.8 },
-    ],
-    junge_familien: [
-      { key: 'infra_schule_kita', direction: 'up', weight: 1.2 },
-      { key: 'infra_oepnv', direction: 'up', weight: 1.0 },
-      { key: 'mietrecht_kostenmiete', direction: 'down', weight: 0.8 },
-      { key: 'raumplanung_ausnuetzungsziffer', direction: 'up', weight: 0.8 },
-    ],
-    genossenschafter: [
-      { key: 'gemeinnuetzig_mindestanteil', direction: 'down', weight: 1.5 },
-      { key: 'gemeinnuetzig_foerderfonds', direction: 'down', weight: 1.2 },
-      { key: 'gemeinnuetzig_baurecht', direction: 'down', weight: 1.0 },
-    ],
-    rentner: [
-      { key: 'mietrecht_kuendigungsschutz', direction: 'down', weight: 1.5 },
-      { key: 'bau_sanierungspflicht', direction: 'up', weight: 1.2 },
-      { key: 'mietrecht_kostenmiete', direction: 'down', weight: 0.8 },
-      { key: 'nutzung_abbruchverbot', direction: 'down', weight: 0.8 },
-    ],
-    high_earner: [
-      { key: 'steuer_eigenmietwert', direction: 'up', weight: 1.0 },
-      { key: 'infra_oepnv', direction: 'up', weight: 0.8 },
-      { key: 'ctx:wirtschaftskraft', direction: 'up', weight: 1.0 },
-      { key: 'kapital_institutionelle_regulierung', direction: 'down', weight: 0.8 },
-    ],
-  };
-
-  const keyParams = groupKeyParams[group] ?? [];
-
-  for (const kp of keyParams) {
-    const baseVal = (baseline[kp.key as keyof CityParams40] as number) ?? 1;
-    const modVal = (modified[kp.key as keyof CityParams40] as number) ?? 1;
-    if (baseVal !== modVal) {
-      const delta = modVal - baseVal;
-      drivers.push({
-        paramKey: kp.key,
-        label: paramLabels[kp.key] ?? kp.key,
-        // Bei positivem delta bleibt die Richtung, bei negativem dreht sie um.
-        // XOR-Logik: Richtung invertiert wenn genau einer der Faktoren (delta oder kp.direction) „negativ" ist.
-        direction: (delta > 0) === (kp.direction === 'up') ? 'up' : 'down',
-        weight: Math.abs(delta) * kp.weight,
-      });
-    }
-  }
-
-  // Nachbarschafts-Effekte (E1-Werte) wenn sie besonders hoch sind.
-  // Schwellwert 0.5 = nur E1-Werte, die substanziell von 0 abweichen (>50% der
-  // normalisierten Skala), werden als Treiber aufgenommen. Verhindert, dass
-  // schwache E1-Signale als „Top-Treiber" angezeigt werden.
-  const E1_DRIVER_THRESHOLD = 0.5;
-  if (Math.abs(state.aufwertungsdruck) > E1_DRIVER_THRESHOLD) {
-    drivers.push({
-      paramKey: 'aufwertungsdruck',
-      label: 'Aufwertungsdruck',
-      direction: state.aufwertungsdruck > 0 ? 'up' : 'down',
-      weight: Math.abs(state.aufwertungsdruck),
-    });
-  }
-
-  if (Math.abs(state.verdraengungsrisiko) > E1_DRIVER_THRESHOLD) {
-    drivers.push({
-      paramKey: 'verdraengungsrisiko',
-      label: 'Verdrängungsrisiko',
-      direction: state.verdraengungsrisiko > 0 ? 'up' : 'down',
-      weight: Math.abs(state.verdraengungsrisiko),
-    });
-  }
-
-  // Sortiere nach Gewicht absteigend, nimm Top 3.
-  // Top-3 ist die UI-Konvention für „die wichtigsten Treiber" in der Treiber-Liste.
-  const TOP_N_DRIVERS = 3;
-  return drivers
-    .sort((a, b) => b.weight - a.weight)
-    .slice(0, TOP_N_DRIVERS);
-}
-
-/**
  * Erstellt einen kurzen Tooltip-Text für eine Gruppe.
  */
 function makeTooltip(trend: number, drivers: GroupPriceTrend['drivers']): string {
@@ -378,26 +232,22 @@ function makeTooltip(trend: number, drivers: GroupPriceTrend['drivers']): string
 /**
  * Berechnet die Preistrends für alle 9 Bevölkerungsgruppen.
  *
- * @param state   Markt-Zustand (E1) aus computePhasesCached()
- * @param baseline Original-Parameter (Ist-Zustand)
- * @param modified Geänderte Parameter (Nutzer-Szenario)
- * @param diff    Geänderte Parameter (from/to)
+ * @param state   Markt-Zustand (E1) einer Phase aus computePhasesCached()
+ * @param drivers Treiber je Gruppe für diese Phase (computeGroupDrivers);
+ *                ohne Angabe bleibt die Treiberliste leer.
  */
 export function computeGroupTrends(
   state: MarketState,
-  baseline: CityParams40,
-  modified: CityParams40,
+  drivers?: Record<GroupId, GroupDriver[]>,
 ): GroupPriceTrend[] {
   return GROUPS.map(group => {
     const { trend } = basePriceTrend(state, group.id);
-    const drivers = computeDrivers(state, baseline, modified, group.id);
-    const tooltip = makeTooltip(trend, drivers);
-
+    const groupDrivers = drivers?.[group.id] ?? [];
     return {
       group,
       value: trend,
-      drivers,
-      tooltip,
+      drivers: groupDrivers,
+      tooltip: makeTooltip(trend, groupDrivers),
     };
   });
 }

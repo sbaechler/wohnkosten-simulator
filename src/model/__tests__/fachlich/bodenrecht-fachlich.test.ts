@@ -284,7 +284,7 @@ describe('Bodenrecht: CH-007 BWO Raumplanung — Zonenreserve dämpft Kostenanst
       raumplanung_zonenreserve: { from: 2, to: 0 },
     });
     const neumieter = (s: MarketState) =>
-      computeGroupTrends(s, ZUERICH_V2, ZUERICH_V2)
+      computeGroupTrends(s)
         .find(g => g.group.id === 'normalverdiener_angebot')!.value;
     for (const i of [0, 1, 2]) {
       expect(neumieter(mit[i].marketState)).toBeLessThan(neumieter(ohne[i].marketState));

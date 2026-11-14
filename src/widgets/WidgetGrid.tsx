@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import type { CityConfig, ParamsDiff40, CityParams40 } from '../types';
 import { computePhasesCached } from '../model/compute-phases';
 import { computeGroupTrends } from '../model/groups';
+import { computeGroupDrivers } from '../model/group-drivers';
 import type { PhaseResult } from '../model/phases';
 import { SupplyDemandChart } from './SupplyDemandChart';
 import { TrendArrow } from './TrendArrow';
@@ -14,6 +15,7 @@ import { MarktfriktionsWidget } from './MarktfriktionsWidget';
 import { EigentumsquotenWidget } from './EigentumsquotenWidget';
 import { StandortwettbewerbWidget } from './StandortwettbewerbWidget';
 import { GemeinnuetzigSektorWidget } from './GemeinnuetzigSektorWidget';
+import { MietrechtRegimeWidget } from './MietrechtRegimeWidget';
 import './WidgetGrid.css';
 
 interface Props {
@@ -64,11 +66,13 @@ export function WidgetGrid({ city, modified, diff }: Props) {
   const baseline = city.params;
 
   // Group trends helper
+  // Treiber je Phase, per Leave-one-out aus der Rechnung (group-drivers.ts)
+  const groupDrivers = useMemo(() => computeGroupDrivers(context, diff), [context, diff]);
   function computeModifiedGroupTrends(phase: PhaseResult) {
-    return computeGroupTrends(phase.marketState, baseline, modified);
+    return computeGroupTrends(phase.marketState, groupDrivers[phase.phase - 1]);
   }
   function computeBaselineGroupTrends(phase: PhaseResult) {
-    return computeGroupTrends(phase.marketState, baseline, baseline);
+    return computeGroupTrends(phase.marketState);
   }
 
   const stadtbildGetter = (m: CityParams40, b: CityParams40) => () =>
@@ -118,6 +122,7 @@ export function WidgetGrid({ city, modified, diff }: Props) {
         marketState={latestModified.marketState}
         baselineMarketState={hasChanges ? latestBaseline.marketState : undefined}
       />
+      <MietrechtRegimeWidget phases={modifiedPhases} baselinePhases={hasChanges ? baselinePhases : undefined} />
       <OwnershipDonut city={city} modified={modified} diff={diff} state={latestModified.marketState} baselineState={hasChanges ? latestBaseline.marketState : undefined} />
 
       {/* -- Einzelwert-Widgets: langfristiger Stand (P3), Heute neben Simuliert -- */}
