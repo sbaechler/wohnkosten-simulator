@@ -41,7 +41,7 @@ function gezeigt(diff: ParamsDiff40): number[] {
   return computePhasesCached(ZH.context, diff).flatMap(p => [
     ...GEZEIGTE_E1.map(f => p.marketState[f]),
     ...GEZEIGTE_E2.map(f => p.derived[f]),
-    ...computeGroupTrends(p.marketState).map(t => t.value),
+    ...computeGroupTrends(p.marketState, ZH.context).map(t => t.value),
   ]);
 }
 

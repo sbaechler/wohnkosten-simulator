@@ -14,7 +14,6 @@ const ZH: CityContext = {
   wirtschaftskraft: 2,
   bevoelkerungstrend: 1,
   marktenge: 2,
-  mietbelastungs_grenze: 2,
   teuerung: -1,
 };
 

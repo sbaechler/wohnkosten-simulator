@@ -32,7 +32,7 @@ const ZUERICH_CONTEXT: CityContext = {
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
   bevoelkerungstrend: 2,
-  marktenge: 2,  mietbelastungs_grenze: 1,
+  marktenge: 2,
 };
 
 const EMPTY_DIFF = {} as ParamsDiff40;
@@ -151,7 +151,7 @@ describe('Generator: Stand = PERSISTENCE · Vorstand + Impuls / E1_NENNER', () =
   const NEUTRAL: CityContext = {
     ownershipBaseline: ZUERICH_CONTEXT.ownershipBaseline,
     zinsniveau: 0, zuwanderungsdruck: 0, wirtschaftskraft: 0,
-    bevoelkerungstrend: 0, marktenge: 0, mietbelastungs_grenze: 0,
+    bevoelkerungstrend: 0, marktenge: 0,
   };
 
   it('eine Kante, ein Schritt: Stand folgt der Formel ohne weiteren Phasenfaktor', () => {

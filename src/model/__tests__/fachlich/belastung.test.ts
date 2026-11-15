@@ -12,7 +12,8 @@
  *   - Eigentum-Belastung: inkl. Opportunitätskosten, in [10, 45]%
  *   - belastungLevel(p): 0|1|2 je nach Schwellwert 30% / 45%
  *
- * Quelle (Kalibrierung): WOHNMONITOR.admin.ch (BWO 2026), Sotomo 2025.
+ * Quelle Basis: Wohnmonitor BWO, «Die Lage auf dem Wohnungsmarkt 2026/1».
+ * Die Sensitivitäten sind Setzungen (belastung.ts).
  */
 
 import { describe, it, expect } from 'vitest';
@@ -99,12 +100,21 @@ describe('computeMieteBelastung', () => {
     expect(high).toBeLessThan(mid);
   });
 
-  it('increases monotonically with marktfriktion', () => {
+  // Fix-14 (2026-11-15): ersetzt «increases monotonically with marktfriktion».
+  // Für eine Kennzahl über den Bestand ist das Vorzeichen der Marktfriktion
+  // offen und ohne Quelle; der Term ist entfernt.
+  it('marktfriktion bewegt die Mietbelastung nicht (Kennzahl über den Bestand)', () => {
     const low  = computeMieteBelastung({ ...emptyState, marktfriktion: -1 });
-    const mid  = computeMieteBelastung({ ...emptyState, marktfriktion:  0 });
     const high = computeMieteBelastung({ ...emptyState, marktfriktion:  1 });
-    expect(mid).toBeGreaterThan(low);
-    expect(high).toBeGreaterThan(mid);
+    expect(high).toBe(low);
+  });
+
+  it('decreases monotonically with gemeinnuetzig_kraft (AT-002, Fix-14)', () => {
+    const low  = computeMieteBelastung({ ...emptyState, gemeinnuetzig_kraft: -1 });
+    const mid  = computeMieteBelastung({ ...emptyState, gemeinnuetzig_kraft:  0 });
+    const high = computeMieteBelastung({ ...emptyState, gemeinnuetzig_kraft:  1 });
+    expect(mid).toBeLessThan(low);
+    expect(high).toBeLessThan(mid);
   });
 
   it('clamps to upper bound [70] under extreme pressure', () => {

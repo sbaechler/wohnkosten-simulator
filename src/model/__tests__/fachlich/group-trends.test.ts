@@ -20,9 +20,12 @@
 
 import { describe, it, expect } from 'vitest';
 import { computeGroupTrends, GROUPS } from '../../groups';
-import type { GroupDriver, GroupId } from '../../groups';
+import type { GroupContext, GroupDriver, GroupId } from '../../groups';
 import type { MarketState } from '../../../types';
 import { REGIME_NEUTRAL } from '../market-state-fixtures';
+
+/** Kontext ohne Zinsänderung (Referenzzinssatz unverändert). */
+const KEIN_ZINS: GroupContext = {};
 
 const emptyState: MarketState = {
   angebotspotenzial: 0,
@@ -57,7 +60,7 @@ const allNegative: MarketState = {
 
 describe('computeGroupTrends — shape and invariants', () => {
   it('returns one entry per group in GROUPS', () => {
-    const trends = computeGroupTrends(emptyState);
+    const trends = computeGroupTrends(emptyState, KEIN_ZINS);
     expect(trends).toHaveLength(GROUPS.length);
     const ids = trends.map(t => t.group.id);
     for (const g of GROUPS) {
@@ -66,7 +69,7 @@ describe('computeGroupTrends — shape and invariants', () => {
   });
 
   it('each entry has group, value, drivers, tooltip fields', () => {
-    const trends = computeGroupTrends(emptyState);
+    const trends = computeGroupTrends(emptyState, KEIN_ZINS);
     for (const t of trends) {
       expect(t.group).toBeDefined();
       expect(t.group.id).toBeTruthy();
@@ -79,7 +82,7 @@ describe('computeGroupTrends — shape and invariants', () => {
 
   it('all values are clamped to [-1, 1] for any input', () => {
     for (const state of [emptyState, allPositive, allNegative]) {
-      const trends = computeGroupTrends(state);
+      const trends = computeGroupTrends(state, KEIN_ZINS);
       for (const t of trends) {
         expect(t.value).toBeGreaterThanOrEqual(-1);
         expect(t.value).toBeLessThanOrEqual(1);
@@ -94,7 +97,7 @@ describe('computeGroupTrends — group divergence (sachlich)', () => {
       ...emptyState,
       nachfragedruck: 1, marktfriktion: 0.5,
     };
-    const trends = computeGroupTrends(tight);
+    const trends = computeGroupTrends(tight, KEIN_ZINS);
     const angebot = trends.find(t => t.group.id === 'normalverdiener_angebot')!;
     const bestand = trends.find(t => t.group.id === 'normalverdiener_bestand')!;
     expect(angebot.value).toBeGreaterThan(bestand.value);
@@ -105,16 +108,16 @@ describe('computeGroupTrends — group divergence (sachlich)', () => {
       ...emptyState,
       mietpreis_schutzlevel: 1,
     };
-    const trends = computeGroupTrends(schutz);
+    const trends = computeGroupTrends(schutz, KEIN_ZINS);
     const gering = trends.find(t => t.group.id === 'geringverdiener')!;
-    const emptyTrends = computeGroupTrends(emptyState);
+    const emptyTrends = computeGroupTrends(emptyState, KEIN_ZINS);
     const geringEmpty = emptyTrends.find(t => t.group.id === 'geringverdiener')!;
     expect(gering.value).toBeLessThan(geringEmpty.value);
   });
 
   it('rentner is more affected by verdraengungsrisiko than high_earner (rentner hat Verdrängungs-Komponente)', () => {
     const pressure: MarketState = { ...emptyState, verdraengungsrisiko: 1 };
-    const trends = computeGroupTrends(pressure);
+    const trends = computeGroupTrends(pressure, KEIN_ZINS);
     const rentner = trends.find(t => t.group.id === 'rentner')!;
     const highEarner = trends.find(t => t.group.id === 'high_earner')!;
     expect(rentner.value).toBeGreaterThan(highEarner.value);
@@ -124,14 +127,14 @@ describe('computeGroupTrends — group divergence (sachlich)', () => {
 describe('computeGroupTrends — tooltip', () => {
   it('tooltip contains "steigend" for high positive trend', () => {
     const pressure: MarketState = { ...emptyState, nachfragedruck: 1, marktfriktion: 1 };
-    const trends = computeGroupTrends(pressure);
+    const trends = computeGroupTrends(pressure, KEIN_ZINS);
     const hasSteigend = trends.some(t => t.tooltip.includes('steigend'));
     expect(hasSteigend).toBe(true);
   });
 
   it('tooltip contains "sinkend" for strong negative trend', () => {
     const relief: MarketState = { ...emptyState, mietpreis_schutzlevel: 1, angebotspotenzial: 1 };
-    const trends = computeGroupTrends(relief);
+    const trends = computeGroupTrends(relief, KEIN_ZINS);
     const hasSinkend = trends.some(t => t.tooltip.includes('sinkend'));
     expect(hasSinkend).toBe(true);
   });
@@ -140,13 +143,13 @@ describe('computeGroupTrends — tooltip', () => {
     const drivers = Object.fromEntries(GROUPS.map(g => [g.id, [
       { paramKey: 'mietrecht_kostenmiete', label: 'Kostenmiete', direction: 'down' as const, weight: 0.2 },
     ]])) as Record<GroupId, GroupDriver[]>;
-    const gering = computeGroupTrends(emptyState, drivers).find(t => t.group.id === 'geringverdiener')!;
+    const gering = computeGroupTrends(emptyState, KEIN_ZINS, drivers).find(t => t.group.id === 'geringverdiener')!;
     expect(gering.drivers).toHaveLength(1);
     expect(gering.tooltip).toContain('Kostenmiete');
   });
 
   it('ohne übergebene Treiber bleibt die Treiberliste leer', () => {
-    for (const t of computeGroupTrends(allPositive)) expect(t.drivers).toHaveLength(0);
+    for (const t of computeGroupTrends(allPositive, KEIN_ZINS)) expect(t.drivers).toHaveLength(0);
   });
 });
 

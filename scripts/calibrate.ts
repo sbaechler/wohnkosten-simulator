@@ -110,12 +110,12 @@ interface Constraint {
   phaseB?: 0 | 1 | 2;
 }
 
-function getField(output: PhaseOutput, field: string): number {
+function getField(output: PhaseOutput, field: string, context: CityContext): number {
   const [group, key] = field.split('.');
   if (group === 'marketState') return output.marketState[key as keyof MarketState];
   if (group === 'derived') return output.derived[key as keyof DerivedIndicators];
   if (group === 'group') {
-    const t = computeGroupTrends(output.marketState).find(g => g.group.id === (key as GroupId));
+    const t = computeGroupTrends(output.marketState, context).find(g => g.group.id === (key as GroupId));
     if (!t) throw new Error(`Unknown group: ${key}`);
     return t.value;
   }
@@ -151,7 +151,7 @@ const BERLIN_BASELINE: CityParams40 = {
   infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
 };
 
-const BERLIN_CTX: CityContext = { zinsniveau: -1, zuwanderungsdruck: 2, wirtschaftskraft: 2, bevoelkerungstrend: 2, marktenge: 2, mietbelastungs_grenze: 2 } as CityContext;
+const BERLIN_CTX: CityContext = { zinsniveau: -1, zuwanderungsdruck: 2, wirtschaftskraft: 2, bevoelkerungstrend: 2, marktenge: 2 } as CityContext;
 
 const ZUERICH_V2: CityParams40 = {
   raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
@@ -170,9 +170,9 @@ const ZUERICH_V2: CityParams40 = {
   infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
 };
 
-const ZH_CTX: CityContext = { zinsniveau: -1, zuwanderungsdruck: 2, wirtschaftskraft: 2, bevoelkerungstrend: 2, marktenge: 2, mietbelastungs_grenze: 2 } as CityContext;
-const NEUTRAL_CTX: CityContext = { zinsniveau: 0, zuwanderungsdruck: 0, wirtschaftskraft: 0, bevoelkerungstrend: 0, marktenge: 0, mietbelastungs_grenze: 0 } as CityContext;
-const ANGESPANNT: CityContext = { zinsniveau: -1, zuwanderungsdruck: 2, wirtschaftskraft: 2, bevoelkerungstrend: 2, marktenge: 2, mietbelastungs_grenze: 2 } as CityContext;
+const ZH_CTX: CityContext = { zinsniveau: -1, zuwanderungsdruck: 2, wirtschaftskraft: 2, bevoelkerungstrend: 2, marktenge: 2 } as CityContext;
+const NEUTRAL_CTX: CityContext = { zinsniveau: 0, zuwanderungsdruck: 0, wirtschaftskraft: 0, bevoelkerungstrend: 0, marktenge: 0 } as CityContext;
+const ANGESPANNT: CityContext = { zinsniveau: -1, zuwanderungsdruck: 2, wirtschaftskraft: 2, bevoelkerungstrend: 2, marktenge: 2 } as CityContext;
 
 const LOCKERE_BASIS: CityParams40 = {
   ...ZUERICH_V2,
@@ -792,8 +792,8 @@ const EMPTY_DIFF: ParamsDiff40 = {};
 function constraintMargin(weights: number[], c: Constraint): number {
   const resultA = forwardPass(weights, c.context, c.diffA);
   const resultB = forwardPass(weights, c.context, c.diffB);
-  const valA = getField(resultA[c.phase], c.field);
-  const valB = getField(resultB[c.phase], c.field);
+  const valA = getField(resultA[c.phase], c.field, c.context);
+  const valB = getField(resultB[c.phase], c.field, c.context);
 
   switch (c.relation) {
     case 'gt': return valA - valB;
@@ -801,7 +801,7 @@ function constraintMargin(weights: number[], c: Constraint): number {
     case 'gte': return valA - valB + EPSILON; // gte needs no strict margin
     case 'lte': return valB - valA + EPSILON;
     case 'abs_gt': {
-      const ref = getField(forwardPass(weights, c.context, EMPTY_DIFF)[c.phase], c.field);
+      const ref = getField(forwardPass(weights, c.context, EMPTY_DIFF)[c.phase], c.field, c.context);
       return Math.abs(valA - ref) - Math.abs(valB - ref);
     }
     case 'near':
@@ -809,7 +809,7 @@ function constraintMargin(weights: number[], c: Constraint): number {
     case 'delta_lt_phase': {
       if (c.phaseB === undefined) throw new Error(`${c.id}: phaseB fehlt`);
       const deltaLater = valA - valB;
-      const deltaEarlier = getField(resultA[c.phaseB], c.field) - getField(resultB[c.phaseB], c.field);
+      const deltaEarlier = getField(resultA[c.phaseB], c.field, c.context) - getField(resultB[c.phaseB], c.field, c.context);
       return deltaEarlier - deltaLater;
     }
   }

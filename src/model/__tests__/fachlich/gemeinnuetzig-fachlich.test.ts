@@ -5,17 +5,21 @@
  *
  * Wichtige empirische Befunde:
  * ─────────────────────────────────────────────────────────────────────
- * 1. Vancouver Empty Home Tax (EHT): Leerstand 0.9% → 0.49%
+ * 1. Vancouver Empty Homes Tax (EHT): Leerstand 0.90 % (2017) → 0.49 % (2024),
+ *    rund 2'900 Wohnungen zurück auf dem Markt (CA-001/CA-003)
  *    → nutzung_kurzzeitvermietung ↑ (Regulierung verschärft)
  *
- * 2. BC Speculation and Vacancy Tax (SVT): 20'000 Einheiten zum Mietmarkt
+ * 2. BC Speculation and Vacancy Tax (SVT, provinziell, nicht EHT): 20'000
+ *    Condos in Metro Vancouver 2018–2020 zum Mietmarkt (CA-002)
  *    → steuer_leerstandsabgabe ↑, spekulationshemmung ↑
  *
- * 3. NYC LL18: 90% Inserate-Rückgang nach Regulierung
+ * 3. NYC LL18: 90% Inserate-Rückgang nach Regulierung; Leerstand und Mieten
+ *    ohne messbare Änderung (US-013)
  *    → nutzung_kurzzeitvermietung ↑ stark
  *
- * 4. Airbnb-Regulierung Barcelona: +1.9% Miete, +4.6% Kaufpreise
- *    → Verlagerungseffekt auf Kaufmarkt
+ * 4. Barcelona: Airbnb-Aktivität erhöhte die Mieten um 1.9 % und die
+ *    Transaktionspreise um 4.6 % (Garcia-López et al. 2020, ES-001).
+ *    Effekt der Aktivität, nicht der Regulierung.
  *
  * 5. Gemeinnütziger Anteil 33%+:
  *    → Dämpft Mietpreise durch Wettbewerb
@@ -61,7 +65,7 @@ const ZUERICH_CONTEXT: CityContext = {
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
   bevoelkerungstrend: 2,
-  marktenge: 2,  mietbelastungs_grenze: 1,
+  marktenge: 2,
 };
 
 function phases(_params: CityParams40, context: CityContext, diff: ParamsDiff40) {
@@ -73,8 +77,9 @@ describe('Gemeinnützigkeit: Vancouver EHT (Leerstand −0.4 Prozentpunkte)', ()
   /**
    * Vancouver Empty Home Tax:
    * - Einführung 2017 (0.5% → 2018 auf 2.5% erhöht)
-   * - Leerstand 0.9% → 0.49%
-   * - 20'000 Einheiten kamen zum Mietmarkt
+   * - Leerstand 0.90 % (2017) → 0.49 % (2024), rund 2'900 Wohnungen (CA-001/CA-003)
+   * - Die 20'000 Condos (Metro Vancouver 2018–2020) gehören zur provinziellen
+   *   Speculation and Vacancy Tax, nicht zur EHT (CA-002)
    *
    * Hinweis: steuer_leerstandsabgabe hat im aktuellen DAG keine direkte
    * Verbindung zu spekulationshemmung. Die Tests hier dokumentieren die
@@ -130,8 +135,9 @@ describe('Gemeinnützigkeit: NYC LL18 (90% Inserate-Rückgang)', () => {
 
 describe('Gemeinnützigkeit: Barcelona Airbnb-Regulierung Paradox', () => {
   /**
-   * Barcelona Regulierung: +1.9% Miete, +4.6% Kaufpreise
-   * → Verlagerungseffekt! Regulierung treibt Mieten nach oben statt sie zu senken.
+   * Barcelona: Airbnb-Aktivität erhöhte die Mieten um 1.9 % und die
+   * Transaktionspreise um 4.6 % (Garcia-López et al. 2020, ES-001). Effekt der
+   * Aktivität, nicht der Regulierung; ein «Paradox» zeigt die Studie nicht.
    *
    * Hinweis: nutzung_kurzzeitvermietung hat im aktuellen DAG keine direkte
    * Verbindung zu investitionsattraktivitaet.
@@ -224,11 +230,12 @@ describe('Nutzungsregulierung: Abbruchverbot schützt Bestand', () => {
     /**
      * Ursprünglich: Abbruchverbot → angebotspotenzial ↑ (Bestand bleibt)
      *
-     * Korrektur per FHNW-Studie (Ters/Kholodilin 2025, Genf 1994–2022):
+     * Korrektur per DIW Discussion Paper 2143 (Ters/Kholodilin 2025, nur Genf 1994–2022):
      * Die Wohnungsrationierung (Abbruch-/Umnutzungsverbot) ist die SCHADLICHSTE
      * aller Regulierungsformen für das Angebot:
      * −600 Mio. CHF Bauinvestitionen aggregiert; −400 Mio. CHF institutionelle Neubauinvestitionen.
-     * Basel: Baugesuche −76%, geplante Wohneinheiten −95% (1078→67).
+     * Basel: Baugesuche für Wohnungen −76 % (784 → 190 im Mittel; SRES im
+     * Auftrag des SVIT, Interessenvertreter; Ursache laut Regierungsrat offen).
      * Dominanter Effekt: Neubau-Verhinderung überwiegt Bestandserhalt bei weitem.
      */
     const neutral = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});

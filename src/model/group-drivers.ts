@@ -30,7 +30,7 @@ const PARAM_LABEL = new Map<string, string>(paramMeta40.map(m => [m.key, m.label
 function trendByGroup(context: CityContext, diff: ParamsDiff40): Array<Record<GroupId, number>> {
   return computePhasesCached(context, diff).map(phase =>
     Object.fromEntries(
-      computeGroupTrends(phase.marketState).map(t => [t.group.id, t.value]),
+      computeGroupTrends(phase.marketState, context).map(t => [t.group.id, t.value]),
     ) as Record<GroupId, number>,
   );
 }

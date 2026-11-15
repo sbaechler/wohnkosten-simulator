@@ -25,8 +25,8 @@ function phases(ctx: CityContext, diff: ParamsDiff40): MarketState[] {
   return [...computePhasePipeline(ctx, diff)].map(r => r.marketState);
 }
 
-function trend(s: MarketState, id: GroupId): number {
-  return computeGroupTrends(s).find(g => g.group.id === id)!.value;
+function trend(ctx: CityContext, s: MarketState, id: GroupId): number {
+  return computeGroupTrends(s, ctx).find(g => g.group.id === id)!.value;
 }
 
 const ANGEBOTSHEBEL: Record<string, ParamsDiff40> = {
@@ -49,7 +49,7 @@ const KEIN_MESSBARER_EFFEKT = 0.02;
 describe.each(cities.map(c => [c.name, c.context] as const))('Rangfolge der Hebel — %s', (_name, ctx) => {
   const basis = phases(ctx, {});
   const deltaNeumieterP3 = (diff: ParamsDiff40) =>
-    Math.abs(trend(phases(ctx, diff)[2], 'normalverdiener_angebot') - trend(basis[2], 'normalverdiener_angebot'));
+    Math.abs(trend(ctx, phases(ctx, diff)[2], 'normalverdiener_angebot') - trend(ctx, basis[2], 'normalverdiener_angebot'));
 
   for (const [a, diffA] of Object.entries(ANGEBOTSHEBEL)) {
     for (const [b, diffB] of Object.entries(VERGLEICHSHEBEL)) {
@@ -68,8 +68,8 @@ describe.each(cities.map(c => [c.name, c.context] as const))('Rangfolge der Hebe
 
   it('[FACH] GLOBAL-027/-029: Mietregulierung — Bestand sinkt, Neumieter steigt, Angebot sinkt in P3 stärker als in P1', () => {
     const mit = phases(ctx, MIETREGULIERUNG);
-    expect(trend(mit[2], 'normalverdiener_bestand')).toBeLessThan(trend(basis[2], 'normalverdiener_bestand'));
-    expect(trend(mit[2], 'normalverdiener_angebot')).toBeGreaterThan(trend(basis[2], 'normalverdiener_angebot'));
+    expect(trend(ctx, mit[2], 'normalverdiener_bestand')).toBeLessThan(trend(ctx, basis[2], 'normalverdiener_bestand'));
+    expect(trend(ctx, mit[2], 'normalverdiener_angebot')).toBeGreaterThan(trend(ctx, basis[2], 'normalverdiener_angebot'));
     const dAngebotP1 = mit[0].angebotspotenzial - basis[0].angebotspotenzial;
     const dAngebotP3 = mit[2].angebotspotenzial - basis[2].angebotspotenzial;
     expect(dAngebotP3).toBeLessThan(dAngebotP1);
@@ -78,7 +78,7 @@ describe.each(cities.map(c => [c.name, c.context] as const))('Rangfolge der Hebe
 
   it('[FACH] US-007: Upzoning (Ausnützung) ohne messbaren Preiseffekt für Neumieter in P1', () => {
     const mit = phases(ctx, ANGEBOTSHEBEL['Ausnützung']);
-    const delta = trend(mit[0], 'normalverdiener_angebot') - trend(basis[0], 'normalverdiener_angebot');
+    const delta = trend(ctx, mit[0], 'normalverdiener_angebot') - trend(ctx, basis[0], 'normalverdiener_angebot');
     expect(Math.abs(delta)).toBeLessThanOrEqual(KEIN_MESSBARER_EFFEKT);
   });
 });

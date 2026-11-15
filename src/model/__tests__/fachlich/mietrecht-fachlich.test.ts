@@ -65,7 +65,7 @@ const BERLIN_CONTEXT: CityContext = {
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
   bevoelkerungstrend: 2,
-  marktenge: 2,  mietbelastungs_grenze: 1,
+  marktenge: 2,
 };
 
 // San Francisco-like (V1: raumplanung=2, bauvorschriften=2, energetischeVorgaben=1,
@@ -162,7 +162,6 @@ describe('Mietrecht: San Francisco Effekt', () => {
       wirtschaftskraft: 2,
       bevoelkerungstrend: 2,
       marktenge: 2,
-      mietbelastungs_grenze: 1,
     };
 
     const results = phases(SF_V2, sfContext, {});
@@ -259,7 +258,6 @@ describe('Mietrecht: Paris Encadrement des Loyers (FR-002) — −4.2% Mieten', 
       wirtschaftskraft: 2,
       bevoelkerungstrend: 2,
       marktenge: 2,
-      mietbelastungs_grenze: 1,
     };
 
     const neutral = phases(BERLIN_BASELINE_V2, parisContext, {});

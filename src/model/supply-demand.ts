@@ -210,8 +210,11 @@ export function findEquilibrium(
  * Preis-Einheiten, um die ein voller Mietpreis-Schutzlevel (+1) den
  * Deckel unter den Gleichgewichtspreis drückt. 2 von 10 Achseneinheiten
  * = ein maximal ausgebauter Mietpreisschutz senkt den regulierten Preis
- * um ~20% der Preisskala unter das Marktgleichgewicht (Sotomo 2025:
- * Bestandsmieten in stark regulierten Märkten ~18–30% unter Marktmiete).
+ * um ~20% der Preisskala unter das Marktgleichgewicht. Grösse: Setzung.
+ * Anhaltspunkt Genf: Bestandsmiete 279 gegen Marktmiete 372 CHF/m²·a,
+ * Abstand rund 33 % (DIW Discussion Paper 2143, CH-005). Sotomo 2025 zeigt
+ * für Genf, dass frei werdende Bestandswohnungen trotz Deckel teurer sind
+ * als Neubau.
  */
 export const MIETPREISDECKEL_FAKTOR = 2;
 

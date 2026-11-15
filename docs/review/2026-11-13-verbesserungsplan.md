@@ -1,8 +1,8 @@
 # Verbesserungsplan nach fachlichem Review (2026-11-13)
 
-> **Status:** Entscheide 1, 2, 3 und 5 gefällt (2026-11-13, siehe Abschnitt 9); alle Entscheide gefällt. Sprint 0, 1 und 2 sind umgesetzt auf `feat/mietrecht-regime-2026` (Sprint 0 und Fix-8 in Commit `238b6cd`, Sprint 1 in `46036cc`, Sprint 2 am 2026-11-14 umgesetzt). Sprint 3 Fix-9 bis Fix-13 am 2026-11-15 umgesetzt (nicht committet). Offen: Fix-14, Optimierer-Lauf (Fix-13), Sprint 4.
+> **Status:** Entscheide 1, 2, 3 und 5 gefällt (2026-11-13, siehe Abschnitt 9); alle Entscheide gefällt. Sprint 0, 1 und 2 sind umgesetzt auf `feat/mietrecht-regime-2026` (Sprint 0 und Fix-8 in Commit `238b6cd`, Sprint 1 in `46036cc`, Sprint 2 am 2026-11-14 umgesetzt). Sprint 3 Fix-9 bis Fix-14 am 2026-11-15 umgesetzt (Fix-9 bis Fix-13 in `f8841b3`). Das Kontextfeld `mietbelastungs_grenze` ist vollständig entfernt. Offen: Optimierer-Lauf (Fix-13), Regime-Kalibrierung (Sprint 4, braucht Daten).
 > **Grundlage:** Fachliches Review vom 2026-11-13: Code in `src/model`, gerenderte Widgets, `docs/recherche/summary.md`, CH-012, Nachrechnung aller 43 Parameter für Zürich (je ±1 Stufe, Wirkung in P3).
-> **Teststand 2026-11-15:** 371 passed, 1 skipped. Kalibrierungs-Dry-Run 0/567 Verletzungen. `tsc -b`, `npm run build` und `npm run lint` ohne Fehler.
+> **Teststand 2026-11-15 (nach Fix-14):** 422 passed, 1 skipped. Kalibrierungs-Dry-Run 0/567 Verletzungen. `tsc -b`, `npm run build` und `npm run lint` ohne Fehler.
 > **Teststand 2026-11-13:** 225 passed, 1 skipped. Kalibrierungs-Dry-Run 0/446 Verletzungen. `tsc -b` meldet 10 Typfehler, alle in Testdateien (Fixtures ohne die neuen Regime-Felder von `MarketState`, dazu `international-fachlich.test.ts:236`); damit läuft `npm run build` nicht durch. Die Fehler stammen aus den Regime-Änderungen des Branches, nicht aus den Fixes dieses Plans.
 
 ## 1. Ausgangslage
@@ -13,7 +13,7 @@ Die Engine rechnet technisch sauber. Fachlich gab es drei Klassen von Problemen:
 |---|---|---|
 | Vorzeichen | `raumplanung_zonenreserve → nachfragedruck` und `bau_bewilligungsverfahren → angebotspotenzial_regulation` lasen die Parameterskala verkehrt herum | ✅ behoben |
 | Regime | Referenzzins-Regime las das Zinsniveau statt der Zinsänderung | ✅ behoben |
-| Struktur | Normalisierung pro Knoten verzerrt die Rangfolge der Hebel; der Phasenmultiplikator drückt alle frühen Effekte (Fix-10); mehrere Schieber und Evidenzpfade laufen ins Leere | ✅ Nenner, Multiplikator, Evidenzpfade behoben (Sprint 3, 2026-11-15); Gruppenmodell offen (Fix-14) |
+| Struktur | Normalisierung pro Knoten verzerrt die Rangfolge der Hebel; der Phasenmultiplikator drückt alle frühen Effekte (Fix-10); mehrere Schieber und Evidenzpfade laufen ins Leere | ✅ Nenner, Multiplikator, Evidenzpfade, Gruppenmodell behoben (Sprint 3, 2026-11-15) |
 
 ### Die Verzerrung in Zahlen (Zürich, 1 Stufe, P3, vor Sprint 0)
 
@@ -132,7 +132,7 @@ Offen: Vorzeichen `gemeinnuetzig_kraft: +1` in `fiskalische_wirkung` (Förderfon
 
 ---
 
-## 5. Sprint 3 — Modellstruktur — ✅ Fix-9 bis Fix-13 umgesetzt (2026-11-15), Fix-14 offen
+## 5. Sprint 3 — Modellstruktur — ✅ Fix-9 bis Fix-14 umgesetzt (2026-11-15)
 
 Fix-9 bis Fix-12 gehören zusammen und enden in **einer** Neukalibrierung (Fix-13). Nicht einzeln ausliefern.
 
@@ -285,19 +285,60 @@ Ohne Wirkung auf Gruppen und Mietbelastung bleiben `boden_mehrwertabgabe`, `miet
 - Das Vorzeichen von `gemeinnuetzig_kraft` in `fiskalische_wirkung` ist nicht entschieden.
 - Einsprache suspensiv ist jetzt so stark wie die Zonenreserve; das Gewicht ist eine übernommene Setzung ohne eigene Quelle.
 
-#### Fix-14: Gruppenmodell
+#### Fix-14: Gruppenmodell — ✅ umgesetzt (2026-11-15)
 **Dateien:** `src/model/groups.ts`, `src/model/belastung.ts`
 **Aufwand:** 0.5 Tag
 1. Geringverdiener haben keinen Verdrängungsterm, obwohl CH-008 sie als verletzlichste Gruppe nennt.
 2. Eigentümer mit Hypothek: höhere Zinsen wirken nur indirekt über Nachfrage und Investition und heben sich fast auf. Direkten Zinskanal ergänzen.
 3. Mietbelastung: Basis 44.8 % für alle Städte. `mietbelastungs_grenze` als stadtspezifische Basis verwenden oder das Kontextfeld entfernen.
 
+**Umgesetzt (2026-11-15):**
+1. **Geringverdiener:** Term `+0.2 · verdraengungsrisiko` (`VERDRAENGUNG_GERINGVERDIENER` in `groups.ts`). Quelle CH-008; Grösse Setzung, gleich wie bei den Rentnern, weil CH-008 beide Gruppen ohne Rangfolge nennt.
+2. **Zinskanal Eigentümer:** Term `+0.3 · referenzzins_aenderung/2` (`ZINSKANAL_EIGENTUEMER`). Antrieb ist die **Änderung** des Referenzzinssatzes, nicht `zinsniveau`: der Referenzzinssatz ist der Durchschnittszins der ausstehenden Hypotheken, seine Änderung also die Änderung der Zinskosten; ein tiefes, unverändertes Niveau ist kein laufender Kostentreiber und wirkt schon über die `ctx:zinsniveau`-Kanten auf Nachfrage und Investition. Grösse Setzung (eine Stufe = Anzeigeschwelle 0.15). `computeGroupTrends(state, context, drivers?)` verlangt den Kontext jetzt als Pflichtargument (`GroupContext = Pick<CityContext, 'referenzzins_aenderung'>`); angepasst sind `WidgetGrid.tsx`, `group-drivers.ts`, `scripts/calibrate.ts` (`getField` mit Constraint-Kontext) und alle Tests. Heute ist der Satz in allen Städten unverändert (0), der Kanal ändert die Baseline also nicht.
+3. **Mietbelastung:** Feld entfernt. Die Stufen 1/2 waren nicht gemessen (per Skript nach «hoher Belastung» gesetzt), Sotomo 2025 deckt nur den Kanton Zürich ab, und die Stufen-Labels in `contextMeta` (<15 % … >30 %) widersprechen dem Wohnmonitor-Niveau 44.8 %. Aus `switzerland.yaml`, `cities.ts` (`npm run build:data`), `dag-topology.ts`, `calibrate.ts`, neun Test-Fixtures und der Architektur-README entfernt. In `types.ts` bleibt das Feld vorläufig optional und `@deprecated`.
+4. **Befund Kostenmiete (+0.67 pp):** Ursache war der Term `+3 pp · marktfriktion` (Beitrag +0.41 pp in P3), dazu +0.61 pp aus dem kleineren Angebot und −0.36 pp aus dem Schutz. Die Kennzahl ist ein Querschnitt aller einkommensschwachen Mieterhaushalte, also überwiegend Bestand. Für den Bestand ist das Vorzeichen der Marktfriktion offen (weniger Wechsel heisst auch weniger Abschlüsse zu Marktmieten), und der Term hatte keine Quelle: entfernt, als Fehler gewertet. Der Rest ist vertretbar: Kostenmiete entlastet in P1 (−0.27 pp), das kleinere Angebot (GLOBAL-029) holt die Entlastung bis P3 ein (+0.25 pp).
+5. **Gemeinnützige Kraft in der Mietbelastung:** Term `−2 pp · gemeinnuetzig_kraft`, Richtung AT-002, Grösse Setzung (Überschlag im JSDoc). Baurecht senkt die Mietbelastung wieder (−0.32 pp in P3), Förderfonds stärker als vorher.
+6. **Zitate:** `protectionEffect` (0.4, Setzung; Sotomo 2025 S. 27: Bestand rund 9 % unter Miete nach Wechsel, Genf 33.5 % nach DIW DP 2143), `MIETBELASTUNG_SENSITIVITY` (Setzungen, Sotomo liefert nur ein Niveau), `WOHNMONITOR_BASELINE` (Ausgabe 2026/1; 44.8 % nur für Haushalte über 20'000 CHF Äquivalenzeinkommen pro Person).
+7. **Tests:** neu `gruppenmodell-fachlich.test.ts` (Verdrängung, Zinskanal, Basis, Kostenmiete-Verlauf, Förderfonds/Baurecht, je über alle Städte). In `belastung.test.ts` ist «increases monotonically with marktfriktion» ersetzt durch «marktfriktion bewegt die Mietbelastung nicht»; neu «decreases monotonically with gemeinnuetzig_kraft». Kalibrierung 0/567.
+
+**Mietbelastung neu (Zürich, 1 Stufe, Δ in pp):**
+
+| Hebel (Stufe) | P1 | P3 | P3 vorher |
+|---|---|---|---|
+| Kostenmiete (1→2) | −0.27 | +0.25 | +0.67 |
+| Förderfonds (2→1) | +0.26 | +0.64 | +0.37 |
+| Baurecht (1→2) | −0.13 | −0.32 | 0.00 |
+| Mindestanteil (2→1) | −0.08 | −0.20 | −0.53 |
+| Kündigungsschutz (2→1) | +0.17 | +0.14 | −0.23 |
+| Mietzinstransparenz (1→2) | −0.05 | −0.13 | +0.08 |
+| Anfechtung Anfangsmiete (1→2) | −0.06 | −0.18 | −0.18 |
+| Zonenreserve (2→1) | −0.04 | −0.70 | −0.70 |
+
+Baseline Zürich: Mietbelastung 46.6 / 47.8 / 48.3 % → 46.8 / 48.2 / 48.8 % (P1–P3; Verschiebung aus dem gestrichenen Friktionsterm, Marktfriktion steht in Zürich bei −0.17). Geringverdiener-Trend 0.10 / 0.18 / 0.21 → 0.15 / 0.27 / 0.34; übrige Gruppen unverändert.
+
+**Offen:**
+- ✅ Restbereinigung `mietbelastungs_grenze` erledigt (2026-11-15): Eintrag in `contextMeta`, Test-Fixtures und Typfeld entfernt; AGENTS.md nennt 7 Kontextfaktoren.
+- Mindestanteil-Senkung entlastet weiterhin (−0.20 pp), weil `gemeinnuetzig_mindestanteil → angebotspotenzial` negativ ist; im Gruppenmodell nicht lösbar.
+- Die drei Steuern auf Gewinne und Handänderung bewegen die Mietbelastung nicht mehr (nur noch `marktfriktion`, im Widget sichtbar).
+- Geringverdiener haben keinen Term für `gemeinnuetzig_kraft`, obwohl die Gruppenbeschreibung «stark geförderte Wohnungen» nennt.
+- Der Zinskanal ist im UI nicht bedienbar (Kontext nicht editierbar) und wirkt erst, wenn der Referenzzinssatz in den Daten ändert.
+- Alle neuen Grössen (0.2, 0.3, 2 pp) sind Setzungen.
+
 ---
 
 ## 6. Sprint 4 — erst mit Daten
 
 - `mietluecke` und `anteil_altliegenschaft` gemäss Messvorschrift in CH-012 füllen. Erst dann `FRONTLOAD`, `VERWEIL_GEWICHT`, `CAP_INVEST_WEIGHT` kalibrieren.
-- Zitierte Zahlen in JSDoc-Kommentaren (z. B. «Sotomo: ~40 % weniger Miete») gegen die Originalquellen prüfen. Im Review nicht geschehen.
+- Zitierte Zahlen in JSDoc-Kommentaren (z. B. «Sotomo: ~40 % weniger Miete») gegen die Originalquellen prüfen. — ✅ erledigt (2026-11-15), nur Kommentare und Hilfetexte; kein Gewicht, keine Konstante geändert. Korrekturen:
+  - `marketModulator` (compute-phases.ts): Zuschreibung an Sotomo und «~3× stärker» gestrichen. 0.3 pro Stufe ist eine Setzung, Richtung nach CH-007; die Formel ergibt 0.4× bis 1.6× (Faktor 4).
+  - `MIETPREISDECKEL_FAKTOR` (supply-demand.ts): «Sotomo: 18–30 % unter Marktmiete» ersetzt durch Genf 279 gegen 372 CHF/m²·a (DIW DP 2143, CH-005); Grösse Setzung.
+  - `mietrecht_kostenmiete → marktfriktion`: 13.7 Jahre Genf gegen rund 8.5 Jahre CH-Schnitt (statt ~6); Agglomeration Zürich rund 9 % (Sotomo S. 27) statt ~18 %.
+  - `nutzung_abbruchverbot` (→ angebotspotenzial, → investitionsattraktivitaet, → angebotspotenzial_regulation) und zwei Fachtest-Kommentare: Quelle DIW DP 2143 (nur Genf); Basel −76 % Baugesuche mit Herkunft (SRES/SVIT, Ursache offen); «−95 % (1078 → 67)» gestrichen, keine Quelle gefunden.
+  - Kurzzeitvermietung: Barcelona (ES-001) als Effekt der Airbnb-Aktivität, nicht der Regulierung; NYC LL18 ergänzt um «Leerstand und Mieten ohne messbare Änderung» (US-013).
+  - Leerstandsabgabe: 20'000 Condos der provinziellen SVT zugeordnet (CA-002), nicht der EHT (rund 2'900 Wohnungen, CA-001/CA-003).
+  - Ersatzneubau (phase-weights.ts, helpText): «Agglomeration Zürich 2.8×, Agglomeration Lausanne 6.5×».
+  - `gemeinnuetzig_mindestanteil`, Stufe 2: «33% (Stadtratsziel)» → «33% (hoher Pflichtanteil)». Das Zürcher Drittelsziel ist ein Volksentscheid (2011) für einen Drittel aller Mietwohnungen bis 2050, kein Neubau-Anteil.
+  - Offen: Verweise auf DIW DP 2143, Wüest Partner 2024 (8.5 Jahre) und Sotomo 2025 (S. 27, Abb. 9) fehlen in den Notizen `docs/recherche/` (CH-005 nennt nur 279/372 und 13.7 Jahre); Basel-Herkunft (SRES/SVIT) ohne Notiz; «Zürich +20 % Baugesuche» (wohnschutz-fachlich.test.ts) und EHT-Steuersätze (gemeinnuetzig-fachlich.test.ts) nicht nachgeprüft; gleiche Altzahlen in `src/types.ts` und `scripts/add-new-params.js` (2.8x), «FHNW» in `scripts/calibrate.ts`.
 
 ---
 

@@ -2,9 +2,9 @@
  * wohnschutz-fachlich.test.ts — Fachliche Tests (Research-basiert)
  *
  * Validierung der Modell-Gewichte gegen empirische Evidenz aus:
- * - FHNW-Studie (Prof. Dr. Kristyna Ters & Konstantin Kholodilin, DIW Berlin):
- *   «Restrictive rental policies and a tough trade off: Lower rents vs. less
- *   construction in Geneva», Nov. 2025 — Daten Genf 1994–2022
+ * - DIW Discussion Paper 2143 (Kristyna Ters, FHNW, & Konstantin Kholodilin,
+ *   DIW Berlin): «Restrictive rental policies and a tough trade off: Lower
+ *   rents vs. less construction in Geneva», Nov. 2025 — nur Genf, 1994–2022
  * - SVIT / HEV / Swiss Real Estate Institute:
  *   «Auswirkungen der Wohnschutzinitiative im Kanton Basel-Stadt», Jan. 2025
  *
@@ -31,8 +31,10 @@
  * 4. Genfer Abstand Neuvertrag zu Bestand (~33 Prozent, Mietdauer 13.7 Jahre):
  *    nicht in dieser Datei assertet. Der Kaltstart erzeugt den Abstand nicht.
  *
- * 5. Basel: Baugesuche −76%, geplante Wohneinheiten −95% (1078 → 67)
- *    → Zürich im selben Zeitraum: +20% Baugesuche
+ * 5. Basel: Baugesuche für Wohnungen −76 % (Mittel 784 für 2014–2020 gegen
+ *    190 für 2021–2023; Swiss Real Estate Institute im Auftrag des SVIT,
+ *    Interessenvertreter; Ursache laut Regierungsrat Basel-Stadt offen)
+ *    → Zürich im selben Zeitraum: +20% Baugesuche (nicht nachgeprüft)
  *
  * Run: npx vitest run src/model/__tests__/fachlich/wohnschutz-fachlich.test.ts
  */
@@ -75,7 +77,7 @@ const ANGESPANNT: CityContext = {
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
   bevoelkerungstrend: 2,
-  marktenge: 2,  mietbelastungs_grenze: 1,
+  marktenge: 2,
 };
 
 const NEUTRAL_CONTEXT: CityContext = {
@@ -89,7 +91,7 @@ const NEUTRAL_CONTEXT: CityContext = {
   zuwanderungsdruck: 0,
   wirtschaftskraft: 0,
   bevoelkerungstrend: 0,
-  marktenge: 0,  mietbelastungs_grenze: 1,
+  marktenge: 0,
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -160,8 +162,9 @@ describe('Basel Wohnschutzverordnung (2022): kombinierte Rationierung', () => {
   /**
    * Basel Wohnschutzverordnung:
    * - Abriss, Ersatzneubau und Sanierungen: bewilligungspflichtig + Mietzinsobergrenzen
-   * - Baugesuche −76%, geplante Wohneinheiten −95% (1078 → 67)
-   * - Zürich im selben Zeitraum: +20% mehr Baugesuche
+   * - Baugesuche für Wohnungen −76 % (784 → 190 im Mittel, SRES/SVIT;
+   *   Ursache laut Regierungsrat offen)
+   * - Zürich im selben Zeitraum: +20% mehr Baugesuche (nicht nachgeprüft)
    *
    * Modell-Szenario: Wohnschutz-Initiative eingeführt
    * (nutzung_abbruchverbot + nutzung_umnutzungsverbot + mietrecht_kostenmiete)

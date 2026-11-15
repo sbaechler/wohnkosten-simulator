@@ -142,7 +142,8 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     sign: +1,
     weights: [0.52, 0.52, 0.52],
     profilQuelle: 'Annahme',
-    // Sotomo 2025: Ersatzneubau-Effizienz (Zürich 2.8×, Lausanne 6.5×).
+    // Ersatzneubau-Effizienz: Agglomeration Zürich 2.8×, Agglomeration
+    // Lausanne 6.5× (Sotomo 2025, Abb. 9; Stadt Zürich rund 2×).
     // Mehr Netto-Neubau pro Abriss → mehr Angebot. Grösse Setzung.
   },
   {
@@ -206,9 +207,11 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     sign: -1,
     weights: [0.61, 0.61, 0.61],
     profilQuelle: 'Annahme',
-    // FHNW-Studie (Ters/Kholodilin 2025, Genf; nicht in docs/recherche):
-    // Wohnungsrationierung = stärkste Angebotsbremse. Basel: Baugesuche −76 %,
-    // geplante Wohneinheiten −95 % (1078 → 67) nach der Wohnschutz-Initiative.
+    // DIW Discussion Paper 2143 (Ters/Kholodilin, nur Genf): Wohnungs-
+    // rationierung = stärkste Angebotsbremse. Basel: Baugesuche für Wohnungen
+    // −76 % (Mittel 784 für 2014–2020 gegen 190 für 2021–2023; Swiss Real
+    // Estate Institute im Auftrag des SVIT, Interessenvertreter; Ursache laut
+    // Regierungsrat Basel-Stadt offen).
     // Ohne Verlaufsangabe in der Sammlung → neutraler Impuls.
   },
   {
@@ -270,9 +273,10 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     sign: +1,
     weights: [0.05, 0.15, 0.15],
     profilQuelle: 'CA-001',
-    // CA-001 bis CA-003 (Vancouver Empty Homes Tax, BC Speculation and
-    // Vacancy Tax): Leerstand 0.90 % → 0.49 %, rund 2'900 Wohnungen
-    // (Vancouver) bzw. 20'000 Condos (Metro Vancouver) zurück auf dem Markt.
+    // Vancouver Empty Homes Tax (EHT): Leerstand 0.90 % (2017) → 0.49 %
+    // (2024), rund 2'900 Wohnungen zurück auf dem Markt (CA-001/CA-003).
+    // Die 20'000 Condos (Metro Vancouver, 2018–2020) gehören laut CA-002 zur
+    // provinziellen Speculation and Vacancy Tax, nicht zur EHT.
     // Verlauf CA-001: erste Effekte nach 1–2 Jahren, deutlich nach 3–5.
     // Grösse Setzung, bewusst klein: die Leerstandsquote sank um 0.4
     // Prozentpunkte, also um einen kleinen Teil des Bestands, und der
@@ -493,8 +497,9 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     sign: -1,
     weights: [0.79, 0.79, 0.79],
     profilQuelle: 'Annahme',
-    // US-013 NYC LL18: Inserate −90 % nach der Regulierung. Weniger
-    // Ferienwohnungen → weniger Verdrängung.
+    // US-013 NYC LL18: Inserate −90 % nach der Regulierung, Leerstand und
+    // Mieten ohne messbare Änderung (US-013). Weniger Ferienwohnungen →
+    // weniger Verdrängung.
   },
 
   // ═══════════════════════════════════════════════════════════════════
@@ -572,8 +577,9 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     sign: +1,
     weights: [0.3, 0.9, 0.9],
     profilQuelle: 'CA-001',
-    // CA-001/CA-002: Leerstand halbiert, Hausverkäufe in steuerpflichtigen
-    // Regionen −12.5 %. Verlauf CA-001: erste Effekte nach 1–2 Jahren,
+    // CA-001: EHT, Leerstand 0.90 % (2017) → 0.49 % (2024). CA-002
+    // (provinzielle Speculation and Vacancy Tax, nicht EHT): Hausverkäufe in
+    // steuerpflichtigen Regionen zusätzlich −12.5 %. Verlauf CA-001: erste Effekte nach 1–2 Jahren,
     // deutlich nach 3–5. Gleicher P3-Stand wie der alte Vektor [0.7, 0.8, 0.9].
   },
 
@@ -619,9 +625,12 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     sign: +1,
     weights: [0.79, 0.79, 0.79],
     profilQuelle: 'Annahme',
-    // FHNW (Genf): in stark regulierten Märkten sinkt die Marktrotation,
-    // Bestandsmieter bleiben im Mittel 13.7 Jahre (vs. ~6 Jahre).
-    // CH-004: Mietrecht als Mobilitätsbremse.
+    // Genf: in stark regulierten Märkten sinkt die Marktrotation,
+    // Bestandsmieter bleiben im Mittel 13.7 Jahre gegenüber rund 8.5 Jahren
+    // im CH-Schnitt (Wüest Partner 2024, zitiert in DIW Discussion Paper
+    // 2143; CH-005). Abstand Markt- zu Bestandsmiete: Genf rund 33 %,
+    // Agglomeration Zürich rund 9 % (Sotomo 2025, S. 27: 268 gegen
+    // 245 CHF/m²·a). CH-004: Mietrecht als Mobilitätsbremse.
   },
   {
     from: 'mietrecht_kuendigungsschutz',
@@ -934,8 +943,10 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     sign: -1,
     weights: [0.69, 0.69, 0.69],
     profilQuelle: 'Annahme',
-    // ES-001 Barcelona: Kurzzeitvermietung hebt Kaufpreise (+4.6 %);
-    // Regulierung nimmt diesen Renditekanal weg.
+    // Barcelona: Airbnb-Aktivität erhöhte die Mieten um 1.9 % und die
+    // Transaktionspreise um 4.6 % (Garcia-López et al. 2020, ES-001).
+    // Effekt der Aktivität, nicht der Regulierung. Regulierung nimmt
+    // diesen Renditekanal weg.
   },
   {
     from: 'nutzung_abbruchverbot',
@@ -943,8 +954,8 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     sign: -1,
     weights: [0.69, 0.69, 0.69],
     profilQuelle: 'Annahme',
-    // FHNW (Genf 1994–2022): Rationierungsschocks → institutionelle
-    // Neubauinvestitionen −400 Mio. CHF.
+    // DIW Discussion Paper 2143 (Ters/Kholodilin; Genf 1994–2022):
+    // Rationierungsschocks → institutionelle Neubauinvestitionen −400 Mio. CHF.
   },
   {
     from: 'nutzung_umnutzungsverbot',
@@ -1000,7 +1011,8 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     sign: +1,
     weights: [0.71, 0.71, 0.71],
     profilQuelle: 'Annahme',
-    // Rationierung blockiert den physischen Reaktionskanal.
+    // Rationierung blockiert den physischen Reaktionskanal (Basel-Angaben
+    // siehe nutzung_abbruchverbot → angebotspotenzial).
   },
   {
     from: 'ctx:zinsniveau',

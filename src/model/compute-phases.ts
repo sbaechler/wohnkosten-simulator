@@ -119,8 +119,11 @@ export const PERSISTENCE = 0.8;
  * `marktenge` kommt hier als Rohwert −2…+2 an (nicht normalisiert). 0.3 pro
  * Stufe ergibt also ±60 % bei extremem Markt, ±30 % bei einer Stufe.
  * Der Faktor skaliert auch den Kontext-Antrieb, nicht nur die Politik-Effekte.
- * Forschungsbasis: Sotomo ZH-Wohnraumstudie 2025 + CH-007 (Zonenreserve-Wirkung
- * ist in angespannten Märkten ~3× stärker als in entspannten).
+ * 0.3 pro Stufe: Setzung. Richtung nach CH-007 (wo mehr Bauland vorhanden
+ * ist, steigen die Kosten bei Nachfrageanstieg weniger stark; Aufzonungen
+ * dämpfen dort, wo die Bauzonen bereits stark ausgeschöpft sind); eine
+ * Grösse nennt die Quelle nicht. Die Formel ergibt 0.4× bis 1.6×, also
+ * Faktor 4 zwischen den Extremen.
  */
 export function marketModulator(marktenge: number): number {
   return 1.0 + marktenge * 0.3;

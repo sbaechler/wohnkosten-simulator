@@ -21,7 +21,7 @@ const ANGESPANNT_CONTEXT: CityContext = {
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
   bevoelkerungstrend: 2,
-  marktenge: 2,  mietbelastungs_grenze: 1,
+  marktenge: 2,
 };
 
 describe('Gruppen-Divergenz: Bestand vs. Angebot', () => {
@@ -35,7 +35,7 @@ describe('Gruppen-Divergenz: Bestand vs. Angebot', () => {
 
     const results = [...computePhasePipeline(ANGESPANNT_CONTEXT, diff)];
     const phase2 = results[1];
-    const trends = computeGroupTrends(phase2.marketState);
+    const trends = computeGroupTrends(phase2.marketState, ANGESPANNT_CONTEXT);
     
     const bestand = trends.find(t => t.group.id === 'normalverdiener_bestand')!;
     const angebot = trends.find(t => t.group.id === 'normalverdiener_angebot')!;
@@ -51,7 +51,7 @@ describe('Gruppen-Divergenz: Bestand vs. Angebot', () => {
     const diff: ParamsDiff40 = { mietrecht_kostenmiete: { from: 1, to: 2 } };
 
     const results = [...computePhasePipeline(ANGESPANNT_CONTEXT, diff)];
-    const trends = computeGroupTrends(results[0].marketState);
+    const trends = computeGroupTrends(results[0].marketState, ANGESPANNT_CONTEXT);
     
     const gering = trends.find(t => t.group.id === 'geringverdiener')!;
     const angebot = trends.find(t => t.group.id === 'normalverdiener_angebot')!;

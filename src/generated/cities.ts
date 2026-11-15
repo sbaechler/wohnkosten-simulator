@@ -17,7 +17,6 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 2,
       "bevoelkerungstrend": 1,
       "marktenge": 2,
-      "mietbelastungs_grenze": 2,
       "teuerung": -1,
       "referenzzins_aenderung": 0
     },
@@ -83,7 +82,6 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 2,
       "bevoelkerungstrend": 1,
       "marktenge": 2,
-      "mietbelastungs_grenze": 2,
       "teuerung": -1,
       "referenzzins_aenderung": 0
     },
@@ -149,7 +147,6 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 2,
       "bevoelkerungstrend": 1,
       "marktenge": 1,
-      "mietbelastungs_grenze": 2,
       "teuerung": -1,
       "referenzzins_aenderung": 0
     },
@@ -215,7 +212,6 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 2,
       "bevoelkerungstrend": 1,
       "marktenge": 2,
-      "mietbelastungs_grenze": 2,
       "teuerung": -1,
       "referenzzins_aenderung": 0
     },
@@ -281,7 +277,6 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": 1,
       "marktenge": 2,
-      "mietbelastungs_grenze": 1,
       "teuerung": -1,
       "referenzzins_aenderung": 0
     },
@@ -347,7 +342,6 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": 2,
       "marktenge": 2,
-      "mietbelastungs_grenze": 1,
       "teuerung": -1,
       "referenzzins_aenderung": 0
     },
@@ -413,7 +407,6 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": 1,
       "marktenge": 1,
-      "mietbelastungs_grenze": 1,
       "teuerung": -1,
       "referenzzins_aenderung": 0
     },
@@ -479,7 +472,6 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": 1,
       "marktenge": 0,
-      "mietbelastungs_grenze": 1,
       "teuerung": -1,
       "referenzzins_aenderung": 0
     },
@@ -545,7 +537,6 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": 0,
       "marktenge": 1,
-      "mietbelastungs_grenze": 1,
       "teuerung": -1,
       "referenzzins_aenderung": 0
     },
@@ -611,7 +602,6 @@ export const cities: CityConfig[] = [
       "wirtschaftskraft": 1,
       "bevoelkerungstrend": 1,
       "marktenge": 1,
-      "mietbelastungs_grenze": 1,
       "teuerung": -1,
       "referenzzins_aenderung": 0
     },

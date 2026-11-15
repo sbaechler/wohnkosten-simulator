@@ -71,7 +71,7 @@ const ZUERICH_CONTEXT: CityContext = {
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
   bevoelkerungstrend: 2,
-  marktenge: 2,  mietbelastungs_grenze: 1,
+  marktenge: 2,
 };
 
 const NEUTRAL_CONTEXT: CityContext = {
@@ -85,7 +85,7 @@ const NEUTRAL_CONTEXT: CityContext = {
   zuwanderungsdruck: 0,
   wirtschaftskraft: 0,
   bevoelkerungstrend: 0,
-  marktenge: 0,  mietbelastungs_grenze: 1,
+  marktenge: 0,
 };
 
 function phases(_params: CityParams40, context: CityContext, diff: ParamsDiff40) {
@@ -286,7 +286,7 @@ describe('Bodenrecht: CH-007 BWO Raumplanung — Zonenreserve dämpft Kostenanst
       raumplanung_zonenreserve: { from: 2, to: 0 },
     });
     const neumieter = (s: MarketState) =>
-      computeGroupTrends(s)
+      computeGroupTrends(s, ZUERICH_CONTEXT)
         .find(g => g.group.id === 'normalverdiener_angebot')!.value;
     for (const i of [0, 1, 2]) {
       expect(neumieter(mit[i].marketState)).toBeLessThan(neumieter(ohne[i].marketState));

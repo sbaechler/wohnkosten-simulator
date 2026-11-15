@@ -15,7 +15,7 @@ const ZH = cities.find(c => c.slug === 'zuerich')!;
 
 function trends(diff: ParamsDiff40) {
   return computePhasesCached(ZH.context, diff).map(p =>
-    Object.fromEntries(computeGroupTrends(p.marketState).map(t => [t.group.id, t.value])),
+    Object.fromEntries(computeGroupTrends(p.marketState, ZH.context).map(t => [t.group.id, t.value])),
   );
 }
 

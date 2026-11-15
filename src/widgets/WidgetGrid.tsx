@@ -69,10 +69,10 @@ export function WidgetGrid({ city, modified, diff }: Props) {
   // Treiber je Phase, per Leave-one-out aus der Rechnung (group-drivers.ts)
   const groupDrivers = useMemo(() => computeGroupDrivers(context, diff), [context, diff]);
   function computeModifiedGroupTrends(phase: PhaseResult) {
-    return computeGroupTrends(phase.marketState, groupDrivers[phase.phase - 1]);
+    return computeGroupTrends(phase.marketState, context, groupDrivers[phase.phase - 1]);
   }
   function computeBaselineGroupTrends(phase: PhaseResult) {
-    return computeGroupTrends(phase.marketState);
+    return computeGroupTrends(phase.marketState, context);
   }
 
   const stadtbildGetter = (m: CityParams40, b: CityParams40) => () =>

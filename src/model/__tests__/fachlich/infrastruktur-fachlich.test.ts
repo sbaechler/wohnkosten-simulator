@@ -52,7 +52,7 @@ const NEUTRAL_CONTEXT: CityContext = {
   zuwanderungsdruck: 0,
   wirtschaftskraft: 0,
   bevoelkerungstrend: 0,
-  marktenge: 0,  mietbelastungs_grenze: 1,
+  marktenge: 0,
 };
 
 const ZUERICH_CONTEXT: CityContext = {
@@ -66,7 +66,7 @@ const ZUERICH_CONTEXT: CityContext = {
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
   bevoelkerungstrend: 2,
-  marktenge: 2,  mietbelastungs_grenze: 1,
+  marktenge: 2,
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

@@ -160,7 +160,7 @@ export const paramMeta40: ParamMeta40[] = [
   {
     key: 'bau_ersatzneubau_effizienz',
     label: 'Ersatzneubau-Effizienz',
-    helpText: 'Wie viele Netto-Neubauwohnungen entstehen pro abgerissener Wohnung? (Zürich: 2.8x, Lausanne: 6.5x)',
+    helpText: 'Wie viele Netto-Neubauwohnungen entstehen pro abgerissener Wohnung? (Agglomeration Zürich 2.8×, Agglomeration Lausanne 6.5×; Sotomo 2025)',
     levels: ['Ineffizient (2–3x)', 'Mittel (3–5x)', 'Effizient (5x+)'],
     hoeherBedeutet: 'mehr Netto-Wohnungen pro Abriss',
     group: 'bau',
@@ -203,7 +203,11 @@ export const paramMeta40: ParamMeta40[] = [
     key: 'gemeinnuetzig_mindestanteil',
     label: 'Mindestanteil Neubauten',
     helpText: 'Wie viel Prozent der Neubauten müssen gemeinnützig sein?',
-    levels: ['0% (kein Mindestanteil)', '10% (Volksinitiative)', '33% (Stadtratsziel)'],
+    levels: ['0% (kein Mindestanteil)', '10% (Volksinitiative)', '33% (hoher Pflichtanteil)'],
+    // Bis 2026-11 «33% (Stadtratsziel)». Das Zürcher Drittelsziel ist ein
+    // Volksentscheid (27.11.2011, Gemeindeordnung Art. 18) und meint einen
+    // Drittel aller Mietwohnungen bis 2050, keinen Neubau-Anteil
+    // (stadt-zuerich.ch/wohnpolitik). Die Stufe 33 % ist eine Setzung.
     hoeherBedeutet: 'höherer gemeinnütziger Pflichtanteil',
     group: 'gemeinnuetzig',
   },
@@ -449,7 +453,6 @@ export const contextMeta: ContextMeta[] = [
   { key: 'wirtschaftskraft', label: 'Wirtschaftskraft', levels: ['sehr schwach', 'schwach', 'mittel', 'stark', 'sehr stark'] },
   { key: 'bevoelkerungstrend', label: 'Bevölkerung', levels: ['stark sinkend', 'sinkend', 'stabil', 'wachsend', 'stark wachsend'] },
   { key: 'marktenge', label: 'Marktenge', levels: ['entspannt', 'leicht eng', 'moderat', 'angespannt', 'extrem eng'] },
-  { key: 'mietbelastungs_grenze', label: 'Mietbelastungsgrenze', levels: ['sehr tief (<15%)', 'tief (15–20%)', 'mittel (20–25%)', 'hoch (25–30%)', 'sehr hoch (>30%)'] },
   { key: 'teuerung', label: 'Teuerung (LIK)', levels: ['unter 0 %', '0–0.5 %', '0.5–1.5 %', '1.5–2.5 %', 'über 2.5 %'] },
   { key: 'referenzzins_aenderung', label: 'Referenzzinssatz (12 Mt.)', levels: ['stark gesenkt', 'gesenkt', 'unverändert', 'erhöht', 'stark erhöht'] },
 ];

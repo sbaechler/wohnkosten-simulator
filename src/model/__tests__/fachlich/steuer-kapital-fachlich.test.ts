@@ -61,7 +61,7 @@ const NEUTRAL_CONTEXT: CityContext = {
   zuwanderungsdruck: 0,
   wirtschaftskraft: 0,
   bevoelkerungstrend: 0,
-  marktenge: 0,  mietbelastungs_grenze: 1,
+  marktenge: 0,
 };
 
 const ZUERICH_CONTEXT: CityContext = {
@@ -75,7 +75,7 @@ const ZUERICH_CONTEXT: CityContext = {
   zuwanderungsdruck: 2,
   wirtschaftskraft: 2,
   bevoelkerungstrend: 2,
-  marktenge: 2,  mietbelastungs_grenze: 1,
+  marktenge: 2,
 };
 
 function phases(_params: CityParams40, context: CityContext, diff: ParamsDiff40) {
@@ -330,7 +330,7 @@ describe('Steuern: AT-002 — Gemeinnütziger Wohnbau dämpft Mietpreise', () =>
     const mit = phases(ohneGemeinnuetzig, ZUERICH_CONTEXT, mitGemeinnuetzig);
     // Grosser Gemeinnützig-Sektor → Konkurrenz dämpft die Marktmiete
     const neumieter = (s: MarketState) =>
-      computeGroupTrends(s).find(g => g.group.id === 'normalverdiener_angebot')!.value;
+      computeGroupTrends(s, ZUERICH_CONTEXT).find(g => g.group.id === 'normalverdiener_angebot')!.value;
     expect(mit[0].marketState.gemeinnuetzig_kraft)
       .toBeGreaterThan(ohne[0].marketState.gemeinnuetzig_kraft);
     expect(neumieter(mit[0].marketState))

@@ -15,7 +15,7 @@ import type { CityContext, MarketState, ParamsDiff40 } from '../../../types';
 const NEUTRAL: CityContext = {
   ownershipBaseline: { privat: 0.39, institutionell: 0.30, genossenschaft: 0.175, oeffentlich: 0.066 },
   zinsniveau: 0, zuwanderungsdruck: 0, wirtschaftskraft: 0,
-  bevoelkerungstrend: 0, marktenge: 0, mietbelastungs_grenze: 0,
+  bevoelkerungstrend: 0, marktenge: 0,
 };
 
 /** Effekt eines Diffs auf einen E1-Knoten je Phase, relativ zum P3-Stand. */

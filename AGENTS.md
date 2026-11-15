@@ -93,7 +93,7 @@ npm run build:data        # regeneriert cities.ts
 npm run dev               # startet mit neuen Daten
 ```
 
-Aktuell: 10 Schweizer Städte (>40k Einwohner) mit allen 43 Parameter-Werten + 8 Kontextfaktoren (Typ- und Variablennamen mit «40» sind historisch).
+Aktuell: 10 Schweizer Städte (>40k Einwohner) mit allen 43 Parameter-Werten + 7 Kontextfaktoren (Typ- und Variablennamen mit «40» sind historisch).
 
 ---
 

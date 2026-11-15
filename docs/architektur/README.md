@@ -65,7 +65,7 @@ Parameter ändern  ────▶  ┌─────────────�
 ## Schichten (Layers)
 
 ### E0 — Rohdaten
-- **8 Kontextfaktoren** (`CityContext`), Skala –2…+2: Zinsniveau, Zuwanderungsdruck, Wirtschaftskraft, Bevölkerungstrend, Marktenge, Mietbelastungs-Grenze (nur Anzeige, keine Kante), Teuerung und Referenzzins-Änderung (beide national, nur im Mietrecht-Regime). Dazu die `ownershipBaseline`-Anteile.
+- **7 Kontextfaktoren** (`CityContext`), Skala –2…+2: Zinsniveau, Zuwanderungsdruck, Wirtschaftskraft, Bevölkerungstrend, Marktenge, Teuerung und Referenzzins-Änderung (beide national, im Mietrecht-Regime; die Referenzzins-Änderung zusätzlich als Zinskanal der Eigentümer in `groups.ts`). Die frühere Mietbelastungs-Grenze ist entfernt (Fix-14, 2026-11-15). Dazu die `ownershipBaseline`-Anteile.
 - **43 steuerbare Parameter** (`CityParams40`, der Name ist historisch): atomare Policies, Skala 0/1/2
 - **Baseline** (Ist-Zustand der gewählten Stadt) vs. **Modified** (Nutzer-Szenario)
 - **Diff** (`ParamsDiff40`): Geänderte Parameter mit `from`/`to`-Werten
@@ -221,4 +221,4 @@ Folgende Abweichungen vom Ist-Stand:
 | Generator-Pipeline | ✅ `computePhasePipeline()` | ✅ Implementiert |
 | 8 Bevölkerungsgruppen | 9 Gruppen in `groups.ts` (Bestand und Neumieter getrennt) | Abweichung |
 | 40 atomare Parameter | 43 Parameter in `CityParams40` | Abweichung |
-| 4 Kontextfaktoren | 8 Kontextfaktoren in `CityContext` | Abweichung |
+| 4 Kontextfaktoren | 7 Kontextfaktoren in `CityContext` | Abweichung |

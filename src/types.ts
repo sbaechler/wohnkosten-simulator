@@ -6,7 +6,6 @@
 //
 // Sotomo Wohnraumstudie ZH 2025 (Sep.):
 //   - bau_ersatzneubau_effizienz: Netto-Neubau pro Abriss (Zürich: 2.8x, Westschweiz: 6+x) — als E0-Parameter
-//   - mietbelastungs_grenze: Strukturelles Mietbelastungsniveau (tief: 30%, Viertel >40%) — als CityContext
 //   Quelle: https://www.sotomo.ch/files/data/projectfile/2025/09/Sotomo-Wohnraumstudie-%E2%80%93-ZHK-2025-09.pdf
 //
 
@@ -85,20 +84,6 @@ export interface CityContext {
   bevoelkerungstrend: ContextValue;
   /** Marktverfassung: -2=entspannt (>5% Leerstand), +2=extrem eng (<1% Leerstand) */
   marktenge: ContextValue;
-  /**
-   * Strukturelles Mietbelastungsniveau (Anteil am Haushaltseinkommen).
-   * Quelle: Sotomo Wohnraumstudie ZH 2025 — tiefes Einkommen ~30%, Viertel >40%.
-   *
-   * Semantik: Read-only Kontextfaktor (nicht via Slider editierbar).
-   * Default pro Stadt aus data/cities/switzerland.yaml.
-   *
-   * Wird heute nur angezeigt (ContextIndicators). Es gibt KEINE Kante und
-   * keine Rechnung, die den Wert liest: die frühere Kante auf die
-   * Marktfriktion wurde im Review 2026-06 entfernt, und die Mietbelastung
-   * (belastung.ts) startet für jede Stadt beim CH-Wert. Siehe
-   * docs/review/2026-11-13-verbesserungsplan.md, Fix-14.
-   */
-  mietbelastungs_grenze: ContextValue;
   /**
    * LIK-Jahresteuerung, national, Bins in TEUERUNG_BINS (mietrecht-regime.ts).
    * 2025: +0.2 % → −1. CH-012. Die Stufe ist eine Lage in der Reihe, keine
