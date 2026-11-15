@@ -40,12 +40,18 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
   // Active phases depend on toggle
   const activePhasesForChart = (baselinePhases && viewMode === 'heutig') ? baselinePhases : phases;
 
-  // Baseline reference state (dashed line) — uses pipeline phase 1 of the baseline
-  // (no diff = neutral state). Memoized to avoid recomputing on every render.
-  const baselineState = useMemo(
-    () => computePhasesCached(context, {})[0].marketState,
-    [context],
-  );
+  // Gestrichelte Referenz «Heutige Situation»: Baseline DERSELBEN Phase wie die
+  // gewählte simulierte Phase. So zeigt der Abstand zwischen gestrichelter und
+  // ausgezogener Kurve nur die Wirkung der Politik-Änderung, nicht zusätzlich
+  // die Entwicklung der Baseline über die Zeit (Kontextfaktoren treiben auch
+  // sie von P1 bis P3). Früher stand hier immer Phase 1.
+  // Nur im Vergleich sinnvoll: ohne Änderungen oder in der Ansicht «Heutige
+  // Situation» wäre die Referenz deckungsgleich mit der gezeigten Kurve.
+  const baselineState = useMemo(() => {
+    if (!baselinePhases || viewMode !== 'simuliert') return null;
+    const source = baselinePhases.length > 0 ? baselinePhases : computePhasesCached(context, {});
+    return source[activePhaseIndex]?.marketState ?? null;
+  }, [context, baselinePhases, viewMode, activePhaseIndex]);
 
   useEffect(() => {
     if (!svgRef.current || !phases || phases.length === 0) return;
@@ -83,24 +89,26 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
       .x(d => x(d[0])).y(d => y(d[1]))
       .curve(d3.curveLinear);
 
-    // Baseline curves: always use baseline params for the dashed reference line
-    const baselineSupplyShift = supplyShiftFromState(baselineState);
-    const [bq, bp] = findEquilibrium(baselineSupplyShift, baselineState.nachfragedruck, baselineState.angebotspotenzial_regulation);
+    // Referenzkurven (gestrichelt): Baseline derselben Phase, nur im Vergleich
+    if (baselineState) {
+      const baselineSupplyShift = supplyShiftFromState(baselineState);
+      const [bq, bp] = findEquilibrium(baselineSupplyShift, baselineState.nachfragedruck, baselineState.angebotspotenzial_regulation);
 
-    // Draw baseline curves (dashed)
-    g.append('path').datum(supplyCurve(baselineSupplyShift, baselineState.angebotspotenzial_regulation))
-      .attr('d', line).attr('fill', 'none')
-      .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
-    g.append('path').datum(demandCurve(baselineState.nachfragedruck))
-      .attr('d', line).attr('fill', 'none')
-      .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
+      // Draw baseline curves (dashed)
+      g.append('path').datum(supplyCurve(baselineSupplyShift, baselineState.angebotspotenzial_regulation))
+        .attr('d', line).attr('fill', 'none')
+        .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
+      g.append('path').datum(demandCurve(baselineState.nachfragedruck))
+        .attr('d', line).attr('fill', 'none')
+        .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
 
-    // Baseline equilibrium
-    g.append('line').attr('x1', x(bq)).attr('y1', y(bp)).attr('x2', x(bq)).attr('y2', y(0))
-      .attr('stroke', COLORS.baseline).attr('stroke-dasharray', '3').attr('stroke-width', 1);
-    g.append('line').attr('x1', 0).attr('y1', y(bp)).attr('x2', x(bq)).attr('y2', y(bp))
-      .attr('stroke', COLORS.baseline).attr('stroke-dasharray', '3').attr('stroke-width', 1);
-    g.append('circle').attr('cx', x(bq)).attr('cy', y(bp)).attr('r', 3).attr('fill', COLORS.baseline);
+      // Baseline equilibrium
+      g.append('line').attr('x1', x(bq)).attr('y1', y(bp)).attr('x2', x(bq)).attr('y2', y(0))
+        .attr('stroke', COLORS.baseline).attr('stroke-dasharray', '3').attr('stroke-width', 1);
+      g.append('line').attr('x1', 0).attr('y1', y(bp)).attr('x2', x(bq)).attr('y2', y(bp))
+        .attr('stroke', COLORS.baseline).attr('stroke-dasharray', '3').attr('stroke-width', 1);
+      g.append('circle').attr('cx', x(bq)).attr('cy', y(bp)).attr('r', 3).attr('fill', COLORS.baseline);
+    }
 
     // Draw phases (use activePhasesForChart based on toggle)
     activePhasesForChart.forEach((phase, idx) => {
@@ -173,9 +181,12 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
       .attr('stroke', COLORS.supply).attr('stroke-width', 2.5);
     legend.append('text').attr('x', 25).attr('y', 24).attr('fill', '#ccc').attr('font-size', 11).text('Angebot');
 
-    legend.append('line').attr('x1', 0).attr('y1', 40).attr('x2', 20).attr('y2', 40)
-      .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
-    legend.append('text').attr('x', 25).attr('y', 44).attr('fill', '#888').attr('font-size', 11).text('Heutige Situation');
+    if (baselineState) {
+      legend.append('line').attr('x1', 0).attr('y1', 40).attr('x2', 20).attr('y2', 40)
+        .attr('stroke', COLORS.baseline).attr('stroke-width', 1.5).attr('stroke-dasharray', '4');
+      legend.append('text').attr('x', 25).attr('y', 44).attr('fill', '#888').attr('font-size', 11)
+        .text(`Heute (${PHASE_NAMES[activePhaseIndex]})`);
+    }
 
     legend.append('circle').attr('cx', 10).attr('cy', 64).attr('r', 5).attr('fill', COLORS.equilibrium).attr('stroke', '#fff').attr('stroke-width', 1);
     legend.append('text').attr('x', 25).attr('y', 68).attr('fill', '#ccc').attr('font-size', 11).text('Gleichgewicht');
