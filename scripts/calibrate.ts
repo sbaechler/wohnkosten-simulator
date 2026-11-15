@@ -218,7 +218,10 @@ const BASE_CONSTRAINTS: Constraint[] = [
     diffB: {},
     phase: 2, field: 'marketState.investitionsattraktivitaet', relation: 'lt',
   },
-  // CH-003: Anfechtungsrecht erhöht marktfriktion
+  // Mietzinstransparenz erhöht marktfriktion. Keine Quelle: CH-003 behandelt
+  // die Anfechtung der Anfangsmiete, nicht die Offenlegung (Prüfung
+  // 2026-11-15). Hält nur die gesetzte Richtung der Annahme-Kante fest; die ID
+  // bleibt wegen der Vergleichbarkeit der Läufe.
   {
     id: 'mietrecht-ch003-marktfriktion-p0',
     context: BERLIN_CTX, baseline: BERLIN_BASELINE,
@@ -468,7 +471,9 @@ const BASE_CONSTRAINTS: Constraint[] = [
     diffB: {},
     phase: 0, field: 'marketState.nachfragedruck', relation: 'lt',
   },
-  // CH-006: Zweitwohnungsbeschränkung senkt angebotspotenzial (paradox)
+  // CH-006: Zweitwohnungsbeschränkung senkt angebotspotenzial (paradox).
+  // CH-006 betrifft Tourismusgemeinden; für Städte ist die Richtung eine
+  // Annahme (Prüfung 2026-11-15, Parameter «Wirkung nicht belegt»).
   {
     id: 'steuer-ch006-angebot-p2',
     context: ZH_CTX, baseline: withOverrides(ZUERICH_V2, { nutzung_zweitwohnungen: 0 }),
@@ -498,7 +503,9 @@ const BASE_CONSTRAINTS: Constraint[] = [
     diffB: {},
     phase: 0, field: 'marketState.spekulationshemmung', relation: 'gt',
   },
-  // NYC LL18: Kurzzeitvermietung senkt verdraengungsrisiko
+  // Kurzzeitvermietung senkt verdraengungsrisiko (nur Richtung). NYC LL18
+  // (US-013) findet keine messbare Wirkung auf Mieten und Leerstand; die
+  // Richtung stützt sich auf die Mietwirkung der Aktivität (US-003, ES-001).
   {
     id: 'gemeinnuetzig-ll18-verdraengung-p0',
     context: ZH_CTX, baseline: ZUERICH_V2,

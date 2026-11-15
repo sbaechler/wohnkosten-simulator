@@ -18,7 +18,8 @@ export const cities: CityConfig[] = [
       "bevoelkerungstrend": 1,
       "marktenge": 2,
       "teuerung": -1,
-      "referenzzins_aenderung": 0
+      "referenzzins_aenderung": 0,
+      "anteil_altliegenschaft": 0.758
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -83,7 +84,8 @@ export const cities: CityConfig[] = [
       "bevoelkerungstrend": 1,
       "marktenge": 2,
       "teuerung": -1,
-      "referenzzins_aenderung": 0
+      "referenzzins_aenderung": 0,
+      "anteil_altliegenschaft": 0.87
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -148,7 +150,8 @@ export const cities: CityConfig[] = [
       "bevoelkerungstrend": 1,
       "marktenge": 1,
       "teuerung": -1,
-      "referenzzins_aenderung": 0
+      "referenzzins_aenderung": 0,
+      "anteil_altliegenschaft": 0.9
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -213,7 +216,8 @@ export const cities: CityConfig[] = [
       "bevoelkerungstrend": 1,
       "marktenge": 2,
       "teuerung": -1,
-      "referenzzins_aenderung": 0
+      "referenzzins_aenderung": 0,
+      "anteil_altliegenschaft": 0.848
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -278,7 +282,8 @@ export const cities: CityConfig[] = [
       "bevoelkerungstrend": 1,
       "marktenge": 2,
       "teuerung": -1,
-      "referenzzins_aenderung": 0
+      "referenzzins_aenderung": 0,
+      "anteil_altliegenschaft": 0.9
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -343,7 +348,8 @@ export const cities: CityConfig[] = [
       "bevoelkerungstrend": 2,
       "marktenge": 2,
       "teuerung": -1,
-      "referenzzins_aenderung": 0
+      "referenzzins_aenderung": 0,
+      "anteil_altliegenschaft": 0.707
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -408,7 +414,8 @@ export const cities: CityConfig[] = [
       "bevoelkerungstrend": 1,
       "marktenge": 1,
       "teuerung": -1,
-      "referenzzins_aenderung": 0
+      "referenzzins_aenderung": 0,
+      "anteil_altliegenschaft": 0.805
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -473,7 +480,8 @@ export const cities: CityConfig[] = [
       "bevoelkerungstrend": 1,
       "marktenge": 0,
       "teuerung": -1,
-      "referenzzins_aenderung": 0
+      "referenzzins_aenderung": 0,
+      "anteil_altliegenschaft": 0.822
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -538,7 +546,8 @@ export const cities: CityConfig[] = [
       "bevoelkerungstrend": 0,
       "marktenge": 1,
       "teuerung": -1,
-      "referenzzins_aenderung": 0
+      "referenzzins_aenderung": 0,
+      "anteil_altliegenschaft": 0.812
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -603,7 +612,8 @@ export const cities: CityConfig[] = [
       "bevoelkerungstrend": 1,
       "marktenge": 1,
       "teuerung": -1,
-      "referenzzins_aenderung": 0
+      "referenzzins_aenderung": 0,
+      "anteil_altliegenschaft": 0.814
     },
     "params": {
       "raumplanung_zonenreserve": 1,

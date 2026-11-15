@@ -87,7 +87,7 @@ Positiver Wert: höheres Verdrängungsrisiko. Eingehende Kanten: 9.
 | `raumplanung_verdichtung` | stärkere Pflicht zur Innenverdichtung | erhöht → höheres Verdrängungsrisiko | 0.57 / 0.57 / 0.57 | Annahme |
 | `ctx:zuwanderungsdruck` | Zuwanderung: stark wachsend | erhöht → höheres Verdrängungsrisiko | 1.00 / 1.00 / 1.00 | — |
 | `ctx:wirtschaftskraft` | Wirtschaftskraft: sehr stark | erhöht → höheres Verdrängungsrisiko | 0.70 / 1.00 / 0.90 | — |
-| `nutzung_kurzzeitvermietung` | strengere Regeln für Kurzzeitvermietung | senkt → weniger: höheres Verdrängungsrisiko | 0.79 / 0.79 / 0.79 | Annahme |
+| `nutzung_kurzzeitvermietung` | strengere Regeln für Kurzzeitvermietung | senkt → weniger: höheres Verdrängungsrisiko | 0.20 / 0.20 / 0.20 | Annahme |
 
 ### `spekulationshemmung`
 
@@ -230,5 +230,5 @@ Gewichtete Summe, geteilt durch die Summe der Koeffizienten. Keine Phasengewicht
 |---|---|---|
 | `spekulationshemmung` | 1.5 | erhöht |
 | `marktfriktion` | 1.0 | senkt |
-| `gemeinnuetzig_kraft` | 1.0 | erhöht |
+| `gemeinnuetzig_kraft` | 1.0 | senkt |
 | `aufwertungsdruck` | 0.8 | erhöht |

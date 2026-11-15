@@ -291,6 +291,10 @@ export const paramMeta40: ParamMeta40[] = [
     helpText: 'Regulierung von Kurzzeitvermietung und Untervermietung',
     levels: ['Frei (keine Einschränkung)', 'Zustimmung nötig', 'Tageslimit + Kündigungsrecht'],
     hoeherBedeutet: 'strengere Regeln für Untervermietung',
+    // Keine Notiz in docs/recherche/ behandelt Untervermietungsregeln; die
+    // einzige Kante (→ verdraengungsrisiko) ist eine Annahme (Prüfung
+    // 2026-11-15, phase-weights.ts).
+    evidenz: 'nicht_belegt',
     group: 'mietrecht',
   },
   {
@@ -409,6 +413,10 @@ export const paramMeta40: ParamMeta40[] = [
     helpText: 'Regulierung des Anteils zulässiger Zweitwohnungen',
     levels: ['Unbegrenzt', '20%-Deckel (Weber-Initiative)', 'Strengere kommunale Limits'],
     hoeherBedeutet: 'strengere Zweitwohnungsgrenze',
+    // CH-006 (Lex Weber) betrifft Tourismusgemeinden; für Städte über 40'000
+    // Einwohnern gibt es in docs/recherche/ keine Wirkungsstudie (Prüfung
+    // 2026-11-15, phase-weights.ts).
+    evidenz: 'nicht_belegt',
     group: 'nutzung',
   },
 

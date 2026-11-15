@@ -66,27 +66,74 @@ Falle: 2025 kam der grösste Beitrag zur Jahresteuerung von der Wohnungsmiete se
 
 Die Stufe ist eine Lage in der Reihe, keine Grösse. Stufe 0 ist der Normalfall (0.5 bis 1.5 Prozent), nicht null Teuerung; null liegt an der Grenze zwischen −2 und −1. Bis November 2026 rechnete der Code mit der Stufe selbst. Stufe −1 ergab im Indexregime einen Erhöhungsspielraum von −0.42, also einen Senkungsanspruch bei einer Teuerung von +0.2 Prozent. Das war ein Fehler der Skala, kein Befund der Reihe.
 
-Jetzt übersetzt `TEUERUNG_STUFE_PROZENT` jede Stufe in eine Jahresteuerung: −0.5, 0.25, 1.0, 2.0 und 3.0 Prozent. Die drei mittleren Werte sind die Bin-Mitten. Die beiden Randwerte sind eine Setzung, je eine halbe Bin-Breite jenseits der Grenze; die Reihe hat dort −0.4 und −0.7 beziehungsweise 2.8 Prozent. Geteilt wird durch `TEUERUNG_REFERENZ_PROZENT` (3.0), damit die oberste Stufe wie bisher bei 1 liegt.
+Jetzt übersetzt `TEUERUNG_STUFE_PROZENT` jede Stufe in eine Jahresteuerung: −0.5, 0.25, 1.0, 2.0 und 3.0 Prozent. Die drei mittleren Werte sind die Bin-Mitten. Die beiden Randwerte sind eine Setzung, je eine halbe Bin-Breite jenseits der Grenze; die Reihe hat dort −0.4 und −0.7 beziehungsweise 2.8 Prozent.
 
-Mit Teuerung −1 und Überwälzung 0.85 ist der Erhöhungsspielraum im Indexregime jetzt leicht positiv (0.07). Ein Senkungsanspruch entsteht nur bei Stufe −2. Eine Spirale aus der Teuerung 2025 erzeugt der Code weiterhin nicht: die Bestandsmiete steigt in Zürich über drei Phasen auf 0.04. Offen: das Verhältnis einer Teuerungseinheit zu einem Schritt des Referenzzinssatzes ist nicht geeicht.
+Seit Sprint 4 (November 2026) rechnet der Regime-Code die Teuerung in derselben Einheit wie den Zinsschritt: zulässige Mietzinsänderung in Prozent, geteilt durch `ERHOEHUNG_REFERENZ_PROZENT` (7.5). Siehe den Abschnitt zum Erhöhungsspielraum unten. Vorher war 3 Prozent Teuerung = 1 (`TEUERUNG_REFERENZ_PROZENT`, entfernt) und ein Zinsschritt = 0.5, ohne Eichung dazwischen.
 
-### `ctx:referenzzins_aenderung` — belegt, Bins provisorisch
+Mit Teuerung −1 (0.25 Prozent) und Überwälzung 0.85 erlaubt das Indexregime 0.2125 Prozent, in der Einheit 0.028 (vorher 0.07). Ein Senkungsanspruch entsteht nur bei Stufe −2. Eine Spirale aus der Teuerung 2025 erzeugt der Code weiterhin nicht: die Bestandsmiete steigt in Zürich über drei Phasen auf 0.017 (vorher 0.04).
+
+### `ctx:referenzzins_aenderung` — belegt, Schritt geeicht, Rand-Bins gesetzt
 
 Im Referenzzins-Regime entsteht der Anspruch auf Erhöhung oder Senkung aus der Änderung des Satzes, nicht aus seinem Niveau. Bis November 2026 las der Code `ctx:zinsniveau`. Ein tiefes, unverändertes Niveau (−1) galt damit in jeder Phase als neuer Senkungsanspruch, und die Initiative senkte die Bestandsmiete auch ohne gesetzte Mietlücke. Das widersprach dem Abschnitt zur Mietlücke weiter unten.
 
-Jetzt: Veränderung des Referenzzinssatzes über die letzten zwölf Monate, national. Bins in `REFERENZZINS_BINS`: Senkung um 0.5 Punkte oder mehr → −2, um 0.25 → −1, unverändert → 0, Erhöhung um 0.25 → +1, um 0.5 oder mehr → +2. Der Satz steht seit dem 2. September 2025 bei 1.25 Prozent und ist per 2. September 2026 unverändert.[14] Alle Städte tragen 0. Die Zuordnung Schritt zu Bin ist nicht kalibriert.
+Jetzt: Veränderung des Referenzzinssatzes über die letzten zwölf Monate, national. Bins in `REFERENZZINS_BINS`: Senkung um 0.5 Punkte oder mehr → −2, um 0.25 → −1, unverändert → 0, Erhöhung um 0.25 → +1, um 0.5 oder mehr → +2. Der Satz steht seit dem 2. September 2025 bei 1.25 Prozent und ist per 2. September 2026 unverändert.[14] Alle Städte tragen 0. Eine Stufe ist ein Schritt von 0.25 Punkten und erlaubt nach Art. 13 VMWG 3 Prozent Erhöhung oder 2.91 Prozent Senkung (Abschnitt Erhöhungsspielraum). Setzung: die Rand-Bins («0.5 Punkte oder mehr») zählen als genau zwei Schritte, eine Untergrenze.
 
 Nicht abgebildet: Senkungen aus früheren Jahren, die Mieter nie eingefordert haben. Das ist die verpasste Senkung unter der relativen Methode und gehört zur Mietlücke, nicht in diesen Kontextwert.
 
-Die Vorladung rechnet seit November 2026 in Teuerungs-Einheiten: gesperrt ist der Teil der Teuerung, den das Regime im laufenden Vertrag nicht zulässt. Referenzzins-Regime 60 Prozent (40 Prozent sind überwälzbar[18], `REFERENZ_TEUERUNG_PASS_THROUGH`), Landesindex 15 Prozent, Kostenbindung 100 Prozent. Vorher wurde im Referenzzins-Regime ein Teuerungs-Bin gegen einen Zins-Bin verrechnet. Offen: der Erhöhungsspielraum im Referenzzins-Regime enthält die 40 Prozent Teuerung selbst noch nicht, nur die Zinsänderung.
+Die Vorladung rechnet seit November 2026 in der Einheit des Erhöhungsspielraums: gesperrt ist der Teil der Teuerung, den das Regime im laufenden Vertrag nicht zulässt. Referenzzins-Regime 60 Prozent (40 Prozent sind überwälzbar, Art. 16 VMWG[30], `REFERENZ_TEUERUNG_PASS_THROUGH`), Landesindex 15 Prozent, Kostenbindung 100 Prozent. Überwälzter und gesperrter Teil ergeben zusammen die ganze positive Teuerung. Vorher wurde im Referenzzins-Regime ein Teuerungs-Bin gegen einen Zins-Bin verrechnet.
 
-### `ctx:anteil_altliegenschaft` — Messvorschrift, nicht gefüllt
+### Erhöhungsspielraum — Einheit aus dem Recht geeicht (Sprint 4)
 
-Gebäude- und Wohnungsstatistik, Wohnungen nach Bauperiode, nur Mietwohnungen.[13] Schnitt: Baujahr ≤ Stichtag − 30. Nicht alle Wohnungen: Eigentum im Einfamilienhaus zieht den Anteil nach unten und interessiert den Knoten nicht. STAT-TAB, pro Gemeinde. Rohwert in den YAML-Kommentar, nicht eine erfundene Stufe.
+**Was sich geändert hat.** Der `erhoehungsspielraum` bedeutet in allen drei Index-Regimes dasselbe: zulässige Änderung des laufenden Mietzinses in Prozent pro Jahr, geteilt durch eine einzige Referenz, `ERHOEHUNG_REFERENZ_PROZENT` = 7.5 Prozent. Bestands- und Anfangsmiete summieren den Spielraum auf und tragen damit dieselbe Einheit.
+
+- Referenzzins-Regime (Index 0): Zinsanteil plus 40 Prozent der Teuerung. Vorher fehlte die Teuerung, obwohl das geltende Recht sie zulässt.
+- Landesindex (Index 1): 0.85 × Teuerung in Prozent, wie bisher, jetzt in derselben Einheit.
+- Kostenbindung (Index 2): 0.
+
+**Rechtsquelle.** VMWG, SR 221.213.11, Stand 1. Oktober 2025.[30]
+
+- Art. 13 Abs. 1: «Eine Hypothekarzinserhöhung von einem Viertel Prozent berechtigt in der Regel zu einer Mietzinserhöhung von höchstens: a. 2 Prozent bei Hypothekarzinssätzen von mehr als 6 Prozent; b. 2,5 Prozent bei Hypothekarzinssätzen zwischen 5 und 6 Prozent; c. 3 Prozent bei Hypothekarzinssätzen von weniger als 5 Prozent. Bei Hypothekarzinssenkungen sind die Mietzinse entsprechend herabzusetzen oder die Einsparungen mit inzwischen eingetretenen Kostensteigerungen zu verrechnen.» Der Referenzzinssatz liegt seit 2008 unter 5 Prozent; der Code verwendet nur Bst. c (`REFERENZZINS_SCHRITT_PROZENT` = 3). Die Senkung ist der Kehrwert, 1 − 1/1.03 = 2.91 Prozent je Viertelprozent; so beziffert sie das BWO in der Mitteilung vom 1. September 2025.[31] Mehrere Schritte wirken multiplikativ: zwei Schritte +6.09 beziehungsweise −5.74 Prozent.
+- Art. 16: «Zum Ausgleich der Teuerung auf dem risikotragenden Kapital im Sinne von Artikel 269a Buchstabe e OR darf der Mietzins um höchstens 40 Prozent der Steigerung des Landesindexes der Konsumentenpreise erhöht werden.» Dieselbe BWO-Mitteilung: die Teuerung könne zu 40 Prozent angerechnet werden.[31]
+
+**Stand der 40 Prozent.** Gültig. Der Vernehmlassungsentwurf vom April 2024 sah 28 Prozent vor. Der Bundesrat hat am 21. März 2025 nur einen Teil übernommen (Formulare, Art. 19 und 19a, in Kraft seit 1. Oktober 2025); die genauere Berechnung des Teuerungsausgleichs fiel weg.[32] Die konsolidierte Fassung vom 1. Oktober 2025 nennt in Art. 16 weiterhin 40 Prozent.[30] Die Vernehmlassung vom 25. Februar 2026 betrifft die zulässige Rendite, nicht Art. 13 oder 16. Das BWO überarbeitet das Mietzinsmodell (BWO-Bericht[7]); eine neue Zahl gilt erst mit einer Verordnungsänderung.
+
+**Referenz, eine Setzung.** 7.5 Prozent = 1. Grösster Fall der Bins: Erhöhung um zwei Zinsschritte (6.09 Prozent) plus 40 Prozent der obersten Teuerungsstufe (1.2 Prozent), zusammen 7.29 Prozent. Die Referenz ist das nächste halbe Prozent darüber; kein Bin-Fall erreicht 1. Die grösste Senkung liegt bei −0.77. Nicht gesetzt sind die Verhältnisse: ein Zinsschritt (3 Prozent) zu x Prozent Teuerung ist 3 : 0.4 x im Referenzzins-Regime und 3 : 0.85 x im Landesindex, unabhängig von der Referenz.
+
+**Folgen für die Baseline.** Alle Städte tragen Teuerung −1 (0.25 Prozent) und Referenzzins unverändert. Das Referenzzins-Regime erlaubt damit 0.1 Prozent im Jahr, in der Einheit 0.013. Die Bestandsmiete steigt in der «Heutigen Situation» von Zürich über drei Phasen auf 0.008 (vorher 0). Das ist fachlich richtig, 40 Prozent von 0.25 Prozent. Im Widget erscheint es mit zwei Nachkommastellen als +0.01 in Phase 3. Ein Zinsschritt ist jetzt 0.40 statt 0.50, eine Senkung −0.39 statt −0.50.
+
+**Was das Umstellen mitzieht.** `FRONTLOAD`, `VERWEIL_GEWICHT` und `CAP_INVEST_WEIGHT` sind unverändert und weiter nicht kalibriert. Weil die gesperrte Teuerung jetzt durch 7.5 statt 3 geteilt wird, wirkt dieselbe Vorladung (`FRONTLOAD` 0.4) nur noch 0.4-mal so stark wie vorher. `pullBestand` zieht jede positive Bestandsmiete an den Deckel zurück, auch die zulässige Teuerungsüberwälzung. Deshalb bewegt die Durchsetzung allein in der Baseline jetzt etwas, höchstens 0.003, unter der Anzeigeschwelle. Die Regime-Zustände fliessen weiterhin nicht in Preistrends und Mietbelastung ein.
+
+**Offen.**
+- Ob ein Rückgang des LIK im Referenzzins-Regime einen Senkungsanteil gibt. Art. 16 spricht nur von der Steigerung; der Code rechnet nur positive Teuerung. Ein Herabsetzungsbegehren nach der relativen Methode kann ihn anrechnen; nicht geprüft.
+- Kostensteigerungen (Unterhalt, Betrieb) als dritter Anteil des Spielraums fehlen. Art. 13 verrechnet sie mit Senkungen.
+- Die Pauschale geht davon aus, dass frühere Senkungen weitergegeben wurden (Art. 13 Abs. 4). Wo nicht, ist es die verpasste Senkung und gehört zur Mietlücke.
+- Die Mietlücke muss in derselben Einheit gesetzt werden: Abstand in Prozent, geteilt durch 7.5.
+- `pullBestand` unterscheidet die zulässige Überwälzung nicht von einer Überhöhung über dem Deckel.
+
+### `ctx:anteil_altliegenschaft` — gemessen, ohne Wirkung
+
+Messvorschrift: Gebäude- und Wohnungsstatistik, Wohnungen nach Bauperiode, nur Mietwohnungen.[13] Schnitt: Baujahr ≤ Stichtag − 30. Pro Gemeinde. Rohwert, keine Stufe.
 
 Nicht abziehen: jüngere Handänderungen. Nach dem Urteil bleibt ein 1980 erstelltes, 2020 verkauftes Haus alt.[11]
 
-Solange `WIRKSAMKEIT_OQU` auf 0 steht, ändert der fehlende Anteil das Status-quo-Ergebnis nicht. Gemessen werden muss er trotzdem, sonst kann niemand die Beweisregeln später lockern, ohne die Städte zu raten. Im provisorischen Code fehlt das Feld. Fehlend heisst nicht 0 Prozent Altbau, sondern «nicht verwendet».
+**Gefüllt, November 2026.** GWS, Bestand am 31. Dezember 2025, Swiss Stats Explorer `DF_GWS_REG5` (Nachfolger von STAT-TAB px-x-0902020200_102), Wohnungen nach Gemeinde, Gebäudekategorie und Bauperiode.[40] Die Schweizer Summe der Tabelle (4 883 159) passt zu den 4,88 Millionen Wohnungen «Ende 2025» der BFS-Mitteilung.[41] Schnitt: Bauperiode bis 1995. Stichtag − 30 ist 1995, die Klassengrenze 1991–1995 trifft die Grenze genau. Abgrenzung: Wohnungen in Wohngebäuden ohne Einfamilienhäuser.
+
+| Stadt | bis 1995 | Total ohne EFH | Anteil | alle Wohnungen | bis 1990 | bis 2000 |
+|---|---:|---:|---:|---:|---:|---:|
+| Zürich | 174 504 | 230 273 | 0.758 | 0.764 | 0.739 | 0.775 |
+| Genf | 98 922 | 113 686 | 0.870 | 0.870 | 0.838 | 0.914 |
+| Basel | 89 503 | 99 482 | 0.900 | 0.903 | 0.884 | 0.909 |
+| Lausanne | 68 115 | 80 353 | 0.848 | 0.846 | 0.836 | 0.859 |
+| Bern | 70 841 | 78 695 | 0.900 | 0.902 | 0.891 | 0.918 |
+| Winterthur | 35 789 | 50 618 | 0.707 | 0.719 | 0.671 | 0.735 |
+| Luzern | 37 427 | 46 503 | 0.805 | 0.805 | 0.777 | 0.833 |
+| St. Gallen | 35 388 | 43 073 | 0.822 | 0.823 | 0.795 | 0.844 |
+| Lugano | 29 957 | 36 895 | 0.812 | 0.811 | 0.763 | 0.829 |
+| Biel | 24 973 | 30 679 | 0.814 | 0.816 | 0.795 | 0.854 |
+
+Abweichung von der Messvorschrift: Die GWS kennt keine Bewohnerart. «Nur Mietwohnungen» pro Gemeinde ist nicht publiziert. Im Wert stecken Stockwerkeigentum, Genossenschaften, leere und zeitweise bewohnte Wohnungen. Richtung: eher zu tief. Schweizweit sind Mietwohnungen älter als der Durchschnitt, gebaut bis 1990 sind es 70.0 gegen 65.4 Prozent aller bewohnten Wohnungen, beim Stockwerkeigentum 39.9 Prozent.[42] In Städten mit wenig Eigentum dürfte der Abstand kleiner sein. Pro Stadt ist er nicht gemessen. Die Annahme oben, Einfamilienhäuser zögen den Anteil nach unten, stimmt in diesen Städten nicht: dort sind sie älter als der Rest. Weglassen senkt den Wert leicht, in Winterthur um 1.2 Punkte. Renovationen bleiben unberücksichtigt; die Bauperiode ist die Erstellung.
+
+Solange `WIRKSAMKEIT_OQU` auf 0 steht, ändert der Anteil kein Ergebnis. Geprüft: alle Städte, alle Phasen, leeres Diff und `mietrecht_kriterium` 1 → 2, mit und ohne Feld identisch. Der Test `anteil-altliegenschaft.test.ts` hält das fest.
 
 ### `ctx:mietluecke` — nicht belegt, nicht gesetzt
 
@@ -98,7 +145,17 @@ Die IAZI-Studie von Ende 2024, auf die der BWO-Bericht verweist, prüft, ob das 
 
 Proxy, der den Deckel nicht ersetzt: Mietpreiserhebung Stadt Zürich, Nettomieten im Bestand, nach Mietdauer. Portalpreise sind ausgeschriebene Bruttomieten, ausdrücklich nicht der Bestand.[15] Lange Mietdauer mal Referenzzinspfad seit Vertragsbeginn ist die verpasste Senkung unter der relativen Methode, nicht der absolute Ertragstest. Gemeinnützig gegen privat zeigt zwei Teilmärkte, nicht einen Prozentsatz über dem Deckel. Die Häuser sind nicht dieselben.
 
-Im Code fehlt `mietluecke`. Durchsetzung multipliziert mit 0. Eine Initiative ohne gesetzte Lücke senkt nichts. Das ist Absicht. Ein gesetzter Wert braucht `mietlueckeEstimated: true`, bis eine Stichprobe mit Anlagekosten vorliegt. Die Angebotsmiete ist endogen und darf nicht als Kontext festgenagelt werden.
+**Suche November 2026: kein Ertragstest, nur der Mietdauer-Abstand.** Eine öffentliche Datenbasis mit Anlagekosten pro Liegenschaft gibt es weiterhin nicht. Publiziert ist der Abstand zwischen Neubezug und langer Mietdauer, aus drei Quellen. Proxy: `1 − Miete(lange Mietdauer) / Miete(Neubezug)`.
+
+- BFS Strukturerhebung 2024, T 09.03.03.67, Nettomiete von Mieter- und Genossenschafterwohnungen nach Zimmerzahl und Bezugsdauer, nur Zürich, Genf, Basel, Lausanne und Bern.[43] Neubezug unter 2 Jahren gegen 21 Jahre und mehr, Mittel aus 2 bis 4 Zimmern: Zürich 0.36 (3 Zimmer 2125 gegen 1346 Franken), Lausanne 0.35, Genf 0.32, Basel 0.28, Bern 0.27, Schweiz 0.26. Die Stichprobe ist klein. Die Vertrauensintervalle verschieben die Einzelwerte um bis zu ±0.10.
+- BFS Strukturerhebung 2024, T 09.03.03.64, nach Kanton.[44] Sie trennt Neubau vom Neubezug einer älteren Wohnung. Neubezug älter gegen 21 Jahre und mehr: Genf 0.28, Waadt 0.26, Zürich 0.23, Luzern 0.17, Bern 0.16, Basel-Stadt 0.16, St. Gallen 0.15, Tessin 0.13, Schweiz 0.18. Kanton, nicht Stadt. Für Winterthur, Luzern, St. Gallen, Lugano und Biel gibt es nur diese Ebene.
+- Mietpreiserhebung Stadt Zürich 2026, Stichtag 1. April 2026, typische 75-Quadratmeter-Wohnung, nicht gemeinnützig: Neubezug in älterem Gebäude 2287, 3 bis 10 Jahre 2086, ab 10 Jahren 1657, über 20 Jahre 1416 Franken. Abstand über 20 Jahre: 0.38. Gemeinnützig: über 20 Jahre 1080 gegen 1145 bis 1174 Franken, 0.06 bis 0.08.[45]
+
+Was der Proxy misst: wie weit lange Verträge unter dem heutigen Neuabschluss liegen. Das ist eher die Lücke zur Anfangsmiete als eine Überhöhung des Bestands über dem Deckel; das Vorzeichen ist entgegengesetzt. Was er nicht misst: den absoluten Ertragstest. Er enthält Lage, Zustand und Gebäudealter (lange Verträge liegen öfter in unrenovierten Altbauten) und in den BFS-Tabellen den Genossenschaftsanteil. Er enthält nicht die verpasste Senkung im Bestand. Die Zürcher MPE zeigt die Mischung: nicht gemeinnützig 0.38, gemeinnützig unter 0.10.
+
+Skala: Die Regime-Einheit ist Prozent geteilt durch 7.5 (oben). Ein Abstand von 36 Prozent ergäbe 4.8 und läge weit über der Klemme bei 1. Der Proxy lässt sich deshalb nicht ohne zusätzliche Setzung in `mietluecke` übertragen. Kein Wert gesetzt; der Entscheid liegt beim Projektinhaber.
+
+In `switzerland.yaml` fehlt `mietluecke`; das Build-Skript lehnt einen Wert ohne `mietlueckeEstimated: true` ab. Durchsetzung multipliziert mit 0. Eine Initiative ohne gesetzte Lücke senkt nichts. Das ist Absicht. Ein gesetzter Wert braucht `mietlueckeEstimated: true`, bis eine Stichprobe mit Anlagekosten vorliegt. Die Angebotsmiete ist endogen und darf nicht als Kontext festgenagelt werden.
 
 ## Provisorische Graph-Anpassung
 
@@ -117,7 +174,7 @@ Neue Zustände, ausserhalb der linearen Kantensumme, eine Phase Verzug, kein Fix
 
 1. `vergleichsmiete_aktiv` — Tor. Kriterium 0 → 0. Kriterium 2 → 1. Kriterium 1 → Anteil × Wirksamkeit, heute 0.
 2. `bestandsmiete` und `anfangsmiete` — plus heisst teuer. Überhöhung ist `max(0, miete)`. Kein eigener Knoten.
-3. `erhoehungsspielraum` — Index 0 liest `ctx:referenzzins_aenderung` (Änderung des Referenzzinssatzes über zwölf Monate, nicht `ctx:zinsniveau`; siehe unten), Index 1 liest `ctx:teuerung × LIK_PASS_THROUGH` (0.85, Mitte der 80/90 Prozent[7]), Index 2 ist 0. Vermieter ziehen nur positives Spielraum nach. Senkungen laufen über die Durchsetzung.
+3. `erhoehungsspielraum` — zulässige Mietzinsänderung in Prozent, geteilt durch `ERHOEHUNG_REFERENZ_PROZENT` (7.5). Index 0: Änderung des Referenzzinssatzes über zwölf Monate (`ctx:referenzzins_aenderung`, nicht `ctx:zinsniveau`; 3 Prozent je Schritt, Art. 13 VMWG) plus 40 Prozent der Teuerung (Art. 16 VMWG). Index 1: `ctx:teuerung` in Prozent × `LIK_PASS_THROUGH` (0.85, Mitte der 80/90 Prozent[7]). Index 2 ist 0. Herleitung oben, Abschnitt Erhöhungsspielraum. Vermieter ziehen nur positives Spielraum nach. Senkungen laufen über die Durchsetzung.
 4. Teuerung ist Kontext plus dieser Schalter, kein eigener E1-Knoten.
 5. Durchsetzung ist die Intensität 0 / 0.5 / 1 und multipliziert die Überhöhung. Ohne gesetzte Lücke ist der Abzug 0.
 6. `verweildauer` liest die Mietlücke der Vorperiode. Nicht `marktfriktion` umdeuten.
@@ -205,3 +262,12 @@ Kein Schiedsrichter zwischen Mieterverband und Bundesrat. Die Spirale kann erst 
 [22] https://web.archive.org/web/20250117170353/https://www.tagesanzeiger.ch/mieten-schweiz-mietzinserhoehung-wegen-veralteten-modells-862157887436 — Tages-Anzeiger, Schlapbach, 10.1.2025, Archiv 17.1.2025, nur Vorspann
 [23] https://www.steinbeis-cres.de/assets/Forschung/Studie_Mietpreisbremse_20151031.pdf — Wölfle, CRES Discussion Paper No. 6, 2015
 [24] https://epub.uni-regensburg.de/32398/3/IREBS_Heft_10.pdf — Lerbs/Sebastian, IREBS Heft 10, 2015
+[30] https://www.fedlex.admin.ch/eli/cc/1990/835_835_835/de — VMWG, SR 221.213.11, Stand 1.10.2025, Art. 13 und 16 (gelesen 15.11.2026)
+[31] https://www.admin.ch/de/newnsb/XAQAzjeJ5vT1zHSTJBRak — BWO, Mitteilung 1.9.2025, Referenzzinssatz 1.25 %, Senkungsanspruch 2,91 %, Teuerung 40 %
+[32] https://www.srf.ch/news/schweiz/mietzinsdaempfer-per-verordnung-mehr-transparenz-beim-mietzins-neue-regeln-ab-oktober — SRF, 22.3.2025, Bundesratsentscheid zur VMWG-Revision
+[40] https://stats.swiss/vis?lc=de&df[ds]=disseminate&df[id]=DF_GWS_REG5&df[ag]=CH1.GWS — BFS GWS, DF_GWS_REG5, Wohnungen nach Gemeinde, Gebäudekategorie und Bauperiode, Jahr 2025 (SDMX-Abfrage 15.11.2026)
+[41] https://www.bfs.admin.ch/de/newnsb/xrhcMB8jXvge — BFS, Medienmitteilung 15.9.2026, Gebäude- und Wohnungsstatistik 2025
+[42] https://www.bfs.admin.ch/asset/de/36398365 — BFS SE, T 09.03.02.01.05, Bewohnte Wohnungen nach Bauperiode und Bewohnertyp, 2024
+[43] https://www.bfs.admin.ch/asset/de/36398555 — BFS SE, T 09.03.03.67, Mietpreis nach Zimmerzahl und Bezugsdauer, grösste Städte, 2024
+[44] https://www.bfs.admin.ch/asset/de/36398542 — BFS SE, T 09.03.03.64, Mietpreis nach Bezugsdauer und Kanton, 2024
+[45] https://www.stadt-zuerich.ch/artikel/de/statistik-und-daten/mietpreise-2026-in-der-stadt-zuerich.html — Statistik Stadt Zürich, Mietpreiserhebung 2026

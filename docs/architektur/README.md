@@ -103,7 +103,7 @@ in `src/model/derived.ts`.
 | `gentrifizierungsindex` | `w·aufwertungsdruck – w·mietpreis_schutzlevel + w·verdraengungsrisiko – w·gemeinnuetzig_kraft` |
 | `neubau_hemmnisindex` | `–1 × angebotspotenzial` (invertiert) |
 | `verdraengungsrisiko_index` | Alias von `verdraengungsrisiko` (E1) |
-| `fiskalische_wirkung` | `w·spekulationshemmung – w·marktfriktion + w·gemeinnuetzig_kraft + w·aufwertungsdruck` |
+| `fiskalische_wirkung` | `w·spekulationshemmung – w·marktfriktion – w·gemeinnuetzig_kraft + w·aufwertungsdruck` (plus = Mehreinnahmen oder Entlastung der öffentlichen Hand) |
 
 ---
 

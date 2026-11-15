@@ -4,7 +4,7 @@ import { graphConnect, sugiyama, layeringSimplex, decrossTwoLayer, decrossDfs } 
 import type { ParamsDiff40, MarketState, DerivedIndicators, CityContext } from '../types';
 import { computePhasesCached } from '../model/compute-phases';
 import { computeDerivedIndicators } from '../model/derived';
-import { getDagTopology, type Edge, type NodeId } from '../model/dag-topology';
+import { getDagTopology, getNodeTimeClasses, type Edge, type NodeId, type NodeTimeClass } from '../model/dag-topology';
 import { PARAM_KEYS_40 } from '../model/params';
 import './DAGVisualization.css';
 
@@ -59,55 +59,28 @@ const GROUP_LABELS: Record<string, string> = {
   e2:             'Indikatoren',
 };
 
-// ── Time classes (local) ────────────────────────────────────────────────────
+// ── Verlaufsklassen ─────────────────────────────────────────────────────────
+// Aus dem Modell abgeleitet (dag-topology.ts, Stand über die Phasen). Bis
+// 2026-11 stand hier eine von Hand gepflegte Liste, die nicht zu den
+// Kantenvektoren passte (z. B. ÖV «langfristig», obwohl alle ÖV-Kanten
+// Annahme-Kanten ohne Verlaufsevidenz sind).
 
-type TimeClassLocal = 'short' | 'medium' | 'long';
+const NODE_TIME_CLASSES = getNodeTimeClasses();
 
-const TIME_CLASS_MAP_LOCAL: Record<string, TimeClassLocal> = {
-  'ctx:zinsniveau':          'short',
-  'ctx:zuwanderungsdruck':   'short',
-  'ctx:wirtschaftskraft':    'medium',
-  'ctx:bevoelkerungstrend':  'long',
-  raumplanung_zonenreserve:          'long',
-  raumplanung_verdichtung:           'medium',
-  raumplanung_ausnuetzungsziffer:   'medium',
-  boden_vorkaufsrecht:               'long',
-  boden_bauverpflichtung:            'medium',
-  boden_mehrwertabgabe:              'long',
-  boden_bodeneigentumssteuer:        'medium',
-  bau_energievorgaben:               'short',
-  bau_sanierungspflicht:             'short',
-  bau_einspracherecht_dritte:        'short',
-  bau_einspracherecht_suspensiv:     'short',
-  bau_bewilligungsverfahren:         'medium',
-  bau_normenharmonisierung:          'long',
-  gemeinnuetzig_mindestanteil:       'long',
-  gemeinnuetzig_foerderfonds:        'long',
-  gemeinnuetzig_baurecht:            'long',
-  gemeinnuetzig_belegungsvorschriften:'medium',
-  gemeinnuetzig_sozialmischung:      'long',
-  mietrecht_kostenmiete:             'short',
-  mietrecht_anfangsmiete:            'short',
-  mietrecht_mietzinstransparenz:     'short',
-  mietrecht_kuendigungsschutz:       'short',
-  mietrecht_mietzinsindex:           'short',
-  mietrecht_untervermietung:         'short',
-  steuer_grundstueckgewinn:          'medium',
-  steuer_eigenmietwert:              'medium',
-  steuer_leerstandsabgabe:           'medium',
-  steuer_handaenderung:              'short',
-  steuer_kapitalgewinnprivatpersonen:'short',
-  kapital_auslaendische_investoren:  'medium',
-  kapital_institutionelle_regulierung:'medium',
-  kapital_hypothekarregulierung:     'short',
-  nutzung_kurzzeitvermietung:        'short',
-  nutzung_umnutzungsverbot:          'short',
-  nutzung_abbruchverbot:            'short',
-  nutzung_zweitwohnungen:            'long',
-  infra_oepnv:                       'long',
-  infra_schule_kita:                'long',
-  infra_oeffentlicher_raum:          'long',
-  infra_wirtschaftsansiedlung:        'long',
+const TIME_COLORS: Record<NodeTimeClass, string> = {
+  sofort: '#51cf66',
+  aufbauend: '#fab005',
+  verzoegert: '#ff6b6b',
+  annahme: '#868e96',
+  gemischt: '#74c0fc',
+};
+
+const TIME_LABELS: Record<NodeTimeClass, string> = {
+  sofort: 'sofort',
+  aufbauend: 'aufbauend',
+  verzoegert: 'verzögert',
+  annahme: 'nicht belegt (Annahme)',
+  gemischt: 'je nach Kante verschieden',
 };
 
 // ── Node metadata ─────────────────────────────────────────────────────────
@@ -117,7 +90,7 @@ interface NodeMeta {
   label: string;
   group: string;
   level: 0 | 1 | 2;
-  time?: string;
+  time?: NodeTimeClass;
   paramKey?: string;
 }
 
@@ -138,6 +111,7 @@ function buildNodes(): NodeMeta[] {
     bau_einspracherecht_suspensiv: 'bau',
     bau_bewilligungsverfahren: 'bau',
     bau_normenharmonisierung: 'bau',
+    bau_ersatzneubau_effizienz: 'bau',
     gemeinnuetzig_mindestanteil: 'gemeinnuetzig',
     gemeinnuetzig_foerderfonds: 'gemeinnuetzig',
     gemeinnuetzig_baurecht: 'gemeinnuetzig',
@@ -181,6 +155,7 @@ function buildNodes(): NodeMeta[] {
     bau_einspracherecht_suspensiv: 'Einsprache Susp.',
     bau_bewilligungsverfahren: 'Bewilligung',
     bau_normenharmonisierung: 'Normenharmonis.',
+    bau_ersatzneubau_effizienz: 'Ersatzneubau',
     gemeinnuetzig_mindestanteil: 'Mindestanteil',
     gemeinnuetzig_foerderfonds: 'Förderfonds',
     gemeinnuetzig_baurecht: 'Baurecht',
@@ -219,7 +194,7 @@ function buildNodes(): NodeMeta[] {
       label: labelMap[key] ?? key,
       group: groupMap[key] ?? 'bodenrecht',
       level: 0,
-      time: TIME_CLASS_MAP_LOCAL[key] ?? 'medium',
+      time: NODE_TIME_CLASSES[key as NodeId],
       paramKey: key,
     });
   }
@@ -232,7 +207,7 @@ function buildNodes(): NodeMeta[] {
     { id: 'ctx:bevoelkerungstrend',  label: 'Bevölkerungstrend'  },
   ];
   for (const ctx of ctxKeys) {
-    nodes.push({ ...ctx, group: 'ctx', level: 0, time: TIME_CLASS_MAP_LOCAL[ctx.id] ?? 'short' });
+    nodes.push({ ...ctx, group: 'ctx', level: 0, time: NODE_TIME_CLASSES[ctx.id] });
   }
 
   // E1 nodes
@@ -599,12 +574,11 @@ export function DAGVisualization({ context, diff }: Props) {
 
       // Time badge for E0
       if (node.level === 0 && node.time) {
-        const timeColors: Record<string, string> = { short: '#51cf66', medium: '#fab005', long: '#ff6b6b' };
         nodeG.append('circle')
           .attr('cx', w - 8)
           .attr('cy', h / 2)
           .attr('r', 3)
-          .attr('fill', timeColors[node.time] ?? '#555');
+          .attr('fill', TIME_COLORS[node.time]);
       }
 
       // Diff badge
@@ -717,7 +691,7 @@ export function DAGVisualization({ context, diff }: Props) {
                 </div>
                 {tooltip.node.time && (
                   <div className="dag-viz__tooltip-row">
-                    Zeitklasse: <strong style={{ color: tooltip.node.time === 'short' ? '#51cf66' : tooltip.node.time === 'medium' ? '#fab005' : '#ff6b6b' }}>{tooltip.node.time}</strong>
+                    Verlauf: <strong style={{ color: TIME_COLORS[tooltip.node.time] }}>{TIME_LABELS[tooltip.node.time]}</strong>
                   </div>
                 )}
                 {tooltip.value !== undefined && (
@@ -755,18 +729,12 @@ export function DAGVisualization({ context, diff }: Props) {
           </span>
         ))}
         <span className="dag-viz__legend-sep" />
-        <span className="dag-viz__legend-item">
-          <span className="dag-viz__legend-dot" style={{ background: '#51cf66' }} />
-          <span className="dag-viz__legend-label">kurz</span>
-        </span>
-        <span className="dag-viz__legend-item">
-          <span className="dag-viz__legend-dot" style={{ background: '#fab005' }} />
-          <span className="dag-viz__legend-label">mittel</span>
-        </span>
-        <span className="dag-viz__legend-item">
-          <span className="dag-viz__legend-dot" style={{ background: '#ff6b6b' }} />
-          <span className="dag-viz__legend-label">lang</span>
-        </span>
+        {(Object.keys(TIME_COLORS) as NodeTimeClass[]).map(k => (
+          <span key={k} className="dag-viz__legend-item">
+            <span className="dag-viz__legend-dot" style={{ background: TIME_COLORS[k] }} />
+            <span className="dag-viz__legend-label">{TIME_LABELS[k]}</span>
+          </span>
+        ))}
         <span className="dag-viz__legend-sep" />
         <span className="dag-viz__legend-item">
           <span className="dag-viz__legend-line" style={{ background: '#3d5a80' }} />

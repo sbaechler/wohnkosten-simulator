@@ -146,7 +146,7 @@ export interface GroupPriceTrend {
  *
  * | Gruppe                     | Markt-Faktor | Schutz-Faktor | Verdrängung | Andere        | Rationale |
  * |----------------------------|-------------|---------------|-------------|---------------|-----------|
- * | geringverdiener            | 0.5         | -1.0          | +verd*0.2   | —             | Sozialhilfe/EL entkoppeln vom Markt; voller Schutz; Verdrängung (CH-008) |
+ * | geringverdiener            | 0.5         | -1.0          | +verd*0.2   | -gemkraft*0.25| Sozialhilfe/EL entkoppeln vom Markt; voller Schutz; Verdrängung (CH-008); gemeinnütziger Sektor (AT-002) |
  * | normalverdiener_bestand    | 0.4         | -1.2          | —           | —             | Regulierung schützt stark; reagiert träge |
  * | normalverdiener_angebot    | 1.2         | +0.2          | —           | -gemkraft*0.25| Volle Marktdynamik; Spillover vom Bestandsschutz; gemeinnützige Konkurrenz dämpft die Marktmiete (AT-002) |
  * | glueckspilze               | 0.1         | —             | —           | —             | Fast vollständig markt-entkoppelt |
@@ -174,6 +174,31 @@ export interface GroupPriceTrend {
  * Gruppen ohne Rangfolge und quantifiziert die Belastung nicht.
  */
 const VERDRAENGUNG_GERINGVERDIENER = 0.2;
+
+/**
+ * Gemeinnütziger Sektor bei den Geringverdienern (2026-11-15).
+ *
+ * Die Gruppe ist definiert als «auf Sozialhilfe oder stark geförderte
+ * Wohnungen angewiesen» (GROUPS oben). Ein stärkerer gemeinnütziger Sektor
+ * wirkt für sie auf zwei Wegen:
+ * - Preisdämpfung auf dem Mietmarkt (AT-002, WIFO: «Public Option», der
+ *   gemeinnützige Wohnbau dämpft auch die privaten Mieten; AT-001: Wien mit
+ *   rund 60 % geförderten oder gemeinnützigen Wohnungen, Mietbelastung 18 %).
+ *   Diesen Weg haben die Neumieter mit −0.25.
+ * - Zugang: mehr geförderte und gemeinnützige Wohnungen heisst mehr
+ *   Wohnungen, auf die diese Gruppe nach ihrer Definition angewiesen ist.
+ *   CH-008 nennt Belegungsvorschriften als Gegenmassnahme zur Verdrängung
+ *   einkommensschwacher Haushalte.
+ *
+ * Grösse 0.25: Setzung, gleich wie bei den Neumietern. Die schwächere
+ * Marktkopplung der Gruppe (Marktfaktor 0.5 statt 1.2) spräche für weniger,
+ * der direkte Zugang für mehr; keine Notiz quantifiziert einen der beiden
+ * Wege, und keine sagt, wie treffsicher der Schweizer gemeinnützige Sektor
+ * Geringverdiener erreicht (Genossenschaften haben oft keine
+ * Einkommenslimite). Unter dem Faktor der Genossenschafter (0.5), die bereits
+ * eine solche Wohnung haben.
+ */
+const GEMEINNUETZIG_GERINGVERDIENER = 0.25;
 
 /**
  * Direkter Zinskanal der Eigentümer mit Hypothek (Fix-14, 2026-11-15).
@@ -225,8 +250,10 @@ function basePriceTrend(state: MarketState, context: GroupContext, group: GroupI
 
   if (group === 'geringverdiener') {
     // Geringverdiener sind stärker vom Markt entkoppelt (Sozialhilfe, Ergänzungsleistungen),
-    // aber von Verdrängung betroffen (CH-008, VERDRAENGUNG_GERINGVERDIENER)
-    groupBase = base * 0.5 + state.verdraengungsrisiko * VERDRAENGUNG_GERINGVERDIENER - protectionEffect * 1.0;
+    // aber von Verdrängung betroffen (CH-008, VERDRAENGUNG_GERINGVERDIENER),
+    // und profitieren vom gemeinnützigen Sektor (AT-002, GEMEINNUETZIG_GERINGVERDIENER)
+    groupBase = base * 0.5 + state.verdraengungsrisiko * VERDRAENGUNG_GERINGVERDIENER - protectionEffect * 1.0
+      - state.gemeinnuetzig_kraft * GEMEINNUETZIG_GERINGVERDIENER;
   } else if (group === 'normalverdiener_bestand') {
     // Bestandsmieter: Starke Dämpfung durch Regulierung, reagiert träge auf Markt
     groupBase = base * 0.4 - protectionEffect * 1.2;

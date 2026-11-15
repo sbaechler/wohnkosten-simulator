@@ -124,6 +124,11 @@ export const PERSISTENCE = 0.8;
  * dämpfen dort, wo die Bauzonen bereits stark ausgeschöpft sind); eine
  * Grösse nennt die Quelle nicht. Die Formel ergibt 0.4× bis 1.6×, also
  * Faktor 4 zwischen den Extremen.
+ * Prüfung 2026-11-15: keine Notiz in docs/recherche/ stützt eine Grösse.
+ * AU-004 (Zonierung wirkt stärker, je enger die Beschränkung bindet) und
+ * GLOBAL-025 (Angebotselastizität US-Städte >3 bis <0.5) stützen nur die
+ * Richtung, und nur für die Angebotsseite; der Faktor skaliert hier alle
+ * Kanten, auch Mietrecht, Nachfrage und Kontext.
  */
 export function marketModulator(marktenge: number): number {
   return 1.0 + marktenge * 0.3;

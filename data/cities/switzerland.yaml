@@ -20,6 +20,26 @@
 # Der Typwechsel (nichtständige → ständige Wohnbevölkerung) ist mitgezählt, weil
 # diese Personen Wohnraum belegen; 2023 war er ein Sondereffekt. Ohne ihn lägen
 # die Werte 0.3 bis 1.0 Prozentpunkte tiefer. Grenzfälle: Winterthur, Biel, Basel.
+#
+# anteil_altliegenschaft: Rohwert 0…1, keine Stufe. BGE 144 III 514 (CH-012).
+# Quelle: BFS Gebäude- und Wohnungsstatistik (GWS), Bestand am 31.12.2025,
+# Swiss Stats Explorer DF_GWS_REG5 (Nachfolger von STAT-TAB px-x-0902020200_102),
+# Wohnungen nach Gemeinde, Gebäudekategorie und Bauperiode, abgefragt 2026-11-15.
+# Schnitt: Bauperiode bis 1995 (Klasse 1991–1995 eingeschlossen). Stichtag − 30 =
+# 1995; die GWS-Klassengrenze fällt hier genau auf die 30-Jahre-Grenze.
+# Abgrenzung: Wohnungen in Wohngebäuden OHNE Einfamilienhäuser (Mehrfamilienhäuser,
+# Wohngebäude mit Nebennutzung, Gebäude mit teilweiser Wohnnutzung).
+# Abweichung von der Messvorschrift: Die GWS kennt keine Bewohnerart. «Nur
+# Mietwohnungen» pro Gemeinde ist nicht publiziert. Enthalten sind deshalb auch
+# Stockwerkeigentum, Genossenschaftswohnungen, leer stehende und zeitweise bewohnte
+# Wohnungen. Richtung: eher Unterschätzung. Schweizweit sind bewohnte Mietwohnungen
+# älter als alle bewohnten Wohnungen (BFS SE 2024, T 09.03.02.01.05: gebaut bis 1990
+# 70.0 % gegen 65.4 %), Stockwerkeigentum ist deutlich jünger (39.9 %). In den
+# Städten mit tiefem Eigentumsanteil dürfte der Abstand kleiner sein; pro Stadt
+# nicht gemessen. EFH weglassen senkt den Wert in den Städten leicht (EFH dort älter).
+# Nicht berücksichtigt: Renovationen (Bauperiode = Erstellung) und jüngere
+# Handänderungen (nach dem Urteil nicht abziehen, CH-012).
+# Wirkt nur über WIRKSAMKEIT_OQU (heute 0): ändert kein Rechenergebnis.
 
 - slug: zuerich
   name: "Zürich"
@@ -40,6 +60,10 @@
     teuerung: -1
     # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
     referenzzins_aenderung: 0
+    # BFS GWS, Bestand 31.12.2025 (DF_GWS_REG5, Gemeinde 261), Wohnungen ohne EFH:
+    # 174 504 von 230 273 mit Bauperiode bis 1995 = 0.758.
+    # Vergleich: alle Wohnungen 0.764; ohne EFH bis 1990 0.739, bis 2000 0.775.
+    anteil_altliegenschaft: 0.758
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 2
@@ -104,6 +128,10 @@
     teuerung: -1
     # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
     referenzzins_aenderung: 0
+    # BFS GWS, Bestand 31.12.2025 (DF_GWS_REG5, Gemeinde 6621), Wohnungen ohne EFH:
+    # 98 922 von 113 686 mit Bauperiode bis 1995 = 0.870.
+    # Vergleich: alle Wohnungen 0.870; ohne EFH bis 1990 0.838, bis 2000 0.914.
+    anteil_altliegenschaft: 0.870
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 2
@@ -168,6 +196,10 @@
     teuerung: -1
     # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
     referenzzins_aenderung: 0
+    # BFS GWS, Bestand 31.12.2025 (DF_GWS_REG5, Gemeinde 2701), Wohnungen ohne EFH:
+    # 89 503 von 99 482 mit Bauperiode bis 1995 = 0.900.
+    # Vergleich: alle Wohnungen 0.903; ohne EFH bis 1990 0.884, bis 2000 0.909.
+    anteil_altliegenschaft: 0.900
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 2
@@ -232,6 +264,10 @@
     teuerung: -1
     # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
     referenzzins_aenderung: 0
+    # BFS GWS, Bestand 31.12.2025 (DF_GWS_REG5, Gemeinde 5586), Wohnungen ohne EFH:
+    # 68 115 von 80 353 mit Bauperiode bis 1995 = 0.848.
+    # Vergleich: alle Wohnungen 0.846; ohne EFH bis 1990 0.836, bis 2000 0.859.
+    anteil_altliegenschaft: 0.848
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -296,6 +332,10 @@
     teuerung: -1
     # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
     referenzzins_aenderung: 0
+    # BFS GWS, Bestand 31.12.2025 (DF_GWS_REG5, Gemeinde 351), Wohnungen ohne EFH:
+    # 70 841 von 78 695 mit Bauperiode bis 1995 = 0.900.
+    # Vergleich: alle Wohnungen 0.902; ohne EFH bis 1990 0.891, bis 2000 0.918.
+    anteil_altliegenschaft: 0.900
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -360,6 +400,10 @@
     teuerung: -1
     # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
     referenzzins_aenderung: 0
+    # BFS GWS, Bestand 31.12.2025 (DF_GWS_REG5, Gemeinde 230), Wohnungen ohne EFH:
+    # 35 789 von 50 618 mit Bauperiode bis 1995 = 0.707.
+    # Vergleich: alle Wohnungen 0.719; ohne EFH bis 1990 0.671, bis 2000 0.735.
+    anteil_altliegenschaft: 0.707
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 1
@@ -424,6 +468,10 @@
     teuerung: -1
     # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
     referenzzins_aenderung: 0
+    # BFS GWS, Bestand 31.12.2025 (DF_GWS_REG5, Gemeinde 1061), Wohnungen ohne EFH:
+    # 37 427 von 46 503 mit Bauperiode bis 1995 = 0.805.
+    # Vergleich: alle Wohnungen 0.805; ohne EFH bis 1990 0.777, bis 2000 0.833.
+    anteil_altliegenschaft: 0.805
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -488,6 +536,10 @@
     teuerung: -1
     # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
     referenzzins_aenderung: 0
+    # BFS GWS, Bestand 31.12.2025 (DF_GWS_REG5, Gemeinde 3203), Wohnungen ohne EFH:
+    # 35 388 von 43 073 mit Bauperiode bis 1995 = 0.822.
+    # Vergleich: alle Wohnungen 0.823; ohne EFH bis 1990 0.795, bis 2000 0.844.
+    anteil_altliegenschaft: 0.822
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -552,6 +604,10 @@
     teuerung: -1
     # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
     referenzzins_aenderung: 0
+    # BFS GWS, Bestand 31.12.2025 (DF_GWS_REG5, Gemeinde 5192), Wohnungen ohne EFH:
+    # 29 957 von 36 895 mit Bauperiode bis 1995 = 0.812.
+    # Vergleich: alle Wohnungen 0.811; ohne EFH bis 1990 0.763, bis 2000 0.829.
+    anteil_altliegenschaft: 0.812
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -616,6 +672,10 @@
     teuerung: -1
     # BWO Referenzzinssatz: 1.25 % seit 2.9.2025, per 2.9.2026 unverändert → 0 (Änderung, nicht Niveau). CH-012.
     referenzzins_aenderung: 0
+    # BFS GWS, Bestand 31.12.2025 (DF_GWS_REG5, Gemeinde 371), Wohnungen ohne EFH:
+    # 24 973 von 30 679 mit Bauperiode bis 1995 = 0.814.
+    # Vergleich: alle Wohnungen 0.816; ohne EFH bis 1990 0.795, bis 2000 0.854.
+    anteil_altliegenschaft: 0.814
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1

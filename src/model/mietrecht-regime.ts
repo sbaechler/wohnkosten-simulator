@@ -7,9 +7,13 @@
 // Quelle und Grenzen: docs/recherche/CH/CH-012-mietpreisinitiative-gegenvorschlag-2026.md
 //
 // PROVISORISCH:
-// - anteil_altliegenschaft und mietluecke sind nicht belegt und
-//   fehlen im Stadt-Kontext. Fehlend ist nicht «null Prozent».
+// - anteil_altliegenschaft ist seit 2026-11-15 je Stadt gesetzt (BFS GWS,
+//   Messvorschrift im Kopf von switzerland.yaml), wirkt aber nicht, solange
+//   WIRKSAMKEIT_OQU = 0. mietluecke ist nicht belegt und fehlt im
+//   Stadt-Kontext. Fehlend ist nicht «null Prozent».
 // - FRONTLOAD, VERWEIL_GEWICHT, CAP_INVEST_WEIGHT sind nicht kalibriert.
+// - Der Erhöhungsspielraum ist geeicht (Art. 13/16 VMWG, eine Einheit für
+//   alle Regimes); gesetzt ist nur die Referenz ERHOEHUNG_REFERENZ_PROZENT.
 // - Die Regime-Zustände laufen nicht über den gemeinsamen Nenner
 //   (E1_NENNER, compute-phases.ts) und sind nicht kalibriert.
 // ============================================================
@@ -74,13 +78,39 @@ export const CAP_ANGEBOT_ANTEIL = 0.5;
 
 /**
  * Anteil der Teuerung, der im Referenzzins-Regime (Index 0) auf den
- * laufenden Mietzins überwälzt werden darf: 40 Prozent, entsprechend dem
- * angenommenen Eigenkapitalanteil des geltenden Modells (CH-012, NZZ
- * 18.1.2025 zur IAZI-Studie: «Die Teuerung fliesst heute zu 40 Prozent ein»).
+ * laufenden Mietzins überwälzt werden darf: 40 Prozent.
+ *
+ * Rechtsquelle: Art. 16 VMWG (SR 221.213.11, Stand 1.10.2025): «Zum Ausgleich
+ * der Teuerung auf dem risikotragenden Kapital […] darf der Mietzins um
+ * höchstens 40 Prozent der Steigerung des Landesindexes der
+ * Konsumentenpreise erhöht werden.» Der Vernehmlassungsentwurf vom April 2024
+ * (28 Prozent) wurde nicht übernommen; die Änderung vom 21.3.2025 betrifft
+ * nur Art. 19/19a. BWO, Mitteilung 1.9.2025: «Die Teuerung kann im Umfang von
+ * 40 Prozent angerechnet werden.» Siehe CH-012.
+ *
  * Der Rest ist gesperrte Teuerung und kann in die Anfangsmiete vorgeladen
  * werden.
  */
 export const REFERENZ_TEUERUNG_PASS_THROUGH = 0.4;
+
+/**
+ * Zulässige Mietzinserhöhung in Prozent je Erhöhung des Referenzzinssatzes um
+ * 0.25 Prozentpunkte.
+ *
+ * Rechtsquelle: Art. 13 Abs. 1 Bst. c VMWG (SR 221.213.11): «Eine
+ * Hypothekarzinserhöhung von einem Viertel Prozent berechtigt in der Regel zu
+ * einer Mietzinserhöhung von höchstens: […] 3 Prozent bei
+ * Hypothekarzinssätzen von weniger als 5 Prozent.» Der Referenzzinssatz liegt
+ * seit seiner Einführung 2008 unter 5 Prozent (Stand 2.9.2026: 1.25 %);
+ * die Stufen 2 % (über 6 %) und 2.5 % (5 bis 6 %) sind deshalb nicht
+ * abgebildet. `ctx:referenzzins_aenderung` trägt kein Zinsniveau.
+ *
+ * Senkungen: Art. 13 Abs. 1 Satz 2 VMWG, «entsprechend herabzusetzen».
+ * Rechnerisch der Kehrwert der Erhöhung, 1 − 1/1.03 = 2.91 Prozent je
+ * Viertelprozent (BWO, Mitteilung 1.9.2025: «Senkungsanspruch im Umfang von
+ * 2,91 Prozent»). Siehe `referenzzinsAnpassungProzent`.
+ */
+export const REFERENZZINS_SCHRITT_PROZENT = 3;
 
 /**
  * Bins für `ctx:teuerung`, geeicht an der BFS-LIK-Jahresteuerung
@@ -118,21 +148,31 @@ export const TEUERUNG_STUFE_PROZENT: Record<-2 | -1 | 0 | 1 | 2, number> = {
 };
 
 /**
- * Teuerung in Prozent, die im Regime dem Wert 1 entspricht: der Wert der
- * obersten Stufe. Damit bleibt Stufe +2 wie vor der Korrektur bei 1, und
- * die Skala bleibt in [−1, +1]. Setzung, nicht kalibriert: das Verhältnis
- * zu einem Schritt des Referenzzinssatzes (0.25 Punkte = 0.5) ist damit
- * nicht geeicht.
+ * Gemeinsame Einheit des Erhöhungsspielraums: zulässige Änderung des
+ * laufenden Mietzinses in Prozent pro Jahr, geteilt durch diese Referenz.
+ * Gilt für alle drei Index-Regimes, für die gesperrte Teuerung und damit
+ * auch für Bestands- und Anfangsmiete, die den Spielraum aufsummieren.
+ *
+ * Wert 7.5 Prozent = 1. Setzung. Begründung: der grösste Fall, den die Bins
+ * zulassen, ist im Referenzzins-Regime eine Erhöhung um zwei Schritte
+ * (1.03² − 1 = 6.09 %) plus 40 Prozent der obersten Teuerungsstufe
+ * (0.4 × 3.0 = 1.2 %), zusammen 7.29 %. Die Referenz ist das nächste halbe
+ * Prozent darüber, damit kein Bin-Fall über 1 liegt. Die grösste Senkung
+ * (zwei Schritte, 1 − 1.03⁻² = 5.74 %) liegt bei −0.77.
+ *
+ * Nur die Referenz ist gesetzt. Die Verhältnisse zwischen Zinsschritt,
+ * Teuerung im Referenzzins-Regime und Teuerung im LIK-Regime folgen aus
+ * Art. 13 und 16 VMWG und `LIK_PASS_THROUGH` und hängen nicht von ihr ab.
  */
-export const TEUERUNG_REFERENZ_PROZENT = 3.0;
+export const ERHOEHUNG_REFERENZ_PROZENT = 7.5;
 
 /**
  * Bins für `ctx:referenzzins_aenderung`: Veränderung des hypothekarischen
  * Referenzzinssatzes (BWO) über die letzten zwölf Monate. Der Satz bewegt
  * sich in Schritten von 0.25 Prozentpunkten; jeder Schritt begründet nach
- * VMWG Art. 13 eine Anpassung. Massgebend ist die Änderung, nicht das
- * Niveau. Stand 2.9.2026: 1.25 %, unverändert → 0. Siehe CH-012.
- * Provisorisch: die Zuordnung Schritt → Bin ist nicht kalibriert.
+ * VMWG Art. 13 eine Anpassung (`REFERENZZINS_SCHRITT_PROZENT`). Massgebend
+ * ist die Änderung, nicht das Niveau. Stand 2.9.2026: 1.25 %, unverändert
+ * → 0. Siehe CH-012. Setzung: die Rand-Bins zählen als genau zwei Schritte.
  */
 export const REFERENZZINS_BINS = {
   minus2: 'Senkung um 0.5 Punkte oder mehr',
@@ -149,21 +189,52 @@ export interface RegimeCarry {
   vergleichsbasis: number;
 }
 
-function normContext(value: number | undefined, fallback = 0): number {
-  if (typeof value !== 'number') return fallback;
-  return value / 2;
+/**
+ * Jahresteuerung in Prozent zur Stufe von `ctx:teuerung`. Fehlt der
+ * Kontextwert, gilt keine Teuerung (0), nicht die Stufe 0.
+ */
+export function teuerungProzent(stufe: number | undefined): number {
+  if (typeof stufe !== 'number') return 0;
+  const prozent = TEUERUNG_STUFE_PROZENT[stufe as -2 | -1 | 0 | 1 | 2];
+  return typeof prozent === 'number' ? prozent : 0;
+}
+
+/** Mietzinsänderung in Prozent → gemeinsame Einheit (`ERHOEHUNG_REFERENZ_PROZENT` = 1). */
+export function alsSpielraum(prozent: number): number {
+  return prozent / ERHOEHUNG_REFERENZ_PROZENT;
 }
 
 /**
- * Teuerung als Grösse mit echtem Nullpunkt: 0 = keine Teuerung,
- * 1 = `TEUERUNG_REFERENZ_PROZENT`. Fehlt der Kontextwert, gilt keine
- * Teuerung (0), nicht die Stufe 0.
+ * Teuerung als Grösse mit echtem Nullpunkt, in der gemeinsamen Einheit:
+ * 0 = keine Teuerung, Stufe +2 (3 %) = 3 / 7.5 = 0.4.
  */
 export function teuerungAlsGroesse(stufe: number | undefined): number {
-  if (typeof stufe !== 'number') return 0;
-  const prozent = TEUERUNG_STUFE_PROZENT[stufe as -2 | -1 | 0 | 1 | 2];
-  if (typeof prozent !== 'number') return 0;
-  return prozent / TEUERUNG_REFERENZ_PROZENT;
+  return alsSpielraum(teuerungProzent(stufe));
+}
+
+/**
+ * Zulässige Mietzinsänderung in Prozent aus der Änderung des
+ * Referenzzinssatzes, Art. 13 Abs. 1 VMWG. Jede Bin-Stufe von
+ * `ctx:referenzzins_aenderung` ist ein Schritt von 0.25 Punkten; die
+ * Rand-Bins («0.5 Punkte oder mehr») zählen als zwei Schritte, eine
+ * Untergrenze. Die Schritte wirken multiplikativ: Erhöhung 1.03ⁿ − 1,
+ * Senkung 1 − 1.03⁻ⁿ (2.91 % je Schritt, Kehrwert der Erhöhung).
+ */
+export function referenzzinsAnpassungProzent(stufe: number | undefined): number {
+  if (typeof stufe !== 'number' || stufe === 0) return 0;
+  const faktor = 1 + REFERENZZINS_SCHRITT_PROZENT / 100;
+  return (Math.pow(faktor, stufe) - 1) * 100;
+}
+
+/**
+ * Teuerungsanteil des Spielraums im Referenzzins-Regime in Prozent:
+ * 40 Prozent der Steigerung des LIK (Art. 16 VMWG). Art. 16 spricht nur von
+ * der Steigerung; ein Rückgang des LIK begründet hier keinen eigenen
+ * Senkungsanteil. Offen, ob ein Herabsetzungsbegehren nach der relativen
+ * Methode ihn anrechnet (CH-012).
+ */
+export function referenzTeuerungProzent(stufe: number | undefined): number {
+  return REFERENZ_TEUERUNG_PASS_THROUGH * Math.max(0, teuerungProzent(stufe));
 }
 
 function levelFromDiff(
@@ -216,17 +287,21 @@ export function applyMietrechtRegime(
   // wenn der Index auf dem Landesindex steht.
   const vergleich_bestand = kriterium === 2 && index === 1 ? 1 : 0;
 
+  // Alles in der gemeinsamen Einheit: zulässige Mietzinsänderung in Prozent,
+  // geteilt durch ERHOEHUNG_REFERENZ_PROZENT.
   // Teuerung als Grösse, nicht als Stufe: Stufe −1 ist positive Teuerung.
   const teuerung = teuerungAlsGroesse(context.teuerung);
-  // Referenzzins-Regime (Index 0): der Anspruch entsteht aus der ÄNDERUNG
+  // Referenzzins-Regime (Index 0): Zinsanteil (Art. 13 VMWG) plus 40 Prozent
+  // der Teuerung (Art. 16 VMWG). Der Zinsanteil entsteht aus der ÄNDERUNG
   // des Satzes, nicht aus `ctx:zinsniveau`. Ein tiefes, unverändertes
   // Niveau ist kein laufender Senkungsanspruch.
-  const zinsAenderung = normContext(context.referenzzins_aenderung, 0);
+  const zinsAnteil = alsSpielraum(referenzzinsAnpassungProzent(context.referenzzins_aenderung));
+  const referenzTeuerungAnteil = alsSpielraum(referenzTeuerungProzent(context.teuerung));
   const erhoehungsspielraum = index === 1
     ? teuerung * LIK_PASS_THROUGH
     : index === 2
       ? 0
-      : zinsAenderung;
+      : zinsAnteil + referenzTeuerungAnteil;
 
   const lueckeBekannt = typeof context.mietluecke === 'number';
   const start = lueckeBekannt ? clamp(context.mietluecke as number) : 0;
@@ -249,8 +324,9 @@ export function applyMietrechtRegime(
   );
 
   // Gesperrte Teuerung: der Teil der Teuerung, den das Regime im laufenden
-  // Vertrag NICHT zulässt. In Teuerungs-Einheiten gerechnet, für jedes
-  // Regime gleich. Früher `teuerung − erhoehungsspielraum`: im
+  // Vertrag NICHT zulässt. In der gemeinsamen Einheit des Spielraums, für
+  // jedes Regime gleich; zusammen mit dem überwälzten Teil ergibt sie die
+  // ganze (positive) Teuerung. Früher `teuerung − erhoehungsspielraum`: im
   // Referenzzins-Regime wurde so ein Teuerungs-Bin gegen einen Zins-Bin
   // verrechnet.
   const teuerungsUeberwaelzung = index === 1

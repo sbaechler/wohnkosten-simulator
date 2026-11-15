@@ -2,7 +2,7 @@
 
 > **Status:** Entscheide 1, 2, 3 und 5 gefällt (2026-11-13, siehe Abschnitt 9); alle Entscheide gefällt. Sprint 0, 1 und 2 sind umgesetzt auf `feat/mietrecht-regime-2026` (Sprint 0 und Fix-8 in Commit `238b6cd`, Sprint 1 in `46036cc`, Sprint 2 am 2026-11-14 umgesetzt). Sprint 3 Fix-9 bis Fix-14 am 2026-11-15 umgesetzt (Fix-9 bis Fix-13 in `f8841b3`). Das Kontextfeld `mietbelastungs_grenze` ist vollständig entfernt. Offen: Optimierer-Lauf (Fix-13), Regime-Kalibrierung (Sprint 4, braucht Daten).
 > **Grundlage:** Fachliches Review vom 2026-11-13: Code in `src/model`, gerenderte Widgets, `docs/recherche/summary.md`, CH-012, Nachrechnung aller 43 Parameter für Zürich (je ±1 Stufe, Wirkung in P3).
-> **Teststand 2026-11-15 (nach Fix-14):** 422 passed, 1 skipped. Kalibrierungs-Dry-Run 0/567 Verletzungen. `tsc -b`, `npm run build` und `npm run lint` ohne Fehler.
+> **Teststand 2026-11-15 (nach Sprint 4):** 520 passed, 1 skipped. Kalibrierungs-Dry-Run 0/567 Verletzungen. `tsc -b`, `npm run build` und `npm run lint` ohne Fehler.
 > **Teststand 2026-11-13:** 225 passed, 1 skipped. Kalibrierungs-Dry-Run 0/446 Verletzungen. `tsc -b` meldet 10 Typfehler, alle in Testdateien (Fixtures ohne die neuen Regime-Felder von `MarketState`, dazu `international-fachlich.test.ts:236`); damit läuft `npm run build` nicht durch. Die Fehler stammen aus den Regime-Änderungen des Branches, nicht aus den Fixes dieses Plans.
 
 ## 1. Ausgangslage
@@ -326,7 +326,34 @@ Baseline Zürich: Mietbelastung 46.6 / 47.8 / 48.3 % → 46.8 / 48.2 / 48.8 % (P
 
 ---
 
-## 6. Sprint 4 — erst mit Daten
+## 6. Sprint 4 — Daten, Regime-Einheiten, Restposten — ✅ teilweise (2026-11-15)
+
+**Stand 2026-11-15.** Umgesetzt mit drei parallelen Arbeitspaketen; die Kalibrierung der Regime-Gewichte bleibt offen.
+
+#### Daten
+- ✅ `anteil_altliegenschaft` für alle zehn Städte gesetzt (0.71 Winterthur bis 0.90 Basel und Bern). Quelle: BFS GWS, `DF_GWS_REG5`, Bestand 31.12.2025, Bauperiode bis 1995, Wohnungen in Wohngebäuden ohne Einfamilienhäuser. Messvorschrift im Kopf von `switzerland.yaml`. Abweichung von CH-012: nicht nur Mietwohnungen (die GWS kennt keine Bewohnerart); der Wert liegt deshalb eher zu tief. Solange `WIRKSAMKEIT_OQU = 0`, ändert der Wert kein Rechenergebnis (Test `anteil-altliegenschaft.test.ts`).
+- ⏳ `mietluecke` **nicht gesetzt.** Eine Datenbasis mit Anlagekosten gibt es weiterhin nicht. Verfügbar ist nur der Abstand langer Mietverhältnisse zum Neubezug einer älteren Wohnung (BFS-Strukturerhebung 2024, T 09.03.03.64, nach Kanton: ZH 0.23, GE 0.28, VD 0.26, LU 0.17, BE 0.16, BS 0.16, SG 0.15, TI 0.13; Mietpreiserhebung Stadt Zürich 2026, nicht gemeinnützig: 0.38). Der Proxy misst nicht den Abstand zum zulässigen Ertrag, und seine Skala passt nicht zur neuen Regime-Einheit (36 % wären 4.8). Entscheid offen: Proxy mit `mietlueckeEstimated: true` setzen oder Feld leer lassen.
+- ⏳ `FRONTLOAD`, `VERWEIL_GEWICHT`, `CAP_INVEST_WEIGHT` bleiben unkalibriert, solange die Mietlücke fehlt.
+
+#### Regime: Einheit des Erhöhungsspielraums
+- ✅ Eine Einheit für alle Index-Regimes: zulässige Mietzinsänderung in Prozent, geteilt durch `ERHOEHUNG_REFERENZ_PROZENT` (7.5, Setzung). Ein Schritt des Referenzzinssatzes von 0.25 Punkten zählt +3 % bzw. −2.91 % (Art. 13 VMWG), Teuerung im Referenzzins-Regime zu 40 % (Art. 16 VMWG), im LIK-Regime zu 85 %. Die Verhältnisse folgen aus dem Recht.
+- ✅ Art. 16 VMWG steht weiter bei 40 % (Fassung 1.10.2025). Der Entwurf von 2024 mit 28 % wurde nicht übernommen (Medienmitteilung des Bundesrats vom 21.3.2025).
+- Folge: Die «Heutige Situation» steht im Regime-Widget nicht mehr auf null (Zürich: Erhöhungsspielraum +0.01, Bestandsmiete +0.01 in P3). LIK-Regime: Spielraum 0.03 statt 0.07.
+- Offen: `pullBestand` behandelt jede positive Bestandsmiete als Überhöhung, auch die zulässige Überwälzung. Die Vorladung wirkt bei gleichem `FRONTLOAD` nur noch 0.4-mal so stark. Ob ein Rückgang des LIK im Referenzzins-Regime einen Senkungsanteil gibt, ist nicht entschieden (Art. 16 spricht von «Steigerung»).
+
+#### Restposten des Modells
+- ✅ DAG-Ansicht: Zeitklasse aus dem Stand abgeleitet (`sofort` / `aufbauend` / `verzögert` / `Annahme` / `gemischt`), Handliste entfernt, Legende nachgeführt. 71 von 100 Kanten sind Annahmen ohne Verlaufsevidenz.
+- ✅ `fiskalische_wirkung`: `gemeinnuetzig_kraft` geht mit −1 ein (Förderfonds, Baurecht, Vorkaufsrecht kosten). Widget-Texte zeigen nur noch die Tendenz und die vier Bestandteile.
+- ✅ `nutzung_kurzzeitvermietung → verdraengungsrisiko`: 0.79 → 0.2 (US-013, US-014, ES-002: keine messbare Wirkung der Regulierung auf Mieten und Leerstand).
+- ✅ Geringverdiener: Term `−0.25 · gemeinnuetzig_kraft` (AT-001, AT-002; Grösse Setzung).
+- ✅ Drei umstrittene Kanten (Zweitwohnungen → Angebot, Untervermietung → Verdrängung, Transparenz → Friktion): Vorzeichen unverändert, als Annahme gekennzeichnet; Zweitwohnungen und Untervermietung tragen «Wirkung nicht belegt».
+- ⏳ **Entscheid offen: Stärke unbelegter Angebotshebel.** Suspensive Einsprache (P3-Stand 1.66), Abbruchverbot (1.49), Umnutzungsverbot (1.42), Sanierungspflicht (1.37) und Bauverpflichtung (1.27) wirken auf das Angebot etwa so stark wie die belegten Hebel Zonenreserve (1.62), Verdichtung (1.48) und Ausnützung (1.46). Ursache: Fix-10 hat den P3-Stand der alten Vektoren übernommen. Es braucht eine Regel für das Verhältnis von Annahme-Kanten zu belegten Hebeln.
+- ⏳ **Entscheid offen: Mindestanteil.** Eine Senkung entlastet Neumieter (−0.064 in P3) und Mietbelastung (−0.20 pp), weil die Angebotskante (0.51) die Preisdämpfung über die gemeinnützige Kraft überwiegt. US-018 stützt die Richtung nur ohne Ausgleich (Dichtebonus); welches Verhältnis gilt, sagt keine Studie.
+- ⏳ `marketModulator`: keine Notiz stützt die Grösse; AU-004 und GLOBAL-025 stützen die Richtung nur für die Angebotsseite. Unverändert.
+- ⏳ Optimierer-Lauf weiterhin nicht gemacht (Gewichte erfüllen alle Constraints).
+- Kleinere Reste: `US-018` trägt im Kopf die ID `GLOBAL-027`; veraltete Kommentare in `gemeinnuetzig-fachlich.test.ts`; Fussnoten in CH-012 springen von [24] auf [30] und [40].
+
+#### Ursprüngliche Liste
 
 - `mietluecke` und `anteil_altliegenschaft` gemäss Messvorschrift in CH-012 füllen. Erst dann `FRONTLOAD`, `VERWEIL_GEWICHT`, `CAP_INVEST_WEIGHT` kalibrieren.
 - Zitierte Zahlen in JSDoc-Kommentaren (z. B. «Sotomo: ~40 % weniger Miete») gegen die Originalquellen prüfen. — ✅ erledigt (2026-11-15), nur Kommentare und Hilfetexte; kein Gewicht, keine Konstante geändert. Korrekturen:
@@ -350,7 +377,7 @@ Baseline Zürich: Mietbelastung 46.6 / 47.8 / 48.3 % → 46.8 / 48.2 / 48.8 % (P
 | 1 | Fix-1 bis Fix-4 | erledigt | — |
 | 2 | Fix-5 bis Fix-7 (Fix-8 erledigt) | ca. 1 Tag | keine |
 | 3 | Fix-9 bis Fix-14 | ca. 5 Tage | keine |
-| 4 | Regime-Kalibrierung | offen | Daten |
+| 4 | Daten, Regime-Einheiten, Restposten | teilweise erledigt; Regime-Kalibrierung offen | Mietlücke |
 
 Sprint 1 und 2 können parallel laufen. Sprint 3 ändert alle Zahlen im UI und sollte als ein Release mit Hinweis ausgeliefert werden.
 
@@ -374,4 +401,4 @@ Stand 2026-11-13:
 
 6. **Phasenmultiplikator (Fix-10):** ✅ streichen (2026-11-14), zusammen mit Fix-9.
 
-Keine offenen Entscheide.
+Offene Entscheide (2026-11-15, aus Sprint 4): Mietlücke als Proxy setzen oder leer lassen; Regel für die Stärke unbelegter Angebotshebel; Verhältnis der beiden Kanäle des Mindestanteils.

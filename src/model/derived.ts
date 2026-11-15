@@ -47,12 +47,32 @@ export const E2_TERMS: Record<keyof DerivedIndicators, readonly E2Term[]> = {
   verdraengungsrisiko_index: [
     { from: 'verdraengungsrisiko', coeff: 1.0, sign: +1 },
   ],
+  // Lesart: plus = Mehreinnahmen oder Entlastung der öffentlichen Hand,
+  // minus = Mindereinnahmen oder Mehrkosten (FiskalischeWirkungWidget:
+  // «negativ / positiv»). Dimensionsloser Index, kein Frankenbetrag.
+  //
   // aufwertungsdruck=0.8: UK-001 Crossrail / GLOBAL-020 TIF —
   // Aufwertung → höhere Steuereinnahmen
+  // marktfriktion −: weniger Handänderungen, weniger Transaktionssteuern
+  // (Spezifikation dag-berechnungsmodell.md, März 2026).
+  //
+  // gemeinnuetzig_kraft −1 (bis 2026-11-15 +1): Der Knoten wird vom
+  // Förderfonds, der Landvergabe im Baurecht und dem Vorkaufsrecht getragen
+  // (Kanten in phase-weights.ts); alle drei kosten die öffentliche Hand Geld
+  // (Fondsmittel, Baurechtszins unter Marktwert, Landkauf). Die alte
+  // Begründung der Spezifikation («mehr Projekte durch Fonds-Hebel») beschrieb
+  // mehr Wohnungen, keine Einnahme, und widersprach der Lesart oben. Keine
+  // Notiz in docs/recherche/ quantifiziert die Kosten (AT-001/AT-002
+  // behandeln die Mietwirkung, nicht den Haushalt).
+  // Annahme: Mindestanteil, Belegungsvorschriften und Sozialmischung heben
+  // den Knoten ebenfalls, kosten die öffentliche Hand direkt aber wenig. E2
+  // liest nur den Knoten und kann die Instrumente nicht trennen; für diese
+  // drei zeigt der Index darum Kosten, die überzeichnet sind.
+  // Koeffizient 1.0 unverändert übernommen (Setzung).
   fiskalische_wirkung: [
     { from: 'spekulationshemmung', coeff: 1.5, sign: +1 },
     { from: 'marktfriktion',       coeff: 1.0, sign: -1 },
-    { from: 'gemeinnuetzig_kraft', coeff: 1.0, sign: +1 },
+    { from: 'gemeinnuetzig_kraft', coeff: 1.0, sign: -1 },
     { from: 'aufwertungsdruck',    coeff: 0.8, sign: +1 },
   ],
 };

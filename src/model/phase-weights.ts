@@ -186,7 +186,20 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     sign: -1,
     weights: [0.51, 0.51, 0.51],
     profilQuelle: 'Annahme',
-    // Kontingentierung reduziert das private Angebot. Grösse Setzung.
+    // Kontingentierung reduziert das private Angebot. Richtung bedingt
+    // belegt: US-018 (Schuetz/Been/Ellen 2012, Inclusionary Zoning) — ein
+    // Pflichtanteil kann das Gesamtangebot senken, wenn kein Ausgleich
+    // (Dichtebonus, Ersatzabgabe, schnelle Bewilligung) besteht; mit Ausgleich
+    // hängt der Nettoeffekt vom Design ab. US-012 (Seattle MHA): mildes
+    // Upzoning mit hoher Affordable-Pflicht ergab weniger Neubau als erwartet.
+    // US-002 (Glaeser/Gyourko) ist ein Policy-Argument, keine Messung.
+    // Grösse und Verlauf Setzung; keine Notiz quantifiziert den Angebotsverlust.
+    // Folge (Prüfung 2026-11-15): Eine Senkung des Mindestanteils entlastet
+    // im Modell Neumieter und Mietbelastung, weil diese Kante (0.51 · 2.44
+    // · 1.2 auf den Neumieter-Trend) die Preisdämpfung über
+    // gemeinnuetzig_kraft (0.97 · 2.44 · 0.25) überwiegt. Das Verhältnis der
+    // zwei Kanäle ist gesetzt, nicht gemessen; die Studien sagen nicht, welcher
+    // überwiegt, und das Modell kennt keinen Ausgleichsmechanismus.
   },
   {
     from: 'gemeinnuetzig_foerderfonds',
@@ -213,6 +226,15 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     // Estate Institute im Auftrag des SVIT, Interessenvertreter; Ursache laut
     // Regierungsrat Basel-Stadt offen).
     // Ohne Verlaufsangabe in der Sammlung → neutraler Impuls.
+    // Grösse: Setzung (Prüfung 2026-11-15). Weder DIW DP 2143 noch die
+    // Basler Zahlen haben eine Notiz in docs/recherche/; die Richtung ist
+    // plausibel (Genf), die Grösse nicht belegt. Der P3-Stand (1.49) liegt
+    // auf der Höhe der belegten Angebotshebel (Zonenreserve 1.62, Verdichtung
+    // 1.48, Ausnützung 1.46). Das teilt die Kante mit den übrigen Annahme-
+    // Kanten auf angebotspotenzial (Einsprache suspensiv 1.66, Umnutzungs-
+    // verbot 1.42, Sanierungspflicht 1.37, Bauverpflichtung 1.27): ihr Impuls
+    // wurde in Fix-10 aus dem P3-Stand des alten Vektors übernommen. Eine
+    // Senkung nur dieser Kante wäre ebenso gesetzt; nicht geändert.
   },
   {
     from: 'nutzung_umnutzungsverbot',
@@ -262,8 +284,16 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     sign: -1,
     weights: [0.53, 0.53, 0.53],
     profilQuelle: 'Annahme',
-    // CH-006 Lex Weber: Beschränkung senkt die Bautätigkeit insgesamt.
-    // Fachlich strittig für Städte (Verbesserungsplan Fix-1).
+    // Annahme, Richtung für Städte nicht belegt (Prüfung 2026-11-15).
+    // CH-006 (Lex Weber): in den betroffenen Gemeinden ging die Bautätigkeit
+    // insgesamt zurück, auch bei Mietwohnungen. Betroffen sind Gemeinden mit
+    // über 20 % Zweitwohnungen, also Tourismusgemeinden; in den Städten über
+    // 40'000 Einwohnern greift die Weber-Grenze nicht, und Stufe 2 («strengere
+    // kommunale Limits») ist dort ein anderes Instrument. Ob eine strengere
+    // Grenze in einer Stadt Erstwohnungen freigibt (dann +) oder Projekte
+    // abhält (−), belegt keine Notiz in docs/recherche/. Vorzeichen und Grösse
+    // unverändert übernommen (Setzung); Parameter als «Wirkung nicht belegt»
+    // gekennzeichnet (params.ts).
   },
   // Fix-11 (2026-11-15): drei Kanten, die beim Umbau auf Phasengewichte
   // verloren gegangen waren.
@@ -465,8 +495,17 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     sign: -1,
     weights: [0.69, 0.69, 0.69],
     profilQuelle: 'Annahme',
-    // Fachlich strittig (Verbesserungsplan Fix-1): Stufe 2 enthält ein
-    // Kündigungsrecht des Vermieters. Nicht Teil von Fix-9 bis Fix-13.
+    // Annahme, Richtung nicht belegt (Prüfung 2026-11-15). Gedachter
+    // Mechanismus: strengere Regeln halten Wohnungen aus der Kurzzeit-
+    // Untervermietung und damit im Dauermarkt. Gegen das Vorzeichen spricht
+    // Stufe 2 («Tageslimit + Kündigungsrecht»): ein Kündigungsrecht des
+    // Vermieters ist für Mieter ein zusätzlicher Kündigungsgrund. Keine Notiz
+    // in docs/recherche/ behandelt Untervermietungsregeln (SE-001 nennt nur
+    // Schwarzmarkt-Untervermietung bei strenger Mietregulierung). Überschneidet
+    // sich mit nutzung_kurzzeitvermietung → verdraengungsrisiko. Nicht
+    // gestrichen: es ist die einzige Kante des Schiebers
+    // (schieber-wirkung.test.ts). Vorzeichen und Grösse unverändert (Setzung);
+    // Parameter als «Wirkung nicht belegt» gekennzeichnet (params.ts).
   },
   {
     from: 'raumplanung_verdichtung',
@@ -495,11 +534,20 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     from: 'nutzung_kurzzeitvermietung',
     to: 'verdraengungsrisiko',
     sign: -1,
-    weights: [0.79, 0.79, 0.79],
+    weights: [0.2, 0.2, 0.2],
     profilQuelle: 'Annahme',
-    // US-013 NYC LL18: Inserate −90 % nach der Regulierung, Leerstand und
-    // Mieten ohne messbare Änderung (US-013). Weniger Ferienwohnungen →
-    // weniger Verdrängung.
+    // Skala: höher = strengere Regeln. Richtung: weniger Ferienwohnungen →
+    // weniger Umwandlung von Mietwohnungen → weniger Verdrängung.
+    // Grösse (2026-11-15 von 0.79 auf 0.2 gesenkt, Setzung): Die Sammlung
+    // misst nur eine Mietwirkung der Aktivität von rund 2 % in touristischen
+    // Vierteln (US-003 Los Angeles, ES-001 Barcelona +1.9 %). Für die
+    // Regulierung selbst findet sie keine messbare Wirkung auf Mieten und
+    // Leerstand: US-013 (NYC LL18, Inserate −90 %), US-014 (Santa Monica,
+    // −60 %), ES-002 (Barcelona, Hotels füllten die Lücke). Verdrängung misst
+    // keine der Studien. 0.79 lag auf der Höhe der direkten Schutzinstrumente
+    // (Kündigungsschutz 0.84, Abbruchverbot 0.76); 0.2 ist rund ein Viertel
+    // davon und von derselben Grössenordnung wie die Angebotskante dieses
+    // Parameters (0.1).
   },
 
   // ═══════════════════════════════════════════════════════════════════
@@ -646,9 +694,15 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     sign: +1,
     weights: [0.41, 0.41, 0.41],
     profilQuelle: 'Annahme',
-    // Fachlich strittig (Verbesserungsplan Fix-1): mehr Information senkt
-    // gewöhnlich Friktion; CH-003 behandelt die Anfangsmiete, nicht die
-    // Offenlegung. Nicht Teil von Fix-9 bis Fix-13.
+    // Annahme, Richtung nicht belegt (Prüfung 2026-11-15). Die frühere
+    // Stütze CH-003 behandelt die Anfechtung der Anfangsmiete und findet dort
+    // keinen messbaren Effekt; zur Offenlegung und zur Mobilität sagt sie
+    // nichts. DE-006 (Mietspiegel) misst nur eine begrenzte Preiswirkung,
+    // DE-001 und FR-002 messen Mieten, keine Fluktuation. Gegen das
+    // Vorzeichen spricht, dass mehr Information Suchkosten gewöhnlich senkt;
+    // dafür, dass eine Offenlegung der Vormiete die Anfechtung erleichtert und
+    // Vermieter dann seltener neu vermieten. Keine Notiz belegt eine der
+    // beiden Richtungen. Vorzeichen und Grösse unverändert (Setzung).
   },
 
   // ═══════════════════════════════════════════════════════════════════

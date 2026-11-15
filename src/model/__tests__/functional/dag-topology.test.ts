@@ -8,14 +8,15 @@
  * - All `from` keys are valid NodeIds
  * - sign is +1 or -1
  * - weight is a number in [0, 1] (since it comes from PHASE_WEIGHTED_EDGES which is in [0,1])
- * - time is 'short' | 'medium' | 'long'
+ * - time is 'sofort' | 'aufbauend' | 'verzoegert' | 'annahme', read from the
+ *   Stand over the phases, not from the largest impulse (Fix-10)
  * - The edge count matches PHASE_WEIGHTED_EDGES (1:1 projection)
  *
  * Run: npx vitest run src/model/__tests__/functional/dag-topology.test.ts
  */
 
 import { describe, it, expect } from 'vitest';
-import { getDagTopology } from '../../dag-topology';
+import { getDagTopology, getNodeTimeClasses, edgeStand, edgeTimeClass } from '../../dag-topology';
 import { PHASE_WEIGHTED_EDGES } from '../../phase-weights';
 import { E2_TERMS } from '../../derived';
 import type { NodeId } from '../../dag-topology';
@@ -87,25 +88,55 @@ describe('getDagTopology', () => {
 
   it('every edge has a valid time class', () => {
     const topology = getDagTopology();
-    const validTimes = new Set(['short', 'medium', 'long']);
+    const validTimes = new Set(['sofort', 'aufbauend', 'verzoegert', 'annahme']);
     const invalid = topology.filter((e) => !validTimes.has(e.time));
     expect(invalid).toHaveLength(0);
   });
 
-  it('time class corresponds to the phase with maximum absolute weight (E0→E1)', () => {
+  // Bis 2026-11-15 las dieser Test die Phase mit dem grössten Impuls als
+  // Zeitklasse. Seit Fix-10 ist das Gewicht der Impuls, nicht der Stand, und ein
+  // neutraler Vektor [w, w, w] heisst «keine Verlaufsevidenz». Die Regel von
+  // damals gab jede Annahme-Kante als «kurzfristig» aus.
+  it('Annahme-Kanten (neutraler Impuls) erscheinen nie als «sofort», sondern als «annahme»', () => {
     const sourceEdges = new Map(PHASE_WEIGHTED_EDGES.map((e) => [`${e.from}->${e.to}`, e]));
     for (const edge of e0e1Edges()) {
-      const source = sourceEdges.get(`${edge.from}->${edge.to}`);
-      expect(source).toBeDefined();
-      const [p1, p2, p3] = source!.weights;
-      const expectedTime =
-        Math.abs(p1) >= Math.abs(p2) && Math.abs(p1) >= Math.abs(p3)
-          ? 'short'
-          : Math.abs(p2) >= Math.abs(p3)
-            ? 'medium'
-            : 'long';
-      expect(edge.time).toBe(expectedTime);
+      const source = sourceEdges.get(`${edge.from}->${edge.to}`)!;
+      if (source.profilQuelle === 'Annahme') expect(edge.time).toBe('annahme');
+      else expect(edge.time).not.toBe('annahme');
     }
+  });
+
+  it('Verlaufsklasse folgt dem Stand über die Phasen (Belegkanten aus verlauf-fachlich)', () => {
+    const find = (from: string, to: string) =>
+      e0e1Edges().find((e) => e.from === from && e.to === to)!.time;
+    // DE-004 Berlin: Sprung und Halten
+    expect(find('mietrecht_kostenmiete', 'mietpreis_schutzlevel')).toBe('sofort');
+    // FR-003 Paris: der Stand wächst
+    expect(find('mietrecht_anfangsmiete', 'mietpreis_schutzlevel')).toBe('aufbauend');
+    // NZ-001 Auckland / AU-002 / US-005: in P1 praktisch nichts
+    expect(find('raumplanung_verdichtung', 'angebotspotenzial')).toBe('verzoegert');
+    expect(find('raumplanung_zonenreserve', 'angebotspotenzial')).toBe('verzoegert');
+    expect(find('raumplanung_ausnuetzungsziffer', 'angebotspotenzial')).toBe('verzoegert');
+    // KR-003: nur ein P1-Impuls, klingt danach ab → Höchststand in P1
+    expect(find('kapital_hypothekarregulierung', 'nachfragedruck')).toBe('sofort');
+    // GLOBAL-029: kumulativ
+    expect(find('mietrecht_kostenmiete', 'angebotspotenzial')).toBe('aufbauend');
+  });
+
+  it('edgeStand rechnet wie der Generator (PERSISTENCE 0.8)', () => {
+    const [s1, s2, s3] = edgeStand([1, 1, 1]);
+    expect(s1).toBeCloseTo(1);
+    expect(s2).toBeCloseTo(1.8);
+    expect(s3).toBeCloseTo(2.44);
+    // Neutraler Vektor ohne Annahme-Kennzeichnung (Kontextkante) wächst: aufbauend
+    expect(edgeTimeClass({ weights: [0.5, 0.5, 0.5] })).toBe('aufbauend');
+  });
+
+  it('Knoten-Verlaufsklasse: nur Annahme-Kanten → annahme; gemischte Kanten → gemischt', () => {
+    const classes = getNodeTimeClasses();
+    expect(classes.infra_oepnv).toBe('annahme');
+    expect(classes.raumplanung_zonenreserve).toBe('verzoegert');
+    expect(classes.mietrecht_kostenmiete).toBe('gemischt');
   });
 
   it('at least one edge exists for each E1 node (consistent with phase-weights)', () => {
@@ -124,10 +155,10 @@ describe('getDagTopology', () => {
 });
 
 describe('getDagTopology — invariants over the full edge set', () => {
-  it('every edge has time in {"short", "medium", "long"}', () => {
+  it('every edge has time in {"sofort", "aufbauend", "verzoegert", "annahme"}', () => {
     const topology = getDagTopology();
     for (const e of topology) {
-      expect(['short', 'medium', 'long']).toContain(e.time);
+      expect(['sofort', 'aufbauend', 'verzoegert', 'annahme']).toContain(e.time);
     }
   });
 
@@ -154,17 +185,19 @@ describe('getDagTopology — invariants over the full edge set', () => {
     }
   });
 
-  it('time matches the phase with maximum |weight| in the source edge (E0→E1)', () => {
+  it('time follows the Stand over the phases, not the largest impulse (E0→E1)', () => {
+    // Ersetzt «time matches the phase with maximum |weight|» (bis 2026-11-15):
+    // ein neutraler Impuls [w, w, w] ergab dort «short».
     const sourceEdges = new Map(PHASE_WEIGHTED_EDGES.map(e => [`${e.from}->${e.to}`, e]));
     for (const e of e0e1Edges()) {
       const source = sourceEdges.get(`${e.from}->${e.to}`)!;
-      const [p1, p2, p3] = source.weights;
-      const abs = [Math.abs(p1), Math.abs(p2), Math.abs(p3)];
-      const expectedTime = abs[0] >= abs[1] && abs[0] >= abs[2]
-        ? 'short'
-        : abs[1] >= abs[2]
-          ? 'medium'
-          : 'long';
+      if (source.profilQuelle === 'Annahme') {
+        expect(e.time).toBe('annahme');
+        continue;
+      }
+      const stand = edgeStand(source.weights).map(Math.abs);
+      const anteilP1 = stand[0] / Math.max(...stand);
+      const expectedTime = anteilP1 >= 0.8 ? 'sofort' : anteilP1 <= 0.1 ? 'verzoegert' : 'aufbauend';
       expect(e.time).toBe(expectedTime);
     }
   });

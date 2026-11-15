@@ -100,8 +100,12 @@ export interface CityContext {
    */
   referenzzins_aenderung?: ContextValue;
   /**
-   * Anteil Mietwohnungen in Gebäuden mit Baujahr ≤ Stichtag − 30.
-   * BGE 144 III 514. Nicht gefüllt — fehlend heisst «nicht gemessen», nicht 0.
+   * Anteil Wohnungen in Gebäuden mit Baujahr ≤ Stichtag − 30, Rohwert 0…1.
+   * BGE 144 III 514. Gefüllt aus BFS GWS 31.12.2025 (DF_GWS_REG5): Wohnungen
+   * ohne Einfamilienhäuser, Bauperiode bis 1995. Nicht nur Mietwohnungen (pro
+   * Gemeinde nicht publiziert), eher unterschätzt; Messvorschrift im Kopf von
+   * switzerland.yaml und in CH-012. Wirkt nur über WIRKSAMKEIT_OQU (heute 0).
+   * Fehlend heisst «nicht gemessen», nicht 0.
    */
   anteil_altliegenschaft?: number;
   /**
@@ -181,7 +185,7 @@ export interface ParamMeta40 {
   hoeherBedeutet: string;
   /**
    * 'nicht_belegt': Für die Wirkung dieses Parameters fehlt in
-   * docs/recherche/summary.md die empirische Evidenz. Der Schieber bleibt,
+   * docs/recherche/ (summary.md und Einzelnotizen) die empirische Evidenz. Der Schieber bleibt,
    * wird im Panel aber gekennzeichnet (Entscheid 5, Verbesserungsplan 2026-11).
    */
   evidenz?: 'nicht_belegt';

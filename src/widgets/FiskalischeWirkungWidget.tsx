@@ -24,15 +24,28 @@ function formatIndex(v: number): string {
   return `Index ${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toFixed(2)}`;
 }
 
+/**
+ * Die Texte nennen die vier Grössen, aus denen der Index gerechnet wird
+ * (`E2_TERMS.fiskalische_wirkung` in derived.ts), und keine einzelne Steuer:
+ * welche Grösse den Index im Einzelfall bewegt, sieht das Widget nicht. Bis
+ * 2026-11-15 nannten sie feste Steuerarten (Mehrwertabgabe,
+ * Handänderungssteuer, Grundstückgewinnsteuer), auch wenn der Ausschlag etwa
+ * aus dem gemeinnützigen Sektor kam.
+ */
 function getExplanation(value: number): string {
   if (value < 0) {
-    return 'Tiefere Einnahmen durch geringere Aktivität am Immobilienmarkt';
+    return 'Tendenz zu Mindereinnahmen oder Mehrkosten für die öffentliche Hand';
   }
   if (value < 0.3) {
-    return 'Leicht positive Effekte via Mehrwertabgabe & Handänderungssteuer';
+    return 'Leicht positive Tendenz für die öffentliche Hand';
   }
-  return 'Erhebliche Mehreinnahmen via Mehrwertabgabe, Handänderungssteuer & Grundstückgewinnsteuer';
+  return 'Deutlich positive Tendenz für die öffentliche Hand';
 }
+
+const ZUSAMMENSETZUNG =
+  'Index aus vier Grössen: Abschöpfung und Spekulationshemmung (+), Aufwertung ' +
+  'der Bodenwerte (+), Marktfriktion (−, weniger Handänderungen) und Stärke des ' +
+  'gemeinnützigen Sektors (−, Förderung und Baurecht kosten). Kein Frankenbetrag.';
 
 // Gauge: SVG half-circle, -1 to +1
 function valueToAngle(v: number): number {
@@ -121,6 +134,9 @@ export function FiskalischeWirkungWidget({ derived, baselineDerived }: Props) {
         baseline={baselineDerived && <FiskalischeWirkungBody derived={baselineDerived} />}
         current={<FiskalischeWirkungBody derived={derived} />}
       />
+      <div className="fiskalische-wirkung-widget__explanation">
+        {ZUSAMMENSETZUNG}
+      </div>
     </div>
   );
 }

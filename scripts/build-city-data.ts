@@ -57,6 +57,23 @@ for (const city of raw) {
   }
 }
 
+// anteil_altliegenschaft (CH-012): Rohwert als Anteil, keine Stufe. Fehlend ist
+// erlaubt («nicht gemessen»); gesetzt muss er in [0, 1] liegen.
+for (const city of raw) {
+  const anteil = city.context.anteil_altliegenschaft;
+  if (anteil === undefined) continue;
+  if (typeof anteil !== 'number' || !Number.isFinite(anteil) || anteil < 0 || anteil > 1) {
+    throw new Error(`${city.slug}: context.anteil_altliegenschaft muss ein Anteil in [0, 1] sein: ${anteil}`);
+  }
+}
+
+// mietluecke ist nicht belegt (CH-012). Ein gesetzter Wert muss als Schätzung markiert sein.
+for (const city of raw) {
+  if (city.context.mietluecke !== undefined && city.context.mietlueckeEstimated !== true) {
+    throw new Error(`${city.slug}: context.mietluecke gesetzt ohne "mietlueckeEstimated: true" (CH-012)`);
+  }
+}
+
 mkdirSync(dirname(outPath), { recursive: true });
 
 writeFileSync(outPath, [
