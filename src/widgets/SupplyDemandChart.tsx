@@ -77,11 +77,11 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
       .selectAll('text').remove();
 
     // Axis labels
-    g.append('text').attr('x', w / 2).attr('y', h - 10)
+    g.append('text').attr('x', w / 2).attr('y', h - 8)
       .attr('text-anchor', 'middle').attr('fill', '#888').attr('font-size', 11)
       .text('Menge');
     g.append('text').attr('transform', 'rotate(-90)')
-      .attr('x', -(h - 40) / 2).attr('y', -25)
+      .attr('x', -(h - 40) / 2).attr('y', -32)
       .attr('text-anchor', 'middle').attr('fill', '#888').attr('font-size', 11)
       .text('Preis');
 
@@ -110,35 +110,41 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
       g.append('circle').attr('cx', x(bq)).attr('cy', y(bp)).attr('r', 3).attr('fill', COLORS.baseline);
     }
 
-    // Draw phases (use activePhasesForChart based on toggle)
+    // Phasen: Kurven nur für die aktive Phase. Für die übrigen Phasen bleiben
+    // Gleichgewichtspunkt und Achsen-Marken (P1–P3 / M1–M3) – für die Nutzer
+    // zählen Preis und Menge, nicht der Verlauf der inaktiven Kurven.
+    const equilibria = activePhasesForChart.map(phase => {
+      const state = phase.marketState;
+      const shift = supplyShiftFromState(state);
+      return findEquilibrium(shift, state.nachfragedruck, state.angebotspotenzial_regulation);
+    });
+
     activePhasesForChart.forEach((phase, idx) => {
       const isActive = idx === activePhaseIndex;
       const state = phase.marketState;
       const phaseSupplyShift = supplyShiftFromState(state);
-      const [pq, pp] = findEquilibrium(phaseSupplyShift, state.nachfragedruck, state.angebotspotenzial_regulation);
+      const [pq, pp] = equilibria[idx];
 
-      // Supply curve — Steigung abhängig von Regulationsgrad
-      g.append('path').datum(supplyCurve(phaseSupplyShift, state.angebotspotenzial_regulation))
-        .attr('d', line).attr('fill', 'none')
-        .attr('stroke', COLORS.supply)
-        .attr('stroke-width', isActive ? 2.5 : 1)
-        .attr('opacity', isActive ? 1 : 0.15);
+      if (isActive) {
+        // Supply curve — Steigung abhängig von Regulationsgrad
+        g.append('path').datum(supplyCurve(phaseSupplyShift, state.angebotspotenzial_regulation))
+          .attr('d', line).attr('fill', 'none')
+          .attr('stroke', COLORS.supply).attr('stroke-width', 2.5);
 
-      // Demand curve
-      g.append('path').datum(demandCurve(state.nachfragedruck))
-        .attr('d', line).attr('fill', 'none')
-        .attr('stroke', COLORS.demand)
-        .attr('stroke-width', isActive ? 2.5 : 1)
-        .attr('opacity', isActive ? 1 : 0.15);
+        // Demand curve
+        g.append('path').datum(demandCurve(state.nachfragedruck))
+          .attr('d', line).attr('fill', 'none')
+          .attr('stroke', COLORS.demand).attr('stroke-width', 2.5);
+      }
 
       // Equilibrium dot
       g.append('circle')
         .attr('cx', x(pq)).attr('cy', y(pp))
         .attr('r', isActive ? 6 : 3)
-        .attr('fill', isActive ? COLORS.equilibrium : '#666')
+        .attr('fill', isActive ? COLORS.equilibrium : '#888')
         .attr('stroke', isActive ? '#fff' : 'none')
         .attr('stroke-width', 2)
-        .attr('opacity', isActive ? 1 : 0.4);
+        .attr('opacity', isActive ? 1 : 0.6);
 
       if (isActive) {
         // Guideline for active equilibrium
@@ -168,6 +174,50 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
             .attr('r', 3.5).attr('fill', COLORS.luecke);
         }
       }
+    });
+
+    // Achsen-Marken: Preis (P1–P3) links, Menge (M1–M3) unten, je Phase.
+    // Liegen Werte nah beieinander, werden die Beschriftungen auseinander-
+    // geschoben; der Strich auf der Achse bleibt am echten Wert.
+    const spread = (values: number[], minGap: number): number[] => {
+      const order = values.map((v, i) => i).sort((a, b) => values[a] - values[b]);
+      const out = [...values];
+      for (let k = 1; k < order.length; k++) {
+        const prev = out[order[k - 1]];
+        if (out[order[k]] - prev < minGap) out[order[k]] = prev + minGap;
+      }
+      // Gesamtverschiebung zentrieren, damit die Gruppe um die echten Werte liegt
+      const shift = order.reduce((acc, i) => acc + (out[i] - values[i]), 0) / order.length;
+      return out.map(v => v - shift);
+    };
+
+    const markerColor = (idx: number) => idx === activePhaseIndex ? COLORS.equilibrium : '#888';
+    const markerWeight = (idx: number) => idx === activePhaseIndex ? 700 : 400;
+
+    const yPos = equilibria.map(([, p]) => y(p));
+    const yLabel = spread(yPos, 11);
+    equilibria.forEach((_, idx) => {
+      g.append('line')
+        .attr('x1', -4).attr('x2', 0).attr('y1', yPos[idx]).attr('y2', yPos[idx])
+        .attr('stroke', markerColor(idx)).attr('stroke-width', 1.5);
+      g.append('text')
+        .attr('x', -7).attr('y', yLabel[idx]).attr('dy', '0.35em')
+        .attr('text-anchor', 'end').attr('font-size', 10)
+        .attr('fill', markerColor(idx)).attr('font-weight', markerWeight(idx))
+        .text(`P${idx + 1}`);
+    });
+
+    const xPos = equilibria.map(([q]) => x(q));
+    const xLabel = spread(xPos, 20);
+    equilibria.forEach((_, idx) => {
+      g.append('line')
+        .attr('x1', xPos[idx]).attr('x2', xPos[idx]).attr('y1', h - 40).attr('y2', h - 36)
+        .attr('stroke', markerColor(idx)).attr('stroke-width', 1.5);
+      g.append('text')
+        .attr('x', xLabel[idx]).attr('y', h - 25)
+        .attr('text-anchor', 'middle').attr('font-size', 10)
+        .attr('fill', markerColor(idx)).attr('font-weight', markerWeight(idx))
+        .text(`M${idx + 1}`);
     });
 
     // Legend
