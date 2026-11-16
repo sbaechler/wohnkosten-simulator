@@ -19,9 +19,9 @@ import { computePhasePipeline } from '../../compute-phases';
 import { computeGroupTrends, type GroupId } from '../../groups';
 import { computeMieteBelastung } from '../../belastung';
 import { cities } from '../../../generated/cities';
-import type { CityContext, MarketState, ParamsDiff40 } from '../../../types';
+import type { CityContext, MarketState, ParamsDiff } from '../../../types';
 
-function phases(ctx: CityContext, diff: ParamsDiff40): MarketState[] {
+function phases(ctx: CityContext, diff: ParamsDiff): MarketState[] {
   return [...computePhasePipeline(ctx, diff)].map(r => r.marketState);
 }
 
@@ -29,16 +29,16 @@ function trend(ctx: CityContext, s: MarketState, id: GroupId): number {
   return computeGroupTrends(s, ctx).find(g => g.group.id === id)!.value;
 }
 
-const ANGEBOTSHEBEL: Record<string, ParamsDiff40> = {
+const ANGEBOTSHEBEL: Record<string, ParamsDiff> = {
   'Zonierung (mehr Bauland)': { raumplanung_zonenreserve: { from: 2, to: 1 } },
   'Verdichtung': { raumplanung_verdichtung: { from: 1, to: 2 } },
   'Ausnützung': { raumplanung_ausnuetzungsziffer: { from: 1, to: 2 } },
 };
-const VERGLEICHSHEBEL: Record<string, ParamsDiff40> = {
+const VERGLEICHSHEBEL: Record<string, ParamsDiff> = {
   'Förderfonds': { gemeinnuetzig_foerderfonds: { from: 1, to: 2 } },
   'ÖV-Ausbau': { infra_oepnv: { from: 1, to: 2 } },
 };
-const MIETREGULIERUNG: ParamsDiff40 = {
+const MIETREGULIERUNG: ParamsDiff = {
   mietrecht_kostenmiete: { from: 1, to: 2 },
   mietrecht_kuendigungsschutz: { from: 1, to: 2 },
 };
@@ -48,7 +48,7 @@ const KEIN_MESSBARER_EFFEKT = 0.02;
 
 describe.each(cities.map(c => [c.name, c.context] as const))('Rangfolge der Hebel — %s', (_name, ctx) => {
   const basis = phases(ctx, {});
-  const deltaNeumieterP3 = (diff: ParamsDiff40) =>
+  const deltaNeumieterP3 = (diff: ParamsDiff) =>
     Math.abs(trend(ctx, phases(ctx, diff)[2], 'normalverdiener_angebot') - trend(ctx, basis[2], 'normalverdiener_angebot'));
 
   for (const [a, diffA] of Object.entries(ANGEBOTSHEBEL)) {
@@ -60,7 +60,7 @@ describe.each(cities.map(c => [c.name, c.context] as const))('Rangfolge der Hebe
   }
 
   it('[FACH] CH-003: Anfangsmiete wirkt auf die Mietbelastung schwächer als Kostenmiete (P3)', () => {
-    const belastung = (diff: ParamsDiff40) =>
+    const belastung = (diff: ParamsDiff) =>
       Math.abs(computeMieteBelastung(phases(ctx, diff)[2]) - computeMieteBelastung(basis[2]));
     expect(belastung({ mietrecht_anfangsmiete: { from: 1, to: 2 } }))
       .toBeLessThan(belastung({ mietrecht_kostenmiete: { from: 1, to: 2 } }));

@@ -14,7 +14,7 @@ import {
   teuerungAlsGroesse,
   teuerungProzent,
 } from '../../mietrecht-regime';
-import type { CityContext, ParamsDiff40 } from '../../../types';
+import type { CityContext, ParamsDiff } from '../../../types';
 
 const ZH: CityContext = {
   ownershipBaseline: { privat: 0.39, institutionell: 0.3, genossenschaft: 0.175, oeffentlich: 0.076 },
@@ -35,7 +35,7 @@ const ZH_OHNE_TEUERUNG: CityContext = { ...ZH, teuerung: undefined };
 /** 40 % von 0.25 % Teuerung, in der gemeinsamen Einheit. */
 const ZH_TEUERUNGSANTEIL = alsSpielraum(REFERENZ_TEUERUNG_PASS_THROUGH * teuerungProzent(-1));
 
-function last(context: CityContext, diff: ParamsDiff40 = {}) {
+function last(context: CityContext, diff: ParamsDiff = {}) {
   invalidatePhasesCache();
   return [...computePhasePipeline(context, diff)].at(-1)!;
 }
@@ -72,7 +72,7 @@ describe('Mietrecht-Regime, provisorisch', () => {
 
   it('Tiefes, unverändertes Zinsniveau ist kein Senkungsanspruch: Durchsetzung allein senkt nichts', () => {
     // ZH: zinsniveau −1 (tief), Referenzzinssatz unverändert (Feld fehlt = 0).
-    const durchsetzung: ParamsDiff40 = { mietrecht_durchsetzung: { from: 0, to: 2 } };
+    const durchsetzung: ParamsDiff = { mietrecht_durchsetzung: { from: 0, to: 2 } };
     const isoliert = last(ZH_OHNE_TEUERUNG, durchsetzung);
     expect(isoliert.marketState.erhoehungsspielraum).toBe(0);
     expect(isoliert.marketState.bestandsmiete).toBeCloseTo(0, 5);
@@ -83,7 +83,7 @@ describe('Mietrecht-Regime, provisorisch', () => {
   });
 
   it('Initiative ohne gesetzte Mietlücke und ohne Zinsänderung senkt nichts (CH-012)', () => {
-    const initiative: ParamsDiff40 = {
+    const initiative: ParamsDiff = {
       mietrecht_kriterium: { from: 1, to: 0 },
       mietrecht_durchsetzung: { from: 0, to: 2 },
     };
@@ -132,7 +132,7 @@ describe('Mietrecht-Regime, provisorisch', () => {
 
   it('Regime-Abzug auf die Investition wird nicht über die Phasen aufsummiert', () => {
     const ctx: CityContext = { ...ZH, mietluecke: 0.2, mietlueckeEstimated: true };
-    const diff: ParamsDiff40 = { mietrecht_durchsetzung: { from: 0, to: 2 } };
+    const diff: ParamsDiff = { mietrecht_durchsetzung: { from: 0, to: 2 } };
     invalidatePhasesCache();
     const ohne = [...computePhasePipeline(ctx, {})];
     const mit = [...computePhasePipeline(ctx, diff)];
@@ -146,7 +146,7 @@ describe('Mietrecht-Regime, provisorisch', () => {
     // Hohe Teuerung, Kostenbindung (Index 2) sperrt sie ganz. Die Lücke startet
     // die Bestandsmiete über der Anfangsmiete → Verweildauer wird negativ.
     const ctx: CityContext = { ...ZH, teuerung: 2, mietluecke: 0.5, mietlueckeEstimated: true };
-    const diff: ParamsDiff40 = {
+    const diff: ParamsDiff = {
       mietrecht_mietzinsindex: { from: 0, to: 2 },
       mietrecht_durchsetzung: { from: 0, to: 1 },
     };
@@ -168,7 +168,7 @@ describe('Mietrecht-Regime, provisorisch', () => {
 
   it('Tiefe, positive Teuerung (Stufe −1) ist im LIK-Regime kein Senkungsanspruch', () => {
     // LIK 2025: +0.2 %. Die Stufe −1 heisst «0 bis 0.5 %», nicht «Preise sinken».
-    const diff: ParamsDiff40 = {
+    const diff: ParamsDiff = {
       mietrecht_mietzinsindex: { from: 0, to: 1 },
       mietrecht_durchsetzung: { from: 0, to: 2 },
     };
@@ -178,7 +178,7 @@ describe('Mietrecht-Regime, provisorisch', () => {
   });
 
   it('Nur negative Teuerung (Stufe −2) gibt im LIK-Regime einen Senkungsanspruch', () => {
-    const diff: ParamsDiff40 = {
+    const diff: ParamsDiff = {
       mietrecht_mietzinsindex: { from: 0, to: 1 },
       mietrecht_durchsetzung: { from: 0, to: 2 },
     };
@@ -188,7 +188,7 @@ describe('Mietrecht-Regime, provisorisch', () => {
   });
 
   it('Erhöhungsspielraum im LIK-Regime steigt mit jeder Teuerungsstufe', () => {
-    const lik: ParamsDiff40 = { mietrecht_mietzinsindex: { from: 0, to: 1 } };
+    const lik: ParamsDiff = { mietrecht_mietzinsindex: { from: 0, to: 1 } };
     const werte = ([-2, -1, 0, 1, 2] as const).map(
       stufe => last({ ...ZH, teuerung: stufe }, lik).marketState.erhoehungsspielraum,
     );
@@ -204,12 +204,12 @@ describe('Mietrecht-Regime, provisorisch', () => {
 });
 
 describe('Erhöhungsspielraum: eine Einheit für alle Regimes (Art. 13 und 16 VMWG)', () => {
-  const LIK: ParamsDiff40 = { mietrecht_mietzinsindex: { from: 0, to: 1 } };
+  const LIK: ParamsDiff = { mietrecht_mietzinsindex: { from: 0, to: 1 } };
   const STUFEN = [-2, -1, 0, 1, 2] as const;
-  const spielraum = (ctx: CityContext, diff: ParamsDiff40 = {}) =>
+  const spielraum = (ctx: CityContext, diff: ParamsDiff = {}) =>
     last(ctx, diff).marketState.erhoehungsspielraum;
   /** Spielraum zurück in Prozent Mietzinsänderung. */
-  const prozent = (ctx: CityContext, diff: ParamsDiff40 = {}) =>
+  const prozent = (ctx: CityContext, diff: ParamsDiff = {}) =>
     spielraum(ctx, diff) * ERHOEHUNG_REFERENZ_PROZENT;
 
   it('Ein Zinsschritt von 0.25 Punkten erlaubt 3 % (Art. 13 Abs. 1 Bst. c), eine Senkung 2.91 %', () => {
@@ -264,14 +264,14 @@ describe('Erhöhungsspielraum: eine Einheit für alle Regimes (Art. 13 und 16 VM
   it('Kein Bin-Fall sättigt: alle Kombinationen liegen in [−1, +1]', () => {
     const indexe = [0, 1, 2] as const;
     for (const t of STUFEN) for (const r of STUFEN) for (const i of indexe) {
-      const diff: ParamsDiff40 = i === 0 ? {} : { mietrecht_mietzinsindex: { from: 0, to: i } };
+      const diff: ParamsDiff = i === 0 ? {} : { mietrecht_mietzinsindex: { from: 0, to: i } };
       const v = spielraum({ ...ZH, teuerung: t, referenzzins_aenderung: r }, diff);
       expect(Math.abs(v)).toBeLessThan(1);
     }
   });
 
   it('Kostenbindung (Index 2) lässt keinen Spielraum, auch bei Zinsänderung', () => {
-    const kosten: ParamsDiff40 = { mietrecht_mietzinsindex: { from: 0, to: 2 } };
+    const kosten: ParamsDiff = { mietrecht_mietzinsindex: { from: 0, to: 2 } };
     expect(spielraum({ ...ZH, teuerung: 2, referenzzins_aenderung: 2 }, kosten)).toBe(0);
   });
 });

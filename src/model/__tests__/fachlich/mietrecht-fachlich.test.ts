@@ -30,13 +30,13 @@
 
 import { describe, it, expect } from 'vitest';
 import { computePhasePipeline, invalidatePhasesCache } from '../../compute-phases';
-import type { CityContext, CityParams40, ParamsDiff40 } from '../../../types';
+import type { CityContext, CityParams, ParamsDiff } from '../../../types';
 
 // Berlin-like (high zuwanderung, high wirtschaft, tight mietrecht)
 // V1: raumplanung=2, bauvorschriften=1, energetischeVorgaben=1, mietrecht=2, steuerpolitik=1,
 //      foerderungGemeinnuetzig=1, subventionen=1, einspracherechte=2, infrastruktur=2,
 //      auslaendischeInvestitionen=1
-const BERLIN_BASELINE_V2: CityParams40 = {
+const BERLIN_BASELINE_V2: CityParams = {
   raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
   boden_vorkaufsrecht: 1, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
   bau_energievorgaben: 1, bau_sanierungspflicht: 1,
@@ -71,7 +71,7 @@ const BERLIN_CONTEXT: CityContext = {
 // San Francisco-like (V1: raumplanung=2, bauvorschriften=2, energetischeVorgaben=1,
 // mietrecht=2, steuerpolitik=1, foerderungGemeinnuetzig=1, subventionen=1,
 // einspracherechte=2, infrastruktur=2, auslaendischeInvestitionen=1)
-const SF_V2: CityParams40 = {
+const SF_V2: CityParams = {
   raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
   boden_vorkaufsrecht: 1, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
   bau_energievorgaben: 1, bau_sanierungspflicht: 1,
@@ -91,7 +91,7 @@ const SF_V2: CityParams40 = {
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
-function phases(_params: CityParams40, context: CityContext, diff: ParamsDiff40) {
+function phases(_params: CityParams, context: CityContext, diff: ParamsDiff) {
   invalidatePhasesCache();
   return [...computePhasePipeline(context, diff)];
 }
@@ -117,7 +117,7 @@ describe('Mietrecht: Berlin Mietendeckel (2020–2021)', () => {
    */
   it('[FACH] Phase1: mietrecht-Verschärfung erhöht mietpreis_schutzlevel stark', () => {
     const neutral = phases(BERLIN_BASELINE_V2, BERLIN_CONTEXT, {});
-    const withDeckel: ParamsDiff40 = {
+    const withDeckel: ParamsDiff = {
       mietrecht_anfangsmiete:  { from: 1, to: 2 },
       mietrecht_kuendigungsschutz: { from: 1, to: 2 },
     };
@@ -129,7 +129,7 @@ describe('Mietrecht: Berlin Mietendeckel (2020–2021)', () => {
 
   it('[FACH] Langfristig sinkt investitionsattraktivitaet durch Mietregulierung', () => {
     const neutral = phases(BERLIN_BASELINE_V2, BERLIN_CONTEXT, {});
-    const withRegulierung: ParamsDiff40 = {
+    const withRegulierung: ParamsDiff = {
       mietrecht_kostenmiete:   { from: 1, to: 2 },
       mietrecht_anfangsmiete:  { from: 1, to: 2 },
       mietrecht_kuendigungsschutz: { from: 1, to: 2 },
@@ -187,10 +187,10 @@ describe('Mietrecht: CH-003 Anfechtungsrecht — kein messbarer Preiseffekt', ()
    * reicht nicht zur Preisdämpfung.
    */
   it('[FACH] CH-003: Anfechtungsrecht erhöht Miettransparenz, senkt aber NICHT nachfragedruck', () => {
-    const ohneAnfechtung: ParamsDiff40 = {
+    const ohneAnfechtung: ParamsDiff = {
       mietrecht_mietzinstransparenz: { from: 1, to: 1 }, // bleibt gleich
     };
-    const mitAnfechtung: ParamsDiff40 = {
+    const mitAnfechtung: ParamsDiff = {
       mietrecht_mietzinstransparenz: { from: 1, to: 2 }, // Anfechtungsrecht eingeführt
     };
 
@@ -219,7 +219,7 @@ describe('Mietrecht: San Francisco Effekt', () => {
   it('[FACH] Strikte Kurzzeitvermietungs-Regulierung erhöht spekulationshemmung (indirekter Effekt)', () => {
     const neutral = phases(BERLIN_BASELINE_V2, BERLIN_CONTEXT, {});
 
-    const withAirbnbBan: ParamsDiff40 = {
+    const withAirbnbBan: ParamsDiff = {
       nutzung_kurzzeitvermietung: { from: 1, to: 2 },
     };
     const withDiff = phases(BERLIN_BASELINE_V2, BERLIN_CONTEXT, withAirbnbBan);
@@ -263,7 +263,7 @@ describe('Mietrecht: Paris Encadrement des Loyers (FR-002) — −4.2% Mieten', 
     const neutral = phases(BERLIN_BASELINE_V2, parisContext, {});
 
     // Paris: Anfechtungsrecht (Anfangsmiete) + Mietzinsindex + Kündigungsschutz
-    const mitEncadrement: ParamsDiff40 = {
+    const mitEncadrement: ParamsDiff = {
       mietrecht_anfangsmiete:      { from: 1, to: 2 },
       mietrecht_kuendigungsschutz: { from: 1, to: 2 },
     };
@@ -291,7 +291,7 @@ describe('Mietrecht: GLOBAL-029 Langzeiteffekt — Neubau wird gehemmt ausser we
    * - mietrecht_kostenmiete ↑ → neubau_hemmnisindex ↑
    */
   it('[FACH] GLOBAL-029: Mieteingriff senkt angebotspotenzial langfristig', () => {
-    const ohneRegulierung: CityParams40 = {
+    const ohneRegulierung: CityParams = {
       ...BERLIN_BASELINE_V2,
       mietrecht_kostenmiete:      0,
       mietrecht_anfangsmiete:     0,
@@ -299,7 +299,7 @@ describe('Mietrecht: GLOBAL-029 Langzeiteffekt — Neubau wird gehemmt ausser we
     };
     const ohne = phases(ohneRegulierung, BERLIN_CONTEXT, {});
 
-    const mietrechtDiff: ParamsDiff40 = {
+    const mietrechtDiff: ParamsDiff = {
       mietrecht_kostenmiete:      { from: 0, to: 2 },
       mietrecht_anfangsmiete:     { from: 0, to: 2 },
       mietrecht_kuendigungsschutz: { from: 0, to: 2 },
@@ -312,14 +312,14 @@ describe('Mietrecht: GLOBAL-029 Langzeiteffekt — Neubau wird gehemmt ausser we
   });
 
   it('[FACH] GLOBAL-029: Mieteingriff erhöht neubau_hemmnisindex', () => {
-    const ohneRegulierung: CityParams40 = {
+    const ohneRegulierung: CityParams = {
       ...BERLIN_BASELINE_V2,
       mietrecht_kostenmiete:       0,
       mietrecht_kuendigungsschutz: 0,
     };
     const ohne = phases(ohneRegulierung, BERLIN_CONTEXT, {});
 
-    const mietrechtDiff: ParamsDiff40 = {
+    const mietrechtDiff: ParamsDiff = {
       mietrecht_kostenmiete:       { from: 0, to: 2 },
       mietrecht_kuendigungsschutz: { from: 0, to: 2 },
     };
@@ -337,7 +337,7 @@ describe('Mietrecht: GLOBAL-029 Langzeiteffekt — Neubau wird gehemmt ausser we
      * Vorzeichen, keine Beträge.
      */
     const ohne = phases(BERLIN_BASELINE_V2, BERLIN_CONTEXT, {});
-    const vergleich: ParamsDiff40 = {
+    const vergleich: ParamsDiff = {
       mietrecht_kriterium: { from: 1, to: 2 },
     };
     const mit = phases(BERLIN_BASELINE_V2, BERLIN_CONTEXT, vergleich);
@@ -360,7 +360,7 @@ describe('Mietrecht: CH-004 — Kündigungsschutz → Marktfriktion (Schweiz)', 
    * Ein Test auf diesen Abstand wäre der Kaltstart, nicht der Befund.
    */
   it('[FACH] CH-004: Kündigungsschutz erhöht Marktfriktion (Mobilitätsbremse)', () => {
-    const lockeresMietrecht: CityParams40 = {
+    const lockeresMietrecht: CityParams = {
       ...BERLIN_BASELINE_V2,
       mietrecht_kuendigungsschutz: 0,
     };
@@ -369,7 +369,7 @@ describe('Mietrecht: CH-004 — Kündigungsschutz → Marktfriktion (Schweiz)', 
     const ohne = phases(lockeresMietrecht, BERLIN_CONTEXT, {});
 
 
-    const mitKschutz: ParamsDiff40 = {
+    const mitKschutz: ParamsDiff = {
       mietrecht_kuendigungsschutz: { from: 0, to: 2 },
     };
     const mit = phases(lockeresMietrecht, BERLIN_CONTEXT, mitKschutz);

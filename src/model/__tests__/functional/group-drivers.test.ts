@@ -7,13 +7,13 @@ import { describe, it, expect } from 'vitest';
 import { computePhasesCached } from '../../compute-phases';
 import { computeGroupDrivers } from '../../group-drivers';
 import { computeGroupTrends, GROUPS } from '../../groups';
-import { PARAM_KEYS_40 } from '../../params';
+import { PARAM_KEYS } from '../../params';
 import { cities } from '../../../generated/cities';
-import type { ParamsDiff40, ParamValue } from '../../../types';
+import type { ParamsDiff, ParamValue } from '../../../types';
 
 const ZH = cities.find(c => c.slug === 'zuerich')!;
 
-function trends(diff: ParamsDiff40) {
+function trends(diff: ParamsDiff) {
   return computePhasesCached(ZH.context, diff).map(p =>
     Object.fromEntries(computeGroupTrends(p.marketState, ZH.context).map(t => [t.group.id, t.value])),
   );
@@ -29,11 +29,11 @@ describe('Gruppen-Treiber aus der Rechnung', () => {
   it('bei einer einzelnen Änderung stimmt die Treiberrichtung mit der Trendänderung überein (alle Parameter, Gruppen, Phasen)', () => {
     const base = trends({});
     let geprueft = 0;
-    for (const key of PARAM_KEYS_40) {
+    for (const key of PARAM_KEYS) {
       const from = ZH.params[key];
       for (const to of [0, 1, 2] as ParamValue[]) {
         if (to === from) continue;
-        const diff: ParamsDiff40 = { [key]: { from, to } };
+        const diff: ParamsDiff = { [key]: { from, to } };
         const mod = trends(diff);
         computeGroupDrivers(ZH.context, diff).forEach((phase, i) => {
           for (const g of GROUPS) {
@@ -60,7 +60,7 @@ describe('Gruppen-Treiber aus der Rechnung', () => {
     // Richtung des Treibers.
     const from = ZH.params.mietrecht_anfangsmiete;
     const to = (from === 2 ? 0 : 2) as ParamValue;
-    const diff: ParamsDiff40 = { mietrecht_anfangsmiete: { from, to } };
+    const diff: ParamsDiff = { mietrecht_anfangsmiete: { from, to } };
     const delta = trends(diff)[1].normalverdiener_angebot - trends({})[1].normalverdiener_angebot;
     expect(Math.sign(delta)).toBe(to > from ? 1 : -1);
     const phase2 = computeGroupDrivers(ZH.context, diff)[1];
@@ -70,7 +70,7 @@ describe('Gruppen-Treiber aus der Rechnung', () => {
 
   it('ein Parameter ohne Wirkung auf den Trend erscheint nicht als Treiber', () => {
     const from = ZH.params.mietrecht_mietzinsindex;
-    const diff: ParamsDiff40 = {
+    const diff: ParamsDiff = {
       mietrecht_mietzinsindex: { from, to: (from === 2 ? 0 : 2) as ParamValue },
       mietrecht_kostenmiete: { from: ZH.params.mietrecht_kostenmiete, to: (ZH.params.mietrecht_kostenmiete === 2 ? 0 : 2) as ParamValue },
     };
@@ -82,7 +82,7 @@ describe('Gruppen-Treiber aus der Rechnung', () => {
   });
 
   it('höchstens drei Treiber je Gruppe, absteigend nach Beitrag', () => {
-    const diff: ParamsDiff40 = {};
+    const diff: ParamsDiff = {};
     for (const key of ['mietrecht_kostenmiete', 'raumplanung_ausnuetzungsziffer', 'infra_oepnv', 'gemeinnuetzig_foerderfonds', 'mietrecht_kuendigungsschutz'] as const) {
       const from = ZH.params[key];
       diff[key] = { from, to: (from === 2 ? 0 : 2) as ParamValue };

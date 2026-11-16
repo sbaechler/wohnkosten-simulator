@@ -18,7 +18,7 @@
 //   (E1_NENNER, compute-phases.ts) und sind nicht kalibriert.
 // ============================================================
 
-import type { CityContext, MarketState, ParamsDiff40, ParamValue } from '../types';
+import type { CityContext, MarketState, ParamsDiff, ParamValue } from '../types';
 import { clamp } from './utils';
 
 /**
@@ -238,8 +238,8 @@ export function referenzTeuerungProzent(stufe: number | undefined): number {
 }
 
 function levelFromDiff(
-  diff: ParamsDiff40,
-  key: keyof ParamsDiff40,
+  diff: ParamsDiff,
+  key: keyof ParamsDiff,
   fallback: ParamValue,
 ): ParamValue {
   const entry = diff[key];
@@ -257,14 +257,14 @@ function enforcementIntensity(level: ParamValue): number {
  * Ohne Diff gilt Index 0 (Referenzzinssatz). Das ist die Baseline
  * in switzerland.yaml, nicht die absoluten Werte der Testfixturen.
  */
-function indexLevel(diff: ParamsDiff40): ParamValue {
+function indexLevel(diff: ParamsDiff): ParamValue {
   return levelFromDiff(diff, 'mietrecht_mietzinsindex', 0);
 }
 
 export function applyMietrechtRegime(
   linear: MarketState,
   context: CityContext,
-  diff: ParamsDiff40,
+  diff: ParamsDiff,
   prev: RegimeCarry | null,
 ): { market: MarketState; carry: RegimeCarry } {
   const kriterium = levelFromDiff(diff, 'mietrecht_kriterium', 1);

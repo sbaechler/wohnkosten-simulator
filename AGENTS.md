@@ -58,7 +58,7 @@ Aus E1 berechnet (`E2_TERMS` in derived.ts): `gentrifizierungsindex`, `neubau_he
 - Die 44 E0-Parameter wirken als **Diffs** (Änderung vs. Stadt-Baseline). Die absoluten Parameter-Werte einer Stadt beeinflussen die Baseline-E1-Werte NICHT — die Baseline wird nur von den Kontextfaktoren (`ctx:*`) getrieben.
 - Kontextfaktoren wirken als konstanter Antrieb in jeder Phase → auch die Baseline ("Heutige Situation") entwickelt sich über die 3 Phasen weiter.
 - Alle E1/E2-Werte sind normierte Indizes (–1…+1), keine CHF- oder Prozentwerte.
-- **Bedingte Kanten** (`ausgleichDurch` in `phase-weights.ts`) rechnen ein Produkt zweier Parameter statt einer Summe und brauchen deren absolute Stufen. `computeDiff40` trägt dafür Begleiteinträge mit `from === to` ins Diff ein (`DIFF_BEGLEITER`). Wer Änderungen zählt, nimmt `changedParamKeys(diff)`, nicht `Object.keys(diff)`.
+- **Bedingte Kanten** (`ausgleichDurch` in `phase-weights.ts`) rechnen ein Produkt zweier Parameter statt einer Summe und brauchen deren absolute Stufen. `computeDiff` trägt dafür Begleiteinträge mit `from === to` ins Diff ein (`DIFF_BEGLEITER`). Wer Änderungen zählt, nimmt `changedParamKeys(diff)`, nicht `Object.keys(diff)`.
 
 ### Pipeline
 ```
@@ -94,13 +94,13 @@ npm run build:data        # regeneriert cities.ts
 npm run dev               # startet mit neuen Daten
 ```
 
-Aktuell: 10 Schweizer Städte (>40k Einwohner) mit allen 44 Parameter-Werten + 7 Kontextfaktoren (Typ- und Variablennamen mit «40» sind historisch).
+Aktuell: 10 Schweizer Städte (>40k Einwohner) mit allen 44 Parameter-Werten + 7 Kontextfaktoren. Die früheren Namen mit «40» (`CityParams40`, `paramMeta40`, `computeDiff40` …) heissen seit 2026-11-16 ohne Zahl.
 
 ---
 
 ## Parameter nachschlagen
 
-Die Parameter-Metadaten (Labels, Stufen-Definitionen 0/1/2, Gruppen) stehen in `src/model/params.ts` (`paramMeta40`). Kanten-Gewichte und deren Forschungsbasis: `src/model/phase-weights.ts` und `docs/recherche/summary.md`.
+Die Parameter-Metadaten (Labels, Stufen-Definitionen 0/1/2, Gruppen) stehen in `src/model/params.ts` (`paramMeta`). Kanten-Gewichte und deren Forschungsbasis: `src/model/phase-weights.ts` und `docs/recherche/summary.md`.
 
 ---
 
@@ -120,7 +120,7 @@ Die Parameter-Metadaten (Labels, Stufen-Definitionen 0/1/2, Gruppen) stehen in `
 ## Wichtige Konventionen
 
 - **Keine anonymen Magic Numbers in der DAG-Pipeline** — Werte kommen aus `phase-weights.ts` (per-Edge `weights: [w1, w2, w3]`)
-- **Andere Dateien dürfen benannte `const`s verwenden** — sie MÜSSEN aber JSDoc mit Quelle (Forschung, Sotomo, ETH SPUR etc.) und Zweck haben. Beispiele: `MIETBELASTUNG_SENSITIVITY` (belastung.ts), `KNAPPHEIT_GEWICHTE` (supply-demand.ts), `PERSISTENCE` (compute-phases.ts).
+- **Andere Dateien dürfen benannte `const`s verwenden** — sie MÜSSEN aber JSDoc mit Quelle (Forschung, Sotomo, ETH SPUR etc.) und Zweck haben. Beispiele: `MIETBELASTUNG_SENSITIVITY` (belastung.ts), `VERDICHTUNGSDRUCK_GEWICHTE` (WidgetGrid.tsx), `PERSISTENCE` (compute-phases.ts).
 - **Per-Group-Faktoren in `groups.ts` sind Modell-Design** (definieren WAS eine Gruppe ist) — NICHT in `calibration.ts` extrahieren, sondern inline mit JSDoc-Rationale dokumentieren.
 - **URL ist Source of Truth** — nie lokalen React-State für Parameter nutzen
 - **Tests müssen grün sein** bevor gepullt wird: `npx vitest run`

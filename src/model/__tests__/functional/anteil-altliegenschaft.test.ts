@@ -8,7 +8,7 @@ import { describe, it, expect } from 'vitest';
 import { cities } from '../../../generated/cities';
 import { computePhasePipeline } from '../../compute-phases';
 import { WIRKSAMKEIT_OQU } from '../../mietrecht-regime';
-import type { CityContext, ParamsDiff40 } from '../../../types';
+import type { CityContext, ParamsDiff } from '../../../types';
 
 function ohneAnteil(context: CityContext): CityContext {
   const rest = { ...context };
@@ -34,7 +34,7 @@ describe('anteil_altliegenschaft', () => {
   });
 
   for (const city of cities) {
-    const diffs: Record<string, ParamsDiff40> = {
+    const diffs: Record<string, ParamsDiff> = {
       'leeres Diff': {},
       'Kriterium 1 → 2': {
         mietrecht_kriterium: { from: city.params.mietrecht_kriterium, to: 2 },

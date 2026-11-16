@@ -20,10 +20,10 @@
 
 import { describe, it, expect } from 'vitest';
 import { computePhasePipeline, invalidatePhasesCache } from '../../compute-phases';
-import type { CityContext, CityParams40, ParamsDiff40 } from '../../../types';
+import type { CityContext, CityParams, ParamsDiff } from '../../../types';
 
 // Zürich-like baseline
-const ZUERICH_V2: CityParams40 = {
+const ZUERICH_V2: CityParams = {
   raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
   boden_vorkaufsrecht: 1, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
   bau_energievorgaben: 1, bau_sanierungspflicht: 1,
@@ -71,7 +71,7 @@ const ZUERICH_CONTEXT: CityContext = {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function phases(_params: CityParams40, context: CityContext, diff: ParamsDiff40) {
+function phases(_params: CityParams, context: CityContext, diff: ParamsDiff) {
   invalidatePhasesCache();
   return [...computePhasePipeline(context, diff)];
 }
@@ -95,12 +95,12 @@ describe('Infrastruktur: Crossrail London (UK-001) — OEPNV ↑ → Aufwertungs
    * - infra_oepnv ↑ → fiskalische_wirkung ↑ (langfristig durch höhere Steuereinnahmen)
    */
   it('[FACH] OEPNV-Ausbau erhöht aufwertungsdruck (Crossrail-Effekt)', () => {
-    const ohneAusbau: CityParams40 = {
+    const ohneAusbau: CityParams = {
       ...ZUERICH_V2,
       infra_oepnv: 0,
     };
     const ohne = phases(ohneAusbau, NEUTRAL_CONTEXT, {});
-    const mitOepnvDiff: ParamsDiff40 = {
+    const mitOepnvDiff: ParamsDiff = {
       infra_oepnv: { from: 0, to: 2 },
     };
     const mitOepnv = phases(ohneAusbau, NEUTRAL_CONTEXT, mitOepnvDiff);
@@ -117,12 +117,12 @@ describe('Infrastruktur: Crossrail London (UK-001) — OEPNV ↑ → Aufwertungs
      * Rückflüsse, die infrastruktur refinanzieren können.
      * Im Modell sollte ein OEPNV-Ausbau die fiskalische_wirkung über Zeit erhöhen.
      */
-    const ohneAusbau: CityParams40 = {
+    const ohneAusbau: CityParams = {
       ...ZUERICH_V2,
       infra_oepnv: 0,
     };
     const ohne = phases(ohneAusbau, ZUERICH_CONTEXT, {});
-    const mitOepnvDiff: ParamsDiff40 = {
+    const mitOepnvDiff: ParamsDiff = {
       infra_oepnv: { from: 0, to: 2 },
     };
     const mit = phases(ohneAusbau, ZUERICH_CONTEXT, mitOepnvDiff);
@@ -141,15 +141,15 @@ describe('Infrastruktur: OEPNV + Wirtschaftsansiedlung kombiniert', () => {
    * Grand Paris Express zeigt ähnliche Dynamik.
    */
   it('[FACH] Kombinierter OEPNV + Wirtschaftsansiedlung erhöht Aufwertungsdruck stärker als einzeln', () => {
-    const base: CityParams40 = {
+    const base: CityParams = {
       ...ZUERICH_V2,
       infra_oepnv: 0,
       infra_wirtschaftsansiedlung: 0,
     };
-    const nurOepnv: ParamsDiff40 = {
+    const nurOepnv: ParamsDiff = {
       infra_oepnv: { from: 0, to: 2 },
     };
-    const kombiniert: ParamsDiff40 = {
+    const kombiniert: ParamsDiff = {
       infra_oepnv: { from: 0, to: 2 },
       infra_wirtschaftsansiedlung: { from: 0, to: 2 },
     };

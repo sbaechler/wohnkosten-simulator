@@ -1,13 +1,13 @@
 /**
  * gemeinnuetzig-fachlich.test.ts — Fachliche Tests (Research-basiert)
  *
- * Forschung: docs/superpowers/research/gemeinnuetzig-nutzung-parameter-wirkung.md
+ * Forschung: Notizen in docs/recherche/ (CA-001, CA-002, CA-003, US-013, ES-001, US-018).
  *
  * Wichtige empirische Befunde:
  * ─────────────────────────────────────────────────────────────────────
  * 1. Vancouver Empty Homes Tax (EHT): Leerstand 0.90 % (2017) → 0.49 % (2024),
  *    rund 2'900 Wohnungen zurück auf dem Markt (CA-001/CA-003)
- *    → nutzung_kurzzeitvermietung ↑ (Regulierung verschärft)
+ *    → steuer_leerstandsabgabe ↑, spekulationshemmung ↑
  *
  * 2. BC Speculation and Vacancy Tax (SVT, provinziell, nicht EHT): 20'000
  *    Condos in Metro Vancouver 2018–2020 zum Mietmarkt (CA-002)
@@ -30,13 +30,13 @@
 
 import { describe, it, expect } from 'vitest';
 import { computePhasePipeline, invalidatePhasesCache } from '../../compute-phases';
-import type { CityContext, CityParams40, ParamsDiff40 } from '../../../types';
+import type { CityContext, CityParams, ParamsDiff } from '../../../types';
 
 // Zürich-like baseline
 // V1: raumplanung=2, bauvorschriften=2, energetischeVorgaben=1, mietrecht=1, steuerpolitik=2,
 //      foerderungGemeinnuetzig=2, subventionen=1, einspracherechte=2, infrastruktur=2,
 //      auslaendischeInvestitionen=1
-const ZUERICH_V2: CityParams40 = {
+const ZUERICH_V2: CityParams = {
   raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
   boden_vorkaufsrecht: 1, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
   bau_energievorgaben: 1, bau_sanierungspflicht: 1,
@@ -68,7 +68,7 @@ const ZUERICH_CONTEXT: CityContext = {
   marktenge: 2,
 };
 
-function phases(_params: CityParams40, context: CityContext, diff: ParamsDiff40) {
+function phases(_params: CityParams, context: CityContext, diff: ParamsDiff) {
   invalidatePhasesCache();
   return [...computePhasePipeline(context, diff)];
 }
@@ -76,19 +76,15 @@ function phases(_params: CityParams40, context: CityContext, diff: ParamsDiff40)
 describe('Gemeinnützigkeit: Vancouver EHT (Leerstand −0.4 Prozentpunkte)', () => {
   /**
    * Vancouver Empty Home Tax:
-   * - Einführung 2017 (0.5% → 2018 auf 2.5% erhöht)
+   * - Eingeführt 2017, heute 3 % des Immobilienwerts pro Jahr (CA-001, CA-003)
    * - Leerstand 0.90 % (2017) → 0.49 % (2024), rund 2'900 Wohnungen (CA-001/CA-003)
    * - Die 20'000 Condos (Metro Vancouver 2018–2020) gehören zur provinziellen
    *   Speculation and Vacancy Tax, nicht zur EHT (CA-002)
-   *
-   * Hinweis: steuer_leerstandsabgabe hat im aktuellen DAG keine direkte
-   * Verbindung zu spekulationshemmung. Die Tests hier dokumentieren die
-   * erwartete Wirkung (Research-Bedarf für DAG-Kalibrierung).
    */
   it('[FACH] Vancouver EHT: Leerstandsabgabe erhöht spekulationshemmung', () => {
     const neutral = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
-    const withEHT: ParamsDiff40 = {
+    const withEHT: ParamsDiff = {
       steuer_leerstandsabgabe: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, ZUERICH_CONTEXT, withEHT);
@@ -98,7 +94,7 @@ describe('Gemeinnützigkeit: Vancouver EHT (Leerstand −0.4 Prozentpunkte)', ()
   });
 
   it('[FACH] Vancouver EHT: spekulationshemmung bleibt hoch über alle Phasen', () => {
-    const withEHT: ParamsDiff40 = {
+    const withEHT: ParamsDiff = {
       steuer_leerstandsabgabe: { from: 1, to: 2 },
     };
     const results = phases(ZUERICH_V2, ZUERICH_CONTEXT, withEHT);
@@ -111,49 +107,36 @@ describe('Gemeinnützigkeit: NYC LL18 (90% Inserate-Rückgang)', () => {
   /**
    * New York City Local Law 18 (2023):
    * - Airbnb-Inserate −90%
-   * - hundreds of hosts left the platform
-   *
-   * Hinweis: nutzung_kurzzeitvermietung hat im aktuellen DAG keine direkte
-   * Verbindung zu verdraengungsrisiko.
+   * - Leerstand und Mieten ohne messbare Änderung (US-013)
    */
-  it('[FACH] NYC LL18: Strikte Kurzzeitvermietung senkt verdraengungsrisiko (Research-Bedarf)', () => {
+  it('[FACH] NYC LL18: Strikte Kurzzeitvermietung senkt verdraengungsrisiko', () => {
     const neutral = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
-    const withLL18: ParamsDiff40 = {
+    const withLL18: ParamsDiff = {
       nutzung_kurzzeitvermietung: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, ZUERICH_CONTEXT, withLL18);
 
-    /**
-     * DAG-Kalibrierungsbedarf: nutzung_kurzzeitvermietung → verdraengungsrisiko
-     * Kante fehlt im aktuellen DAG.
-     */
     expect(withDiff[0].marketState.verdraengungsrisiko)
       .toBeLessThan(neutral[0].marketState.verdraengungsrisiko);
   });
 });
 
-describe('Gemeinnützigkeit: Barcelona Airbnb-Regulierung Paradox', () => {
+describe('Gemeinnützigkeit: Barcelona Kurzzeitvermietung (ES-001)', () => {
   /**
    * Barcelona: Airbnb-Aktivität erhöhte die Mieten um 1.9 % und die
    * Transaktionspreise um 4.6 % (Garcia-López et al. 2020, ES-001). Effekt der
-   * Aktivität, nicht der Regulierung; ein «Paradox» zeigt die Studie nicht.
-   *
-   * Hinweis: nutzung_kurzzeitvermietung hat im aktuellen DAG keine direkte
-   * Verbindung zu investitionsattraktivitaet.
+   * Aktivität, nicht der Regulierung. Weniger Kurzzeitvermietung senkt
+   * damit die erzielbare Rendite.
    */
-  it('[FACH] Barcelona: Strikte Kurzzeitvermietung senkt investitionsattraktivitaet (Research-Bedarf)', () => {
+  it('[FACH] Barcelona: Strikte Kurzzeitvermietung senkt investitionsattraktivitaet', () => {
     const neutral = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
-    const withBarcelona: ParamsDiff40 = {
+    const withBarcelona: ParamsDiff = {
       nutzung_kurzzeitvermietung: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, ZUERICH_CONTEXT, withBarcelona);
 
-    /**
-     * DAG-Kalibrierungsbedarf: nutzung_kurzzeitvermietung → investitionsattraktivitaet
-     * Kante fehlt im aktuellen DAG.
-     */
     expect(withDiff[0].marketState.investitionsattraktivitaet)
       .toBeLessThan(neutral[0].marketState.investitionsattraktivitaet);
   });
@@ -169,7 +152,7 @@ describe('Gemeinnütziger Wohnungsbau: Mindestanteil + Baurecht', () => {
    * - gemeinnuetzig_mindestanteil ↑ → gemeinnuetzig_kraft ↑ → gentrifizierungsindex ↓
    */
   it('[FACH] Hoher Mindestanteil senkt Gentrifizierungsindex (im Vergleich zu keinem Mindestanteil)', () => {
-    const restrictiveBasis: CityParams40 = {
+    const restrictiveBasis: CityParams = {
       ...ZUERICH_V2,
       gemeinnuetzig_mindestanteil: 0, gemeinnuetzig_ausgleich: 0,
       gemeinnuetzig_foerderfonds: 0,
@@ -178,7 +161,7 @@ describe('Gemeinnütziger Wohnungsbau: Mindestanteil + Baurecht', () => {
 
     const ohneReform = phases(restrictiveBasis, ZUERICH_CONTEXT, {});
 
-    const reformDiff: ParamsDiff40 = {
+    const reformDiff: ParamsDiff = {
       gemeinnuetzig_mindestanteil: { from: 0, to: 2 },
       gemeinnuetzig_foerderfonds:  { from: 0, to: 2 },
       gemeinnuetzig_baurecht:      { from: 0, to: 2 },
@@ -190,13 +173,13 @@ describe('Gemeinnütziger Wohnungsbau: Mindestanteil + Baurecht', () => {
   });
 
   it('[FACH] Hoher Mindestanteil erhöht angebotspotenzial über den Foerderfonds-Kanal', () => {
-    const ohneFonds: CityParams40 = {
+    const ohneFonds: CityParams = {
       ...ZUERICH_V2,
       gemeinnuetzig_foerderfonds: 0,
     };
 
     const ohneReform = phases(ohneFonds, ZUERICH_CONTEXT, {});
-    const reformDiff: ParamsDiff40 = {
+    const reformDiff: ParamsDiff = {
       gemeinnuetzig_foerderfonds: { from: 0, to: 2 },
     };
     const mitReform = phases(ohneFonds, ZUERICH_CONTEXT, reformDiff);
@@ -217,7 +200,7 @@ describe('Nutzungsregulierung: Abbruchverbot schützt Bestand', () => {
   it('[FACH] Abbruchverbot senkt Verdraengungsrisiko', () => {
     const neutral = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
-    const withBan: ParamsDiff40 = {
+    const withBan: ParamsDiff = {
       nutzung_abbruchverbot: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, ZUERICH_CONTEXT, withBan);
@@ -226,12 +209,12 @@ describe('Nutzungsregulierung: Abbruchverbot schützt Bestand', () => {
       .toBeLessThan(neutral[0].marketState.verdraengungsrisiko);
   });
 
-  it('[FACH] Abbruchverbot senkt Angebotspotenzial (FHNW: Neubau-Bremse dominiert Bestandsschutz)', () => {
+  it('[FACH] Abbruchverbot senkt Angebotspotenzial (DIW DP 2143: Neubau-Bremse dominiert Bestandsschutz)', () => {
     /**
      * Ursprünglich: Abbruchverbot → angebotspotenzial ↑ (Bestand bleibt)
      *
      * Korrektur per DIW Discussion Paper 2143 (Ters/Kholodilin 2025, nur Genf 1994–2022):
-     * Die Wohnungsrationierung (Abbruch-/Umnutzungsverbot) ist die SCHADLICHSTE
+     * Die Wohnungsrationierung (Abbruch-/Umnutzungsverbot) ist die schädlichste
      * aller Regulierungsformen für das Angebot:
      * −600 Mio. CHF Bauinvestitionen aggregiert; −400 Mio. CHF institutionelle Neubauinvestitionen.
      * Basel: Baugesuche für Wohnungen −76 % (784 → 190 im Mittel; SRES im
@@ -240,7 +223,7 @@ describe('Nutzungsregulierung: Abbruchverbot schützt Bestand', () => {
      */
     const neutral = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
-    const withBan: ParamsDiff40 = {
+    const withBan: ParamsDiff = {
       nutzung_abbruchverbot: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, ZUERICH_CONTEXT, withBan);

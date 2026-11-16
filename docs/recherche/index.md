@@ -90,6 +90,9 @@ status_counts:
 | US-013 | New York City Local Law 18 (LL18) — STR Fallstudie | 2024 | government-report | found | nutzung_kurzzeitvermietung, angebotspotenzial, nachfragedruck |
 | US-014 | Santa Monica Home Sharing Ordinance (HSO) — STR Fallstudie | 2024 | peer-reviewed | evaluated | nutzung_kurzzeitvermietung, angebotspotenzial, nachfragedruck |
 | US-015 | Chicago Transit-Oriented Development Upzonings — Fallstudie | 2020 | peer-reviewed | evaluated | raumplanung_ausnuetzungsziffer, aufwertungsdruck, angebotspotenzial |
+| US-016 | Local Effects of Large New Apartment Buildings in Low-Income Areas (Asquith/Mast/Reed) | 2023 | peer-reviewed | evaluated | raumplanung_verdichtung, bau_bewilligungsverfahren, angebotspotenzial, nachfragedruck, verdraengungsrisiko |
+| US-017 | Housing Market Spillovers: End of Rent Control in Cambridge, MA (Autor/Palmer/Pathak) | 2014 | peer-reviewed | evaluated | mietrecht_kuendigungsschutz, mietrecht_kostenmiete, angebotspotenzial, investitionsattraktivitaet, aufwertungsdruck |
+| US-018 | The Effects of Inclusionary Zoning on Local Housing Markets (Schuetz/Been/Ellen) | 2012 | peer-reviewed | evaluated | gemeinnuetzig_mindestanteil, gemeinnuetzig_baurecht, gemeinnuetzig_sozialmischung, angebotspotenzial |
 | US-019 | Why People Are Fleeing Blue Cities for Red States (Brooks) | 2023 | gray-literature | evaluated | raumplanung_zonenreserve, angebotspotenzial, nachfragedruck |
 | US-020 | Abundance and the Left (Klein / Teachout / Chakrabarti) | 2025 | gray-literature | evaluated | bau_bewilligungsverfahren, gemeinnuetzig_kraft, angebotspotenzial |
 

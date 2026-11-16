@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import onDisk from '../../../../docs/architektur/01-graph-kanten.md?raw';
 import { renderEdgeDoc } from '../../edge-doc';
-import { paramMeta40, PARAM_KEYS_40 } from '../../params';
+import { paramMeta, PARAM_KEYS } from '../../params';
 import { PHASE_WEIGHTED_EDGES } from '../../phase-weights';
 
 describe('Kanten-Referenz', () => {
@@ -14,8 +14,8 @@ describe('Kanten-Referenz', () => {
   });
 
   it('jeder Parameter nennt, was eine höhere Stufe bedeutet', () => {
-    expect(paramMeta40.map(m => m.key).sort()).toEqual([...PARAM_KEYS_40].sort());
-    for (const meta of paramMeta40) {
+    expect(paramMeta.map(m => m.key).sort()).toEqual([...PARAM_KEYS].sort());
+    for (const meta of paramMeta) {
       expect(meta.hoeherBedeutet.trim().length, meta.key).toBeGreaterThan(5);
     }
   });

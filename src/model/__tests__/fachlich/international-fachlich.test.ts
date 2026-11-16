@@ -24,11 +24,11 @@
 
 import { describe, it, expect } from 'vitest';
 import { computePhasePipeline, invalidatePhasesCache } from '../../compute-phases';
-import type { CityContext, CityParams40, ParamsDiff40 } from '../../../types';
+import type { CityContext, CityParams, ParamsDiff } from '../../../types';
 
 // Basis-Parameter für Singapur-artiges Szenario
 // (Starkes Vorkaufsrecht, hoher gemeinnütziger Sektor, niedrige Bodenpreise)
-const SG_LIKE: CityParams40 = {
+const SG_LIKE: CityParams = {
   raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
   boden_vorkaufsrecht: 2, boden_bauverpflichtung: 2, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
   bau_energievorgaben: 1, bau_sanierungspflicht: 1,
@@ -48,7 +48,7 @@ const SG_LIKE: CityParams40 = {
 
 // Stockholm-artiges Szenario (starke Mietregulierung, kollektive Mietpreissetzung,
 // extreme Marktfriktion, fast nur noch nicht-profit Neubau)
-const STOCKHOLM_LIKE: CityParams40 = {
+const STOCKHOLM_LIKE: CityParams = {
   raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
   boden_vorkaufsrecht: 1, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
   bau_energievorgaben: 1, bau_sanierungspflicht: 1,
@@ -66,7 +66,7 @@ const STOCKHOLM_LIKE: CityParams40 = {
     bau_ersatzneubau_effizienz: 1,
 };
 
-const ZUERICH_V2: CityParams40 = {
+const ZUERICH_V2: CityParams = {
   raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
   boden_vorkaufsrecht: 1, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
   bau_energievorgaben: 1, bau_sanierungspflicht: 1,
@@ -114,7 +114,7 @@ const NEUTRAL_CONTEXT: CityContext = {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function phases(_params: CityParams40, context: CityContext, diff: ParamsDiff40) {
+function phases(_params: CityParams, context: CityContext, diff: ParamsDiff) {
   invalidatePhasesCache();
   return [...computePhasePipeline(context, diff)];
 }
@@ -140,12 +140,12 @@ describe('Singapur HDB-System (SG-001): Staatliche Landnahme → Angebotspotenzi
     // In der Schweiz/Europa ist Vorkaufsrecht primär ein Instrument für den
     // gemeinnützigen Sektor (boden_vorkaufsrecht → gemeinnuetzig_kraft), nicht
     // für die allgemeine Angebotsausweitung.
-    const ohneVorkaufsrecht: CityParams40 = {
+    const ohneVorkaufsrecht: CityParams = {
       ...SG_LIKE,
       boden_vorkaufsrecht: 0,
     };
     const ohne = phases(ohneVorkaufsrecht, ANGESPANNT, {});
-    const mitDiff: ParamsDiff40 = {
+    const mitDiff: ParamsDiff = {
       boden_vorkaufsrecht: { from: 0, to: 2 },
     };
     const mit = phases(ohneVorkaufsrecht, ANGESPANNT, mitDiff);
@@ -163,12 +163,12 @@ describe('Singapur HDB-System (SG-001): Staatliche Landnahme → Angebotspotenzi
      * aufwertungsdruck. Der Effekt läuft über gemeinnuetzig_kraft → gentrifizierungsindex.
      * Test auf gemeinnuetzig_kraft umgestellt.
      */
-    const ohneVorkaufsrecht: CityParams40 = {
+    const ohneVorkaufsrecht: CityParams = {
       ...SG_LIKE,
       boden_vorkaufsrecht: 0,
     };
     const ohne = phases(ohneVorkaufsrecht, ANGESPANNT, {});
-    const mitDiff: ParamsDiff40 = {
+    const mitDiff: ParamsDiff = {
       boden_vorkaufsrecht: { from: 0, to: 2 },
     };
     const mit = phases(ohneVorkaufsrecht, ANGESPANNT, mitDiff);
@@ -184,7 +184,7 @@ describe('Singapur HDB-System (SG-001): Staatliche Landnahme → Angebotspotenzi
      * Zusammen sollte der Effekt auf gentrifizierungsindex stärker sein als einzeln.
      * Ref: SG-001
      */
-    const base: CityParams40 = {
+    const base: CityParams = {
       ...SG_LIKE,
       boden_vorkaufsrecht: 0,
       gemeinnuetzig_mindestanteil: 0, gemeinnuetzig_ausgleich: 0,
@@ -192,10 +192,10 @@ describe('Singapur HDB-System (SG-001): Staatliche Landnahme → Angebotspotenzi
       gemeinnuetzig_baurecht: 0,
     };
 
-    const nurVorkauf: ParamsDiff40 = {
+    const nurVorkauf: ParamsDiff = {
       boden_vorkaufsrecht: { from: 0, to: 2 },
     };
-    const kombiniert: ParamsDiff40 = {
+    const kombiniert: ParamsDiff = {
       boden_vorkaufsrecht: { from: 0, to: 2 },
       gemeinnuetzig_mindestanteil: { from: 0, to: 2 },
       gemeinnuetzig_foerderfonds: { from: 0, to: 2 },
@@ -227,7 +227,7 @@ describe('Stockholm Schweden (SE-001): Mietregulierung → Extreme Marktfriktion
    */
   it('[FACH] Stockholm-artige Mietregulierung erzeugt extreme Marktfriktion', () => {
     // Diff-basiert: Von Zürich-Baseline aus den Stockholm-Zusatz applizieren
-    const stockholmDiff: ParamsDiff40 = {
+    const stockholmDiff: ParamsDiff = {
       mietrecht_kostenmiete:       { from: 1, to: 2 },
       mietrecht_anfangsmiete:      { from: 1, to: 2 },
       mietrecht_mietzinstransparenz: { from: 1, to: 2 },
@@ -263,7 +263,7 @@ describe('Stockholm Schweden (SE-001): Mietregulierung → Extreme Marktfriktion
      * Investoren im regulierten Markt aktiv sind.
      * Ref: SE-001
      */
-    const stockholmDiff: ParamsDiff40 = {
+    const stockholmDiff: ParamsDiff = {
       mietrecht_kostenmiete:       { from: 1, to: 2 },
       mietrecht_anfangsmiete:      { from: 1, to: 2 },
       mietrecht_kuendigungsschutz: { from: 1, to: 2 },

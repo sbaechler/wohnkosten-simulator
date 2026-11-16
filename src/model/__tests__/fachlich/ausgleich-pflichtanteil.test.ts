@@ -9,24 +9,24 @@
  */
 import { describe, it, expect } from 'vitest';
 import { computePhasePipeline } from '../../compute-phases';
-import { computeDiff40, changedParamKeys } from '../../params';
+import { computeDiff, changedParamKeys } from '../../params';
 import { cities } from '../../../generated/cities';
-import type { CityParams40, ParamValue } from '../../../types';
+import type { CityParams, ParamValue } from '../../../types';
 
 const ZH = cities.find(c => c.slug === 'zuerich')!;
 /** Genf: Pflichtanteil in Kraft (Art. 4A LGZD) mit vollem Ausgleich. */
 const GE = cities.find(c => c.slug === 'genf')!;
 
-function angebotP3(basis: CityParams40, neu: Partial<CityParams40>): number {
-  const diff = computeDiff40(basis, { ...basis, ...neu });
+function angebotP3(basis: CityParams, neu: Partial<CityParams>): number {
+  const diff = computeDiff(basis, { ...basis, ...neu });
   return [...computePhasePipeline(ZH.context, diff)][2].marketState.angebotspotenzial;
 }
 
 /** Stadt ohne Pflichtanteil und ohne Ausgleich als Ausgangslage. */
-const OHNE: CityParams40 = { ...ZH.params, gemeinnuetzig_mindestanteil: 0, gemeinnuetzig_ausgleich: 0 };
+const OHNE: CityParams = { ...ZH.params, gemeinnuetzig_mindestanteil: 0, gemeinnuetzig_ausgleich: 0 };
 const basisOhne = angebotP3(OHNE, {});
 /** Stadt mit hohem Pflichtanteil, aber ohne Ausgleich. */
-const PFLICHT: CityParams40 = { ...ZH.params, gemeinnuetzig_mindestanteil: 2, gemeinnuetzig_ausgleich: 0 };
+const PFLICHT: CityParams = { ...ZH.params, gemeinnuetzig_mindestanteil: 2, gemeinnuetzig_ausgleich: 0 };
 
 describe('Ausgleich beim Pflichtanteil', () => {
   it('Stand je Stadt wie erhoben (2026-11-16, Begründung in switzerland.yaml)', () => {
@@ -100,19 +100,19 @@ describe('Ausgleich beim Pflichtanteil', () => {
 
   it('ohne Ausgleich rechnet die Kante wie bisher (Diff von Hand, ohne Begleiteintrag)', () => {
     const vonHand = [...computePhasePipeline(ZH.context, { gemeinnuetzig_mindestanteil: { from: 2, to: 1 } })];
-    const app = [...computePhasePipeline(ZH.context, computeDiff40(PFLICHT, { ...PFLICHT, gemeinnuetzig_mindestanteil: 1 }))];
+    const app = [...computePhasePipeline(ZH.context, computeDiff(PFLICHT, { ...PFLICHT, gemeinnuetzig_mindestanteil: 1 }))];
     expect(app.map(p => p.marketState)).toEqual(vonHand.map(p => p.marketState));
   });
 
   it('der Begleiteintrag zählt nicht als Änderung', () => {
-    const diff = computeDiff40(PFLICHT, { ...PFLICHT, gemeinnuetzig_ausgleich: 2 });
+    const diff = computeDiff(PFLICHT, { ...PFLICHT, gemeinnuetzig_ausgleich: 2 });
     expect(Object.keys(diff).sort()).toEqual(['gemeinnuetzig_ausgleich', 'gemeinnuetzig_mindestanteil']);
     expect(changedParamKeys(diff)).toEqual(['gemeinnuetzig_ausgleich']);
   });
 
   it('die übrigen Kanten des Mindestanteils bleiben vom Ausgleich unberührt', () => {
-    const kraft = (neu: Partial<CityParams40>) =>
-      [...computePhasePipeline(ZH.context, computeDiff40(OHNE, { ...OHNE, ...neu }))][2].marketState.gemeinnuetzig_kraft;
+    const kraft = (neu: Partial<CityParams>) =>
+      [...computePhasePipeline(ZH.context, computeDiff(OHNE, { ...OHNE, ...neu }))][2].marketState.gemeinnuetzig_kraft;
     expect(kraft({ gemeinnuetzig_mindestanteil: 2, gemeinnuetzig_ausgleich: 2 }))
       .toBeCloseTo(kraft({ gemeinnuetzig_mindestanteil: 2 }), 10);
   });

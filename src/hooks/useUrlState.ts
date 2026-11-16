@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { CityParams40, CityConfig, CityContext, ParamValue, ParamsDiff40 } from '../types';
+import type { CityParams, CityConfig, CityContext, ParamValue, ParamsDiff } from '../types';
 import { cities, cityBySlug } from '../generated/cities';
-import { computeDiff40 } from '../model/params';
+import { computeDiff } from '../model/params';
 import { clampParam, PARAM_KEYS_40_SET } from '../model/url-helpers';
 
 export function parseUrl(pathname: string, search: string) {
   const citySlug = pathname.replace(/^\//, '').split('/')[0] || '';
-  const overrides: Partial<CityParams40> = {};
+  const overrides: Partial<CityParams> = {};
   const params = new URLSearchParams(search);
 
   for (const [key, val] of params.entries()) {
@@ -20,7 +20,7 @@ export function parseUrl(pathname: string, search: string) {
   return { citySlug, overrides };
 }
 
-export function buildUrl(citySlug: string, overrides: Partial<CityParams40>): string {
+export function buildUrl(citySlug: string, overrides: Partial<CityParams>): string {
   const entries = Object.entries(overrides)
     .filter(([, v]) => v !== undefined)
     .sort(([a], [b]) => a.localeCompare(b));
@@ -31,10 +31,10 @@ export function buildUrl(citySlug: string, overrides: Partial<CityParams40>): st
 export interface UrlState {
   city: CityConfig;
   context: CityContext;
-  baseline: CityParams40;
-  modified: CityParams40;
-  diff: ParamsDiff40;
-  setParam: (key: keyof CityParams40, value: ParamValue) => void;
+  baseline: CityParams;
+  modified: CityParams;
+  diff: ParamsDiff;
+  setParam: (key: keyof CityParams, value: ParamValue) => void;
   setCity: (slug: string) => void;
   reset: () => void;
 }
@@ -56,15 +56,15 @@ export function useUrlState(): UrlState {
   );
   const baseline = city.params;
   const modified = useMemo(() => ({ ...baseline, ...overrides }), [baseline, overrides]);
-  const diff = useMemo(() => computeDiff40(baseline, modified), [baseline, modified]);
+  const diff = useMemo(() => computeDiff(baseline, modified), [baseline, modified]);
 
-  const pushUrl = useCallback((slug: string, ov: Partial<CityParams40>) => {
+  const pushUrl = useCallback((slug: string, ov: Partial<CityParams>) => {
     const url = buildUrl(slug, ov);
     window.history.pushState(null, '', url);
     setLocationKey(window.location.pathname + window.location.search);
   }, []);
 
-  const setParam = useCallback((key: keyof CityParams40, value: ParamValue) => {
+  const setParam = useCallback((key: keyof CityParams, value: ParamValue) => {
     const newOverrides = { ...overrides };
     if (value === baseline[key]) {
       delete newOverrides[key];

@@ -19,7 +19,7 @@ import {
   E1_NENNER, E1_NODES, PERSISTENCE, marketModulator,
 } from '../../compute-phases';
 import { PHASE_WEIGHTED_EDGES, type PhaseEdge } from '../../phase-weights';
-import type { CityContext, ParamsDiff40 } from '../../../types';
+import type { CityContext, ParamsDiff } from '../../../types';
 
 const ZUERICH_CONTEXT: CityContext = {
   ownershipBaseline: {
@@ -35,7 +35,7 @@ const ZUERICH_CONTEXT: CityContext = {
   marktenge: 2,
 };
 
-const EMPTY_DIFF = {} as ParamsDiff40;
+const EMPTY_DIFF = {} as ParamsDiff;
 
 function inRange(value: number): void {
   expect(value).toBeGreaterThanOrEqual(-1);
@@ -158,7 +158,7 @@ describe('Generator: Stand = PERSISTENCE · Vorstand + Impuls / E1_NENNER', () =
     const kante: PhaseEdge = {
       from: 'infra_oepnv', to: 'nachfragedruck', sign: 1, weights: [0.3, 0.6, 0.9],
     };
-    const diff: ParamsDiff40 = { infra_oepnv: { from: 0, to: 2 } };
+    const diff: ParamsDiff = { infra_oepnv: { from: 0, to: 2 } };
     const stand = [...computePhasePipeline(NEUTRAL, diff, [kante])].map(r => r.marketState.nachfragedruck);
     let erwartet = 0;
     kante.weights.forEach((w, p) => {
@@ -168,7 +168,7 @@ describe('Generator: Stand = PERSISTENCE · Vorstand + Impuls / E1_NENNER', () =
   });
 
   it('gleiches Gewicht → gleicher Impuls, unabhängig von der Kantenzahl des Zielknotens', () => {
-    const diff: ParamsDiff40 = { infra_oepnv: { from: 0, to: 2 } };
+    const diff: ParamsDiff = { infra_oepnv: { from: 0, to: 2 } };
     const allein: PhaseEdge[] = [{ from: 'infra_oepnv', to: 'nachfragedruck', sign: 1, weights: [0.5, 0.5, 0.5] }];
     const mitAnderen: PhaseEdge[] = [
       ...allein,

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { CityParams40, ParamValue, CityContext } from '../types';
+import type { CityParams, ParamValue, CityContext } from '../types';
 import { paramsByGroup, PARAM_GROUP_LABELS, PARAM_GROUP_ORDER } from '../model/params';
 import type { ParamGroup } from '../types';
 import { ParameterSlider } from './ParameterSlider';
@@ -8,9 +8,9 @@ import './ParameterPanel.css';
 
 interface Props {
   context: CityContext;
-  baseline: CityParams40;
-  modified: CityParams40;
-  onParamChange: (key: keyof CityParams40, value: ParamValue) => void;
+  baseline: CityParams;
+  modified: CityParams;
+  onParamChange: (key: keyof CityParams, value: ParamValue) => void;
   onReset: () => void;
 }
 
@@ -31,7 +31,7 @@ export function ParameterPanel({ context, baseline, modified, onParamChange, onR
 
   const groups = paramsByGroup();
   const hasAnyChange = Object.keys(modified).some(
-    k => modified[k as keyof CityParams40] !== baseline[k as keyof CityParams40],
+    k => modified[k as keyof CityParams] !== baseline[k as keyof CityParams],
   );
 
   function toggleGroup(group: ParamGroup) {

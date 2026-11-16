@@ -6,7 +6,7 @@
 import { describe, it, expect } from 'vitest';
 import { cities } from '../../../generated/cities';
 import { computePhasePipeline } from '../../compute-phases';
-import type { CityContext, ParamsDiff40 } from '../../../types';
+import type { CityContext, ParamsDiff } from '../../../types';
 
 function ohneAbstand(context: CityContext): CityContext {
   const rest = { ...context };
@@ -35,7 +35,7 @@ describe('mietabstand_neubezug', () => {
   });
 
   for (const city of cities) {
-    const diffs: Record<string, ParamsDiff40> = {
+    const diffs: Record<string, ParamsDiff> = {
       'leeres Diff': {},
       'Durchsetzung und Kostenmiete': {
         mietrecht_durchsetzung: { from: city.params.mietrecht_durchsetzung, to: 2 },

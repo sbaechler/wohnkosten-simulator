@@ -8,8 +8,8 @@
  * - SVIT / HEV / Swiss Real Estate Institute:
  *   «Auswirkungen der Wohnschutzinitiative im Kanton Basel-Stadt», Jan. 2025
  *
- * Forschung: docs/superpowers/specs/parameter-recherche.md (Abschnitte
- *            `kostenmiete`, `kuendigungsschutz`, `umnutzungsverbot`)
+ * Forschung: Für DIW DP 2143 und die Basler Zahlen (SRES/SVIT) fehlt noch
+ *            eine Notiz in docs/recherche/ (Verbesserungsplan 0.3, Punkt 5).
  *
  * Wichtige empirische Befunde:
  * ─────────────────────────────────────────────────────────────────────
@@ -34,20 +34,19 @@
  * 5. Basel: Baugesuche für Wohnungen −76 % (Mittel 784 für 2014–2020 gegen
  *    190 für 2021–2023; Swiss Real Estate Institute im Auftrag des SVIT,
  *    Interessenvertreter; Ursache laut Regierungsrat Basel-Stadt offen)
- *    → Zürich im selben Zeitraum: +20% Baugesuche (nicht nachgeprüft)
  *
  * Run: npx vitest run src/model/__tests__/fachlich/wohnschutz-fachlich.test.ts
  */
 
 import { describe, it, expect } from 'vitest';
 import { computePhasePipeline, invalidatePhasesCache } from '../../compute-phases';
-import type { CityContext, CityParams40, ParamsDiff40 } from '../../../types';
+import type { CityContext, CityParams, ParamsDiff } from '../../../types';
 
 // ── Baselines ─────────────────────────────────────────────────────────────────
 
 
 // Zürich-like baseline (moderate Regulierung, kein Mietpreisdeckel)
-const ZUERICH_V2: CityParams40 = {
+const ZUERICH_V2: CityParams = {
   raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
   boden_vorkaufsrecht: 1, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
   bau_energievorgaben: 1, bau_sanierungspflicht: 1,
@@ -96,20 +95,16 @@ const NEUTRAL_CONTEXT: CityContext = {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function phases(_params: CityParams40, context: CityContext, diff: ParamsDiff40) {
+function phases(_params: CityParams, context: CityContext, diff: ParamsDiff) {
   invalidatePhasesCache();
   return [...computePhasePipeline(context, diff)];
 }
 
 // ── Test-Suite 1: Rationierung bremst stärker als Mietpreisregulierung ────────
 
-describe('FHNW: Wohnungsrationierung bremst Investitionen stärker als Mietpreisregulierung', () => {
-  // ⚠️  CALIBRATION_TARGET: nutzung_abbruchverbot / nutzung_umnutzungsverbot
-  // haben im aktuellen DAG noch keine Kanten zu angebotspotenzial oder
-  // investitionsattraktivitaet. Diese Tests werden erst grün, sobald die
-  // entsprechenden Gewichte im DAG kalibriert sind.
+describe('DIW DP 2143: Wohnungsrationierung bremst Investitionen stärker als Mietpreisregulierung', () => {
   /**
-   * Kernbefund der FHNW-Studie (Genf 1994–2022):
+   * Kernbefund von DIW DP 2143 (Genf 1994–2022):
    * - Rationierung (Abbruch-/Umnutzungsverbot): −600 Mio. CHF Bauinvestitionen aggregiert
    * - Mietpreisregulierung: −100 Mio. CHF bei institutionellen Investoren (statistisch schwach)
    *
@@ -117,12 +112,12 @@ describe('FHNW: Wohnungsrationierung bremst Investitionen stärker als Mietpreis
    *   als reine Mietpreisregulierung.
    */
   it('[FACH] Rationierung senkt angebotspotenzial stärker als Mietpreisregulierung', () => {
-    const nurMietrecht: ParamsDiff40 = {
+    const nurMietrecht: ParamsDiff = {
       mietrecht_kostenmiete:      { from: 1, to: 2 },
       mietrecht_anfangsmiete:     { from: 1, to: 2 },
       mietrecht_kuendigungsschutz: { from: 1, to: 2 },
     };
-    const nurRationierung: ParamsDiff40 = {
+    const nurRationierung: ParamsDiff = {
       nutzung_abbruchverbot:    { from: 1, to: 2 },
       nutzung_umnutzungsverbot: { from: 1, to: 2 },
     };
@@ -135,12 +130,12 @@ describe('FHNW: Wohnungsrationierung bremst Investitionen stärker als Mietpreis
   });
 
   it('[FACH] Rationierung senkt investitionsattraktivitaet stärker als Mietpreisregulierung', () => {
-    const nurMietrecht: ParamsDiff40 = {
+    const nurMietrecht: ParamsDiff = {
       mietrecht_kostenmiete:      { from: 1, to: 2 },
       mietrecht_anfangsmiete:     { from: 1, to: 2 },
       mietrecht_kuendigungsschutz: { from: 1, to: 2 },
     };
-    const nurRationierung: ParamsDiff40 = {
+    const nurRationierung: ParamsDiff = {
       nutzung_abbruchverbot:    { from: 1, to: 2 },
       nutzung_umnutzungsverbot: { from: 1, to: 2 },
     };
@@ -157,14 +152,11 @@ describe('FHNW: Wohnungsrationierung bremst Investitionen stärker als Mietpreis
 // ── Test-Suite 2: Basel-Wohnschutz-Szenario ──────────────────────────────────
 
 describe('Basel Wohnschutzverordnung (2022): kombinierte Rationierung', () => {
-  // ⚠️  CALIBRATION_TARGET: nutzung_abbruchverbot / nutzung_umnutzungsverbot fehlen
-  // aktuell als Quellknoten für neubau_hemmnisindex und angebotspotenzial im DAG.
   /**
    * Basel Wohnschutzverordnung:
    * - Abriss, Ersatzneubau und Sanierungen: bewilligungspflichtig + Mietzinsobergrenzen
    * - Baugesuche für Wohnungen −76 % (784 → 190 im Mittel, SRES/SVIT;
    *   Ursache laut Regierungsrat offen)
-   * - Zürich im selben Zeitraum: +20% mehr Baugesuche (nicht nachgeprüft)
    *
    * Modell-Szenario: Wohnschutz-Initiative eingeführt
    * (nutzung_abbruchverbot + nutzung_umnutzungsverbot + mietrecht_kostenmiete)
@@ -172,7 +164,7 @@ describe('Basel Wohnschutzverordnung (2022): kombinierte Rationierung', () => {
   it('[FACH] Basel-Wohnschutz: Kombination Rationierung + Mietdeckel erhöht neubau_hemmnisindex stark', () => {
     const neutral = phases(ZUERICH_V2, ANGESPANNT, {});
 
-    const baselWohnschutz: ParamsDiff40 = {
+    const baselWohnschutz: ParamsDiff = {
       nutzung_abbruchverbot:      { from: 1, to: 2 },
       nutzung_umnutzungsverbot:   { from: 1, to: 2 },
       mietrecht_kostenmiete:      { from: 1, to: 2 },
@@ -187,7 +179,7 @@ describe('Basel Wohnschutzverordnung (2022): kombinierte Rationierung', () => {
   it('[FACH] Basel-Wohnschutz: angebotspotenzial sinkt deutlich gegenüber Status quo', () => {
     const neutral = phases(ZUERICH_V2, ANGESPANNT, {});
 
-    const baselWohnschutz: ParamsDiff40 = {
+    const baselWohnschutz: ParamsDiff = {
       nutzung_abbruchverbot:      { from: 1, to: 2 },
       nutzung_umnutzungsverbot:   { from: 1, to: 2 },
       mietrecht_kostenmiete:      { from: 1, to: 2 },
@@ -202,7 +194,7 @@ describe('Basel Wohnschutzverordnung (2022): kombinierte Rationierung', () => {
   it('[FACH] Basel-Wohnschutz: investitionsattraktivitaet sinkt über alle Phasen', () => {
     const neutral = phases(ZUERICH_V2, ANGESPANNT, {});
 
-    const baselWohnschutz: ParamsDiff40 = {
+    const baselWohnschutz: ParamsDiff = {
       nutzung_abbruchverbot:      { from: 1, to: 2 },
       nutzung_umnutzungsverbot:   { from: 1, to: 2 },
       mietrecht_kostenmiete:      { from: 1, to: 2 },
@@ -220,7 +212,7 @@ describe('Basel Wohnschutzverordnung (2022): kombinierte Rationierung', () => {
 
 // ── Test-Suite 3: Genf vs. Zürich — Friktion und Angebot ─────────────────────
 
-describe('FHNW: Genf-Effekt — strenges Mietrecht erhöht Marktfriktion und senkt Angebot', () => {
+describe('DIW DP 2143: Genf-Effekt — strenges Mietrecht erhöht Marktfriktion und senkt Angebot', () => {
   /**
    * Diff-basiert, gleicher Ausgangspunkt. Genf-Zusatz gegen Zürich-Baseline.
    *
@@ -230,7 +222,7 @@ describe('FHNW: Genf-Effekt — strenges Mietrecht erhöht Marktfriktion und sen
    * ist entfernt (CH-012).
    */
 
-  const GENF_ZUSATZ_DIFF: ParamsDiff40 = {
+  const GENF_ZUSATZ_DIFF: ParamsDiff = {
     mietrecht_kostenmiete:       { from: 1, to: 2 },
     mietrecht_anfangsmiete:      { from: 1, to: 2 },
     mietrecht_kuendigungsschutz: { from: 1, to: 2 },
@@ -265,9 +257,9 @@ describe('FHNW: Genf-Effekt — strenges Mietrecht erhöht Marktfriktion und sen
 
 // ── Test-Suite 4: Abbruchverbot → politisch induzierte Knappheit ─────────────
 
-describe('FHNW: Abbruchverbot/Rationierung → politisch induzierte Knappheit', () => {
+describe('DIW DP 2143: Abbruchverbot/Rationierung → politisch induzierte Knappheit', () => {
   /**
-   * FHNW-Befund (Granger-Kausalität):
+   * DIW DP 2143 (Granger-Kausalität):
    * Rationierung führt zeitlich vorlaufend zu sinkenden Leerständen.
    * → nachfragedruck steigt durch Angebotsverknappung (ohne Nachfrageanstieg)
    *
@@ -278,7 +270,7 @@ describe('FHNW: Abbruchverbot/Rationierung → politisch induzierte Knappheit', 
   it('[FACH] Abbruchverbot erhöht nachfragedruck mittelfristig (Phase 2)', () => {
     const neutral = phases(ZUERICH_V2, NEUTRAL_CONTEXT, {});
 
-    const mitAbbruchverbot: ParamsDiff40 = {
+    const mitAbbruchverbot: ParamsDiff = {
       nutzung_abbruchverbot: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, NEUTRAL_CONTEXT, mitAbbruchverbot);
@@ -288,10 +280,10 @@ describe('FHNW: Abbruchverbot/Rationierung → politisch induzierte Knappheit', 
   });
 
   it('[FACH] Abbruchverbot + Umnutzungsverbot erhöht nachfragedruck stärker als einzeln', () => {
-    const nurAbbruch: ParamsDiff40 = {
+    const nurAbbruch: ParamsDiff = {
       nutzung_abbruchverbot: { from: 1, to: 2 },
     };
-    const kombiniert: ParamsDiff40 = {
+    const kombiniert: ParamsDiff = {
       nutzung_abbruchverbot:    { from: 1, to: 2 },
       nutzung_umnutzungsverbot: { from: 1, to: 2 },
     };
@@ -306,9 +298,9 @@ describe('FHNW: Abbruchverbot/Rationierung → politisch induzierte Knappheit', 
 
 // ── Test-Suite 5: Zielkonflikt Klimaschutz ───────────────────────────────────
 
-describe('FHNW/Basel: Wohnschutz-Zielkonflikt mit Klimaschutz (Sanierungsrückstand)', () => {
+describe('DIW DP 2143/Basel: Wohnschutz-Zielkonflikt mit Klimaschutz (Sanierungsrückstand)', () => {
   /**
-   * Basler Regierung (2023) und FHNW-Studie:
+   * Basler Regierung (2023) und DIW DP 2143:
    * - Energetische Sanierungen erfolgen meist im Rahmen von Totalsanierungen
    * - Wohnschutz bremst Totalsanierungen → Sanierungsrückstand (Genf 83%, Basel 48%, ZH 41%)
    * - Zielkonflikt: Wohnschutz vs. Klimaziele (Netto-Null 2037 Basel, 2050 Bund)
@@ -319,10 +311,10 @@ describe('FHNW/Basel: Wohnschutz-Zielkonflikt mit Klimaschutz (Sanierungsrückst
    *   (paradoxer Effekt: strengerer Wohnschutz konterkariert Sanierungsziele)
    */
   it('[FACH] Abbruchverbot dämpft den Effekt von Sanierungspflicht auf investitionsattraktivitaet', () => {
-    const nurSanierung: ParamsDiff40 = {
+    const nurSanierung: ParamsDiff = {
       bau_sanierungspflicht: { from: 1, to: 2 },
     };
-    const sanierungPlusAbbruch: ParamsDiff40 = {
+    const sanierungPlusAbbruch: ParamsDiff = {
       bau_sanierungspflicht: { from: 1, to: 2 },
       nutzung_abbruchverbot: { from: 1, to: 2 },
     };

@@ -1,5 +1,5 @@
 ---
-id: "GLOBAL-027"
+id: "US-018"
 title: "The Effects of Inclusionary Zoning on Local Housing Markets"
 authors: ["Schuetz, Jenny", "Been, Vicki", "Ellen, Ingrid Gould"]
 year: 2012

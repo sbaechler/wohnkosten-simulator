@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { CityConfig, ParamsDiff40, CityParams40 } from '../types';
+import type { CityConfig, ParamsDiff, CityParams } from '../types';
 import { changedParamKeys } from '../model/params';
 import { computePhasesCached } from '../model/compute-phases';
 import { computeGroupTrends } from '../model/groups';
@@ -21,8 +21,8 @@ import './WidgetGrid.css';
 
 interface Props {
   city: CityConfig;
-  modified: CityParams40;
-  diff: ParamsDiff40;
+  modified: CityParams;
+  diff: ParamsDiff;
 }
 
 /**
@@ -57,7 +57,7 @@ export function WidgetGrid({ city, modified, diff }: Props) {
   const modifiedPhases = computePhasesCached(context, diff);
 
   // Phases for baseline ("Heutige Situation") — empty diff means no changes
-  const emptyDiff: ParamsDiff40 = useMemo(() => ({}), []);
+  const emptyDiff: ParamsDiff = useMemo(() => ({}), []);
   const baselinePhases = computePhasesCached(context, emptyDiff);
 
   // Latest phase for single-value widgets
@@ -76,7 +76,7 @@ export function WidgetGrid({ city, modified, diff }: Props) {
     return computeGroupTrends(phase.marketState, context);
   }
 
-  const stadtbildGetter = (m: CityParams40, b: CityParams40) => () =>
+  const stadtbildGetter = (m: CityParams, b: CityParams) => () =>
     (Object.entries(STADTBILD_GEWICHTE) as [keyof typeof STADTBILD_GEWICHTE, number][])
       .reduce((acc, [key, w]) => acc + ((m[key] as number) - (b[key] as number)) * w, 0);
 

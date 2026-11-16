@@ -3,11 +3,10 @@
  *
  * Testet die öffentliche API von supply-demand.ts über beobachtbares
  * Verhalten. KEINE Kopplung an interne Konstanten wie
- * KNAPPHEIT_GEWICHTE, CURVE_POINTS, AXIS_MIN/MAX (ausser für invariante
+ * CURVE_POINTS, AXIS_MIN/MAX (ausser für invariante
  * Bounds, die in der UI gerendert werden).
  *
  * Dokumentiertes Verhalten:
- *   - knappheitSignal: Rohwert, Vorzeichen-abhängig von E1-Faktoren
  *   - regulationEffective: in [-1, 1] (UI-clamped), hängt nur vom Regulationsgrad ab
  *   - supplyCurve / demandCurve: Punkte-Arrays, q monoton steigend,
  *     p im Achsenbereich
@@ -18,7 +17,6 @@
 
 import { describe, it, expect } from 'vitest';
 import {
-  knappheitSignal,
   regulationEffective,
   supplySlope,
   supplyLine,
@@ -47,49 +45,6 @@ const emptyState: MarketState = {
   ...REGIME_NEUTRAL,
 };
 
-describe('knappheitSignal', () => {
-  it('returns 0 for all-zero state (keine Knappheitssignale)', () => {
-    expect(knappheitSignal(emptyState)).toBe(0);
-  });
-
-  it('is positive when demand pressure dominates (knapper Markt)', () => {
-    const tight: MarketState = {
-      ...emptyState,
-      nachfragedruck: 1, marktfriktion: 1,
-    };
-    expect(knappheitSignal(tight)).toBeGreaterThan(0);
-  });
-
-  it('is negative when supply / gemeinnützig dominate (entspannter Markt)', () => {
-    const loose: MarketState = {
-      ...emptyState,
-      angebotspotenzial: 1, gemeinnuetzig_kraft: 1,
-    };
-    expect(knappheitSignal(loose)).toBeLessThan(0);
-  });
-
-  it('increases monotonically with nachfragedruck', () => {
-    const a = knappheitSignal({ ...emptyState, nachfragedruck: -1 });
-    const b = knappheitSignal({ ...emptyState, nachfragedruck:  0 });
-    const c = knappheitSignal({ ...emptyState, nachfragedruck:  1 });
-    expect(b).toBeGreaterThan(a);
-    expect(c).toBeGreaterThan(b);
-  });
-
-  it('decreases monotonically with angebotspotenzial (mehr Angebot = weniger knapp)', () => {
-    const a = knappheitSignal({ ...emptyState, angebotspotenzial: -1 });
-    const b = knappheitSignal({ ...emptyState, angebotspotenzial:  0 });
-    const c = knappheitSignal({ ...emptyState, angebotspotenzial:  1 });
-    expect(b).toBeLessThan(a);
-    expect(c).toBeLessThan(b);
-  });
-
-  it('returns a raw (unclamped) value — can exceed ±1 for extreme inputs', () => {
-    const extreme: MarketState = { ...emptyState, nachfragedruck: 5 };
-    expect(Math.abs(knappheitSignal(extreme))).toBeGreaterThan(1);
-  });
-});
-
 describe('regulationEffective', () => {
   it('returns baseReg inside [-1, 1]', () => {
     expect(regulationEffective(0.5)).toBeCloseTo(0.5, 10);
@@ -100,12 +55,10 @@ describe('regulationEffective', () => {
     expect(regulationEffective(-2)).toBeGreaterThanOrEqual(-1);
   });
 
-  // Fix-12, Punkt 4 (2026-11-15): das Knappheitssignal steckt nicht mehr in
+  // Fix-12, Punkt 4 (2026-11-15): Nachfrage und Friktion stecken nicht mehr in
   // der Steigung. Mehr Nachfrage verschiebt nur die Nachfragekurve; die
   // Steigung hängt nur noch vom Regulationsgrad ab.
-  it('Steigung hängt nur vom Regulationsgrad ab, nicht vom Knappheitssignal', () => {
-    const knapp = { ...emptyState, nachfragedruck: 1, marktfriktion: 1 };
-    expect(knappheitSignal(knapp)).toBeGreaterThan(0);
+  it('Steigung hängt nur vom Regulationsgrad ab, nicht vom Marktzustand', () => {
     expect(regulationEffective.length).toBe(1);
     expect(supplyLine.length).toBe(2);
   });

@@ -8,11 +8,11 @@
 // ohne diesen einen Parameter, Differenz im Gruppen-Trend.
 // ============================================================
 
-import type { CityContext, ParamsDiff40 } from '../types';
+import type { CityContext, ParamsDiff } from '../types';
 import { computePhasesCached } from './compute-phases';
 import { computeGroupTrends, GROUPS } from './groups';
 import type { GroupDriver, GroupId } from './groups';
-import { paramMeta40, changedParamKeys } from './params';
+import { paramMeta, changedParamKeys } from './params';
 
 /**
  * Anzeige-Schwelle: Beiträge unter 0.005 Index-Punkten gelten nicht als
@@ -25,9 +25,9 @@ const DRIVER_MIN_BEITRAG = 0.005;
 /** Anzahl angezeigter Treiber je Gruppe. UI-Konvention. */
 const TOP_N_DRIVERS = 3;
 
-const PARAM_LABEL = new Map<string, string>(paramMeta40.map(m => [m.key, m.label]));
+const PARAM_LABEL = new Map<string, string>(paramMeta.map(m => [m.key, m.label]));
 
-function trendByGroup(context: CityContext, diff: ParamsDiff40): Array<Record<GroupId, number>> {
+function trendByGroup(context: CityContext, diff: ParamsDiff): Array<Record<GroupId, number>> {
   return computePhasesCached(context, diff).map(phase =>
     Object.fromEntries(
       computeGroupTrends(phase.marketState, context).map(t => [t.group.id, t.value]),
@@ -48,7 +48,7 @@ function trendByGroup(context: CityContext, diff: ParamsDiff40): Array<Record<Gr
  */
 export function computeGroupDrivers(
   context: CityContext,
-  diff: ParamsDiff40,
+  diff: ParamsDiff,
 ): Array<Record<GroupId, GroupDriver[]>> {
   const full = trendByGroup(context, diff);
   const result: Array<Record<GroupId, GroupDriver[]>> = full.map(() =>
@@ -58,7 +58,7 @@ export function computeGroupDrivers(
   // Nur wirklich geänderte Parameter; Begleiteinträge (from === to) sind keine Treiber.
   for (const paramKey of changedParamKeys(diff)) {
     const rest = { ...diff };
-    delete rest[paramKey as keyof ParamsDiff40];
+    delete rest[paramKey as keyof ParamsDiff];
     const without = trendByGroup(context, rest);
 
     full.forEach((trends, phaseIdx) => {

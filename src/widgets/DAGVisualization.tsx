@@ -1,11 +1,11 @@
 import { useRef, useEffect, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { graphConnect, sugiyama, layeringSimplex, decrossTwoLayer, decrossDfs } from 'd3-dag';
-import type { ParamsDiff40, MarketState, DerivedIndicators, CityContext } from '../types';
+import type { ParamsDiff, MarketState, DerivedIndicators, CityContext } from '../types';
 import { computePhasesCached } from '../model/compute-phases';
 import { computeDerivedIndicators } from '../model/derived';
 import { getDagTopology, getNodeTimeClasses, type Edge, type NodeId, type NodeTimeClass } from '../model/dag-topology';
-import { PARAM_KEYS_40, changedParamKeys } from '../model/params';
+import { PARAM_KEYS, changedParamKeys } from '../model/params';
 import './DAGVisualization.css';
 
 // ── Layout Constants ────────────────────────────────────────────────────────
@@ -190,7 +190,7 @@ function buildNodes(): NodeMeta[] {
   };
 
   // E0: 40 parameter nodes
-  for (const key of PARAM_KEYS_40) {
+  for (const key of PARAM_KEYS) {
     nodes.push({
       id: key as NodeId,
       label: labelMap[key] ?? key,
@@ -356,7 +356,7 @@ function computeLayout(allNodes: NodeMeta[], dagEdges: readonly Edge[]): { nodeL
 
 interface Props {
   context: CityContext;
-  diff: ParamsDiff40;
+  diff: ParamsDiff;
 }
 
 interface TooltipData {

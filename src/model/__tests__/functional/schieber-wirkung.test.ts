@@ -6,9 +6,9 @@
 import { describe, it, expect } from 'vitest';
 import { computePhasesCached } from '../../compute-phases';
 import { computeGroupTrends } from '../../groups';
-import { PARAM_KEYS_40, computeDiff40 } from '../../params';
+import { PARAM_KEYS, computeDiff } from '../../params';
 import { cities } from '../../../generated/cities';
-import type { CityParams40, MarketState, DerivedIndicators, ParamsDiff40, ParamValue } from '../../../types';
+import type { CityParams, MarketState, DerivedIndicators, ParamsDiff, ParamValue } from '../../../types';
 
 /** E1-Zustände, die ein Widget in WidgetGrid direkt anzeigt. */
 const GEZEIGTE_E1: Array<keyof MarketState> = [
@@ -30,7 +30,7 @@ const SICHTBAR = 0.005;
  * Schieber, die allein nichts bewegen. Jeder Eintrag braucht eine Begründung
  * und einen Test, der die Wirkung in Kombination zeigt.
  */
-const NUR_IN_KOMBINATION: Partial<Record<keyof CityParams40, string>> = {
+const NUR_IN_KOMBINATION: Partial<Record<keyof CityParams, string>> = {
   mietrecht_durchsetzung:
     'Vollzieht nur einen Senkungsanspruch (negativer Erhöhungsspielraum) oder zieht eine gestiegene Miete an den Deckel zurück; im Ausgangszustand gibt es beides nicht.',
   gemeinnuetzig_ausgleich:
@@ -39,7 +39,7 @@ const NUR_IN_KOMBINATION: Partial<Record<keyof CityParams40, string>> = {
 
 const ZH = cities.find(c => c.slug === 'zuerich')!;
 
-function gezeigt(diff: ParamsDiff40): number[] {
+function gezeigt(diff: ParamsDiff): number[] {
   return computePhasesCached(ZH.context, diff).flatMap(p => [
     ...GEZEIGTE_E1.map(f => p.marketState[f]),
     ...GEZEIGTE_E2.map(f => p.derived[f]),
@@ -47,29 +47,29 @@ function gezeigt(diff: ParamsDiff40): number[] {
   ]);
 }
 
-function maxAbweichung(diff: ParamsDiff40, gegen: ParamsDiff40 = {}): number {
+function maxAbweichung(diff: ParamsDiff, gegen: ParamsDiff = {}): number {
   const a = gezeigt(gegen);
   const b = gezeigt(diff);
   return Math.max(...a.map((v, i) => Math.abs(v - b[i])));
 }
 
 describe('Jeder Schieber bewegt eine angezeigte Grösse', () => {
-  for (const key of PARAM_KEYS_40) {
+  for (const key of PARAM_KEYS) {
     if (key in NUR_IN_KOMBINATION) continue;
     it(key, () => {
       const from = ZH.params[key];
       const wirkung = ([0, 1, 2] as ParamValue[])
         .filter(to => to !== from)
-        // Diff wie in der App (computeDiff40), damit Begleiteinträge für
+        // Diff wie in der App (computeDiff), damit Begleiteinträge für
         // bedingte Kanten (DIFF_BEGLEITER) enthalten sind.
-        .map(to => maxAbweichung(computeDiff40(ZH.params, { ...ZH.params, [key]: to })));
+        .map(to => maxAbweichung(computeDiff(ZH.params, { ...ZH.params, [key]: to })));
       expect(Math.max(...wirkung)).toBeGreaterThan(SICHTBAR);
     });
   }
 
   it('mietrecht_durchsetzung wirkt, sobald die Miete steigt (Index auf LIK): der Deckel wird vollzogen', () => {
-    const lik: ParamsDiff40 = { mietrecht_mietzinsindex: { from: ZH.params.mietrecht_mietzinsindex, to: 1 } };
-    const mitDurchsetzung: ParamsDiff40 = {
+    const lik: ParamsDiff = { mietrecht_mietzinsindex: { from: ZH.params.mietrecht_mietzinsindex, to: 1 } };
+    const mitDurchsetzung: ParamsDiff = {
       ...lik,
       mietrecht_durchsetzung: { from: ZH.params.mietrecht_durchsetzung, to: 2 },
     };
@@ -77,7 +77,7 @@ describe('Jeder Schieber bewegt eine angezeigte Grösse', () => {
   });
 
   it('die Ausnahmeliste enthält nur Schieber, die allein wirklich nichts bewegen', () => {
-    for (const key of Object.keys(NUR_IN_KOMBINATION) as Array<keyof CityParams40>) {
+    for (const key of Object.keys(NUR_IN_KOMBINATION) as Array<keyof CityParams>) {
       const from = ZH.params[key];
       for (const to of ([0, 1, 2] as ParamValue[]).filter(t => t !== from)) {
         expect(maxAbweichung({ [key]: { from, to } }), key).toBeLessThan(SICHTBAR);

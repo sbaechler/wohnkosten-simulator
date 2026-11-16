@@ -1,11 +1,11 @@
 // ============================================================
 // Domain Types — Wohnkosten-Simulator
-// E0: 44 atomare Parameter (Name CityParams40 ist historisch) + Kontext
+// E0: 44 atomare Parameter (Name CityParams ist historisch) + Kontext
 // E1: lineare Marktvariablen plus provisorische Mietrechts-Zustände (CH-012)
 // ============================================================
 //
 // Sotomo Wohnraumstudie ZH 2025 (Sep.):
-//   - bau_ersatzneubau_effizienz: Netto-Neubau pro Abriss (Zürich: 2.8x, Westschweiz: 6+x) — als E0-Parameter
+//   - bau_ersatzneubau_effizienz: Netto-Neubau pro Abriss (Agglomeration Zürich 2.8×, Agglomeration Lausanne 6.5×; Sotomo 2025, Abb. 9) — als E0-Parameter
 //   Quelle: https://www.sotomo.ch/files/data/projectfile/2025/09/Sotomo-Wohnraumstudie-%E2%80%93-ZHK-2025-09.pdf
 //
 
@@ -15,7 +15,7 @@ export type ContextValue = -2 | -1 | 0 | 1 | 2;
 // ── E0: Rohparameter ─────────────────────────────────────────────────────────
 
 /** 44 atomare Parameter (Typname historisch) */
-export type CityParams40 = {
+export type CityParams = {
   // 1. Bodenrecht & Landnutzung
   raumplanung_zonenreserve: ParamValue;
   raumplanung_verdichtung: ParamValue;
@@ -27,7 +27,7 @@ export type CityParams40 = {
   // 2. Bau & Bewilligung
   bau_energievorgaben: ParamValue;
   bau_sanierungspflicht: ParamValue;
-  bau_ersatzneubau_effizienz: ParamValue; // Sotomo 2025: Netto-Neubau pro Abriss (Zürich 2.8x, WSchweiz 6+x)
+  bau_ersatzneubau_effizienz: ParamValue; // Sotomo 2025, Abb. 9: Netto-Neubau pro Abriss (Agglomeration Zürich 2.8×, Agglomeration Lausanne 6.5×)
   bau_einspracherecht_dritte: ParamValue;
   bau_einspracherecht_suspensiv: ParamValue;
   bau_bewilligungsverfahren: ParamValue;
@@ -159,12 +159,12 @@ export interface CityConfig {
   slug: string;
   name: string;
   context: CityContext;
-  params: CityParams40;
+  params: CityParams;
 }
 
 // ── Diffs ───────────────────────────────────────────────────────────────────
 
-export type ParamsDiff40 = Partial<Record<keyof CityParams40, {
+export type ParamsDiff = Partial<Record<keyof CityParams, {
   from: ParamValue;
   to: ParamValue;
 }>>;
@@ -181,8 +181,8 @@ export type ParamGroup =
   | 'nutzung'
   | 'infrastruktur';
 
-export interface ParamMeta40 {
-  key: keyof CityParams40;
+export interface ParamMeta {
+  key: keyof CityParams;
   label: string;
   helpText: string;
   levels: [string, string, string];

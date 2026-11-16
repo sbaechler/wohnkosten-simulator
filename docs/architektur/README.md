@@ -66,9 +66,9 @@ Parameter ändern  ────▶  ┌─────────────�
 
 ### E0 — Rohdaten
 - **7 Kontextfaktoren** (`CityContext`), Skala –2…+2: Zinsniveau, Zuwanderungsdruck, Wirtschaftskraft, Bevölkerungstrend, Marktenge, Teuerung und Referenzzins-Änderung (beide national, im Mietrecht-Regime; die Referenzzins-Änderung zusätzlich als Zinskanal der Eigentümer in `groups.ts`). Die frühere Mietbelastungs-Grenze ist entfernt (Fix-14, 2026-11-15). Dazu die `ownershipBaseline`-Anteile.
-- **44 steuerbare Parameter** (`CityParams40`, der Name ist historisch): atomare Policies, Skala 0/1/2
+- **44 steuerbare Parameter** (`CityParams`, der Name ist historisch): atomare Policies, Skala 0/1/2
 - **Baseline** (Ist-Zustand der gewählten Stadt) vs. **Modified** (Nutzer-Szenario)
-- **Diff** (`ParamsDiff40`): Geänderte Parameter mit `from`/`to`-Werten
+- **Diff** (`ParamsDiff`): Geänderte Parameter mit `from`/`to`-Werten
 
 ### E1 — Markt-Zustandsvariablen
 11 Variablen, jeweils normiert auf **–1 … +1**. Das Vorzeichen folgt dem
@@ -220,5 +220,5 @@ Folgende Abweichungen vom Ist-Stand:
 | Phase-Aware Kanten-Gewichte | ✅ `PHASE_WEIGHTED_EDGES` in `phase-weights.ts` | ✅ Implementiert |
 | Generator-Pipeline | ✅ `computePhasePipeline()` | ✅ Implementiert |
 | 8 Bevölkerungsgruppen | 9 Gruppen in `groups.ts` (Bestand und Neumieter getrennt) | Abweichung |
-| 40 atomare Parameter | 44 Parameter in `CityParams40` | Abweichung |
+| 40 atomare Parameter | 44 Parameter in `CityParams` | Abweichung |
 | 4 Kontextfaktoren | 7 Kontextfaktoren in `CityContext` | Abweichung |

@@ -1,22 +1,9 @@
 // ============================================================
 // supply-demand.ts — Preis-Mengen-Diagramm Berechnungen
 //
-// Knappheitsindikator (Wohnmonitor BWO):
-// Misst die Abweichung der Insertionsdauer vom Gleichgewicht.
-// Werte: –5 (Überangebot) … 0 (Gleichgewicht) … +5 (Nachfrageüberhang)
-//
-// Knappheitssignal aus vier E1-Treibern (nur Kennzahl, nicht mehr in der
-// Kurvensteigung, siehe knappheitSignal):
-//   nachfragedruck:      +1 → Markt enger
-//   angebotspotenzial:   +1 → mehr Angebot
-//   marktfriktion:       +1 → weniger Mobilisierung
-//   gemeinnuetzig_kraft: +1 → Genossenschaften puffern ab
-//
 // Kurven: Nachfrage verschoben durch nachfragedruck; Angebot verschoben
 // durch angebotspotenzial + investitionsattraktivitaet, Steigung aus
 // angebotspotenzial_regulation.
-//
-// Quelle: https://wohnmonitor.admin.ch/method-and-source
 // ============================================================
 
 import type { MarketState } from '../types';
@@ -32,25 +19,6 @@ export const CURVE_POINTS = 200;
  * 5 = eine ±1 E1-Verschiebung schiebt die Kurve um 5 Mengen-Einheiten.
  */
 export const SHIFT_SCALE  = 5;
-
-/**
- * E1-Gewichte für `knappheitSignal` (Wohnmonitor-Insertionsdauer-Reagibilität).
- * Höherer Wert = stärkerer Einfluss auf Knappheits-Signal.
- *
- * Kalibrierung: Wohnmonitor 2023 + UK-001 Crossrail-Marktreaktion.
- * Werte sind so kalibriert, dass eine 1-σ E1-Bewegung ~1σ auf der
- * Knappheitsskala (−5..+5) erzeugt.
- */
-export const KNAPPHEIT_GEWICHTE = {
-  /** Nachfragedruck: mehr Nachfrage = knapper → +X */
-  nachfragedruck:       0.4,
-  /** Angebotspotenzial: mehr Angebot = weniger knapp → -X */
-  angebotspotenzial:    0.3,
-  /** Marktfriktion: weniger Mobilisierung = knapper → +X */
-  marktfriktion:         0.15,
-  /** Gemeinnützig: Genossenschaften puffern Knappheit → -X */
-  gemeinnuetzig_kraft:  0.15,
-} as const;
 
 /** Basis-Steigung der Angebotskurve (Punkte/Mengeneinheit). */
 const SUPPLY_BASE_SLOPE = 0.8;
@@ -98,24 +66,6 @@ export const INVEST_SUPPLY_GEWICHT = 0.4;
  */
 export function supplyShiftFromState(s: MarketState): number {
   return s.angebotspotenzial + s.investitionsattraktivitaet * INVEST_SUPPLY_GEWICHT;
-}
-
-/**
- * Knappheitssignal aus E1-Zustand (Rohwert vor Clamping).
- *
- * Fliesst seit 2026-11-15 nicht mehr in die Steigung der Angebotskurve
- * (Fix-12, Punkt 4): mehr Nachfrage verschob die Nachfragekurve UND machte
- * die Angebotskurve steiler, der Nachfragedruck wirkte so doppelt auf den
- * Preis. Die Steigung kommt nur noch aus `angebotspotenzial_regulation`.
- */
-export function knappheitSignal(s: MarketState): number {
-  const w = KNAPPHEIT_GEWICHTE;
-  return (
-    s.nachfragedruck * w.nachfragedruck
-    + (-s.angebotspotenzial) * w.angebotspotenzial
-    + s.marktfriktion * w.marktfriktion
-    + (-s.gemeinnuetzig_kraft) * w.gemeinnuetzig_kraft
-  );
 }
 
 /** Effektiver Regulationsgrad für die Angebotskurven-Steigung, auf −1…+1 begrenzt. */

@@ -4,13 +4,13 @@
 // Berechnungslogik in: src/model/belastung.ts
 // ============================================================
 
-import type { CityParams40, MarketState } from '../types';
+import type { CityParams, MarketState } from '../types';
 import { computeMieteBelastung, computeEigentumBelastung } from '../model/belastung';
 import './MietbelastungWidget.css';
 
 interface Props {
-  params: CityParams40;
-  baseline?: CityParams40;
+  params: CityParams;
+  baseline?: CityParams;
   marketState?: MarketState;
   baselineMarketState?: MarketState;
 }

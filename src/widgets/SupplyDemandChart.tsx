@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, useMemo } from 'react';
 import * as d3 from 'd3';
-import type { CityParams40, CityContext, ParamsDiff40 } from '../types';
+import type { CityParams, CityContext, ParamsDiff } from '../types';
 import { supplyCurve, demandCurve, findEquilibrium, supplyShiftFromState, mietpreisdeckel } from '../model/supply-demand';
 import type { PhaseResult } from '../model/phases';
 import { computePhasesCached } from '../model/compute-phases';
@@ -8,9 +8,9 @@ import './SupplyDemandChart.css';
 
 interface Props {
   context: CityContext;
-  baseline: CityParams40;
-  modified: CityParams40;
-  diff: ParamsDiff40;
+  baseline: CityParams;
+  modified: CityParams;
+  diff: ParamsDiff;
   phases: PhaseResult[];
   /** Baseline phases for "Heutige Situation" row (shown when defined) */
   baselinePhases?: PhaseResult[];

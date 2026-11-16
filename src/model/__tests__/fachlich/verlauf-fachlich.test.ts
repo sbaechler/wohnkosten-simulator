@@ -10,7 +10,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { computePhasePipeline } from '../../compute-phases';
-import type { CityContext, MarketState, ParamsDiff40 } from '../../../types';
+import type { CityContext, MarketState, ParamsDiff } from '../../../types';
 
 const NEUTRAL: CityContext = {
   ownershipBaseline: { privat: 0.39, institutionell: 0.30, genossenschaft: 0.175, oeffentlich: 0.066 },
@@ -19,7 +19,7 @@ const NEUTRAL: CityContext = {
 };
 
 /** Effekt eines Diffs auf einen E1-Knoten je Phase, relativ zum P3-Stand. */
-function verlauf(diff: ParamsDiff40, node: keyof MarketState): { abs: number[]; rel: number[] } {
+function verlauf(diff: ParamsDiff, node: keyof MarketState): { abs: number[]; rel: number[] } {
   const mit = [...computePhasePipeline(NEUTRAL, diff)];
   const ohne = [...computePhasePipeline(NEUTRAL, {})];
   const abs = mit.map((r, i) => (r.marketState[node] as number) - (ohne[i].marketState[node] as number));

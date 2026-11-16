@@ -23,10 +23,11 @@ Branch `feat/mietrecht-regime-2026`, **nicht gepusht**. Commits seit `main`-Stan
 | `b246c5a` | Sprint 4 (Altliegenschaften-Daten, Regime-Einheiten, Restposten) |
 | `c4cefb1` | Mietabstand-Indikator, Regel für unbelegte Angebotshebel, Schieber «Ausgleich beim Pflichtanteil» |
 | `e41c600` | `gemeinnuetzig_mindestanteil` und `gemeinnuetzig_ausgleich` je Stadt nach geltendem Recht (Abschnitt 0.3, Punkt 1) |
+| «chore: Aufräumen nach Verbesserungsplan 0.3, Punkte 16–22» | Widget-Katalog, Quellen, US-018, Fachtest-Kommentare, CH-012-Fussnoten, `knappheitSignal` entfernt, Namen ohne «40» |
 
 Working Tree sauber (Stand 2026-11-16).
 
-**Teststand 2026-11-16:** `npx vitest run` 558 passed, 1 skipped (28 Dateien). `npx tsc -b`, `npm run lint`, `npm run build` ohne Fehler. `npx tsx scripts/calibrate.ts --dry-run` 0/567 Verletzungen.
+**Teststand 2026-11-16:** `npx vitest run` 552 passed, 1 skipped (28 Dateien; die sechs Tests von `knappheitSignal` sind mit der Funktion entfernt). `npx tsc -b`, `npm run lint`, `npm run build` ohne Fehler. `npx tsx scripts/calibrate.ts --dry-run` 0/567 Verletzungen.
 
 ### 0.2 Wie das Modell heute rechnet (Kurzfassung, Details im Code)
 
@@ -34,7 +35,7 @@ Working Tree sauber (Stand 2026-11-16).
 - **Stand eines Knotens:** `clamp(PERSISTENCE · Vorstand + Σ sign·w·Δ · marketModulator / E1_NENNER)`, `PERSISTENCE = 0.8`, `E1_NENNER = 11.2` für alle Knoten. Ein Gewicht ist der **Impuls** der Phase, nicht das Niveau. Es gibt keinen Phasenmultiplikator mehr. Kopfkommentar von `phase-weights.ts` und `docs/architektur/README.md`.
 - **`profilQuelle`** an jeder Politik-Kante: Studien-ID oder `'Annahme'`. Annahme-Kanten haben den neutralen Vektor `[w, w, w]` (Test in `dag-integrity.test.ts`).
 - **Regel für unbelegte Angebotshebel:** Annahme-Kante auf `angebotspotenzial` in P3 höchstens halb so stark wie der schwächste Hebel aus `REFERENZ_ANGEBOTSHEBEL` (`ANNAHME_ANGEBOT_MAX_ANTEIL`, Test in `dag-integrity.test.ts`).
-- **Bedingte Kante:** `gemeinnuetzig_mindestanteil → angebotspotenzial` trägt `ausgleichDurch: 'gemeinnuetzig_ausgleich'`; `getEdgeDelta` rechnet Δ[Mindestanteil · (1 − Ausgleich)]. Dafür trägt `computeDiff40` Begleiteinträge mit `from === to` ins Diff ein (`DIFF_BEGLEITER`). **Änderungen zählt man mit `changedParamKeys(diff)`, nie mit `Object.keys(diff)`.**
+- **Bedingte Kante:** `gemeinnuetzig_mindestanteil → angebotspotenzial` trägt `ausgleichDurch: 'gemeinnuetzig_ausgleich'`; `getEdgeDelta` rechnet Δ[Mindestanteil · (1 − Ausgleich)]. Dafür trägt `computeDiff` Begleiteinträge mit `from === to` ins Diff ein (`DIFF_BEGLEITER`). **Änderungen zählt man mit `changedParamKeys(diff)`, nie mit `Object.keys(diff)`.**
 - **Mietrechts-Regime** (`mietrecht-regime.ts`, provisorisch): eigene Logik mit Schwellen und Produkten. Erhöhungsspielraum in einer Einheit (zulässige Mietzinsänderung in Prozent / 7.5), aus Art. 13 und 16 VMWG. Die Regime-Zustände werden im Widget gezeigt und fliessen **nicht** in Gruppen-Trends und Mietbelastung ein.
 - **Gruppen-Trends:** `computeGroupTrends(state, context, drivers?)`; Treiber per Leave-one-out (`group-drivers.ts`).
 - **Kalibrierung:** `scripts/calibrate.ts` rechnet über die Engine. Die Gewichte sind von Hand gesetzt und erfüllen alle Constraints; der Optimierer lief bewusst nicht.
@@ -45,7 +46,7 @@ Working Tree sauber (Stand 2026-11-16).
 1. **`gemeinnuetzig_mindestanteil` nach Rechtsstand.** Entscheid des Projektinhabers: heutige Situation, nur Pflichten, die rechtlich in Kraft sind. Ziele (Zürcher Drittel bis 2050), Entwürfe und Verträge auf öffentlichem Land zählen nicht. Gemessen wird der wirksame Anteil an allen Neubauten (Quote × erfasster Teil der Produktion), Stufe nach Schwellen 5 % / 21.5 % (Setzung, Kopf von `switzerland.yaml`). Ergebnis: Genf 1 (Art. 4A LGZD), Basel 1 (§ 101a BPG seit 18.8.2026), alle anderen 0. Geändert: Zürich und Biel 2 → 0, Bern 2 → 0, Lausanne und Winterthur 1 → 0. **Grenzfälle:** Bern (Pflicht in Kraft, aber nur bei Einzonungen, wirksam wenige Prozent) und Genf (wirksam grob 20–27 %, gemessen 16–23 % LUP). Folge: In Zürich bewegt `gemeinnuetzig_ausgleich` allein nichts mehr (Ausnahmeliste in `schieber-wirkung.test.ts`). Recherche mit Sonnet-Subagents; die Mengenschätzungen sind unbelegt, keine Stadt hat Sicherheit «hoch».
 
 **Datenarbeit**
-2. `gemeinnuetzig_ausgleich` für Lausanne, St. Gallen, Lugano, Biel klären (heute 0 = «nicht geklärt», Kommentar im YAML). Für die sechs gesetzten Städte hat keine Einstufung die Sicherheit «hoch»: Erlasse im Wortlaut aus den Gesetzessammlungen nachlesen (§ 49b PBG ZH, Art. 16b Bauordnung Bern, Art. 4A LGZD, § 101a BPG BS, Art. 24 BZR Luzern, Art. 28/29 LPPPL VD).
+2. `gemeinnuetzig_ausgleich` für Lausanne, St. Gallen, Lugano, Biel klären (heute 0 = «nicht geklärt», Kommentar im YAML). Seit Punkt 1 haben diese vier keinen Pflichtanteil; der Ausgleich rechnet dort nichts, die Klärung ist nur für die Daten. Rechnerisch zählen nur Genf und Basel. Für die sechs gesetzten Städte hat keine Einstufung die Sicherheit «hoch»: Erlasse im Wortlaut aus den Gesetzessammlungen nachlesen (§ 49b PBG ZH, Art. 16b Bauordnung Bern, Art. 4A LGZD, § 101a BPG BS, Art. 24 BZR Luzern, Art. 28/29 LPPPL VD).
 3. `mietluecke` bleibt leer (Entscheid). Damit bleiben `FRONTLOAD`, `VERWEIL_GEWICHT`, `CAP_INVEST_WEIGHT` unkalibriert. Eine Datenbasis mit Anlagekosten gibt es nicht; der Mietdauer-Abstand ist kein Ersatz (CH-012).
 4. `mietabstand_neubezug`: Stadtwerte nur für fünf Grossstädte, sonst Kantonswerte mit anderer Abgrenzung. Jährlich nachführen (BFS Strukturerhebung).
 5. Recherche-Notizen nachtragen: DIW DP 2143, Wüest Partner 2024 (8.5 Jahre), Sotomo 2025 (S. 27, Abb. 9) und die Basler Zahlen (SRES/SVIT) werden im Code zitiert, haben aber keine Notiz in `docs/recherche/`.
@@ -62,21 +63,21 @@ Working Tree sauber (Stand 2026-11-16).
 14. **Zinskanal der Eigentümer** ist im UI nicht bedienbar (Kontext nicht editierbar) und wirkt erst, wenn `referenzzins_aenderung` in den Daten ändert.
 15. Ohne Wirkung auf Gruppen-Trends und Mietbelastung (aber auf eine andere angezeigte Grösse): `boden_mehrwertabgabe`, `mietrecht_mietzinsindex`, `mietrecht_untervermietung`, `mietrecht_kriterium`, `mietrecht_durchsetzung`, `kapital_institutionelle_regulierung`; die drei Steuern auf Gewinne und Handänderung bewegen nur `marktfriktion`.
 
-**Aufräumen (klein, ohne fachlichen Entscheid)**
-16. `docs/architektur/02-widget-katalog.md` ist veraltet (beschreibt `SupplyDemandChart` als Trendlinien und 8 Gruppen; kennt Regime-Widget, Mietabstand und den 44. Schieber nicht).
-17. `src/types.ts` (Zeilen 8 und 30) und `scripts/add-new-params.*` nennen noch «Zürich 2.8x» ohne «Agglomeration»; `scripts/calibrate.ts` nennt als Quelle «FHNW» statt DIW DP 2143.
-18. `docs/recherche/US/US-018-*.md` trägt im Kopf die ID `GLOBAL-027` (kollidiert mit Kholodilin GLOBAL-027).
-19. Veraltete Kommentare und Testtitel in `gemeinnuetzig-fachlich.test.ts` und `wohnschutz-fachlich.test.ts` («FHNW», «Barcelona Paradox», fehlende Kanten, die es inzwischen gibt); ungeprüft sind dort «Zürich +20 % Baugesuche» und die EHT-Steuersätze.
-20. Fussnoten in CH-012 springen von [24] auf [30] und [40].
-21. `knappheitSignal()` in `supply-demand.ts` wird in der App nicht mehr verwendet.
-22. Typ- und Variablennamen mit «40» (`CityParams40`, `paramMeta40`, `PARAM_KEYS_40`) sind historisch; es sind 44 Parameter.
+**Aufräumen — erledigt 2026-11-16** (Punkte 16–22)
+16. Widget-Katalog nach `WidgetGrid.tsx` neu geschrieben (16 Widgets in Rasterfolge, Regime-Widget, Mietabstand, 44. Schieber).
+17. «Agglomeration Zürich 2.8×» mit Quelle in `src/types.ts`; `scripts/calibrate.ts` zitiert DIW DP 2143. Die Migrationsskripte `scripts/add-new-params.*` und `scripts/patch-test-fixtures.*` (einmalig gelaufen, nicht im Build) entfernt.
+18. US-018 trägt die ID `US-018`; US-016 bis US-018 im `docs/recherche/index.md` nachgetragen.
+19. Fachtests: «FHNW» als Quelle durch DIW DP 2143 ersetzt, «Paradox» und Hinweise auf fehlende Kanten entfernt (die Kanten gibt es), ungeprüfte «Zürich +20 % Baugesuche» gestrichen, EHT-Satz nach CA-001 (3 %) statt 0.5/2.5 %, tote Pfade auf `docs/superpowers/` ersetzt.
+20. CH-012: Fussnoten durchgehend 1–28 nummeriert (alle Verweise waren belegt; Lücken auch bei 3, 5, 6, 9, 10).
+21. `knappheitSignal()` und `KNAPPHEIT_GEWICHTE` entfernt, samt Tests; AGENTS.md nennt als Beispiel `VERDICHTUNGSDRUCK_GEWICHTE`.
+22. `CityParams40` → `CityParams`, `ParamsDiff40` → `ParamsDiff`, `PARAM_KEYS_40` → `PARAM_KEYS`, `paramMeta40`/`ParamMeta40` → `paramMeta`/`ParamMeta`, `computeDiff40` → `computeDiff`, `hasChanges40` → `hasParamChanges`. Die Chronik (Abschnitte 1–9) und ältere Reviews nennen die alten Namen.
 
 ### 0.4 Arbeitsweise, die sich bewährt hat
 
 - **Vor jedem Commit:** `npx vitest run`, `npx tsc -b`, `npm run lint`, `npm run build`, `npx tsx scripts/calibrate.ts --dry-run` (muss 0 Verletzungen zeigen).
 - **Nach Änderungen an Kanten oder Parameter-Metadaten:** `npm run build:docs`, sonst schlägt `edge-doc.test.ts` fehl. **Nach Änderungen am YAML:** `npm run build:data`; `src/generated/` nie von Hand editieren.
-- **Ein neuer Parameter** berührt: `types.ts` (`CityParams40`), `params.ts` (`PARAM_KEYS_40`, `paramMeta40`), alle zehn Städte im YAML, `REQUIRED_KEYS` in `scripts/build-city-data.ts`, die Union in `dag-topology.ts`, zwei Karten in `DAGVisualization.tsx` (Gruppe und Label), die `CityParams40`-Fixtures der Fachtests, `AGENTS.md` und die Architektur-README.
-- **Wächter-Tests, die man nicht abschwächt:** `schieber-wirkung.test.ts` (jeder Schieber bewegt eine angezeigte Grösse; baut Diffs über `computeDiff40`), `group-drivers.test.ts`, `rangfolge-fachlich.test.ts`, `verlauf-fachlich.test.ts`, `dag-integrity.test.ts`, `anteil-altliegenschaft.test.ts` und `mietabstand-neubezug.test.ts` (Felder, die nichts rechnen dürfen). Wird ein fachlicher Test rot, ist das ein Modellbefund.
+- **Ein neuer Parameter** berührt: `types.ts` (`CityParams`), `params.ts` (`PARAM_KEYS`, `paramMeta`), alle zehn Städte im YAML, `REQUIRED_KEYS` in `scripts/build-city-data.ts`, die Union in `dag-topology.ts`, zwei Karten in `DAGVisualization.tsx` (Gruppe und Label), die `CityParams`-Fixtures der Fachtests, `AGENTS.md` und die Architektur-README.
+- **Wächter-Tests, die man nicht abschwächt:** `schieber-wirkung.test.ts` (jeder Schieber bewegt eine angezeigte Grösse; baut Diffs über `computeDiff`), `group-drivers.test.ts`, `rangfolge-fachlich.test.ts`, `verlauf-fachlich.test.ts`, `dag-integrity.test.ts`, `anteil-altliegenschaft.test.ts` und `mietabstand-neubezug.test.ts` (Felder, die nichts rechnen dürfen). Wird ein fachlicher Test rot, ist das ein Modellbefund.
 - **Setzungen kennzeichnen.** Jede Grösse ohne Beleg heisst im Kommentar «Setzung»; Quellenangaben nur, wenn die Zahl in der Quelle steht. Die Quellenprüfung vom 2026-11-15 fand vier von fünf Sotomo-Zitaten falsch.
 - **Skala ≠ Grösse.** Zweimal war der Nullpunkt einer Stufenskala nicht der Nullpunkt der Grösse (Zinsniveau statt Zinsänderung; Teuerungsstufe −1 als Preisrückgang). Bei jedem Kontextwert prüfen, was Stufe 0 bedeutet.
 - **Im Browser prüfen**, was das UI zeigt (`npm run dev`, `/zuerich?...`). Zwei Fehler der DAG-Ansicht fielen erst dort auf.

@@ -2,7 +2,7 @@
  * dag-integrity.test.ts — Functional
  *
  * Validates that the DAG edge definitions are internally consistent:
- * - All `from` keys reference valid E0 params (PARAM_KEYS_40) or context nodes (ctx:*) or E1 nodes
+ * - All `from` keys reference valid E0 params (PARAM_KEYS) or context nodes (ctx:*) or E1 nodes
  * - All `to` keys reference valid E1 nodes
  * - All phase weights are in [0, 1]
  * - All sign values are +1 or -1
@@ -15,7 +15,7 @@
 import { describe, it, expect } from 'vitest';
 import { PHASE_WEIGHTED_EDGES, REFERENZ_ANGEBOTSHEBEL, ANNAHME_ANGEBOT_MAX_ANTEIL } from '../../phase-weights';
 import { edgeStand } from '../../dag-topology';
-import { PARAM_KEYS_40 } from '../../params';
+import { PARAM_KEYS } from '../../params';
 import type { MarketState } from '../../../types';
 
 const E1_NODE_IDS: (keyof MarketState)[] = [
@@ -33,7 +33,7 @@ const E1_NODE_IDS: (keyof MarketState)[] = [
 ];
 
 const VALID_FROM_KEYS = new Set([
-  ...PARAM_KEYS_40,
+  ...PARAM_KEYS,
   'ctx:zinsniveau',
   'ctx:zuwanderungsdruck',
   'ctx:wirtschaftskraft',

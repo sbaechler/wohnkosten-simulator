@@ -14,7 +14,7 @@ import type { MarketState } from '../types';
 import { PHASE_WEIGHTED_EDGES } from './phase-weights';
 import { E1_NODES } from './compute-phases';
 import { E2_TERMS } from './derived';
-import { paramMeta40, contextMeta } from './params';
+import { paramMeta, contextMeta } from './params';
 import { PHASE_YEAR_LABELS } from './phases';
 
 type E1Node = (typeof E1_NODES)[number];
@@ -41,7 +41,7 @@ function quelle(from: string): { name: string; hoeher: string } {
     if (!meta) throw new Error(`Kontextfaktor ohne Metadaten: ${from}`);
     return { name: `\`${from}\``, hoeher: `${meta.label}: ${meta.levels[4]}` };
   }
-  const meta = paramMeta40.find(m => m.key === from);
+  const meta = paramMeta.find(m => m.key === from);
   if (!meta) throw new Error(`Parameter ohne Metadaten: ${from}`);
   return { name: `\`${from}\``, hoeher: meta.hoeherBedeutet };
 }
@@ -86,7 +86,7 @@ export function renderEdgeDoc(): string {
     }
   }
 
-  const ohneKante = paramMeta40.filter(m => !PHASE_WEIGHTED_EDGES.some(e => e.from === m.key));
+  const ohneKante = paramMeta.filter(m => !PHASE_WEIGHTED_EDGES.some(e => e.from === m.key));
   out.push('');
   out.push('## Parameter ohne Kante');
   out.push('');

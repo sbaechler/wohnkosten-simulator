@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { computeDiff40, hasChanges40 } from './params';
-import type { CityParams40 } from '../types';
+import { computeDiff, hasParamChanges } from './params';
+import type { CityParams } from '../types';
 
 // V2 baseline (entspricht Zürich: raumplanung=2, bauvorschriften=2, energetischeVorgaben=1,
 // mietrecht=1, steuerpolitik=2, foerderungGemeinnuetzig=2, subventionen=1,
 // einspracherechte=2, infrastruktur=2, auslaendischeInvestitionen=1)
-const baseV2: CityParams40 = {
+const baseV2: CityParams = {
   raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
   boden_vorkaufsrecht: 1, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
   bau_energievorgaben: 1, bau_sanierungspflicht: 1,
@@ -22,26 +22,26 @@ const baseV2: CityParams40 = {
   infra_oepnv: 2, infra_schule_kita: 2, infra_oeffentlicher_raum: 2, infra_wirtschaftsansiedlung: 2,
     bau_ersatzneubau_effizienz: 1,};
 
-describe('V2 — computeDiff40 / hasChanges40', () => {
+describe('V2 — computeDiff / hasParamChanges', () => {
   it('returns empty diff when identical', () => {
-    expect(computeDiff40(baseV2, { ...baseV2 })).toEqual({});
+    expect(computeDiff(baseV2, { ...baseV2 })).toEqual({});
   });
 
   it('returns only changed params', () => {
-    const modified: CityParams40 = {
+    const modified: CityParams = {
       ...baseV2,
       mietrecht_kostenmiete: 2,
       infra_oepnv: 0,
     };
-    const diff = computeDiff40(baseV2, modified);
+    const diff = computeDiff(baseV2, modified);
     expect(diff).toEqual({
       mietrecht_kostenmiete: { from: 1, to: 2 },
       infra_oepnv: { from: 2, to: 0 },
     });
   });
 
-  it('hasChanges40 returns correct boolean', () => {
-    expect(hasChanges40(baseV2, { ...baseV2 })).toBe(false);
-    expect(hasChanges40(baseV2, { ...baseV2, raumplanung_zonenreserve: 0 as const })).toBe(true);
+  it('hasParamChanges returns correct boolean', () => {
+    expect(hasParamChanges(baseV2, { ...baseV2 })).toBe(false);
+    expect(hasParamChanges(baseV2, { ...baseV2, raumplanung_zonenreserve: 0 as const })).toBe(true);
   });
 });

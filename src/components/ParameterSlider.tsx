@@ -1,8 +1,8 @@
-import type { ParamValue, ParamMeta40 } from '../types';
+import type { ParamValue, ParamMeta } from '../types';
 import './ParameterSlider.css';
 
 interface Props {
-  meta: ParamMeta40;
+  meta: ParamMeta;
   value: ParamValue;
   defaultValue: ParamValue;
   onChange: (value: ParamValue) => void;

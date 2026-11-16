@@ -31,7 +31,7 @@ import { computePhasePipeline } from '../src/model/compute-phases.ts';
 import { computeGroupTrends, type GroupId } from '../src/model/groups.ts';
 import { computeMieteBelastung } from '../src/model/belastung.ts';
 import { cities } from '../src/generated/cities.ts';
-import type { CityContext, CityParams40, ParamsDiff40, MarketState, DerivedIndicators } from '../src/types.js';
+import type { CityContext, CityParams, ParamsDiff, MarketState, DerivedIndicators } from '../src/types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -73,7 +73,7 @@ interface PhaseOutput {
 function forwardPass(
   weights: number[],
   context: CityContext,
-  diff: ParamsDiff40,
+  diff: ParamsDiff,
 ): PhaseOutput[] {
   const edges = edgesFromWeights(weights);
   return [...computePhasePipeline(context, diff, edges)].map(r => ({
@@ -99,9 +99,9 @@ function forwardPass(
 interface Constraint {
   id: string;
   context: CityContext;
-  baseline: CityParams40;
-  diffA: ParamsDiff40;     // "with change" scenario
-  diffB: ParamsDiff40;     // "without change" / reference scenario
+  baseline: CityParams;
+  diffA: ParamsDiff;     // "with change" scenario
+  diffB: ParamsDiff;     // "without change" / reference scenario
   phase: 0 | 1 | 2;
   /** z. B. "marketState.angebotspotenzial", "derived.x", "group.<GroupId>", "belastung.miete" */
   field: string;
@@ -134,7 +134,7 @@ const KEIN_MESSBARER_EFFEKT = 0.02;
 
 // ── City baselines and contexts used in tests ─────────────────────────────────
 
-const BERLIN_BASELINE: CityParams40 = {
+const BERLIN_BASELINE: CityParams = {
   raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
   boden_vorkaufsrecht: 1, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
   bau_energievorgaben: 1, bau_sanierungspflicht: 1,
@@ -153,7 +153,7 @@ const BERLIN_BASELINE: CityParams40 = {
 
 const BERLIN_CTX: CityContext = { zinsniveau: -1, zuwanderungsdruck: 2, wirtschaftskraft: 2, bevoelkerungstrend: 2, marktenge: 2 } as CityContext;
 
-const ZUERICH_V2: CityParams40 = {
+const ZUERICH_V2: CityParams = {
   raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
   boden_vorkaufsrecht: 1, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
   bau_energievorgaben: 1, bau_sanierungspflicht: 1,
@@ -174,7 +174,7 @@ const ZH_CTX: CityContext = { zinsniveau: -1, zuwanderungsdruck: 2, wirtschaftsk
 const NEUTRAL_CTX: CityContext = { zinsniveau: 0, zuwanderungsdruck: 0, wirtschaftskraft: 0, bevoelkerungstrend: 0, marktenge: 0 } as CityContext;
 const ANGESPANNT: CityContext = { zinsniveau: -1, zuwanderungsdruck: 2, wirtschaftskraft: 2, bevoelkerungstrend: 2, marktenge: 2 } as CityContext;
 
-const LOCKERE_BASIS: CityParams40 = {
+const LOCKERE_BASIS: CityParams = {
   ...ZUERICH_V2,
   raumplanung_ausnuetzungsziffer: 0 as const,
   raumplanung_verdichtung: 0 as const,
@@ -182,8 +182,8 @@ const LOCKERE_BASIS: CityParams40 = {
 };
 
 // Helper: create modified baseline
-function withOverrides(base: CityParams40, overrides: Partial<CityParams40>): CityParams40 {
-  return { ...base, ...overrides } as CityParams40;
+function withOverrides(base: CityParams, overrides: Partial<CityParams>): CityParams {
+  return { ...base, ...overrides } as CityParams;
 }
 
 // ── Constraints from all fachlich tests ───────────────────────────────────────
@@ -546,7 +546,7 @@ const BASE_CONSTRAINTS: Constraint[] = [
     diffB: {},
     phase: 0, field: 'marketState.verdraengungsrisiko', relation: 'lt',
   },
-  // Abbruchverbot senkt angebotspotenzial (FHNW)
+  // Abbruchverbot senkt angebotspotenzial (DIW DP 2143, Ters/Kholodilin)
   {
     id: 'gemeinnuetzig-abbruch-angebot-p0',
     context: ZH_CTX, baseline: ZUERICH_V2,
@@ -693,17 +693,17 @@ const BASE_CONSTRAINTS: Constraint[] = [
 // src/model/__tests__/fachlich/rangfolge-fachlich.test.ts.
 
 /** Angebotshebel in der Richtung «mehr Angebot». */
-const ANGEBOTSHEBEL: Array<[string, ParamsDiff40]> = [
+const ANGEBOTSHEBEL: Array<[string, ParamsDiff]> = [
   ['zonierung', { raumplanung_zonenreserve: { from: 2, to: 1 } }],
   ['verdichtung', { raumplanung_verdichtung: { from: 1, to: 2 } }],
   ['ausnuetzung', { raumplanung_ausnuetzungsziffer: { from: 1, to: 2 } }],
 ];
-const VERGLEICHSHEBEL: Array<[string, ParamsDiff40]> = [
+const VERGLEICHSHEBEL: Array<[string, ParamsDiff]> = [
   ['foerderfonds', { gemeinnuetzig_foerderfonds: { from: 1, to: 2 } }],
   ['oev', { infra_oepnv: { from: 1, to: 2 } }],
 ];
 /** GLOBAL-027/-029: Kostenmiete und Kündigungsschutz je eine Stufe strenger. */
-const MIETREGULIERUNG: ParamsDiff40 = {
+const MIETREGULIERUNG: ParamsDiff = {
   mietrecht_kostenmiete: { from: 1, to: 2 },
   mietrecht_kuendigungsschutz: { from: 1, to: 2 },
 };
@@ -793,7 +793,7 @@ function expandConstraintsForCities(base: Constraint[]): Constraint[] {
 
 const EPSILON = 0.001; // Minimum margin
 
-const EMPTY_DIFF: ParamsDiff40 = {};
+const EMPTY_DIFF: ParamsDiff = {};
 
 /** Marge eines Constraints: > 0 heisst erfüllt (mit Mindestabstand EPSILON bei strikten Relationen). */
 function constraintMargin(weights: number[], c: Constraint): number {

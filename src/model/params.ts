@@ -4,9 +4,9 @@
 // ============================================================
 
 import type {
-  CityParams40,
-  ParamsDiff40,
-  ParamMeta40,
+  CityParams,
+  ParamsDiff,
+  ParamMeta,
   ParamGroup,
   ContextMeta,
 } from '../types';
@@ -14,7 +14,7 @@ import type {
 // ── Key-Array ────────────────────────────────────────────────────────────────
 
 /** Die 40 atomaren Parameter-Keys */
-export const PARAM_KEYS_40 = [
+export const PARAM_KEYS = [
   // 1. Bodenrecht & Landnutzung
   'raumplanung_zonenreserve',
   'raumplanung_verdichtung',
@@ -69,18 +69,18 @@ export const PARAM_KEYS_40 = [
   'infra_wirtschaftsansiedlung',
 ] as const;
 
-// Compile-time check: PARAM_KEYS_40 must cover all CityParams40 keys
-type _AssertAllKeys40 = typeof PARAM_KEYS_40[number] extends keyof CityParams40
-  ? keyof CityParams40 extends typeof PARAM_KEYS_40[number]
+// Compile-time check: PARAM_KEYS must cover all CityParams keys
+type _AssertAllKeys = typeof PARAM_KEYS[number] extends keyof CityParams
+  ? keyof CityParams extends typeof PARAM_KEYS[number]
     ? true
     : never
   : never;
-const _check40: _AssertAllKeys40 = true;
-void _check40;
+const _checkKeys: _AssertAllKeys = true;
+void _checkKeys;
 
 // ── Metadaten: 40 Parameter ─────────────────────────────────────────────────
 
-export const paramMeta40: ParamMeta40[] = [
+export const paramMeta: ParamMeta[] = [
   // ── 1. Bodenrecht & Landnutzung ──────────────────────────────────────────
   {
     key: 'raumplanung_zonenreserve',
@@ -484,18 +484,18 @@ export const contextMeta: ContextMeta[] = [
 /**
  * Parameter-Paare, deren Wirkung vom absoluten Stand des Partners abhängt
  * (Produkt statt Summe). Die Pipeline kennt nur das Diff, nicht die
- * Stadt-Parameter. Ändert sich einer der beiden, trägt `computeDiff40` darum
+ * Stadt-Parameter. Ändert sich einer der beiden, trägt `computeDiff` darum
  * auch den anderen ein, als Begleiteintrag mit `from === to`. Ein
  * Begleiteintrag ist KEINE Änderung: wer Änderungen zählt oder hervorhebt,
  * nimmt `changedParamKeys`.
  */
-export const DIFF_BEGLEITER: ReadonlyArray<readonly [keyof CityParams40, keyof CityParams40]> = [
+export const DIFF_BEGLEITER: ReadonlyArray<readonly [keyof CityParams, keyof CityParams]> = [
   ['gemeinnuetzig_mindestanteil', 'gemeinnuetzig_ausgleich'],
 ];
 
-export function computeDiff40(baseline: CityParams40, modified: CityParams40): ParamsDiff40 {
-  const diff: ParamsDiff40 = {};
-  for (const key of PARAM_KEYS_40) {
+export function computeDiff(baseline: CityParams, modified: CityParams): ParamsDiff {
+  const diff: ParamsDiff = {};
+  for (const key of PARAM_KEYS) {
     if (baseline[key] !== modified[key]) {
       diff[key] = { from: baseline[key], to: modified[key] };
     }
@@ -508,12 +508,12 @@ export function computeDiff40(baseline: CityParams40, modified: CityParams40): P
 }
 
 /** Schlüssel der wirklich geänderten Parameter (ohne Begleiteinträge mit `from === to`). */
-export function changedParamKeys(diff: ParamsDiff40): Array<keyof CityParams40> {
-  return (Object.keys(diff) as Array<keyof CityParams40>).filter(k => diff[k]!.from !== diff[k]!.to);
+export function changedParamKeys(diff: ParamsDiff): Array<keyof CityParams> {
+  return (Object.keys(diff) as Array<keyof CityParams>).filter(k => diff[k]!.from !== diff[k]!.to);
 }
 
-export function hasChanges40(baseline: CityParams40, modified: CityParams40): boolean {
-  return PARAM_KEYS_40.some(key => baseline[key] !== modified[key]);
+export function hasParamChanges(baseline: CityParams, modified: CityParams): boolean {
+  return PARAM_KEYS.some(key => baseline[key] !== modified[key]);
 }
 
 // ── Group-Map für UI ─────────────────────────────────────────────────────────
@@ -534,11 +534,11 @@ export const PARAM_GROUP_ORDER: ParamGroup[] = [
   'steuern', 'kapital', 'nutzung', 'infrastruktur',
 ];
 
-/** paramMeta40 nach Gruppe gruppiert */
-export function paramsByGroup(): Record<ParamGroup, ParamMeta40[]> {
-  const result = {} as Record<ParamGroup, ParamMeta40[]>;
+/** paramMeta nach Gruppe gruppiert */
+export function paramsByGroup(): Record<ParamGroup, ParamMeta[]> {
+  const result = {} as Record<ParamGroup, ParamMeta[]>;
   for (const g of PARAM_GROUP_ORDER) {
-    result[g] = paramMeta40.filter(p => p.group === g);
+    result[g] = paramMeta.filter(p => p.group === g);
   }
   return result;
 }

@@ -2,7 +2,7 @@
 // compute-phases.ts — Phase-based pipeline computation
 // ============================================================
 
-import type { CityContext, CityParams40, ParamsDiff40, MarketState } from '../types';
+import type { CityContext, CityParams, ParamsDiff, MarketState } from '../types';
 import type { Phase, PhaseResult } from './phases';
 import { PHASE_NAMES, PHASE_YEAR_LABELS, PHASES } from './phases';
 import { PHASE_WEIGHTED_EDGES, type PhaseEdge } from './phase-weights';
@@ -72,7 +72,7 @@ export const E1_NENNER = 11.2;
 
 export function getE0Delta(
   nodeId: string,
-  diff: ParamsDiff40,
+  diff: ParamsDiff,
   context: CityContext,
 ): number {
   if (nodeId.startsWith('ctx:')) {
@@ -81,7 +81,7 @@ export function getE0Delta(
     if (typeof value !== 'number') return 0;
     return normalizeContext(value as -2 | -1 | 0 | 1 | 2);
   }
-  const paramKey = nodeId as keyof CityParams40;
+  const paramKey = nodeId as keyof CityParams;
   const diffEntry = diff[paramKey];
   if (!diffEntry) return 0;
   return normalizeDiff((diffEntry.to as number) - (diffEntry.from as number));
@@ -92,17 +92,17 @@ export function getE0Delta(
  *
  * Bedingte Kante (`ausgleichDurch`): gerechnet wird die Änderung des Produkts
  * `from · (1 − ausgleich)`, beide als Stand 0…1 (Stufe / 2). Dafür braucht es
- * die absoluten Stufen beider Parameter; `computeDiff40` trägt sie als
+ * die absoluten Stufen beider Parameter; `computeDiff` trägt sie als
  * Begleiteinträge ins Diff ein (`DIFF_BEGLEITER`, params.ts).
  * Fehlt `from` im Diff, ist sein Stand unbekannt und die Kante wirkt nicht.
  * Fehlt der Ausgleich im Diff, gilt «kein Ausgleich» (Stufe 0, die Baseline
  * aller Städte): die Kante rechnet dann wie eine gewöhnliche.
  */
-export function getEdgeDelta(edge: PhaseEdge, diff: ParamsDiff40, context: CityContext): number {
+export function getEdgeDelta(edge: PhaseEdge, diff: ParamsDiff, context: CityContext): number {
   if (!edge.ausgleichDurch) return getE0Delta(edge.from, diff, context);
-  const haupt = diff[edge.from as keyof CityParams40];
+  const haupt = diff[edge.from as keyof CityParams];
   if (!haupt) return 0;
-  const ausgleich = diff[edge.ausgleichDurch as keyof CityParams40];
+  const ausgleich = diff[edge.ausgleichDurch as keyof CityParams];
   const a0 = ausgleich ? normalizeDiff(ausgleich.from as number) : 0;
   const a1 = ausgleich ? normalizeDiff(ausgleich.to as number) : 0;
   return normalizeDiff(haupt.to as number) * (1 - a1) - normalizeDiff(haupt.from as number) * (1 - a0);
@@ -164,7 +164,7 @@ export function marketModulator(marktenge: number): number {
  */
 export function computeE1WithPhaseAndCarry(
   context: CityContext,
-  diff: ParamsDiff40,
+  diff: ParamsDiff,
   phase: Phase,
   carryE1: MarketState | null,
   edges: readonly PhaseEdge[] = PHASE_WEIGHTED_EDGES,
@@ -198,7 +198,7 @@ export function computeE1WithPhaseAndCarry(
  */
 export function* computePhasePipeline(
   context: CityContext,
-  diff: ParamsDiff40,
+  diff: ParamsDiff,
   edges: readonly PhaseEdge[] = PHASE_WEIGHTED_EDGES,
 ): Generator<PhaseResult, PhaseResult[], void> {
   let carryE1: MarketState | null = null;
@@ -242,13 +242,13 @@ const _cache = new Map<string, PhaseResult[]>();
  */
 const CACHE_MAX_ENTRIES = 500;
 
-function _cacheKey(context: CityContext, diff: ParamsDiff40): string {
+function _cacheKey(context: CityContext, diff: ParamsDiff): string {
   return JSON.stringify({ context, diff });
 }
 
 export function computePhasesCached(
   context: CityContext,
-  diff: ParamsDiff40,
+  diff: ParamsDiff,
 ): PhaseResult[] {
   const key = _cacheKey(context, diff);
   const cached = _cache.get(key);

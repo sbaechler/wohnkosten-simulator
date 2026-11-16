@@ -26,13 +26,13 @@
 import { describe, it, expect } from 'vitest';
 import { computePhasePipeline, invalidatePhasesCache } from '../../compute-phases';
 import { computeGroupTrends } from '../../groups';
-import type { CityContext, CityParams40, MarketState, ParamsDiff40 } from '../../../types';
+import type { CityContext, CityParams, MarketState, ParamsDiff } from '../../../types';
 
 // Zürich-like baseline
 // V1: raumplanung=2, bauvorschriften=2, energetischeVorgaben=1, mietrecht=1, steuerpolitik=2,
 //      foerderungGemeinnuetzig=2, subventionen=1, einspracherechte=2, infrastruktur=2,
 //      auslaendischeInvestitionen=1
-const ZUERICH_V2: CityParams40 = {
+const ZUERICH_V2: CityParams = {
   raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
   boden_vorkaufsrecht: 1, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
   bau_energievorgaben: 1, bau_sanierungspflicht: 1,
@@ -78,7 +78,7 @@ const ZUERICH_CONTEXT: CityContext = {
   marktenge: 2,
 };
 
-function phases(_params: CityParams40, context: CityContext, diff: ParamsDiff40) {
+function phases(_params: CityParams, context: CityContext, diff: ParamsDiff) {
   invalidatePhasesCache();
   return [...computePhasePipeline(context, diff)];
 }
@@ -96,7 +96,7 @@ describe('Steuern: Grunderwerbsteuer / Handänderungssteuer', () => {
   it('[FACH] Handaänderungssteuer-Erhöhung erhöht marktfriktion sofort', () => {
     const neutral = phases(ZUERICH_V2, NEUTRAL_CONTEXT, {});
 
-    const withTax: ParamsDiff40 = {
+    const withTax: ParamsDiff = {
       steuer_handaenderung: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, NEUTRAL_CONTEXT, withTax);
@@ -108,7 +108,7 @@ describe('Steuern: Grunderwerbsteuer / Handänderungssteuer', () => {
   it('[FACH] Handaänderungssteuer-Erhöhung erhöht spekulationshemmung (Transaktionskosten ↑)', () => {
     const neutral = phases(ZUERICH_V2, NEUTRAL_CONTEXT, {});
 
-    const withTax: ParamsDiff40 = {
+    const withTax: ParamsDiff = {
       steuer_handaenderung: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, NEUTRAL_CONTEXT, withTax);
@@ -130,7 +130,7 @@ describe('Kapital: Lex Koller / ABSD Singapore', () => {
   it('[FACH] Verschärfte Lex Koller senkt nachfragedruck', () => {
     const neutral = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
-    const withLexKoller: ParamsDiff40 = {
+    const withLexKoller: ParamsDiff = {
       kapital_auslaendische_investoren: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, ZUERICH_CONTEXT, withLexKoller);
@@ -142,7 +142,7 @@ describe('Kapital: Lex Koller / ABSD Singapore', () => {
   it('[FACH] Verschärfte Lex Koller senkt investitionsattraktivitaet', () => {
     const neutral = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
-    const withLexKoller: ParamsDiff40 = {
+    const withLexKoller: ParamsDiff = {
       kapital_auslaendische_investoren: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, ZUERICH_CONTEXT, withLexKoller);
@@ -165,7 +165,7 @@ describe('Kapital: Hypothekarregulierung (LTV / Tragbarkeit)', () => {
   it('[FACH] Strenge Hypothekarregulierung senkt nachfragedruck', () => {
     const neutral = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
-    const withRegulierung: ParamsDiff40 = {
+    const withRegulierung: ParamsDiff = {
       kapital_hypothekarregulierung: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, ZUERICH_CONTEXT, withRegulierung);
@@ -177,7 +177,7 @@ describe('Kapital: Hypothekarregulierung (LTV / Tragbarkeit)', () => {
   it('[FACH] Strenge Hypothekarregulierung senkt eigentumsquoten_trend', () => {
     const neutral = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
-    const withRegulierung: ParamsDiff40 = {
+    const withRegulierung: ParamsDiff = {
       kapital_hypothekarregulierung: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, ZUERICH_CONTEXT, withRegulierung);
@@ -200,7 +200,7 @@ describe('Steuern: Kapitalgewinnbesteuerung für Privatpersonen', () => {
   it('[FACH] Kapitalgewinnbesteuerung erhöht spekulationshemmung', () => {
     const neutral = phases(ZUERICH_V2, NEUTRAL_CONTEXT, {});
 
-    const withKapGewSt: ParamsDiff40 = {
+    const withKapGewSt: ParamsDiff = {
       steuer_kapitalgewinnprivatpersonen: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, NEUTRAL_CONTEXT, withKapGewSt);
@@ -222,7 +222,7 @@ describe('Steuern: Grundstückgewinnsteuer (Spekulationsbremse)', () => {
   it('[FACH] Hohe Grundstückgewinnsteuer erhöht spekulationshemmung', () => {
     const neutral = phases(ZUERICH_V2, NEUTRAL_CONTEXT, {});
 
-    const withGewSt: ParamsDiff40 = {
+    const withGewSt: ParamsDiff = {
       steuer_grundstueckgewinn: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, NEUTRAL_CONTEXT, withGewSt);
@@ -245,7 +245,7 @@ describe('Steuern: Eigenmietwert → senkt Wohneigentumsnachfrage', () => {
   it('[FACH] Hoher Eigenmietwert senkt eigentumsquoten_trend', () => {
     const neutral = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
-    const withEMW: ParamsDiff40 = {
+    const withEMW: ParamsDiff = {
       steuer_eigenmietwert: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, ZUERICH_CONTEXT, withEMW);
@@ -257,7 +257,7 @@ describe('Steuern: Eigenmietwert → senkt Wohneigentumsnachfrage', () => {
   it('[FACH] Hoher Eigenmietwert senkt nachfragedruck', () => {
     const neutral = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
-    const withEMW: ParamsDiff40 = {
+    const withEMW: ParamsDiff = {
       steuer_eigenmietwert: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, ZUERICH_CONTEXT, withEMW);
@@ -282,13 +282,13 @@ describe('Steuern: CH-006 Lex Weber — Zweitwohnungsinitiative paradox', () => 
    * - nutzung_zweitwohnungen ↑ → angebotspotenzial ↓ (paradox: weniger Bau overall)
    */
   it('[FACH] CH-006: Zweitwohnungsbeschränkung senkt angebotspotenzial (paradox)', () => {
-    const ohneLex: CityParams40 = {
+    const ohneLex: CityParams = {
       ...ZUERICH_V2,
       nutzung_zweitwohnungen: 0,
     };
     const ohne = phases(ohneLex, ZUERICH_CONTEXT, {});
 
-    const mitLex: ParamsDiff40 = {
+    const mitLex: ParamsDiff = {
       nutzung_zweitwohnungen: { from: 0, to: 2 },
     };
     const mit = phases(ohneLex, ZUERICH_CONTEXT, mitLex);
@@ -314,7 +314,7 @@ describe('Steuern: AT-002 — Gemeinnütziger Wohnbau dämpft Mietpreise', () =>
    *   nachfragedruck; diese Kanten sind als Doppelzählung gestrichen.
    */
   it('[FACH] AT-002: Hoher Gemeinnützig-Anteil senkt den Preistrend der Neumieter', () => {
-    const ohneGemeinnuetzig: CityParams40 = {
+    const ohneGemeinnuetzig: CityParams = {
       ...ZUERICH_V2,
       gemeinnuetzig_mindestanteil: 0, gemeinnuetzig_ausgleich: 0,
       gemeinnuetzig_foerderfonds: 0,
@@ -322,7 +322,7 @@ describe('Steuern: AT-002 — Gemeinnütziger Wohnbau dämpft Mietpreise', () =>
     };
     const ohne = phases(ohneGemeinnuetzig, ZUERICH_CONTEXT, {});
 
-    const mitGemeinnuetzig: ParamsDiff40 = {
+    const mitGemeinnuetzig: ParamsDiff = {
       gemeinnuetzig_mindestanteil: { from: 0, to: 2 },
       gemeinnuetzig_foerderfonds:  { from: 0, to: 2 },
       gemeinnuetzig_baurecht:      { from: 0, to: 2 },

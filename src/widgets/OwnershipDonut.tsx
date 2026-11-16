@@ -1,13 +1,13 @@
 import { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
-import type { CityConfig, ParamsDiff40, MarketState, CityParams40 } from '../types';
+import type { CityConfig, ParamsDiff, MarketState, CityParams } from '../types';
 import { changedParamKeys } from '../model/params';
 import './OwnershipDonut.css';
 
 interface Props {
   city: CityConfig;
-  modified: CityParams40;
-  diff: ParamsDiff40;
+  modified: CityParams;
+  diff: ParamsDiff;
   state: MarketState;
   /** When set, show baseline donut alongside modified for comparison */
   baselineState?: MarketState;

@@ -8,7 +8,7 @@
 import { describe, it, expect } from 'vitest';
 import { computePhasePipeline } from '../../compute-phases';
 import { computeGroupTrends } from '../../groups';
-import type { CityContext, ParamsDiff40 } from '../../../types';
+import type { CityContext, ParamsDiff } from '../../../types';
 
 const ANGESPANNT_CONTEXT: CityContext = {
   ownershipBaseline: {
@@ -27,7 +27,7 @@ const ANGESPANNT_CONTEXT: CityContext = {
 describe('Gruppen-Divergenz: Bestand vs. Angebot', () => {
   it('Bei strenger Regulierung steigen Bestandsmieten weniger stark als Angebotsmieten', () => {
     // Szenario: Hoher Marktdruck + Strenge Regulierung (Wohnschutz)
-    const diff: ParamsDiff40 = {
+    const diff: ParamsDiff = {
       mietrecht_kostenmiete: { from: 1, to: 2 },
       mietrecht_kuendigungsschutz: { from: 1, to: 2 },
       nutzung_abbruchverbot: { from: 1, to: 2 },
@@ -48,7 +48,7 @@ describe('Gruppen-Divergenz: Bestand vs. Angebot', () => {
   });
 
   it('Geringverdiener sind besser geschützt als Normalverdiener (Angebot)', () => {
-    const diff: ParamsDiff40 = { mietrecht_kostenmiete: { from: 1, to: 2 } };
+    const diff: ParamsDiff = { mietrecht_kostenmiete: { from: 1, to: 2 } };
 
     const results = [...computePhasePipeline(ANGESPANNT_CONTEXT, diff)];
     const trends = computeGroupTrends(results[0].marketState, ANGESPANNT_CONTEXT);

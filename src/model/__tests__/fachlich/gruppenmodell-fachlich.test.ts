@@ -20,7 +20,7 @@ import { computePhasePipeline } from '../../compute-phases';
 import { computeGroupTrends, type GroupId } from '../../groups';
 import { computeMieteBelastung } from '../../belastung';
 import { cities } from '../../../generated/cities';
-import type { CityContext, MarketState, ParamsDiff40 } from '../../../types';
+import type { CityContext, MarketState, ParamsDiff } from '../../../types';
 import { REGIME_NEUTRAL } from '../market-state-fixtures';
 
 const leer: MarketState = {
@@ -31,7 +31,7 @@ const leer: MarketState = {
   ...REGIME_NEUTRAL,
 };
 
-function phases(ctx: CityContext, diff: ParamsDiff40): MarketState[] {
+function phases(ctx: CityContext, diff: ParamsDiff): MarketState[] {
   return [...computePhasePipeline(ctx, diff)].map(r => r.marketState);
 }
 
@@ -125,7 +125,7 @@ describe('Fix-14.3: Mietbelastung ohne stadtspezifische Scheinbasis', () => {
 
 describe.each(cities.map(c => [c.name, c.context] as const))('Fix-14.4: Mietbelastung — %s', (_name, ctx) => {
   const basis = phases(ctx, {});
-  const dBelastung = (diff: ParamsDiff40) => {
+  const dBelastung = (diff: ParamsDiff) => {
     const mit = phases(ctx, diff);
     return mit.map((s, i) => computeMieteBelastung(s) - computeMieteBelastung(basis[i]));
   };

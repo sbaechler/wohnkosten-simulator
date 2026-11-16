@@ -22,12 +22,12 @@ import { computePhasePipeline } from '../../compute-phases';
 import { computeGroupTrends, type GroupId } from '../../groups';
 import { PHASE_WEIGHTED_EDGES } from '../../phase-weights';
 import { E2_TERMS } from '../../derived';
-import { paramMeta40 } from '../../params';
+import { paramMeta } from '../../params';
 import { cities } from '../../../generated/cities';
-import type { CityContext, ParamsDiff40 } from '../../../types';
+import type { CityContext, ParamsDiff } from '../../../types';
 import type { PhaseResult } from '../../phases';
 
-function run(ctx: CityContext, diff: ParamsDiff40): PhaseResult[] {
+function run(ctx: CityContext, diff: ParamsDiff): PhaseResult[] {
   return [...computePhasePipeline(ctx, diff)];
 }
 
@@ -85,7 +85,7 @@ describe('Kurzzeitvermietung → Verdrängung: Grösse nach Evidenz', () => {
   describe.each(cities.map(c => [c.name, c.context] as const))('%s', (_name, ctx) => {
     it('[FACH] Kurzzeitvermietung 1→2 senkt das Verdrängungsrisiko weniger als Kündigungsschutz 1→2 (P3)', () => {
       const basis = run(ctx, {});
-      const d = (diff: ParamsDiff40) =>
+      const d = (diff: ParamsDiff) =>
         basis[2].marketState.verdraengungsrisiko - run(ctx, diff)[2].marketState.verdraengungsrisiko;
       const str = d({ nutzung_kurzzeitvermietung: { from: 1, to: 2 } });
       const kuendigung = d({ mietrecht_kuendigungsschutz: { from: 1, to: 2 } });
@@ -122,7 +122,7 @@ describe('Strittige Kanten aus Fix-1: gekennzeichnet statt umgedreht', () => {
   });
 
   it('Zweitwohnungen und Untervermietung tragen «Wirkung nicht belegt»', () => {
-    const meta = (key: string) => paramMeta40.find(m => m.key === key)!;
+    const meta = (key: string) => paramMeta.find(m => m.key === key)!;
     expect(meta('nutzung_zweitwohnungen').evidenz).toBe('nicht_belegt');
     expect(meta('mietrecht_untervermietung').evidenz).toBe('nicht_belegt');
     // Mietzinstransparenz hat schwache, aber vorhandene Evidenz für das

@@ -28,13 +28,13 @@ import { describe, it, expect } from 'vitest';
 import { computePhasePipeline, invalidatePhasesCache } from '../../compute-phases';
 import { computeGroupTrends } from '../../groups';
 import { findEquilibrium, supplyShiftFromState } from '../../supply-demand';
-import type { CityContext, CityParams40, MarketState, ParamsDiff40 } from '../../../types';
+import type { CityContext, CityParams, MarketState, ParamsDiff } from '../../../types';
 
 // Zürich-like baseline
 // V1: raumplanung=2, bauvorschriften=2, energetischeVorgaben=1, mietrecht=1, steuerpolitik=2,
 //      foerderungGemeinnuetzig=2, subventionen=1, einspracherechte=2, infrastruktur=2,
 //      auslaendischeInvestitionen=1
-const ZUERICH_V2: CityParams40 = {
+const ZUERICH_V2: CityParams = {
   raumplanung_zonenreserve: 2, raumplanung_verdichtung: 2, raumplanung_ausnuetzungsziffer: 2,
   boden_vorkaufsrecht: 1, boden_bauverpflichtung: 1, boden_mehrwertabgabe: 1, boden_bodeneigentumssteuer: 1,
   bau_energievorgaben: 1, bau_sanierungspflicht: 1,
@@ -53,7 +53,7 @@ const ZUERICH_V2: CityParams40 = {
 };
 
 // Lockere Baseline (lockere Zonen: AZ=0, Verdichtung=0)
-const LOCKERE_BASIS: CityParams40 = {
+const LOCKERE_BASIS: CityParams = {
   ...ZUERICH_V2,
   raumplanung_ausnuetzungsziffer: 0,
   raumplanung_verdichtung: 0,
@@ -88,7 +88,7 @@ const NEUTRAL_CONTEXT: CityContext = {
   marktenge: 0,
 };
 
-function phases(_params: CityParams40, context: CityContext, diff: ParamsDiff40) {
+function phases(_params: CityParams, context: CityContext, diff: ParamsDiff) {
   invalidatePhasesCache();
   return [...computePhasePipeline(context, diff)];
 }
@@ -110,7 +110,7 @@ describe('Bodenrecht: Minneapolis 2040 Upzoning (−16–34% Preise nach 5 Jahre
   it('[FACH] Upzoning (AZ 0→2): angebotspotenzial in Phase 3 höher als ohne Reform', () => {
     const ohneReform = phases(LOCKERE_BASIS, ZUERICH_CONTEXT, {});
 
-    const upzoningDiff: ParamsDiff40 = {
+    const upzoningDiff: ParamsDiff = {
       raumplanung_ausnuetzungsziffer: { from: 0, to: 2 },
       raumplanung_verdichtung:         { from: 0, to: 2 },
     };
@@ -122,7 +122,7 @@ describe('Bodenrecht: Minneapolis 2040 Upzoning (−16–34% Preise nach 5 Jahre
 
   it('[FACH] Upzoning: neubau_hemmnisindex sinkt langfristig (mehr Angebot = weniger Hemnis)', () => {
     const ohneReform = phases(LOCKERE_BASIS, ZUERICH_CONTEXT, {});
-    const upzoningDiff: ParamsDiff40 = {
+    const upzoningDiff: ParamsDiff = {
       raumplanung_ausnuetzungsziffer: { from: 0, to: 2 },
       raumplanung_verdichtung:         { from: 0, to: 2 },
     };
@@ -134,7 +134,7 @@ describe('Bodenrecht: Minneapolis 2040 Upzoning (−16–34% Preise nach 5 Jahre
 
   it('[FACH] Upzoning: aufwertungsdruck steigt durch AZ-Erhöhung (kurzfristig)', () => {
     const ohneReform = phases(LOCKERE_BASIS, ZUERICH_CONTEXT, {});
-    const upzoningDiff: ParamsDiff40 = {
+    const upzoningDiff: ParamsDiff = {
       raumplanung_ausnuetzungsziffer: { from: 0, to: 2 },
       raumplanung_verdichtung:         { from: 0, to: 2 },
     };
@@ -157,7 +157,7 @@ describe('Bodenrecht: Bodensteuer / Land Value Tax → senkt Aufwertungsdruck', 
   it('[FACH] Bodensteuer-Erhöhung senkt aufwertungsdruck', () => {
     const neutral = phases(ZUERICH_V2, NEUTRAL_CONTEXT, {});
 
-    const withLVT: ParamsDiff40 = {
+    const withLVT: ParamsDiff = {
       boden_bodeneigentumssteuer: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, NEUTRAL_CONTEXT, withLVT);
@@ -169,7 +169,7 @@ describe('Bodenrecht: Bodensteuer / Land Value Tax → senkt Aufwertungsdruck', 
   it('[FACH] Bodensteuer-Erhöhung erhöht spekulationshemmung (Horten wird besteuert)', () => {
     const neutral = phases(ZUERICH_V2, NEUTRAL_CONTEXT, {});
 
-    const withLVT: ParamsDiff40 = {
+    const withLVT: ParamsDiff = {
       boden_bodeneigentumssteuer: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, NEUTRAL_CONTEXT, withLVT);
@@ -191,7 +191,7 @@ describe('Bau: Auckland Unitary Plan (−14–35% Mieten, 3–7 Jahre)', () => {
    * - bau_bewilligungsverfahren
    */
   it('[FACH] Auckland-Szenario: kombinierte Reform erhöht Angebotspotenzial deutlich', () => {
-    const lockedBasis: CityParams40 = {
+    const lockedBasis: CityParams = {
       ...ZUERICH_V2,
       raumplanung_ausnuetzungsziffer: 0,
       raumplanung_verdichtung: 0,
@@ -200,7 +200,7 @@ describe('Bau: Auckland Unitary Plan (−14–35% Mieten, 3–7 Jahre)', () => {
 
     const ohneReform = phases(lockedBasis, ZUERICH_CONTEXT, {});
 
-    const aucklandDiff: ParamsDiff40 = {
+    const aucklandDiff: ParamsDiff = {
       raumplanung_ausnuetzungsziffer: { from: 0, to: 2 },
       raumplanung_verdichtung:         { from: 0, to: 2 },
       bau_bewilligungsverfahren:       { from: 0, to: 2 },
@@ -225,7 +225,7 @@ describe('Bau: Einspracherechte verzögern Angebot (Forschungs-Befund)', () => {
   it('[FACH] Jedermann-Einspracherecht senkt Angebotspotenzial', () => {
     const neutral = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
-    const withEinspracherecht: ParamsDiff40 = {
+    const withEinspracherecht: ParamsDiff = {
       bau_einspracherecht_dritte: { from: 1, to: 2 },
     };
     const withDiff = phases(ZUERICH_V2, ZUERICH_CONTEXT, withEinspracherecht);
@@ -235,10 +235,10 @@ describe('Bau: Einspracherechte verzögern Angebot (Forschungs-Befund)', () => {
   });
 
   it('[FACH] Suspensiveffekt senkt Angebotspotenzial stärker als nur Dritte-Einsprache', () => {
-    const withDritte: ParamsDiff40 = {
+    const withDritte: ParamsDiff = {
       bau_einspracherecht_dritte: { from: 1, to: 2 },
     };
-    const withSuspensiv: ParamsDiff40 = {
+    const withSuspensiv: ParamsDiff = {
       bau_einspracherecht_suspensiv: { from: 1, to: 2 },
     };
 
@@ -270,7 +270,7 @@ describe('Bodenrecht: CH-007 BWO Raumplanung — Zonenreserve dämpft Kostenanst
   it('[FACH] CH-007: Mehr Bauland (Zonenreserve 2→0) erhöht langfristig das Angebotspotenzial', () => {
     const ohne = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});
 
-    const mehrBauland: ParamsDiff40 = {
+    const mehrBauland: ParamsDiff = {
       raumplanung_zonenreserve: { from: 2, to: 0 },
     };
     const mit = phases(ZUERICH_V2, ZUERICH_CONTEXT, mehrBauland);
@@ -336,12 +336,12 @@ describe('Bodenrecht: CH-008 / CH-009 ETH Verdichtung → Verdrängungsrisiko', 
    * - raumplanung_verdichtung ↑ → gentrifizierungsindex ↑
    */
   it('[FACH] CH-008: Verdichtung erhöht Verdrängungsrisiko (ETH-SPUR-Befund)', () => {
-    const basis: CityParams40 = {
+    const basis: CityParams = {
       ...ZUERICH_V2,
       raumplanung_verdichtung: 0,
     };
     const ohne = phases(basis, ZUERICH_CONTEXT, {});
-    const mitVerdichtung: ParamsDiff40 = {
+    const mitVerdichtung: ParamsDiff = {
       raumplanung_verdichtung: { from: 0, to: 2 },
     };
     const mit = phases(basis, ZUERICH_CONTEXT, mitVerdichtung);
@@ -350,12 +350,12 @@ describe('Bodenrecht: CH-008 / CH-009 ETH Verdichtung → Verdrängungsrisiko', 
       .toBeGreaterThan(ohne[0].marketState.verdraengungsrisiko);
   });
   it('[FACH] CH-009: Verdichtung erhöht Gentrifizierungsindex (soziale Aufwertung)', () => {
-    const basis: CityParams40 = {
+    const basis: CityParams = {
       ...ZUERICH_V2,
       raumplanung_verdichtung: 0,
     };
     const ohne = phases(basis, ZUERICH_CONTEXT, {});
-    const mitVerdichtung: ParamsDiff40 = {
+    const mitVerdichtung: ParamsDiff = {
       raumplanung_verdichtung: { from: 0, to: 2 },
     };
     const mit = phases(basis, ZUERICH_CONTEXT, mitVerdichtung);
@@ -364,12 +364,12 @@ describe('Bodenrecht: CH-008 / CH-009 ETH Verdichtung → Verdrängungsrisiko', 
       .toBeGreaterThan(ohne[0].derived.gentrifizierungsindex);
   });
   it('[FACH] CH-008: Verdichtung erhöht Angebotspotenzial (Bestätigung)', () => {
-    const basis: CityParams40 = {
+    const basis: CityParams = {
       ...ZUERICH_V2,
       raumplanung_verdichtung: 0,
     };
     const ohne = phases(basis, ZUERICH_CONTEXT, {});
-    const mitVerdichtung: ParamsDiff40 = {
+    const mitVerdichtung: ParamsDiff = {
       raumplanung_verdichtung: { from: 0, to: 2 },
     };
     const mit = phases(basis, ZUERICH_CONTEXT, mitVerdichtung);

@@ -3,7 +3,7 @@
  *
  * Testet die öffentliche API von url-helpers.ts:
  *   - clampParam: rundet + clamp'd eine Zahl in {0, 1, 2}
- *   - PARAM_KEYS_40_SET: Set-Form von PARAM_KEYS_40
+ *   - PARAM_KEYS_40_SET: Set-Form von PARAM_KEYS
  *
  * KEINE Kopplung an interne Implementation — Tests bleiben grün, solange
  * die dokumentierten Verhaltens-Invarianten (Wertebereich, Rundung)
@@ -12,7 +12,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { clampParam, PARAM_KEYS_40_SET } from '../../url-helpers';
-import { PARAM_KEYS_40 } from '../../params';
+import { PARAM_KEYS } from '../../params';
 
 describe('clampParam', () => {
   it('returns 0 for values in [-Infinity, 0.5)', () => {
@@ -43,16 +43,16 @@ describe('clampParam', () => {
 });
 
 describe('PARAM_KEYS_40_SET', () => {
-  it('has the same size as PARAM_KEYS_40 (no duplicates lost in Set conversion)', () => {
-    expect(PARAM_KEYS_40_SET.size).toBe(PARAM_KEYS_40.length);
+  it('has the same size as PARAM_KEYS (no duplicates lost in Set conversion)', () => {
+    expect(PARAM_KEYS_40_SET.size).toBe(PARAM_KEYS.length);
   });
 
   it('has no duplicates (Set semantics matches input array)', () => {
-    expect(PARAM_KEYS_40_SET.size).toBe(new Set(PARAM_KEYS_40).size);
+    expect(PARAM_KEYS_40_SET.size).toBe(new Set(PARAM_KEYS).size);
   });
 
-  it('contains every key from PARAM_KEYS_40', () => {
-    for (const key of PARAM_KEYS_40) {
+  it('contains every key from PARAM_KEYS', () => {
+    for (const key of PARAM_KEYS) {
       expect(PARAM_KEYS_40_SET.has(key)).toBe(true);
     }
   });
