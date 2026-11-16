@@ -15,7 +15,7 @@ export type NodeId =
   | 'bau_energievorgaben' | 'bau_sanierungspflicht' | 'bau_ersatzneubau_effizienz'
   | 'bau_einspracherecht_dritte' | 'bau_einspracherecht_suspensiv'
   | 'bau_bewilligungsverfahren' | 'bau_normenharmonisierung'
-  | 'gemeinnuetzig_mindestanteil' | 'gemeinnuetzig_foerderfonds' | 'gemeinnuetzig_baurecht'
+  | 'gemeinnuetzig_mindestanteil' | 'gemeinnuetzig_ausgleich' | 'gemeinnuetzig_foerderfonds' | 'gemeinnuetzig_baurecht'
   | 'gemeinnuetzig_belegungsvorschriften' | 'gemeinnuetzig_sozialmischung'
   | 'mietrecht_kostenmiete' | 'mietrecht_anfangsmiete' | 'mietrecht_mietzinstransparenz'
   | 'mietrecht_kuendigungsschutz' | 'mietrecht_mietzinsindex' | 'mietrecht_untervermietung'

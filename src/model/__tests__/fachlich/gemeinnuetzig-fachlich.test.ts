@@ -42,7 +42,7 @@ const ZUERICH_V2: CityParams40 = {
   bau_energievorgaben: 1, bau_sanierungspflicht: 1,
   bau_einspracherecht_dritte: 2, bau_einspracherecht_suspensiv: 2,
   bau_bewilligungsverfahren: 2, bau_normenharmonisierung: 2,
-  gemeinnuetzig_mindestanteil: 2, gemeinnuetzig_foerderfonds: 2, gemeinnuetzig_baurecht: 2,
+  gemeinnuetzig_mindestanteil: 2, gemeinnuetzig_ausgleich: 0, gemeinnuetzig_foerderfonds: 2, gemeinnuetzig_baurecht: 2,
   gemeinnuetzig_belegungsvorschriften: 1, gemeinnuetzig_sozialmischung: 1,
   mietrecht_kostenmiete: 1, mietrecht_anfangsmiete: 1, mietrecht_mietzinstransparenz: 1,
   mietrecht_kuendigungsschutz: 1, mietrecht_mietzinsindex: 1, mietrecht_kriterium: 1, mietrecht_durchsetzung: 0, mietrecht_untervermietung: 1,
@@ -171,7 +171,7 @@ describe('Gemeinnütziger Wohnungsbau: Mindestanteil + Baurecht', () => {
   it('[FACH] Hoher Mindestanteil senkt Gentrifizierungsindex (im Vergleich zu keinem Mindestanteil)', () => {
     const restrictiveBasis: CityParams40 = {
       ...ZUERICH_V2,
-      gemeinnuetzig_mindestanteil: 0,
+      gemeinnuetzig_mindestanteil: 0, gemeinnuetzig_ausgleich: 0,
       gemeinnuetzig_foerderfonds: 0,
       gemeinnuetzig_baurecht: 0,
     };

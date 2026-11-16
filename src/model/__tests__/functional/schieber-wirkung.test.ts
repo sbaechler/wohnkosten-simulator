@@ -6,7 +6,7 @@
 import { describe, it, expect } from 'vitest';
 import { computePhasesCached } from '../../compute-phases';
 import { computeGroupTrends } from '../../groups';
-import { PARAM_KEYS_40 } from '../../params';
+import { PARAM_KEYS_40, computeDiff40 } from '../../params';
 import { cities } from '../../../generated/cities';
 import type { CityParams40, MarketState, DerivedIndicators, ParamsDiff40, ParamValue } from '../../../types';
 
@@ -58,7 +58,9 @@ describe('Jeder Schieber bewegt eine angezeigte Grösse', () => {
       const from = ZH.params[key];
       const wirkung = ([0, 1, 2] as ParamValue[])
         .filter(to => to !== from)
-        .map(to => maxAbweichung({ [key]: { from, to } }));
+        // Diff wie in der App (computeDiff40), damit Begleiteinträge für
+        // bedingte Kanten (DIFF_BEGLEITER) enthalten sind.
+        .map(to => maxAbweichung(computeDiff40(ZH.params, { ...ZH.params, [key]: to })));
       expect(Math.max(...wirkung)).toBeGreaterThan(SICHTBAR);
     });
   }

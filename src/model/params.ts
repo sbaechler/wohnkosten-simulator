@@ -33,6 +33,7 @@ export const PARAM_KEYS_40 = [
   'bau_normenharmonisierung',
   // 3. Gemeinnütziger Wohnungsbau
   'gemeinnuetzig_mindestanteil',
+  'gemeinnuetzig_ausgleich',
   'gemeinnuetzig_foerderfonds',
   'gemeinnuetzig_baurecht',
   'gemeinnuetzig_belegungsvorschriften',
@@ -209,6 +210,19 @@ export const paramMeta40: ParamMeta40[] = [
     // Drittel aller Mietwohnungen bis 2050, keinen Neubau-Anteil
     // (stadt-zuerich.ch/wohnpolitik). Die Stufe 33 % ist eine Setzung.
     hoeherBedeutet: 'höherer gemeinnütziger Pflichtanteil',
+    group: 'gemeinnuetzig',
+  },
+  {
+    key: 'gemeinnuetzig_ausgleich',
+    label: 'Ausgleich beim Pflichtanteil',
+    helpText: 'Erhalten Bauherren für den gemeinnützigen Pflichtanteil eine Gegenleistung, etwa mehr Ausnützung?',
+    levels: ['Kein Ausgleich', 'Teilweise (z. B. Dichtebonus)', 'Voll (Mehrausnützung deckt die Kosten)'],
+    // Entscheid 2026-11-16. US-018 (Schuetz/Been/Ellen 2012): Ein Pflichtanteil
+    // senkt das Gesamtangebot nur, wenn kein Ausgleich besteht. Der Schieber
+    // hat keine eigene Kante; er schaltet die Kante
+    // gemeinnuetzig_mindestanteil → angebotspotenzial (phase-weights.ts,
+    // `ausgleichDurch`). Wie stark eine Stufe ausgleicht, ist eine Setzung.
+    hoeherBedeutet: 'stärkerer Ausgleich für den Pflichtanteil',
     group: 'gemeinnuetzig',
   },
   {
@@ -467,6 +481,18 @@ export const contextMeta: ContextMeta[] = [
 
 // ── Diff-Funktionen ──────────────────────────────────────────────────────────
 
+/**
+ * Parameter-Paare, deren Wirkung vom absoluten Stand des Partners abhängt
+ * (Produkt statt Summe). Die Pipeline kennt nur das Diff, nicht die
+ * Stadt-Parameter. Ändert sich einer der beiden, trägt `computeDiff40` darum
+ * auch den anderen ein, als Begleiteintrag mit `from === to`. Ein
+ * Begleiteintrag ist KEINE Änderung: wer Änderungen zählt oder hervorhebt,
+ * nimmt `changedParamKeys`.
+ */
+export const DIFF_BEGLEITER: ReadonlyArray<readonly [keyof CityParams40, keyof CityParams40]> = [
+  ['gemeinnuetzig_mindestanteil', 'gemeinnuetzig_ausgleich'],
+];
+
 export function computeDiff40(baseline: CityParams40, modified: CityParams40): ParamsDiff40 {
   const diff: ParamsDiff40 = {};
   for (const key of PARAM_KEYS_40) {
@@ -474,7 +500,16 @@ export function computeDiff40(baseline: CityParams40, modified: CityParams40): P
       diff[key] = { from: baseline[key], to: modified[key] };
     }
   }
+  for (const [a, b] of DIFF_BEGLEITER) {
+    if (diff[a] && !diff[b]) diff[b] = { from: baseline[b], to: modified[b] };
+    if (diff[b] && !diff[a]) diff[a] = { from: baseline[a], to: modified[a] };
+  }
   return diff;
+}
+
+/** Schlüssel der wirklich geänderten Parameter (ohne Begleiteinträge mit `from === to`). */
+export function changedParamKeys(diff: ParamsDiff40): Array<keyof CityParams40> {
+  return (Object.keys(diff) as Array<keyof CityParams40>).filter(k => diff[k]!.from !== diff[k]!.to);
 }
 
 export function hasChanges40(baseline: CityParams40, modified: CityParams40): boolean {

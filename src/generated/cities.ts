@@ -19,7 +19,11 @@ export const cities: CityConfig[] = [
       "marktenge": 2,
       "teuerung": -1,
       "referenzzins_aenderung": 0,
-      "anteil_altliegenschaft": 0.758
+      "anteil_altliegenschaft": 0.758,
+      "mietabstand_neubezug": {
+        "faktor": 1.56,
+        "ebene": "stadt"
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -36,6 +40,7 @@ export const cities: CityConfig[] = [
       "bau_bewilligungsverfahren": 2,
       "bau_normenharmonisierung": 1,
       "gemeinnuetzig_mindestanteil": 2,
+      "gemeinnuetzig_ausgleich": 0,
       "gemeinnuetzig_foerderfonds": 2,
       "gemeinnuetzig_baurecht": 1,
       "gemeinnuetzig_belegungsvorschriften": 0,
@@ -85,7 +90,11 @@ export const cities: CityConfig[] = [
       "marktenge": 2,
       "teuerung": -1,
       "referenzzins_aenderung": 0,
-      "anteil_altliegenschaft": 0.87
+      "anteil_altliegenschaft": 0.87,
+      "mietabstand_neubezug": {
+        "faktor": 1.48,
+        "ebene": "stadt"
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -102,6 +111,7 @@ export const cities: CityConfig[] = [
       "bau_bewilligungsverfahren": 1,
       "bau_normenharmonisierung": 1,
       "gemeinnuetzig_mindestanteil": 1,
+      "gemeinnuetzig_ausgleich": 0,
       "gemeinnuetzig_foerderfonds": 1,
       "gemeinnuetzig_baurecht": 1,
       "gemeinnuetzig_belegungsvorschriften": 0,
@@ -151,7 +161,11 @@ export const cities: CityConfig[] = [
       "marktenge": 1,
       "teuerung": -1,
       "referenzzins_aenderung": 0,
-      "anteil_altliegenschaft": 0.9
+      "anteil_altliegenschaft": 0.9,
+      "mietabstand_neubezug": {
+        "faktor": 1.38,
+        "ebene": "stadt"
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -168,6 +182,7 @@ export const cities: CityConfig[] = [
       "bau_bewilligungsverfahren": 1,
       "bau_normenharmonisierung": 1,
       "gemeinnuetzig_mindestanteil": 1,
+      "gemeinnuetzig_ausgleich": 0,
       "gemeinnuetzig_foerderfonds": 2,
       "gemeinnuetzig_baurecht": 2,
       "gemeinnuetzig_belegungsvorschriften": 1,
@@ -217,7 +232,11 @@ export const cities: CityConfig[] = [
       "marktenge": 2,
       "teuerung": -1,
       "referenzzins_aenderung": 0,
-      "anteil_altliegenschaft": 0.848
+      "anteil_altliegenschaft": 0.848,
+      "mietabstand_neubezug": {
+        "faktor": 1.54,
+        "ebene": "stadt"
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -234,6 +253,7 @@ export const cities: CityConfig[] = [
       "bau_bewilligungsverfahren": 1,
       "bau_normenharmonisierung": 1,
       "gemeinnuetzig_mindestanteil": 1,
+      "gemeinnuetzig_ausgleich": 0,
       "gemeinnuetzig_foerderfonds": 1,
       "gemeinnuetzig_baurecht": 2,
       "gemeinnuetzig_belegungsvorschriften": 0,
@@ -283,7 +303,11 @@ export const cities: CityConfig[] = [
       "marktenge": 2,
       "teuerung": -1,
       "referenzzins_aenderung": 0,
-      "anteil_altliegenschaft": 0.9
+      "anteil_altliegenschaft": 0.9,
+      "mietabstand_neubezug": {
+        "faktor": 1.38,
+        "ebene": "stadt"
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -300,6 +324,7 @@ export const cities: CityConfig[] = [
       "bau_bewilligungsverfahren": 1,
       "bau_normenharmonisierung": 1,
       "gemeinnuetzig_mindestanteil": 2,
+      "gemeinnuetzig_ausgleich": 0,
       "gemeinnuetzig_foerderfonds": 1,
       "gemeinnuetzig_baurecht": 1,
       "gemeinnuetzig_belegungsvorschriften": 0,
@@ -349,7 +374,11 @@ export const cities: CityConfig[] = [
       "marktenge": 2,
       "teuerung": -1,
       "referenzzins_aenderung": 0,
-      "anteil_altliegenschaft": 0.707
+      "anteil_altliegenschaft": 0.707,
+      "mietabstand_neubezug": {
+        "faktor": 1.3,
+        "ebene": "kanton"
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 2,
@@ -366,6 +395,7 @@ export const cities: CityConfig[] = [
       "bau_bewilligungsverfahren": 1,
       "bau_normenharmonisierung": 1,
       "gemeinnuetzig_mindestanteil": 1,
+      "gemeinnuetzig_ausgleich": 0,
       "gemeinnuetzig_foerderfonds": 2,
       "gemeinnuetzig_baurecht": 1,
       "gemeinnuetzig_belegungsvorschriften": 0,
@@ -415,7 +445,11 @@ export const cities: CityConfig[] = [
       "marktenge": 1,
       "teuerung": -1,
       "referenzzins_aenderung": 0,
-      "anteil_altliegenschaft": 0.805
+      "anteil_altliegenschaft": 0.805,
+      "mietabstand_neubezug": {
+        "faktor": 1.21,
+        "ebene": "kanton"
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -432,6 +466,7 @@ export const cities: CityConfig[] = [
       "bau_bewilligungsverfahren": 1,
       "bau_normenharmonisierung": 1,
       "gemeinnuetzig_mindestanteil": 0,
+      "gemeinnuetzig_ausgleich": 0,
       "gemeinnuetzig_foerderfonds": 1,
       "gemeinnuetzig_baurecht": 1,
       "gemeinnuetzig_belegungsvorschriften": 0,
@@ -481,7 +516,11 @@ export const cities: CityConfig[] = [
       "marktenge": 0,
       "teuerung": -1,
       "referenzzins_aenderung": 0,
-      "anteil_altliegenschaft": 0.822
+      "anteil_altliegenschaft": 0.822,
+      "mietabstand_neubezug": {
+        "faktor": 1.18,
+        "ebene": "kanton"
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -498,6 +537,7 @@ export const cities: CityConfig[] = [
       "bau_bewilligungsverfahren": 1,
       "bau_normenharmonisierung": 1,
       "gemeinnuetzig_mindestanteil": 0,
+      "gemeinnuetzig_ausgleich": 0,
       "gemeinnuetzig_foerderfonds": 1,
       "gemeinnuetzig_baurecht": 1,
       "gemeinnuetzig_belegungsvorschriften": 0,
@@ -547,7 +587,11 @@ export const cities: CityConfig[] = [
       "marktenge": 1,
       "teuerung": -1,
       "referenzzins_aenderung": 0,
-      "anteil_altliegenschaft": 0.812
+      "anteil_altliegenschaft": 0.812,
+      "mietabstand_neubezug": {
+        "faktor": 1.16,
+        "ebene": "kanton"
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -564,6 +608,7 @@ export const cities: CityConfig[] = [
       "bau_bewilligungsverfahren": 0,
       "bau_normenharmonisierung": 1,
       "gemeinnuetzig_mindestanteil": 0,
+      "gemeinnuetzig_ausgleich": 0,
       "gemeinnuetzig_foerderfonds": 1,
       "gemeinnuetzig_baurecht": 0,
       "gemeinnuetzig_belegungsvorschriften": 0,
@@ -613,7 +658,11 @@ export const cities: CityConfig[] = [
       "marktenge": 1,
       "teuerung": -1,
       "referenzzins_aenderung": 0,
-      "anteil_altliegenschaft": 0.814
+      "anteil_altliegenschaft": 0.814,
+      "mietabstand_neubezug": {
+        "faktor": 1.19,
+        "ebene": "kanton"
+      }
     },
     "params": {
       "raumplanung_zonenreserve": 1,
@@ -630,6 +679,7 @@ export const cities: CityConfig[] = [
       "bau_bewilligungsverfahren": 1,
       "bau_normenharmonisierung": 1,
       "gemeinnuetzig_mindestanteil": 2,
+      "gemeinnuetzig_ausgleich": 0,
       "gemeinnuetzig_foerderfonds": 1,
       "gemeinnuetzig_baurecht": 1,
       "gemeinnuetzig_belegungsvorschriften": 0,

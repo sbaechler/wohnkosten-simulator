@@ -12,7 +12,7 @@ import type { CityContext, ParamsDiff40 } from '../types';
 import { computePhasesCached } from './compute-phases';
 import { computeGroupTrends, GROUPS } from './groups';
 import type { GroupDriver, GroupId } from './groups';
-import { paramMeta40 } from './params';
+import { paramMeta40, changedParamKeys } from './params';
 
 /**
  * Anzeige-Schwelle: Beiträge unter 0.005 Index-Punkten gelten nicht als
@@ -55,7 +55,8 @@ export function computeGroupDrivers(
     Object.fromEntries(GROUPS.map(g => [g.id, [] as GroupDriver[]])) as Record<GroupId, GroupDriver[]>,
   );
 
-  for (const paramKey of Object.keys(diff)) {
+  // Nur wirklich geänderte Parameter; Begleiteinträge (from === to) sind keine Treiber.
+  for (const paramKey of changedParamKeys(diff)) {
     const rest = { ...diff };
     delete rest[paramKey as keyof ParamsDiff40];
     const without = trendByGroup(context, rest);

@@ -1,6 +1,6 @@
 // ============================================================
 // Domain Types — Wohnkosten-Simulator
-// E0: 43 atomare Parameter (Name CityParams40 ist historisch) + Kontext
+// E0: 44 atomare Parameter (Name CityParams40 ist historisch) + Kontext
 // E1: lineare Marktvariablen plus provisorische Mietrechts-Zustände (CH-012)
 // ============================================================
 //
@@ -14,7 +14,7 @@ export type ContextValue = -2 | -1 | 0 | 1 | 2;
 
 // ── E0: Rohparameter ─────────────────────────────────────────────────────────
 
-/** 43 atomare Parameter (Typname historisch) */
+/** 44 atomare Parameter (Typname historisch) */
 export type CityParams40 = {
   // 1. Bodenrecht & Landnutzung
   raumplanung_zonenreserve: ParamValue;
@@ -34,6 +34,8 @@ export type CityParams40 = {
   bau_normenharmonisierung: ParamValue;
   // 3. Gemeinnütziger Wohnungsbau
   gemeinnuetzig_mindestanteil: ParamValue;
+  /** Ausgleich für den Pflichtanteil (Dichtebonus u. ä.); schaltet die Angebotswirkung des Mindestanteils. */
+  gemeinnuetzig_ausgleich: ParamValue;
   gemeinnuetzig_foerderfonds: ParamValue;
   gemeinnuetzig_baurecht: ParamValue;
   gemeinnuetzig_belegungsvorschriften: ParamValue;
@@ -108,6 +110,16 @@ export interface CityContext {
    * Fehlend heisst «nicht gemessen», nicht 0.
    */
   anteil_altliegenschaft?: number;
+  /**
+   * NUR ANZEIGE, fliesst in keine Rechnung. Verhältnis der Nettomiete bei
+   * Neubezug zur Nettomiete bei 21 und mehr Jahren Mietdauer (BFS
+   * Strukturerhebung 2024). `ebene` sagt, ob der Wert für die Stadt
+   * (T 09.03.03.67) oder nur für den Kanton (T 09.03.03.64) vorliegt; die
+   * beiden Ebenen sind nicht vergleichbar. Messvorschrift im Kopf von
+   * switzerland.yaml. Nicht mit `mietluecke` verwechseln: Das ist nicht der
+   * Abstand zum zulässigen Ertrag (CH-012).
+   */
+  mietabstand_neubezug?: { faktor: number; ebene: 'stadt' | 'kanton' };
   /**
    * Abstand der Bestandsmiete über dem Kosten-plus-Rendite-Deckel, als Anteil.
    * Nicht belegt. Nur mit mietlueckeEstimated setzen.

@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 import type { CityConfig, ParamsDiff40, MarketState, CityParams40 } from '../types';
+import { changedParamKeys } from '../model/params';
 import './OwnershipDonut.css';
 
 interface Props {
@@ -74,7 +75,7 @@ export function OwnershipDonut({ city, modified, diff, state }: Props) {
     const g = svg.append('g').attr('transform', `translate(${SIZE / 2},${SIZE / 2})`);
 
     const baseShares = sharesWithResidual(city.context.ownershipBaseline);
-    const hasChanges = Object.keys(diff).length > 0;
+    const hasChanges = changedParamKeys(diff).length > 0;
 
     const pie = d3.pie<number>().sort(null);
 

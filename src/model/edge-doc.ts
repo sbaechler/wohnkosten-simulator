@@ -81,7 +81,8 @@ export function renderEdgeDoc(): string {
     for (const e of edges) {
       const q = quelle(e.from);
       const wirkung = e.sign === 1 ? `erhöht → ${E1_PLUS_BEDEUTET[node]}` : `senkt → weniger: ${E1_PLUS_BEDEUTET[node]}`;
-      out.push(`| ${q.name} | ${q.hoeher} | ${wirkung} | ${gewichte(e.weights)} | ${e.profilQuelle ?? '—'} |`);
+      const bedingung = e.ausgleichDurch ? ` Bedingt: wird durch \`${e.ausgleichDurch}\` anteilig aufgehoben.` : '';
+      out.push(`| ${q.name} | ${q.hoeher} | ${wirkung}${bedingung} | ${gewichte(e.weights)} | ${e.profilQuelle ?? '—'} |`);
     }
   }
 

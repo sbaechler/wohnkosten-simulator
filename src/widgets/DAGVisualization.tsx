@@ -5,7 +5,7 @@ import type { ParamsDiff40, MarketState, DerivedIndicators, CityContext } from '
 import { computePhasesCached } from '../model/compute-phases';
 import { computeDerivedIndicators } from '../model/derived';
 import { getDagTopology, getNodeTimeClasses, type Edge, type NodeId, type NodeTimeClass } from '../model/dag-topology';
-import { PARAM_KEYS_40 } from '../model/params';
+import { PARAM_KEYS_40, changedParamKeys } from '../model/params';
 import './DAGVisualization.css';
 
 // ── Layout Constants ────────────────────────────────────────────────────────
@@ -113,6 +113,7 @@ function buildNodes(): NodeMeta[] {
     bau_normenharmonisierung: 'bau',
     bau_ersatzneubau_effizienz: 'bau',
     gemeinnuetzig_mindestanteil: 'gemeinnuetzig',
+    gemeinnuetzig_ausgleich: 'gemeinnuetzig',
     gemeinnuetzig_foerderfonds: 'gemeinnuetzig',
     gemeinnuetzig_baurecht: 'gemeinnuetzig',
     gemeinnuetzig_belegungsvorschriften: 'gemeinnuetzig',
@@ -157,6 +158,7 @@ function buildNodes(): NodeMeta[] {
     bau_normenharmonisierung: 'Normenharmonis.',
     bau_ersatzneubau_effizienz: 'Ersatzneubau',
     gemeinnuetzig_mindestanteil: 'Mindestanteil',
+    gemeinnuetzig_ausgleich: 'Ausgleich Pflichtant.',
     gemeinnuetzig_foerderfonds: 'Förderfonds',
     gemeinnuetzig_baurecht: 'Baurecht',
     gemeinnuetzig_belegungsvorschriften: 'Belegungsvorschr.',
@@ -389,7 +391,7 @@ export function DAGVisualization({ context, diff }: Props) {
 
   // Affected nodes/edges from diff
   const { affectedNodes, affectedEdges } = useMemo(() => {
-    const dk = new Set(Object.keys(diff));
+    const dk = new Set<string>(changedParamKeys(diff));
     const an = new Set<NodeId>();
     const ae = new Set<Edge>();
 
@@ -654,7 +656,8 @@ export function DAGVisualization({ context, diff }: Props) {
     { key: 'ctx', color: GROUP_COLORS.ctx },
   ];
 
-  const hasDiff = Object.keys(diff).length > 0;
+  const anzahlGeaendert = changedParamKeys(diff).length;
+  const hasDiff = anzahlGeaendert > 0;
 
   return (
     <div className="dag-viz" ref={containerRef}>
@@ -662,7 +665,7 @@ export function DAGVisualization({ context, diff }: Props) {
         <span className="dag-viz__zoom-level">{Math.round(zoomed * 100)}%</span>
         {hasDiff && (
           <span className="dag-viz__hint">
-            {Object.keys(diff).length} geänderte Parameter → hervorgehobene Pfade
+            {anzahlGeaendert} geänderte Parameter → hervorgehobene Pfade
           </span>
         )}
       </div>

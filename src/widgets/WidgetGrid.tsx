@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { CityConfig, ParamsDiff40, CityParams40 } from '../types';
+import { changedParamKeys } from '../model/params';
 import { computePhasesCached } from '../model/compute-phases';
 import { computeGroupTrends } from '../model/groups';
 import { computeGroupDrivers } from '../model/group-drivers';
@@ -49,7 +50,7 @@ const STADTBILD_GEWICHTE = {
 } as const;
 
 export function WidgetGrid({ city, modified, diff }: Props) {
-  const hasChanges = Object.keys(diff).length > 0;
+  const hasChanges = changedParamKeys(diff).length > 0;
   const context = city.context;
 
   // Phases for modified params (current behavior)

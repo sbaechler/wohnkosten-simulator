@@ -15,8 +15,9 @@ if (!Array.isArray(raw)) {
   throw new Error(`Expected YAML root to be an array, got ${typeof raw}`);
 }
 
-// Validate all V2 params are present (41 + mietrecht_kriterium + mietrecht_durchsetzung, CH-012)
-const REQUIRED_KEYS = 43;
+// Validate all V2 params are present (41 + mietrecht_kriterium + mietrecht_durchsetzung, CH-012;
+// + gemeinnuetzig_ausgleich, 2026-11-16)
+const REQUIRED_KEYS = 44;
 for (const city of raw) {
   const keys = Object.keys(city.params);
   if (keys.length !== REQUIRED_KEYS) {
@@ -64,6 +65,15 @@ for (const city of raw) {
   if (anteil === undefined) continue;
   if (typeof anteil !== 'number' || !Number.isFinite(anteil) || anteil < 0 || anteil > 1) {
     throw new Error(`${city.slug}: context.anteil_altliegenschaft muss ein Anteil in [0, 1] sein: ${anteil}`);
+  }
+}
+
+// mietabstand_neubezug: nur Anzeige (BFS SE 2024). Faktor > 0, Ebene benannt.
+for (const city of raw) {
+  const abstand = city.context.mietabstand_neubezug;
+  if (abstand === undefined) continue;
+  if (typeof abstand.faktor !== 'number' || !(abstand.faktor > 0) || !['stadt', 'kanton'].includes(abstand.ebene)) {
+    throw new Error(`${city.slug}: context.mietabstand_neubezug braucht faktor > 0 und ebene stadt|kanton`);
   }
 }
 

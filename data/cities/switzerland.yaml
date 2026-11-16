@@ -40,6 +40,26 @@
 # Nicht berücksichtigt: Renovationen (Bauperiode = Erstellung) und jüngere
 # Handänderungen (nach dem Urteil nicht abziehen, CH-012).
 # Wirkt nur über WIRKSAMKEIT_OQU (heute 0): ändert kein Rechenergebnis.
+#
+# params.gemeinnuetzig_ausgleich (neu 2026-11-16): Ausgleich für den gemeinnützigen
+# Pflichtanteil (0 kein, 1 teilweise, 2 voll). NICHT ERHOBEN: alle Städte stehen auf 0.
+# Das ist eine Setzung, kein Befund. Zu prüfen wäre je Stadt das kantonale Recht
+# (z. B. Pflichtanteile, die nur bei Mehrausnützung greifen). Weil Parameter als Diff
+# wirken, ändert der Wert 0 kein bisheriges Ergebnis.
+#
+# mietabstand_neubezug: NUR ANZEIGE, fliesst in keine Rechnung (Entscheid 2026-11-15).
+# faktor = Nettomiete bei Neubezug / Nettomiete bei 21 und mehr Jahren Mietdauer.
+# Quelle: BFS Strukturerhebung 2024, Mieter- und Genossenschafterwohnungen.
+# ebene: stadt  → T 09.03.03.67 (nur Zürich, Genf, Basel, Lausanne, Bern), Neubezug
+#                 unter 2 Jahren (Neubau eingeschlossen), Mittel der Verhältnisse für
+#                 2, 3 und 4 Zimmer.
+# ebene: kanton → T 09.03.03.64, Neubezug einer mehr als zwei Jahre alten Wohnung
+#                 (ohne Neubau), alle Zimmerzahlen zusammen. Für die übrigen Städte
+#                 gibt es nur diese Ebene.
+# Die beiden Ebenen sind NICHT vergleichbar (Neubau, Zimmerzahl, Stadt/Kanton).
+# Durchschnitte: einzelne Wohnungen liegen weit darüber. Der Abstand enthält Lage,
+# Zustand, Gebäudealter und den Genossenschaftsanteil; er ist nicht der Abstand zum
+# zulässigen Ertrag (mietluecke bleibt leer, CH-012). Vertrauensintervalle bis ±0.1.
 
 - slug: zuerich
   name: "Zürich"
@@ -64,6 +84,10 @@
     # 174 504 von 230 273 mit Bauperiode bis 1995 = 0.758.
     # Vergleich: alle Wohnungen 0.764; ohne EFH bis 1990 0.739, bis 2000 0.775.
     anteil_altliegenschaft: 0.758
+    # Nur Anzeige. Stadt Zürich, T 09.03.03.67, 2/3/4 Zi.: 1844/1199, 2125/1346, 2504/1592 Fr.
+    mietabstand_neubezug:
+      faktor: 1.56
+      ebene: stadt
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 2
@@ -79,6 +103,7 @@
     bau_bewilligungsverfahren: 2
     bau_normenharmonisierung: 1
     gemeinnuetzig_mindestanteil: 2
+    gemeinnuetzig_ausgleich: 0
     gemeinnuetzig_foerderfonds: 2
     gemeinnuetzig_baurecht: 1
     gemeinnuetzig_belegungsvorschriften: 0
@@ -132,6 +157,10 @@
     # 98 922 von 113 686 mit Bauperiode bis 1995 = 0.870.
     # Vergleich: alle Wohnungen 0.870; ohne EFH bis 1990 0.838, bis 2000 0.914.
     anteil_altliegenschaft: 0.870
+    # Nur Anzeige. Stadt Genf, T 09.03.03.67, 2/3/4 Zi.: 1449/974, 1781/1248, 2218/1456 Fr.
+    mietabstand_neubezug:
+      faktor: 1.48
+      ebene: stadt
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 2
@@ -147,6 +176,7 @@
     bau_bewilligungsverfahren: 1
     bau_normenharmonisierung: 1
     gemeinnuetzig_mindestanteil: 1
+    gemeinnuetzig_ausgleich: 0
     gemeinnuetzig_foerderfonds: 1
     gemeinnuetzig_baurecht: 1
     gemeinnuetzig_belegungsvorschriften: 0
@@ -200,6 +230,10 @@
     # 89 503 von 99 482 mit Bauperiode bis 1995 = 0.900.
     # Vergleich: alle Wohnungen 0.903; ohne EFH bis 1990 0.884, bis 2000 0.909.
     anteil_altliegenschaft: 0.900
+    # Nur Anzeige. Stadt Basel, T 09.03.03.67, 2/3/4 Zi.: 1281/960, 1564/1170, 2208/1492 Fr.
+    mietabstand_neubezug:
+      faktor: 1.38
+      ebene: stadt
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 2
@@ -215,6 +249,7 @@
     bau_bewilligungsverfahren: 1
     bau_normenharmonisierung: 1
     gemeinnuetzig_mindestanteil: 1
+    gemeinnuetzig_ausgleich: 0
     gemeinnuetzig_foerderfonds: 2
     gemeinnuetzig_baurecht: 2
     gemeinnuetzig_belegungsvorschriften: 1
@@ -268,6 +303,10 @@
     # 68 115 von 80 353 mit Bauperiode bis 1995 = 0.848.
     # Vergleich: alle Wohnungen 0.846; ohne EFH bis 1990 0.836, bis 2000 0.859.
     anteil_altliegenschaft: 0.848
+    # Nur Anzeige. Stadt Lausanne, T 09.03.03.67, 2/3/4 Zi.: 1376/869, 1683/1100, 2141/1421 Fr.
+    mietabstand_neubezug:
+      faktor: 1.54
+      ebene: stadt
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -283,6 +322,7 @@
     bau_bewilligungsverfahren: 1
     bau_normenharmonisierung: 1
     gemeinnuetzig_mindestanteil: 1
+    gemeinnuetzig_ausgleich: 0
     gemeinnuetzig_foerderfonds: 1
     gemeinnuetzig_baurecht: 2
     gemeinnuetzig_belegungsvorschriften: 0
@@ -336,6 +376,10 @@
     # 70 841 von 78 695 mit Bauperiode bis 1995 = 0.900.
     # Vergleich: alle Wohnungen 0.902; ohne EFH bis 1990 0.891, bis 2000 0.918.
     anteil_altliegenschaft: 0.900
+    # Nur Anzeige. Stadt Bern, T 09.03.03.67, 2/3/4 Zi.: 1234/1007, 1659/1192, 2043/1347 Fr.
+    mietabstand_neubezug:
+      faktor: 1.38
+      ebene: stadt
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -351,6 +395,7 @@
     bau_bewilligungsverfahren: 1
     bau_normenharmonisierung: 1
     gemeinnuetzig_mindestanteil: 2
+    gemeinnuetzig_ausgleich: 0
     gemeinnuetzig_foerderfonds: 1
     gemeinnuetzig_baurecht: 1
     gemeinnuetzig_belegungsvorschriften: 0
@@ -404,6 +449,10 @@
     # 35 789 von 50 618 mit Bauperiode bis 1995 = 0.707.
     # Vergleich: alle Wohnungen 0.719; ohne EFH bis 1990 0.671, bis 2000 0.735.
     anteil_altliegenschaft: 0.707
+    # Nur Anzeige. Kanton Zürich, T 09.03.03.64: 1853/1428 Fr.
+    mietabstand_neubezug:
+      faktor: 1.30
+      ebene: kanton
   params:
     raumplanung_zonenreserve: 2
     raumplanung_verdichtung: 1
@@ -419,6 +468,7 @@
     bau_bewilligungsverfahren: 1
     bau_normenharmonisierung: 1
     gemeinnuetzig_mindestanteil: 1
+    gemeinnuetzig_ausgleich: 0
     gemeinnuetzig_foerderfonds: 2
     gemeinnuetzig_baurecht: 1
     gemeinnuetzig_belegungsvorschriften: 0
@@ -472,6 +522,10 @@
     # 37 427 von 46 503 mit Bauperiode bis 1995 = 0.805.
     # Vergleich: alle Wohnungen 0.805; ohne EFH bis 1990 0.777, bis 2000 0.833.
     anteil_altliegenschaft: 0.805
+    # Nur Anzeige. Kanton Luzern, T 09.03.03.64: 1532/1270 Fr.
+    mietabstand_neubezug:
+      faktor: 1.21
+      ebene: kanton
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -487,6 +541,7 @@
     bau_bewilligungsverfahren: 1
     bau_normenharmonisierung: 1
     gemeinnuetzig_mindestanteil: 0
+    gemeinnuetzig_ausgleich: 0
     gemeinnuetzig_foerderfonds: 1
     gemeinnuetzig_baurecht: 1
     gemeinnuetzig_belegungsvorschriften: 0
@@ -540,6 +595,10 @@
     # 35 388 von 43 073 mit Bauperiode bis 1995 = 0.822.
     # Vergleich: alle Wohnungen 0.823; ohne EFH bis 1990 0.795, bis 2000 0.844.
     anteil_altliegenschaft: 0.822
+    # Nur Anzeige. Kanton St. Gallen, T 09.03.03.64: 1360/1156 Fr.
+    mietabstand_neubezug:
+      faktor: 1.18
+      ebene: kanton
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -555,6 +614,7 @@
     bau_bewilligungsverfahren: 1
     bau_normenharmonisierung: 1
     gemeinnuetzig_mindestanteil: 0
+    gemeinnuetzig_ausgleich: 0
     gemeinnuetzig_foerderfonds: 1
     gemeinnuetzig_baurecht: 1
     gemeinnuetzig_belegungsvorschriften: 0
@@ -608,6 +668,10 @@
     # 29 957 von 36 895 mit Bauperiode bis 1995 = 0.812.
     # Vergleich: alle Wohnungen 0.811; ohne EFH bis 1990 0.763, bis 2000 0.829.
     anteil_altliegenschaft: 0.812
+    # Nur Anzeige. Kanton Tessin, T 09.03.03.64: 1258/1089 Fr.
+    mietabstand_neubezug:
+      faktor: 1.16
+      ebene: kanton
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -623,6 +687,7 @@
     bau_bewilligungsverfahren: 0
     bau_normenharmonisierung: 1
     gemeinnuetzig_mindestanteil: 0
+    gemeinnuetzig_ausgleich: 0
     gemeinnuetzig_foerderfonds: 1
     gemeinnuetzig_baurecht: 0
     gemeinnuetzig_belegungsvorschriften: 0
@@ -676,6 +741,10 @@
     # 24 973 von 30 679 mit Bauperiode bis 1995 = 0.814.
     # Vergleich: alle Wohnungen 0.816; ohne EFH bis 1990 0.795, bis 2000 0.854.
     anteil_altliegenschaft: 0.814
+    # Nur Anzeige. Kanton Bern, T 09.03.03.64: 1367/1146 Fr.
+    mietabstand_neubezug:
+      faktor: 1.19
+      ebene: kanton
   params:
     raumplanung_zonenreserve: 1
     raumplanung_verdichtung: 1
@@ -691,6 +760,7 @@
     bau_bewilligungsverfahren: 1
     bau_normenharmonisierung: 1
     gemeinnuetzig_mindestanteil: 2
+    gemeinnuetzig_ausgleich: 0
     gemeinnuetzig_foerderfonds: 1
     gemeinnuetzig_baurecht: 1
     gemeinnuetzig_belegungsvorschriften: 0

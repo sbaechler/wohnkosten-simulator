@@ -155,6 +155,8 @@ Was der Proxy misst: wie weit lange Verträge unter dem heutigen Neuabschluss li
 
 Skala: Die Regime-Einheit ist Prozent geteilt durch 7.5 (oben). Ein Abstand von 36 Prozent ergäbe 4.8 und läge weit über der Klemme bei 1. Der Proxy lässt sich deshalb nicht ohne zusätzliche Setzung in `mietluecke` übertragen. Kein Wert gesetzt; der Entscheid liegt beim Projektinhaber.
 
+**Entscheid 15. November 2026: anzeigen, nicht rechnen.** Der Mietdauer-Abstand steht als `mietabstand_neubezug` im Stadt-Kontext und erscheint in der Kontextleiste («Neubezug ggü. Altmiete»), als Verhältnis Neubezug zu 21 und mehr Jahren Mietdauer. Stadtwerte aus T 09.03.03.67, Mittel der Verhältnisse für 2 bis 4 Zimmer: Zürich 1.56, Lausanne 1.54, Genf 1.48, Basel 1.38, Bern 1.38. Für Winterthur, Luzern, St. Gallen, Lugano und Biel nur der Kantonswert aus T 09.03.03.64 (Neubezug einer älteren Wohnung): 1.30, 1.21, 1.18, 1.16, 1.19. Die beiden Ebenen sind nicht vergleichbar, die Anzeige nennt die Ebene. Es sind Durchschnitte; einzelne Wohnungen liegen weit darüber. Der Wert fliesst in keine Rechnung (Test `mietabstand-neubezug.test.ts`). `mietluecke` bleibt leer.
+
 In `switzerland.yaml` fehlt `mietluecke`; das Build-Skript lehnt einen Wert ohne `mietlueckeEstimated: true` ab. Durchsetzung multipliziert mit 0. Eine Initiative ohne gesetzte Lücke senkt nichts. Das ist Absicht. Ein gesetzter Wert braucht `mietlueckeEstimated: true`, bis eine Stichprobe mit Anlagekosten vorliegt. Die Angebotsmiete ist endogen und darf nicht als Kontext festgenagelt werden.
 
 ## Provisorische Graph-Anpassung

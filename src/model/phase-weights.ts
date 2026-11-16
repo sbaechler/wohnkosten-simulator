@@ -56,6 +56,20 @@
  * Kalibriert gegen die Constraints in `scripts/calibrate.ts`
  * (Dry-Run 0 Verletzungen, Stand 2026-11-15).
  *
+ * ## Unbelegte Angebotshebel (Entscheid 2026-11-15)
+ *
+ * Eine Politik-Kante auf `angebotspotenzial` mit `profilQuelle: 'Annahme'`
+ * darf in P3 höchstens halb so stark sein wie der schwächste der drei
+ * belegten Planungshebel (`REFERENZ_ANGEBOTSHEBEL`: Zonenreserve,
+ * Verdichtung, Ausnützung; summary.md: Angebot ist der dominante Hebel).
+ * Vorher lagen suspensive Einsprache, Abbruchverbot, Umnutzungsverbot und
+ * Sanierungspflicht gleichauf mit diesen Hebeln, ohne Quelle für die Grösse.
+ * Umsetzung: alle aus den alten Vektoren übernommenen Annahme-Kanten auf das
+ * Angebot sind mit demselben Faktor (0.3 / 0.68) gesenkt, sodass die stärkste
+ * (suspensive Einsprache) genau die Grenze trifft und die Reihenfolge unter
+ * ihnen erhalten bleibt. Die Reihenfolge selbst bleibt eine Setzung.
+ * `dag-integrity.test.ts` prüft die Regel.
+ *
  * Diese Datei enthält ausschliesslich E0/ctx → E1. E1 → E2 steht in
  * `derived.ts` (E2_TERMS).
  */
@@ -72,7 +86,34 @@ export interface PhaseEdge {
    * Politik-Kanten, fehlt bei Kontextkanten (`ctx:*`).
    */
   profilQuelle?: string;
+  /**
+   * Bedingte Kante: Die Wirkung von `from` wird durch den Stand dieses
+   * zweiten Parameters aufgehoben. Statt Δ(from) rechnet die Engine
+   * Δ[from · (1 − ausgleich)], beide auf 0…1 normiert (Stufe / 2). Bei vollem
+   * Ausgleich (Stufe 2) wirkt die Kante nicht mehr. Siehe `getEdgeDelta`
+   * (compute-phases.ts). Linear in der Stufe: Setzung.
+   */
+  ausgleichDurch?: string;
 }
+
+/**
+ * Die drei Angebotshebel, deren Grösse die Recherche trägt (summary.md:
+ * Angebot ist der dominante Hebel; AU-002, NZ-001, US-005). Sie sind der
+ * Massstab für unbelegte Kanten auf `angebotspotenzial`.
+ */
+export const REFERENZ_ANGEBOTSHEBEL = [
+  'raumplanung_zonenreserve',
+  'raumplanung_verdichtung',
+  'raumplanung_ausnuetzungsziffer',
+] as const;
+
+/**
+ * Obergrenze für Annahme-Kanten auf `angebotspotenzial`: Anteil am P3-Stand
+ * des schwächsten Hebels aus `REFERENZ_ANGEBOTSHEBEL`. 0.5 ist eine Setzung
+ * (Entscheid des Projektinhabers, 2026-11-15): ein Hebel ohne Beleg für
+ * seine Grösse soll höchstens halb so stark wirken wie ein belegter.
+ */
+export const ANNAHME_ANGEBOT_MAX_ANTEIL = 0.5;
 
 export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
 
@@ -115,8 +156,9 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     from: 'boden_bauverpflichtung',
     to: 'angebotspotenzial',
     sign: +1,
-    weights: [0.52, 0.52, 0.52],
+    weights: [0.23, 0.23, 0.23],
     profilQuelle: 'Annahme',
+    // Grösse nach ANNAHME_ANGEBOT_MAX_ANTEIL gesenkt (2026-11-15, vorher 0.52).
     // Wirkung nicht belegt (summary.md, Feld `evidenz` in params.ts).
     // Bestehende Kante, Grösse unverändert übernommen; keine neue Evidenz.
   },
@@ -124,24 +166,27 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     from: 'bau_energievorgaben',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.41, 0.41, 0.41],
+    weights: [0.18, 0.18, 0.18],
     profilQuelle: 'Annahme',
+    // Grösse nach ANNAHME_ANGEBOT_MAX_ANTEIL gesenkt (2026-11-15, vorher 0.41).
     // Höhere Baukosten hemmen das Angebot. Grösse Setzung.
   },
   {
     from: 'bau_sanierungspflicht',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.56, 0.56, 0.56],
+    weights: [0.25, 0.25, 0.25],
     profilQuelle: 'Annahme',
+    // Grösse nach ANNAHME_ANGEBOT_MAX_ANTEIL gesenkt (2026-11-15, vorher 0.56).
     // Kapital wird in die Renovation statt in den Neubau gelenkt. Grösse Setzung.
   },
   {
     from: 'bau_ersatzneubau_effizienz',
     to: 'angebotspotenzial',
     sign: +1,
-    weights: [0.52, 0.52, 0.52],
+    weights: [0.23, 0.23, 0.23],
     profilQuelle: 'Annahme',
+    // Grösse nach ANNAHME_ANGEBOT_MAX_ANTEIL gesenkt (2026-11-15, vorher 0.52).
     // Ersatzneubau-Effizienz: Agglomeration Zürich 2.8×, Agglomeration
     // Lausanne 6.5× (Sotomo 2025, Abb. 9; Stadt Zürich rund 2×).
     // Mehr Netto-Neubau pro Abriss → mehr Angebot. Grösse Setzung.
@@ -150,8 +195,9 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     from: 'bau_einspracherecht_dritte',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.52, 0.52, 0.52],
+    weights: [0.23, 0.23, 0.23],
     profilQuelle: 'Annahme',
+    // Grösse nach ANNAHME_ANGEBOT_MAX_ANTEIL gesenkt (2026-11-15, vorher 0.52).
     // NO-001: Einspracherechte verzögern Bewilligungen, ohne quantitative
     // Schätzung. Grösse Setzung.
   },
@@ -159,8 +205,9 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     from: 'bau_einspracherecht_suspensiv',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.68, 0.68, 0.68],
+    weights: [0.3, 0.3, 0.3],
     profilQuelle: 'Annahme',
+    // Grösse nach ANNAHME_ANGEBOT_MAX_ANTEIL gesenkt (2026-11-15, vorher 0.68).
     // Aufschiebende Wirkung kann Projekte stoppen; stärker als das blosse
     // Einspracherecht. Grösse Setzung.
   },
@@ -168,24 +215,31 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     from: 'bau_bewilligungsverfahren',
     to: 'angebotspotenzial',
     sign: +1,
-    weights: [0.42, 0.42, 0.42],
+    weights: [0.19, 0.19, 0.19],
     profilQuelle: 'Annahme',
+    // Grösse nach ANNAHME_ANGEBOT_MAX_ANTEIL gesenkt (2026-11-15, vorher 0.42).
     // Skala: höher = schnelleres Verfahren. CH-007: lange Verfahren verteuern.
   },
   {
     from: 'bau_normenharmonisierung',
     to: 'angebotspotenzial',
     sign: +1,
-    weights: [0.49, 0.49, 0.49],
+    weights: [0.22, 0.22, 0.22],
     profilQuelle: 'Annahme',
+    // Grösse nach ANNAHME_ANGEBOT_MAX_ANTEIL gesenkt (2026-11-15, vorher 0.49).
     // Einheitlichere Vorschriften senken Planungskosten. Grösse Setzung.
   },
   {
     from: 'gemeinnuetzig_mindestanteil',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.51, 0.51, 0.51],
+    weights: [0.23, 0.23, 0.23],
     profilQuelle: 'Annahme',
+    // Bedingung nach US-018: Der Angebotsverlust tritt nur ohne Ausgleich ein.
+    // Der Schieber gemeinnuetzig_ausgleich hebt die Kante anteilig auf
+    // (Stufe 1 zur Hälfte, Stufe 2 ganz; Setzung, Entscheid 2026-11-16).
+    ausgleichDurch: 'gemeinnuetzig_ausgleich',
+    // Grösse nach ANNAHME_ANGEBOT_MAX_ANTEIL gesenkt (2026-11-15, vorher 0.51).
     // Kontingentierung reduziert das private Angebot. Richtung bedingt
     // belegt: US-018 (Schuetz/Been/Ellen 2012, Inclusionary Zoning) — ein
     // Pflichtanteil kann das Gesamtangebot senken, wenn kein Ausgleich
@@ -205,8 +259,9 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     from: 'gemeinnuetzig_foerderfonds',
     to: 'angebotspotenzial',
     sign: +1,
-    weights: [0.35, 0.35, 0.35],
+    weights: [0.15, 0.15, 0.15],
     profilQuelle: 'Annahme',
+    // Grösse nach ANNAHME_ANGEBOT_MAX_ANTEIL gesenkt (2026-11-15, vorher 0.35).
     // Fördermittel ermöglichen zusätzlichen gemeinnützigen Neubau.
     // Fix-12: einziger Angebots-/Nachfragekanal des Förderfonds; die
     // Kante → nachfragedruck ist gestrichen (siehe dort). Grösse Setzung,
@@ -218,8 +273,9 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     from: 'nutzung_abbruchverbot',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.61, 0.61, 0.61],
+    weights: [0.27, 0.27, 0.27],
     profilQuelle: 'Annahme',
+    // Grösse nach ANNAHME_ANGEBOT_MAX_ANTEIL gesenkt (2026-11-15, vorher 0.61).
     // DIW Discussion Paper 2143 (Ters/Kholodilin, nur Genf): Wohnungs-
     // rationierung = stärkste Angebotsbremse. Basel: Baugesuche für Wohnungen
     // −76 % (Mittel 784 für 2014–2020 gegen 190 für 2021–2023; Swiss Real
@@ -240,8 +296,9 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     from: 'nutzung_umnutzungsverbot',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.58, 0.58, 0.58],
+    weights: [0.26, 0.26, 0.26],
     profilQuelle: 'Annahme',
+    // Grösse nach ANNAHME_ANGEBOT_MAX_ANTEIL gesenkt (2026-11-15, vorher 0.58).
     // Gleicher Mechanismus wie das Abbruchverbot, etwas schwächer.
   },
   {
@@ -282,8 +339,9 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     from: 'nutzung_zweitwohnungen',
     to: 'angebotspotenzial',
     sign: -1,
-    weights: [0.53, 0.53, 0.53],
+    weights: [0.23, 0.23, 0.23],
     profilQuelle: 'Annahme',
+    // Grösse nach ANNAHME_ANGEBOT_MAX_ANTEIL gesenkt (2026-11-15, vorher 0.53).
     // Annahme, Richtung für Städte nicht belegt (Prüfung 2026-11-15).
     // CH-006 (Lex Weber): in den betroffenen Gemeinden ging die Bautätigkeit
     // insgesamt zurück, auch bei Mietwohnungen. Betroffen sind Gemeinden mit

@@ -13,7 +13,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { PHASE_WEIGHTED_EDGES } from '../../phase-weights';
+import { PHASE_WEIGHTED_EDGES, REFERENZ_ANGEBOTSHEBEL, ANNAHME_ANGEBOT_MAX_ANTEIL } from '../../phase-weights';
+import { edgeStand } from '../../dag-topology';
 import { PARAM_KEYS_40 } from '../../params';
 import type { MarketState } from '../../../types';
 
@@ -121,5 +122,25 @@ describe('DAG integrity', () => {
         .map(e => `${e.from} → ${e.to}: ${e.weights.join('/')}`);
       expect(nichtNeutral).toEqual([]);
     });
+  });
+});
+
+describe('Unbelegte Angebotshebel (Entscheid 2026-11-15)', () => {
+  const aufAngebot = PHASE_WEIGHTED_EDGES.filter(e => e.to === 'angebotspotenzial');
+  const p3 = (from: string) => edgeStand(aufAngebot.find(e => e.from === from)!.weights)[2];
+  const grenze = ANNAHME_ANGEBOT_MAX_ANTEIL * Math.min(...REFERENZ_ANGEBOTSHEBEL.map(p3));
+
+  it('die Referenzhebel sind selbst keine Annahme-Kanten', () => {
+    for (const from of REFERENZ_ANGEBOTSHEBEL) {
+      expect(aufAngebot.find(e => e.from === from)!.profilQuelle, from).not.toBe('Annahme');
+    }
+  });
+
+  it('keine Annahme-Kante auf das Angebot ist in P3 stärker als die halbe Stärke des schwächsten Referenzhebels', () => {
+    const zuStark = aufAngebot
+      .filter(e => e.profilQuelle === 'Annahme')
+      .filter(e => edgeStand(e.weights)[2] > grenze + 1e-9)
+      .map(e => `${e.from}: ${edgeStand(e.weights)[2].toFixed(3)} > ${grenze.toFixed(3)}`);
+    expect(zuStark).toEqual([]);
   });
 });

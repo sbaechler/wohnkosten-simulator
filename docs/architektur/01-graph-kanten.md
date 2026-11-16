@@ -23,23 +23,23 @@ Positiver Wert: mehr Angebot möglich. Eingehende Kanten: 23.
 | `raumplanung_zonenreserve` | weniger Bauland-Reserven | senkt → weniger: mehr Angebot möglich | 0.10 / 0.70 / 1.00 | AU-002 |
 | `raumplanung_verdichtung` | stärkere Pflicht zur Innenverdichtung | erhöht → mehr Angebot möglich | 0.00 / 0.60 / 1.00 | NZ-001 |
 | `raumplanung_ausnuetzungsziffer` | dichtere Bebauung erlaubt | erhöht → mehr Angebot möglich | 0.10 / 0.50 / 1.00 | US-005 |
-| `boden_bauverpflichtung` | strengere Massnahmen gegen Baulandhortung | erhöht → mehr Angebot möglich | 0.52 / 0.52 / 0.52 | Annahme |
-| `bau_energievorgaben` | strengere Energievorgaben für Neubauten | senkt → weniger: mehr Angebot möglich | 0.41 / 0.41 / 0.41 | Annahme |
-| `bau_sanierungspflicht` | strengere Sanierungspflicht im Bestand | senkt → weniger: mehr Angebot möglich | 0.56 / 0.56 / 0.56 | Annahme |
-| `bau_ersatzneubau_effizienz` | mehr Netto-Wohnungen pro Abriss | erhöht → mehr Angebot möglich | 0.52 / 0.52 / 0.52 | Annahme |
-| `bau_einspracherecht_dritte` | mehr Einspracheberechtigte | senkt → weniger: mehr Angebot möglich | 0.52 / 0.52 / 0.52 | Annahme |
-| `bau_einspracherecht_suspensiv` | stärkere aufschiebende Wirkung von Einsprachen | senkt → weniger: mehr Angebot möglich | 0.68 / 0.68 / 0.68 | Annahme |
-| `bau_bewilligungsverfahren` | schnelleres, einfacheres Verfahren | erhöht → mehr Angebot möglich | 0.42 / 0.42 / 0.42 | Annahme |
-| `bau_normenharmonisierung` | einheitlichere Bauvorschriften | erhöht → mehr Angebot möglich | 0.49 / 0.49 / 0.49 | Annahme |
-| `gemeinnuetzig_mindestanteil` | höherer gemeinnütziger Pflichtanteil | senkt → weniger: mehr Angebot möglich | 0.51 / 0.51 / 0.51 | Annahme |
-| `gemeinnuetzig_foerderfonds` | mehr Fördermittel | erhöht → mehr Angebot möglich | 0.35 / 0.35 / 0.35 | Annahme |
-| `nutzung_abbruchverbot` | stärkerer Abbruchschutz | senkt → weniger: mehr Angebot möglich | 0.61 / 0.61 / 0.61 | Annahme |
-| `nutzung_umnutzungsverbot` | strengeres Umwandlungsverbot | senkt → weniger: mehr Angebot möglich | 0.58 / 0.58 / 0.58 | Annahme |
+| `boden_bauverpflichtung` | strengere Massnahmen gegen Baulandhortung | erhöht → mehr Angebot möglich | 0.23 / 0.23 / 0.23 | Annahme |
+| `bau_energievorgaben` | strengere Energievorgaben für Neubauten | senkt → weniger: mehr Angebot möglich | 0.18 / 0.18 / 0.18 | Annahme |
+| `bau_sanierungspflicht` | strengere Sanierungspflicht im Bestand | senkt → weniger: mehr Angebot möglich | 0.25 / 0.25 / 0.25 | Annahme |
+| `bau_ersatzneubau_effizienz` | mehr Netto-Wohnungen pro Abriss | erhöht → mehr Angebot möglich | 0.23 / 0.23 / 0.23 | Annahme |
+| `bau_einspracherecht_dritte` | mehr Einspracheberechtigte | senkt → weniger: mehr Angebot möglich | 0.23 / 0.23 / 0.23 | Annahme |
+| `bau_einspracherecht_suspensiv` | stärkere aufschiebende Wirkung von Einsprachen | senkt → weniger: mehr Angebot möglich | 0.30 / 0.30 / 0.30 | Annahme |
+| `bau_bewilligungsverfahren` | schnelleres, einfacheres Verfahren | erhöht → mehr Angebot möglich | 0.19 / 0.19 / 0.19 | Annahme |
+| `bau_normenharmonisierung` | einheitlichere Bauvorschriften | erhöht → mehr Angebot möglich | 0.22 / 0.22 / 0.22 | Annahme |
+| `gemeinnuetzig_mindestanteil` | höherer gemeinnütziger Pflichtanteil | senkt → weniger: mehr Angebot möglich Bedingt: wird durch `gemeinnuetzig_ausgleich` anteilig aufgehoben. | 0.23 / 0.23 / 0.23 | Annahme |
+| `gemeinnuetzig_foerderfonds` | mehr Fördermittel | erhöht → mehr Angebot möglich | 0.15 / 0.15 / 0.15 | Annahme |
+| `nutzung_abbruchverbot` | stärkerer Abbruchschutz | senkt → weniger: mehr Angebot möglich | 0.27 / 0.27 / 0.27 | Annahme |
+| `nutzung_umnutzungsverbot` | strengeres Umwandlungsverbot | senkt → weniger: mehr Angebot möglich | 0.26 / 0.26 / 0.26 | Annahme |
 | `ctx:zinsniveau` | Zinsniveau: sehr hoch | senkt → weniger: mehr Angebot möglich | 1.00 / 0.80 / 0.50 | — |
 | `ctx:wirtschaftskraft` | Wirtschaftskraft: sehr stark | erhöht → mehr Angebot möglich | 0.80 / 0.60 / 0.40 | — |
 | `mietrecht_kuendigungsschutz` | stärkerer Kündigungsschutz | senkt → weniger: mehr Angebot möglich | 0.10 / 0.30 / 0.60 | GLOBAL-029 |
 | `mietrecht_kostenmiete` | stärkere Bindung der Miete an die Kosten | senkt → weniger: mehr Angebot möglich | 0.20 / 0.50 / 0.90 | GLOBAL-029 |
-| `nutzung_zweitwohnungen` | strengere Zweitwohnungsgrenze | senkt → weniger: mehr Angebot möglich | 0.53 / 0.53 / 0.53 | Annahme |
+| `nutzung_zweitwohnungen` | strengere Zweitwohnungsgrenze | senkt → weniger: mehr Angebot möglich | 0.23 / 0.23 / 0.23 | Annahme |
 | `steuer_leerstandsabgabe` | verbindlichere Leerstandsabgabe | erhöht → mehr Angebot möglich | 0.05 / 0.15 / 0.15 | CA-001 |
 | `nutzung_kurzzeitvermietung` | strengere Regeln für Kurzzeitvermietung | erhöht → mehr Angebot möglich | 0.10 / 0.10 / 0.10 | Annahme |
 | `boden_bodeneigentumssteuer` | höhere Bodensteuer | erhöht → mehr Angebot möglich | 0.10 / 0.10 / 0.10 | Annahme |
@@ -195,6 +195,7 @@ Positiver Wert: unelastischeres Angebot (reagiert weniger auf Preise). Eingehend
 
 Diese Parameter wirken nicht über die lineare Kantensumme (Mietrechts-Regime, siehe `mietrecht-regime.ts`):
 
+- `gemeinnuetzig_ausgleich` — stärkerer Ausgleich für den Pflichtanteil
 - `mietrecht_mietzinsindex` — kein Mehr oder Weniger: anderer Anpassungsmechanismus (Referenzzins, Landesindex, Kostenbindung)
 - `mietrecht_kriterium` — kein Mehr oder Weniger: anderes bindendes Kriterium (Kosten, heutiges Recht, Vergleichsmiete)
 - `mietrecht_durchsetzung` — stärkerer Vollzug

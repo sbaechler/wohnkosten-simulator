@@ -2,7 +2,7 @@
 
 > **Status:** Entscheide 1, 2, 3 und 5 gefällt (2026-11-13, siehe Abschnitt 9); alle Entscheide gefällt. Sprint 0, 1 und 2 sind umgesetzt auf `feat/mietrecht-regime-2026` (Sprint 0 und Fix-8 in Commit `238b6cd`, Sprint 1 in `46036cc`, Sprint 2 am 2026-11-14 umgesetzt). Sprint 3 Fix-9 bis Fix-14 am 2026-11-15 umgesetzt (Fix-9 bis Fix-13 in `f8841b3`). Das Kontextfeld `mietbelastungs_grenze` ist vollständig entfernt. Offen: Optimierer-Lauf (Fix-13), Regime-Kalibrierung (Sprint 4, braucht Daten).
 > **Grundlage:** Fachliches Review vom 2026-11-13: Code in `src/model`, gerenderte Widgets, `docs/recherche/summary.md`, CH-012, Nachrechnung aller 43 Parameter für Zürich (je ±1 Stufe, Wirkung in P3).
-> **Teststand 2026-11-15 (nach Sprint 4):** 520 passed, 1 skipped. Kalibrierungs-Dry-Run 0/567 Verletzungen. `tsc -b`, `npm run build` und `npm run lint` ohne Fehler.
+> **Teststand 2026-11-16 (nach Sprint 4 und Nachträgen):** 555 passed, 1 skipped. Kalibrierungs-Dry-Run 0/567 Verletzungen. `tsc -b`, `npm run build` und `npm run lint` ohne Fehler.
 > **Teststand 2026-11-13:** 225 passed, 1 skipped. Kalibrierungs-Dry-Run 0/446 Verletzungen. `tsc -b` meldet 10 Typfehler, alle in Testdateien (Fixtures ohne die neuen Regime-Felder von `MarketState`, dazu `international-fachlich.test.ts:236`); damit läuft `npm run build` nicht durch. Die Fehler stammen aus den Regime-Änderungen des Branches, nicht aus den Fixes dieses Plans.
 
 ## 1. Ausgangslage
@@ -353,6 +353,15 @@ Baseline Zürich: Mietbelastung 46.6 / 47.8 / 48.3 % → 46.8 / 48.2 / 48.8 % (P
 - ⏳ Optimierer-Lauf weiterhin nicht gemacht (Gewichte erfüllen alle Constraints).
 - Kleinere Reste: `US-018` trägt im Kopf die ID `GLOBAL-027`; veraltete Kommentare in `gemeinnuetzig-fachlich.test.ts`; Fussnoten in CH-012 springen von [24] auf [30] und [40].
 
+#### Nachtrag 2026-11-15: Entscheide des Projektinhabers umgesetzt
+- ✅ **Mietabstand anzeigen, nicht rechnen.** `mietabstand_neubezug` (Nettomiete Neubezug / Nettomiete bei 21 und mehr Jahren Mietdauer, BFS Strukturerhebung 2024) steht im Stadt-Kontext und erscheint in der Kontextleiste als «Neubezug ggü. Altmiete». Stadtwerte (T 09.03.03.67): Zürich +56 %, Lausanne +54 %, Genf +48 %, Basel +38 %, Bern +38 %. Kantonswerte (T 09.03.03.64, andere Abgrenzung): Winterthur +30 %, Luzern +21 %, Biel +19 %, St. Gallen +18 %, Lugano +16 %. `mietluecke` bleibt leer; Test `mietabstand-neubezug.test.ts` hält fest, dass der Indikator nichts rechnet.
+- ✅ **Regel für unbelegte Angebotshebel.** Eine Annahme-Kante auf `angebotspotenzial` darf in P3 höchstens halb so stark sein wie der schwächste Referenzhebel (`REFERENZ_ANGEBOTSHEBEL`, `ANNAHME_ANGEBOT_MAX_ANTEIL = 0.5` in phase-weights.ts; Test in `dag-integrity.test.ts`). 13 Kanten mit demselben Faktor (0.3 / 0.68) gesenkt: suspensive Einsprache 0.68 → 0.30, Abbruchverbot 0.61 → 0.27, Umnutzungsverbot 0.58 → 0.26, Sanierungspflicht 0.56 → 0.25, Zweitwohnungen 0.53 → 0.23, Bauverpflichtung, Ersatzneubau, Einsprache Dritter 0.52 → 0.23, Mindestanteil 0.51 → 0.23, Normenharmonisierung 0.49 → 0.22, Bewilligungsverfahren 0.42 → 0.19, Energievorgaben 0.41 → 0.18, Förderfonds 0.35 → 0.15. Die Reihenfolge unter ihnen bleibt eine Setzung. Kalibrierung weiterhin 0/567.
+  - Zürich, Δ Neumieter P3 je Stufe: Zonenreserve −0.139, Kostenmiete +0.128, Verdichtung +0.127, Ausnützung +0.125 (unverändert); suspensive Einsprache −0.063 (vorher −0.142), Abbruchverbot −0.056 (vorher −0.128), Förderfonds 2→1 +0.066 (vorher +0.108).
+  - Nebenwirkung: Der Mindestanteil ist auf den Neumieter-Trend fast neutral (2→1: −0.006 statt −0.064), auf die Mietbelastung dreht das Vorzeichen (+0.10 pp statt −0.20 pp).
+- ✅ **Mindestanteil: Bedingung als Schieber (2026-11-16).** Neuer Parameter `gemeinnuetzig_ausgleich` («Ausgleich beim Pflichtanteil»: kein / teilweise / voll), der 44. Schieber. Er hat keine eigene Kante, sondern schaltet `gemeinnuetzig_mindestanteil → angebotspotenzial`: gerechnet wird Δ[Mindestanteil · (1 − Ausgleich)] (`ausgleichDurch`, `getEdgeDelta` in compute-phases.ts). Voller Ausgleich hebt den Angebotsverlust auf, teilweiser zur Hälfte (Setzung). Weil das ein Produkt ist, braucht die Rechnung die absoluten Stufen; `computeDiff40` trägt sie als Begleiteinträge ein (`DIFF_BEGLEITER`), `changedParamKeys` zählt nur echte Änderungen. Tests: `ausgleich-pflichtanteil.test.ts`.
+  - Alle Städte stehen auf «kein Ausgleich». **Nicht erhoben**, eine Setzung; bisherige Ergebnisse ändern sich dadurch nicht. Offen: je Stadt das kantonale Recht prüfen (Pflichtanteile, die nur bei Mehrausnützung greifen, wären bereits ein Ausgleich).
+  - Zürich (Mindestanteil Stufe 2): voller Ausgleich hebt das Angebotspotenzial in P3 so stark wie die Aufhebung der Angebotswirkung des ganzen Pflichtanteils.
+
 #### Ursprüngliche Liste
 
 - `mietluecke` und `anteil_altliegenschaft` gemäss Messvorschrift in CH-012 füllen. Erst dann `FRONTLOAD`, `VERWEIL_GEWICHT`, `CAP_INVEST_WEIGHT` kalibrieren.
@@ -401,4 +410,9 @@ Stand 2026-11-13:
 
 6. **Phasenmultiplikator (Fix-10):** ✅ streichen (2026-11-14), zusammen mit Fix-9.
 
-Offene Entscheide (2026-11-15, aus Sprint 4): Mietlücke als Proxy setzen oder leer lassen; Regel für die Stärke unbelegter Angebotshebel; Verhältnis der beiden Kanäle des Mindestanteils.
+7. **Mietlücke (2026-11-15):** ✅ leer lassen; der Mietdauer-Abstand wird als Indikator im UI angezeigt.
+8. **Unbelegte Angebotshebel (2026-11-15):** ✅ höchstens halb so stark wie der schwächste belegte Hebel.
+
+9. **Mindestanteil (2026-11-16):** ✅ neuer Schieber «Ausgleich beim Pflichtanteil», der die Angebotskante schaltet.
+
+Keine offenen Entscheide. Offen als Datenarbeit: Stand des Ausgleichs je Stadt.

@@ -87,6 +87,27 @@ export function getE0Delta(
   return normalizeDiff((diffEntry.to as number) - (diffEntry.from as number));
 }
 
+/**
+ * Δ einer Kante. Für gewöhnliche Kanten gleich `getE0Delta(edge.from)`.
+ *
+ * Bedingte Kante (`ausgleichDurch`): gerechnet wird die Änderung des Produkts
+ * `from · (1 − ausgleich)`, beide als Stand 0…1 (Stufe / 2). Dafür braucht es
+ * die absoluten Stufen beider Parameter; `computeDiff40` trägt sie als
+ * Begleiteinträge ins Diff ein (`DIFF_BEGLEITER`, params.ts).
+ * Fehlt `from` im Diff, ist sein Stand unbekannt und die Kante wirkt nicht.
+ * Fehlt der Ausgleich im Diff, gilt «kein Ausgleich» (Stufe 0, die Baseline
+ * aller Städte): die Kante rechnet dann wie eine gewöhnliche.
+ */
+export function getEdgeDelta(edge: PhaseEdge, diff: ParamsDiff40, context: CityContext): number {
+  if (!edge.ausgleichDurch) return getE0Delta(edge.from, diff, context);
+  const haupt = diff[edge.from as keyof CityParams40];
+  if (!haupt) return 0;
+  const ausgleich = diff[edge.ausgleichDurch as keyof CityParams40];
+  const a0 = ausgleich ? normalizeDiff(ausgleich.from as number) : 0;
+  const a1 = ausgleich ? normalizeDiff(ausgleich.to as number) : 0;
+  return normalizeDiff(haupt.to as number) * (1 - a1) - normalizeDiff(haupt.from as number) * (1 - a0);
+}
+
 // ── computeE1WithPhaseAndCarry ────────────────────────────────────────────────
 
 /**
@@ -159,7 +180,7 @@ export function computeE1WithPhaseAndCarry(
     let impuls = 0;
     for (const edge of edges) {
       if (edge.to !== nodeId) continue;
-      const delta = getE0Delta(edge.from, diff, context);
+      const delta = getEdgeDelta(edge, diff, context);
       impuls += edge.sign * edge.weights[phaseIndex] * delta;
     }
 
