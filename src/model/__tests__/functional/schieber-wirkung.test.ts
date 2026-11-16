@@ -33,6 +33,8 @@ const SICHTBAR = 0.005;
 const NUR_IN_KOMBINATION: Partial<Record<keyof CityParams40, string>> = {
   mietrecht_durchsetzung:
     'Vollzieht nur einen Senkungsanspruch (negativer Erhöhungsspielraum) oder zieht eine gestiegene Miete an den Deckel zurück; im Ausgangszustand gibt es beides nicht.',
+  gemeinnuetzig_ausgleich:
+    'Schaltet nur die Kante des Pflichtanteils (bedingte Kante). Zürich hat seit 2026-11-16 keinen Pflichtanteil in Kraft (Stufe 0). Wirkung in Kombination: ausgleich-pflichtanteil.test.ts.',
 };
 
 const ZH = cities.find(c => c.slug === 'zuerich')!;
