@@ -214,11 +214,14 @@ describe('Nutzungsregulierung: Abbruchverbot schützt Bestand', () => {
      * Ursprünglich: Abbruchverbot → angebotspotenzial ↑ (Bestand bleibt)
      *
      * Korrektur per DIW Discussion Paper 2143 (Ters/Kholodilin 2025, nur Genf 1994–2022):
-     * Die Wohnungsrationierung (Abbruch-/Umnutzungsverbot) ist die schädlichste
-     * aller Regulierungsformen für das Angebot:
-     * −600 Mio. CHF Bauinvestitionen aggregiert; −400 Mio. CHF institutionelle Neubauinvestitionen.
-     * Basel: Baugesuche für Wohnungen −76 % (784 → 190 im Mittel; SRES im
-     * Auftrag des SVIT, Interessenvertreter; Ursache laut Regierungsrat offen).
+     * Wohnungsrationierung (Index aus Register, Abbruch- und Umnutzungs-
+     * beschränkung u. a.) bremst die Bauinvestitionen stärker als die
+     * Mietpreisregulierung: −600 Mio. CHF aggregiert, −400 Mio. CHF
+     * institutionelle Neubauinvestitionen (CH-013). Die Zahlen gelten für den
+     * ganzen Index, nicht für das Abbruchverbot allein.
+     * Basel: Wohneinheiten in Baugesuchen −76 % (784 → 190 im Mittel; SRES im
+     * Auftrag von SVIT/HEV, Interessenvertreter, CH-015; Einfluss des
+     * Wohnschutzes laut Präsidialdepartement offen).
      * Dominanter Effekt: Neubau-Verhinderung überwiegt Bestandserhalt bei weitem.
      */
     const neutral = phases(ZUERICH_V2, ZUERICH_CONTEXT, {});

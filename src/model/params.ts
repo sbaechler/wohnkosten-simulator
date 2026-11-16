@@ -161,9 +161,9 @@ export const paramMeta: ParamMeta[] = [
   {
     key: 'bau_ersatzneubau_effizienz',
     label: 'Ersatzneubau-Effizienz',
-    helpText: 'Wie viele Netto-Neubauwohnungen entstehen pro abgerissener Wohnung? (Agglomeration Zürich 2.8×, Agglomeration Lausanne 6.5×; Sotomo 2025)',
+    helpText: 'Wie viele neue Wohnungen entstehen pro abgerissener Wohnung? (Agglomeration Zürich 2.8×, Agglomeration Lausanne 6.5×; Sotomo 2025)',
     levels: ['Ineffizient (2–3x)', 'Mittel (3–5x)', 'Effizient (5x+)'],
-    hoeherBedeutet: 'mehr Netto-Wohnungen pro Abriss',
+    hoeherBedeutet: 'mehr neue Wohnungen pro Abriss',
     group: 'bau',
   },
   {

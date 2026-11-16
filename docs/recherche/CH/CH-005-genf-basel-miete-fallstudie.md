@@ -33,4 +33,5 @@ Schweizer Fallstudie für mietrecht_kuendigungsschutz und marktfriktion. Zeigt: 
 
 ## Notizen
 - EY Switzerland Real Estate Report 2025; Wüest Partner; Sui Generis Law Journal
+- Herkunft nachgeprüft 2026-11-16 (CH-013): DIW DP 2143 (S. 7) führt 279/372 CHF/m²·a auf Raiffeisen (Fleury et al. 2024) zurück, Abstand genau 33.5 %; die 13.7 Jahre auf EY (Ganz 2024); den CH-Schnitt von 8.5 Jahren auf Wüest Partner (2024a). Gemeint ist die Wohndauer in derselben Wohnung, nicht die Mietdauer.
 - Kantonal unterschiedliche Regulierungsstärke dokumentiert

@@ -29,12 +29,12 @@ const basisOhne = angebotP3(OHNE, {});
 const PFLICHT: CityParams = { ...ZH.params, gemeinnuetzig_mindestanteil: 2, gemeinnuetzig_ausgleich: 0 };
 
 describe('Ausgleich beim Pflichtanteil', () => {
-  it('Stand je Stadt wie erhoben (2026-11-16, Begründung in switzerland.yaml)', () => {
+  it('Stand je Stadt wie erhoben (2026-11-16, alle geklärt, Begründung in switzerland.yaml)', () => {
     const stand = Object.fromEntries(cities.map(c => [c.slug, c.params.gemeinnuetzig_ausgleich]));
     expect(stand).toEqual({
-      zuerich: 2, genf: 2, bern: 2, winterthur: 2, // Pflichtanteil nur bei Mehrausnützung
-      basel: 1, luzern: 1,                         // ausdrücklicher Teilausgleich
-      lausanne: 0, 'st-gallen': 0, lugano: 0, biel: 0, // nicht geklärt
+      zuerich: 2, genf: 2, bern: 2, winterthur: 2, basel: 2, // Pflicht nur bei Mehrausnützung
+      luzern: 1, lausanne: 1, lugano: 1,                     // ausdrücklicher Bonus
+      'st-gallen': 0, biel: 0,                               // kein Ausgleich
     });
   });
 

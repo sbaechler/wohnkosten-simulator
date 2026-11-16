@@ -23,7 +23,8 @@ Branch `feat/mietrecht-regime-2026`, **nicht gepusht**. Commits seit `main`-Stan
 | `b246c5a` | Sprint 4 (Altliegenschaften-Daten, Regime-Einheiten, Restposten) |
 | `c4cefb1` | Mietabstand-Indikator, Regel für unbelegte Angebotshebel, Schieber «Ausgleich beim Pflichtanteil» |
 | `e41c600` | `gemeinnuetzig_mindestanteil` und `gemeinnuetzig_ausgleich` je Stadt nach geltendem Recht (Abschnitt 0.3, Punkt 1) |
-| «chore: Aufräumen nach Verbesserungsplan 0.3, Punkte 16–22» | Widget-Katalog, Quellen, US-018, Fachtest-Kommentare, CH-012-Fussnoten, `knappheitSignal` entfernt, Namen ohne «40» |
+| `6ee21d6` | Aufräumen (Abschnitt 0.3, Punkte 16–22): Widget-Katalog, Quellen, US-018, Fachtest-Kommentare, CH-012-Fussnoten, `knappheitSignal` entfernt, Namen ohne «40» |
+| «feat: Datenarbeit 0.3, Punkte 2, 4 und 5» | Ausgleich je Stadt geklärt (Basel 1 → 2), Mietabstand geprüft, Notizen CH-013 bis CH-015, Zitate korrigiert |
 
 Working Tree sauber (Stand 2026-11-16).
 
@@ -45,11 +46,11 @@ Working Tree sauber (Stand 2026-11-16).
 **Entschieden und umgesetzt 2026-11-16**
 1. **`gemeinnuetzig_mindestanteil` nach Rechtsstand.** Entscheid des Projektinhabers: heutige Situation, nur Pflichten, die rechtlich in Kraft sind. Ziele (Zürcher Drittel bis 2050), Entwürfe und Verträge auf öffentlichem Land zählen nicht. Gemessen wird der wirksame Anteil an allen Neubauten (Quote × erfasster Teil der Produktion), Stufe nach Schwellen 5 % / 21.5 % (Setzung, Kopf von `switzerland.yaml`). Ergebnis: Genf 1 (Art. 4A LGZD), Basel 1 (§ 101a BPG seit 18.8.2026), alle anderen 0. Geändert: Zürich und Biel 2 → 0, Bern 2 → 0, Lausanne und Winterthur 1 → 0. **Grenzfälle:** Bern (Pflicht in Kraft, aber nur bei Einzonungen, wirksam wenige Prozent) und Genf (wirksam grob 20–27 %, gemessen 16–23 % LUP). Folge: In Zürich bewegt `gemeinnuetzig_ausgleich` allein nichts mehr (Ausnahmeliste in `schieber-wirkung.test.ts`). Recherche mit Sonnet-Subagents; die Mengenschätzungen sind unbelegt, keine Stadt hat Sicherheit «hoch».
 
-**Datenarbeit**
-2. `gemeinnuetzig_ausgleich` für Lausanne, St. Gallen, Lugano, Biel klären (heute 0 = «nicht geklärt», Kommentar im YAML). Seit Punkt 1 haben diese vier keinen Pflichtanteil; der Ausgleich rechnet dort nichts, die Klärung ist nur für die Daten. Rechnerisch zählen nur Genf und Basel. Für die sechs gesetzten Städte hat keine Einstufung die Sicherheit «hoch»: Erlasse im Wortlaut aus den Gesetzessammlungen nachlesen (§ 49b PBG ZH, Art. 16b Bauordnung Bern, Art. 4A LGZD, § 101a BPG BS, Art. 24 BZR Luzern, Art. 28/29 LPPPL VD).
+**Datenarbeit — erledigt 2026-11-16, ausser 3 und der jährlichen Nachführung in 4**
+2. ✅ `gemeinnuetzig_ausgleich` für alle zehn Städte geklärt (Recherche mit Sonnet). Basel 1 → 2: § 101a BPG greift nur bei Umzonung neu für Wohnen, dazu § 121a BPG; das erfüllt die Definition von Stufe 2. **Rechenwirkung:** In Basel senkt der Pflichtanteil das Angebot nicht mehr. Lausanne 0 → 1 (Art. 29 LPPPL), Lugano 0 → 1 (Art. 15 NAPR), ohne Rechenwirkung (kein Pflichtanteil). St. Gallen und Biel bleiben 0, jetzt geprüft. Genf 2 im Wortlaut bestätigt (Art. 4A, 2A LGZD; Art. 12 LaLAT). Offen: Basler Wortlaut nur aus dem Ratschlag, nicht aus der Gesetzessammlung; Luzerner Artikelnummern nur sekundär.
 3. `mietluecke` bleibt leer (Entscheid). Damit bleiben `FRONTLOAD`, `VERWEIL_GEWICHT`, `CAP_INVEST_WEIGHT` unkalibriert. Eine Datenbasis mit Anlagekosten gibt es nicht; der Mietdauer-Abstand ist kein Ersatz (CH-012).
-4. `mietabstand_neubezug`: Stadtwerte nur für fünf Grossstädte, sonst Kantonswerte mit anderer Abgrenzung. Jährlich nachführen (BFS Strukturerhebung).
-5. Recherche-Notizen nachtragen: DIW DP 2143, Wüest Partner 2024 (8.5 Jahre), Sotomo 2025 (S. 27, Abb. 9) und die Basler Zahlen (SRES/SVIT) werden im Code zitiert, haben aber keine Notiz in `docs/recherche/`.
+4. ✅ `mietabstand_neubezug` geprüft: Für Winterthur, Luzern, St. Gallen, Lugano, Biel ist kein Stadtwert mit Bezugsdauer publiziert; eine BFS-Sonderauswertung wäre möglich. SE 2025 nicht publiziert, erwartet um März 2027: dann nachführen. Messvorschrift neu im Kopf von `switzerland.yaml`.
+5. ✅ Notizen CH-013 (DIW DP 2143, mit Wüest Partner 2024a), CH-014 (Sotomo 2025), CH-015 (Basel, SRES/SVIT). Der Abgleich fand Fehler, im Code korrigiert: Ersatzneubau-Faktor ist brutto, nicht «netto»; «rund 9 %» ist aus Sotomo gerechnet; private Renovation +150 Mio. gilt für Jahre 1–3; die Sanierungsquoten (83.5/47.6/41.3 %) sind unrenovierte Altbauten nach Avenir Suisse 2012, ohne Kausalaussage; die DIW-Zahlen gelten für einen Rationierungsindex, nicht für das Abbruchverbot allein; Basel misst Wohneinheiten in Baugesuchen, «Ursache offen» sagt das Präsidialdepartement (26.3.2025), nicht die Studie. Zürich +20 % (Stadt, Wohneinheiten) steht doch in CH-015.
 
 **Modell, bewusst offen gelassen**
 6. **Regime: `pullBestand`** behandelt jede positive Bestandsmiete als Überhöhung, auch die rechtlich zulässige Überwälzung. Die Durchsetzung zieht deshalb zulässige Erhöhungen zurück.

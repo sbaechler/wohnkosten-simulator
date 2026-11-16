@@ -8,21 +8,22 @@
  * - SVIT / HEV / Swiss Real Estate Institute:
  *   «Auswirkungen der Wohnschutzinitiative im Kanton Basel-Stadt», Jan. 2025
  *
- * Forschung: Für DIW DP 2143 und die Basler Zahlen (SRES/SVIT) fehlt noch
- *            eine Notiz in docs/recherche/ (Verbesserungsplan 0.3, Punkt 5).
+ * Forschung: docs/recherche/CH/CH-013 (DIW DP 2143) und CH-015 (Basel, SRES/SVIT).
  *
  * Wichtige empirische Befunde:
  * ─────────────────────────────────────────────────────────────────────
- * 1. Wohnungsrationierung (Genf LDTR / Basel Wohnschutzverordnung):
+ * 1. Wohnungsrationierung (DIW DP 2143, nur Genf; Index aus Register,
+ *    Abbruch- und Umnutzungsbeschränkung u. a., S. 11):
  *    → Aggregierter Rückgang Bauinvestitionen: −600 Mio. CHF (≈11% Bauausgaben)
  *    → Institutionelle Neubauinvestitionen: −400 Mio. CHF
  *    → Private: kurzfristig Renovation +200 Mio. CHF (Jahre 1–3), dann Rückgang
  *    → Leerstände sinken (Granger-Kausalität) → politisch induzierte Knappheit
- *    → Zielkonflikt Klimaschutz: Sanierungsrückstand Genf 83% vs. Zürich 41%
+ *    → Wohnungen über 40 Jahre ohne Renovation: Genf 83.5 %, Basel 47.6 %,
+ *      Zürich 41.3 % (Avenir Suisse 2012, zitiert S. 6–7; ausdrücklich keine Kausalaussage)
  *
  * 2. Mietpreisregulierung (weniger stark als Rationierung):
  *    → Institutionelle Neubauinvestitionen: −100 Mio. CHF (schwacher Effekt)
- *    → Private Renovation: +150 Mio. CHF (Jahre 1–5), kein dauerhafter Effekt
+ *    → Private Renovation: +150 Mio. CHF (Jahre 1–3), kein dauerhafter Effekt
  *    → Leerstände: unverändert (kein Rationierungseffekt)
  *
  * 3. Wohnungsrationierung > Mietpreisregulierung (als Angebotsbremse):
@@ -31,9 +32,11 @@
  * 4. Genfer Abstand Neuvertrag zu Bestand (~33 Prozent, Mietdauer 13.7 Jahre):
  *    nicht in dieser Datei assertet. Der Kaltstart erzeugt den Abstand nicht.
  *
- * 5. Basel: Baugesuche für Wohnungen −76 % (Mittel 784 für 2014–2020 gegen
- *    190 für 2021–2023; Swiss Real Estate Institute im Auftrag des SVIT,
- *    Interessenvertreter; Ursache laut Regierungsrat Basel-Stadt offen)
+ * 5. Basel: Wohneinheiten in Baugesuchen −76 % (Mittel 784 für 2014–2020 gegen
+ *    190 für 2021–2023; SRES im Auftrag von SVIT/HEV, Interessenvertreter,
+ *    CH-015). Stadt Zürich im selben Vergleich +20 % (3035 → 3643). Ob der
+ *    Wohnschutz die Bautätigkeit bremst, ist laut Präsidialdepartement
+ *    Basel-Stadt offen (Medienmitteilung 26.3.2025).
  *
  * Run: npx vitest run src/model/__tests__/fachlich/wohnschutz-fachlich.test.ts
  */
@@ -154,9 +157,10 @@ describe('DIW DP 2143: Wohnungsrationierung bremst Investitionen stärker als Mi
 describe('Basel Wohnschutzverordnung (2022): kombinierte Rationierung', () => {
   /**
    * Basel Wohnschutzverordnung:
-   * - Abriss, Ersatzneubau und Sanierungen: bewilligungspflichtig + Mietzinsobergrenzen
-   * - Baugesuche für Wohnungen −76 % (784 → 190 im Mittel, SRES/SVIT;
-   *   Ursache laut Regierungsrat offen)
+   * - Bei Abbruch/Ersatzneubau und Sanierung legt die Wohnschutzkommission
+   *   Höchstmieten bzw. Aufschläge fest (ab 4 Wohnungen; CH-015)
+   * - Wohneinheiten in Baugesuchen −76 % (784 → 190 im Mittel, SRES/SVIT,
+   *   CH-015); Einfluss des Wohnschutzes laut Präsidialdepartement offen
    *
    * Modell-Szenario: Wohnschutz-Initiative eingeführt
    * (nutzung_abbruchverbot + nutzung_umnutzungsverbot + mietrecht_kostenmiete)
@@ -265,7 +269,8 @@ describe('DIW DP 2143: Abbruchverbot/Rationierung → politisch induzierte Knapp
    *
    * Im Modell:
    * - nutzung_abbruchverbot ↑ → nachfragedruck ↑ (weniger freie Wohnungen)
-   * - Effekt verstärkt sich in Phase 2/3 (Leerstand sinkt durch Ausbleiben von Neubau)
+   * - Horizont der Studie: Jahre 1–10; eine Verstärkung über die Phasen
+   *   belegt sie nicht. Die Leerstands-Impulsantwort ist nicht signifikant (S. 17).
    */
   it('[FACH] Abbruchverbot erhöht nachfragedruck mittelfristig (Phase 2)', () => {
     const neutral = phases(ZUERICH_V2, NEUTRAL_CONTEXT, {});
@@ -300,10 +305,13 @@ describe('DIW DP 2143: Abbruchverbot/Rationierung → politisch induzierte Knapp
 
 describe('DIW DP 2143/Basel: Wohnschutz-Zielkonflikt mit Klimaschutz (Sanierungsrückstand)', () => {
   /**
-   * Basler Regierung (2023) und DIW DP 2143:
-   * - Energetische Sanierungen erfolgen meist im Rahmen von Totalsanierungen
-   * - Wohnschutz bremst Totalsanierungen → Sanierungsrückstand (Genf 83%, Basel 48%, ZH 41%)
-   * - Zielkonflikt: Wohnschutz vs. Klimaziele (Netto-Null 2037 Basel, 2050 Bund)
+   * Präsidialdepartement Basel-Stadt (15.8.2024, zitiert in CH-015, S. 2):
+   * - Energetische Sanierungen erfolgen meist im Rahmen von Totalsanierungen;
+   *   die Mitteilung nennt einen Rückgang der Totalsanierungen und einen
+   *   Zielkonflikt mit dem Klimaschutz.
+   * - Wohnungen über 40 Jahre ohne Renovation: Genf 83.5 %, Basel 47.6 %,
+   *   Zürich 41.3 % (Avenir Suisse 2012, in DIW DP 2143 S. 6–7, CH-013).
+   *   Keine Kausalaussage zum Wohnschutz.
    *
    * Im Modell: energetische Vorgaben + Sanierungspflicht vs. Abbruchverbot
    * - Bei hohem Abbruchverbot sollte sanierungsquote oder ein äquivalenter Index sinken

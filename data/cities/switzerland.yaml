@@ -41,13 +41,30 @@
 # Handänderungen (nach dem Urteil nicht abziehen, CH-012).
 # Wirkt nur über WIRKSAMKEIT_OQU (heute 0): ändert kein Rechenergebnis.
 #
+# mietabstand_neubezug: NUR ANZEIGE. Nettomiete bei Neubezug geteilt durch Nettomiete
+# bei 21 und mehr Jahren Bezugsdauer, BFS Strukturerhebung (SE) 2024, publiziert 5.3.2026.
+# ebene stadt: T 09.03.03.67 (nur Zürich, Genf, Basel, Lausanne, Bern). Neubezug =
+#   Bezugsdauer unter 2 Jahren, Neubauten eingeschlossen. Faktor = Mittel der
+#   Verhältnisse für 2, 3 und 4 Zimmer. Mieter- und Genossenschaftswohnungen.
+# ebene kanton: T 09.03.03.64 (Winterthur → ZH, Luzern → LU, St. Gallen → SG,
+#   Lugano → TI, Biel → BE). Alle Zimmerzahlen zusammen; Neubezug nur von Wohnungen,
+#   die älter als 2 Jahre sind (Neubauten in eigener Spalte). Nicht mit «stadt»
+#   vergleichbar: Kanton ZH 1.30 gegen Stadt Zürich 1.56.
+# Stand 2026-11-16 (Recherche): Für die fünf kleineren Städte ist kein Stadtwert mit
+# Bezugsdauer publiziert (BFS, Statistik Winterthur, LUSTAT, St. Gallen, USTAT, Biel
+# geprüft). Möglich wäre eine Sonderauswertung beim BFS (SE erlaubt Gemeinden ab
+# 15'000 Einwohnern, Pooling über 3 oder 5 Jahre). SE 2025 ist nicht publiziert,
+# erwartet um März 2027 (Schluss aus dem Rhythmus, kein Termin). Dann nachführen.
+# Schwankung von Jahr zu Jahr rund ±0.05 bis 0.1, im Rahmen der Vertrauensintervalle.
+#
 # params.gemeinnuetzig_ausgleich (neu 2026-11-16): Ausgleich für den gemeinnützigen
 # Pflichtanteil (0 kein, 1 teilweise, 2 voll). Erhoben am 2026-11-16 aus kantonalem
 # und kommunalem Recht; Begründung je Stadt im Kommentar am Wert.
 # Stufe 2: Der Pflichtanteil greift rechtlich nur, wo Mehrausnützung entsteht
 #          (Auf-/Einzonung, Gestaltungsplan, Entwicklungszone).
 # Stufe 1: ausdrücklicher Teilausgleich (Bonus, reduzierte Mehrwertabgabe).
-# Stufe 0: kein Ausgleich ODER nicht geklärt (dann «NICHT GEKLÄRT» im Kommentar).
+# Stufe 0: kein Ausgleich. Seit 2026-11-16 für alle zehn Städte geklärt.
+# Wo kein Pflichtanteil gilt, beschreibt der Wert das vorhandene Instrument und rechnet nicht.
 # Keine Stadt hat Sicherheit «hoch»: Die Erlasse waren teils nur über amtliche
 # Berichte, Urteile oder Wiedergaben lesbar, nicht in der Gesetzessammlung.
 #
@@ -181,7 +198,7 @@
     bau_normenharmonisierung: 1
     # Mindestanteil (erhoben 2026-11-16): Art. 4A LGZD (Fassung in Kraft 1.1.2021): in den zones de développement «en principe» 1/3 LUP, Abweichung mit Kompensation möglich; nicht in 4B und PAV. Wirksamer Anteil an allen Neubauten grob 20–27 % (Anteil der Entwicklungszonen geschätzt); gemessen 16–23 % LUP an den neuen Wohnungen 2023–2025 (ge.ch). Grenzfall zwischen 1 und 2. Sicherheit mittel.
     gemeinnuetzig_mindestanteil: 1
-    # Art. 4A LGZD: Drittelsregel nur in den Entwicklungszonen, also dort, wo die Zone Dichte gewährt; kein ausdrücklicher Bonus (Auslegung). Sicherheit mittel.
+    # Art. 4A Abs. 1 LGZD (Wortlaut SIL, Stand 1.9.2026): Drittelsregel nur in Entwicklungszonen. Die ZD ersetzt die Grundzone (Art. 12 Abs. 4 LaLAT) und verlangt Mindestdichten (Art. 2A Abs. 2 LGZD: ZD 3 mindestens 1.8, Villenzone 5 höchstens 0.25 nach Art. 59 LCI). Kein ausdrücklicher Bonus; Ausgleich über die Mehrausnützung. Sicherheit mittel bis hoch (geprüft 2026-11-16).
     gemeinnuetzig_ausgleich: 2
     gemeinnuetzig_foerderfonds: 1
     gemeinnuetzig_baurecht: 1
@@ -256,8 +273,8 @@
     bau_normenharmonisierung: 1
     # Mindestanteil (erhoben 2026-11-16): § 101a BPG in Kraft seit 18.8.2026 (RRB 11.8.2026): 1/3 der neuen Wohn-BGF dauerhaft gemeinnützig in Bebauungsplänen auf Transformationsarealen über 15'000 m². Noch kein Plan danach rechtskräftig; langfristig grob 8–14 % aller Neubauten (Bericht RR 1.9.2026, Schätzung). Sicherheit mittel.
     gemeinnuetzig_mindestanteil: 1
-    # § 101a BPG / §§ 6a–6e WRFG (in Kraft 17.2.2025): ein Drittel gemeinnützig auf Transformationsarealen über 15'000 m², dafür Mehrwertabgabe 20 statt 40 %. Sicherheit mittel.
-    gemeinnuetzig_ausgleich: 1
+    # § 101a BPG (in Kraft 18.8.2026): Pflicht nur in Bebauungsplänen für Bahn-, Industrie- und Gewerbeareale über 15'000 m², die neu für Wohnen umgezont werden (Erläuterung RR). Dazu § 121a BPG (in Kraft 17.2.2025): Ertragslage mindert die Mehrwertabgabe, laut Regierungsunterlagen 20 statt 40 %. Pflicht nur bei Umzonung plus Ausgleich → 2 (bis 2026-11-16: 1). Wortlaut aus Ratschlag, nicht aus der Gesetzessammlung. Sicherheit mittel.
+    gemeinnuetzig_ausgleich: 2
     gemeinnuetzig_foerderfonds: 2
     gemeinnuetzig_baurecht: 2
     gemeinnuetzig_belegungsvorschriften: 1
@@ -331,8 +348,8 @@
     bau_normenharmonisierung: 1
     # Mindestanteil (erhoben 2026-11-16): Art. 28 LPPPL ist eine Kann-Vorschrift; kein Kanton- und kein PGA-Pflichtanteil in Kraft. Quote 30 % im PA Montolivet erst Entwurf (Préavis 2026/16). Kantonsweit nur 295 von 4416 LUP seit 2018 aus Quoten (Bilan LPPPL 2026). «20–35 % je Projekt» ist ein Ziel. Sicherheit mittel.
     gemeinnuetzig_mindestanteil: 0
-    # NICHT GEKLÄRT. Art. 28/29 LPPPL (VD): Quoten und 10 % Bonus als Kann-Vorschrift je Plan; nur aus Sekundär-Wiedergabe gelesen. Vorschlag wäre 1, Sicherheit mittel bis tief.
-    gemeinnuetzig_ausgleich: 0
+    # Art. 29 Abs. 1 LPPPL (VD, Wortlaut lexfind, Fassung 2019): 10 % Bonus auf die Wohn-BGF bei mindestens 15 % LUP, in Bauzonen von vor 2018; in neueren Plänen nur, wenn vorgesehen. Freiwilliger Teilausgleich → 1. Ohne Pflichtanteil ohne Rechenwirkung. Sicherheit mittel (geprüft 2026-11-16).
+    gemeinnuetzig_ausgleich: 1
     gemeinnuetzig_foerderfonds: 1
     gemeinnuetzig_baurecht: 2
     gemeinnuetzig_belegungsvorschriften: 0
@@ -556,7 +573,7 @@
     bau_normenharmonisierung: 1
     # Mindestanteil (erhoben 2026-11-16): Keine Pflicht gefunden; nur Ziele (16 % bis 2037, 18 % bis 2048, Reglement 5.3.2026) und freiwillige Boni im Gestaltungsplan. Sicherheit tief (BZR nicht im Wortlaut gelesen).
     gemeinnuetzig_mindestanteil: 0
-    # Art. 24 Abs. 3 BZR (2013): 5 % Bonus auf die Überbauungsziffer für gemeinnützige Wohnungen im Gestaltungsplan; Pflicht nur in bezeichneten Gebieten (Art. 5). Sicherheit mittel.
+    # BZR 2013: 5 % Bonus für gemeinnützige Wohnungen im Gestaltungsplan (Artikelnummern nur aus Sekundärquellen; eine Pflicht in bezeichneten Gebieten liess sich 2026-11-16 nicht bestätigen). Ohne Pflichtanteil ohne Rechenwirkung. Sicherheit tief.
     gemeinnuetzig_ausgleich: 1
     gemeinnuetzig_foerderfonds: 1
     gemeinnuetzig_baurecht: 1
@@ -631,7 +648,7 @@
     bau_normenharmonisierung: 1
     # Mindestanteil (erhoben 2026-11-16): Keine Quote in Bauordnung (SRS 731.1) und PBG SG; Ortsplanungsrevision erst in Mitwirkung (2026). Sicherheit mittel.
     gemeinnuetzig_mindestanteil: 0
-    # NICHT GEKLÄRT. Keine Pflicht und kein Ausgleich gefunden; nur Suchergebnisse, kein Erlass gelesen.
+    # Kein Bonus: Bauordnung (SRS 731.1) und PBG SG (Stand 1.3.2023) im Volltext ohne Treffer; Art. 65 lit. i PBG erlaubt nur Verträge über preisgünstigen Wohnungsbau, Art. 25 PBG Mehrnutzung allgemein für Qualität. Mehrwertabgabe 20 % ohne Ermässigung. Sicherheit mittel (geprüft 2026-11-16).
     gemeinnuetzig_ausgleich: 0
     gemeinnuetzig_foerderfonds: 1
     gemeinnuetzig_baurecht: 1
@@ -706,8 +723,8 @@
     bau_normenharmonisierung: 1
     # Mindestanteil (erhoben 2026-11-16): Keine Quote in Kraft (Stadt Lugano laut La Regione 22.11.2022, MM 8973); PSE nur vertragliche Verhandlung. Sicherheit mittel bis tief.
     gemeinnuetzig_mindestanteil: 0
-    # NICHT GEKLÄRT. Keine Quotenregel gefunden (Medienberichte 2022); Piano regolatore nicht im Wortlaut gelesen.
-    gemeinnuetzig_ausgleich: 0
+    # Art. 15 NAPR Lugano (Stand 06.2024): Bonus bis 10 % der Ausnützung, bis 30 % bei Vereinbarung mit der Gemeinde nach dem Regolamento per la promozione dell'alloggio (Ordinanza 24.2.2022, Einzelfall, kein Anspruch; nur Sektionen Lugano, Castagnola, Brè). Teilausgleich → 1. Ohne Pflichtanteil ohne Rechenwirkung. Sicherheit mittel (geprüft 2026-11-16).
+    gemeinnuetzig_ausgleich: 1
     gemeinnuetzig_foerderfonds: 1
     gemeinnuetzig_baurecht: 0
     gemeinnuetzig_belegungsvorschriften: 0
@@ -781,7 +798,7 @@
     bau_normenharmonisierung: 1
     # Mindestanteil (erhoben 2026-11-16): Kein Pflichtanteil im Baureglement gefunden; Förderreglement setzt nur ein Ziel (20 %). Sicherheit tief.
     gemeinnuetzig_mindestanteil: 0
-    # NICHT GEKLÄRT. Kein Pflichtanteil im Baureglement gefunden; Förderreglement mit Ziel 20 % bis 2035.
+    # Kein genereller Bonus: Die Stadt hält Nutzungsboni für nicht praktikabel, weil die Ausnützung über Abstände und Geschosszahlen geregelt ist (Mitwirkungsbericht BMBV 2023); projektbezogene Boni in ZPP/ÜO nicht ausgeschlossen, keine gefunden. Sicherheit mittel (geprüft 2026-11-16).
     gemeinnuetzig_ausgleich: 0
     gemeinnuetzig_foerderfonds: 1
     gemeinnuetzig_baurecht: 1

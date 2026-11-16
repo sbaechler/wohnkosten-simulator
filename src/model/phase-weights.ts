@@ -187,9 +187,10 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     weights: [0.23, 0.23, 0.23],
     profilQuelle: 'Annahme',
     // Grösse nach ANNAHME_ANGEBOT_MAX_ANTEIL gesenkt (2026-11-15, vorher 0.52).
-    // Ersatzneubau-Effizienz: Agglomeration Zürich 2.8×, Agglomeration
-    // Lausanne 6.5× (Sotomo 2025, Abb. 9; Stadt Zürich rund 2×).
-    // Mehr Netto-Neubau pro Abriss → mehr Angebot. Grösse Setzung.
+    // Ersatzneubau-Effizienz, neue Wohnungen pro abgerissene Wohnung (brutto):
+    // Agglomeration Zürich 2.8×, Agglomeration Lausanne 6.5× (Sotomo 2025,
+    // Abb. 9; Arbeitsmarktregion Stadt Zürich 2.3×, Abb. 10; CH-014).
+    // Mehr neue Wohnungen pro Abriss → mehr Angebot. Grösse Setzung.
   },
   {
     from: 'bau_einspracherecht_dritte',
@@ -276,15 +277,15 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     weights: [0.27, 0.27, 0.27],
     profilQuelle: 'Annahme',
     // Grösse nach ANNAHME_ANGEBOT_MAX_ANTEIL gesenkt (2026-11-15, vorher 0.61).
-    // DIW Discussion Paper 2143 (Ters/Kholodilin, nur Genf): Wohnungs-
-    // rationierung = stärkste Angebotsbremse. Basel: Baugesuche für Wohnungen
-    // −76 % (Mittel 784 für 2014–2020 gegen 190 für 2021–2023; Swiss Real
-    // Estate Institute im Auftrag des SVIT, Interessenvertreter; Ursache laut
-    // Regierungsrat Basel-Stadt offen).
+    // DIW Discussion Paper 2143 (Ters/Kholodilin, nur Genf, CH-013): Wohnungs-
+    // rationierung bremst die Bauinvestitionen stärker als Mietpreis-
+    // regulierung. Basel: Wohneinheiten in Baugesuchen −76 % (Mittel 784 für
+    // 2014–2020 gegen 190 für 2021–2023; SRES im Auftrag von SVIT/HEV,
+    // Interessenvertreter, CH-015; Einfluss laut Präsidialdepartement offen).
     // Ohne Verlaufsangabe in der Sammlung → neutraler Impuls.
-    // Grösse: Setzung (Prüfung 2026-11-15). Weder DIW DP 2143 noch die
-    // Basler Zahlen haben eine Notiz in docs/recherche/; die Richtung ist
-    // plausibel (Genf), die Grösse nicht belegt. Der P3-Stand (1.49) liegt
+    // Grösse: Setzung (Prüfung 2026-11-15). Die Richtung ist plausibel
+    // (Genf), die Grösse nicht belegt: DIW misst Investitionen für einen
+    // Rationierungsindex, nicht das Angebot je Abbruchverbot. Der P3-Stand (1.49) liegt
     // auf der Höhe der belegten Angebotshebel (Zonenreserve 1.62, Verdichtung
     // 1.48, Ausnützung 1.46). Das teilt die Kante mit den übrigen Annahme-
     // Kanten auf angebotspotenzial (Einsprache suspensiv 1.66, Umnutzungs-
@@ -735,8 +736,8 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     // Bestandsmieter bleiben im Mittel 13.7 Jahre gegenüber rund 8.5 Jahren
     // im CH-Schnitt (Wüest Partner 2024, zitiert in DIW Discussion Paper
     // 2143; CH-005). Abstand Markt- zu Bestandsmiete: Genf rund 33 %,
-    // Agglomeration Zürich rund 9 % (Sotomo 2025, S. 27: 268 gegen
-    // 245 CHF/m²·a). CH-004: Mietrecht als Mobilitätsbremse.
+    // Agglomeration Zürich rund 9 % (gerechnet aus Sotomo 2025, S. 27:
+    // 268 gegen 245 CHF/m²·a; CH-014). CH-004: Mietrecht als Mobilitätsbremse.
   },
   {
     from: 'mietrecht_kuendigungsschutz',
@@ -1066,8 +1067,10 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     sign: -1,
     weights: [0.69, 0.69, 0.69],
     profilQuelle: 'Annahme',
-    // DIW Discussion Paper 2143 (Ters/Kholodilin; Genf 1994–2022):
-    // Rationierungsschocks → institutionelle Neubauinvestitionen −400 Mio. CHF.
+    // DIW Discussion Paper 2143 (Ters/Kholodilin; Genf 1994–2022; CH-013):
+    // Rationierungsschocks → institutionelle Neubauinvestitionen −400 Mio. CHF
+    // (90 %-Band). Gilt für den ganzen Rationierungsindex, nicht für das
+    // Abbruchverbot allein.
   },
   {
     from: 'nutzung_umnutzungsverbot',

@@ -210,6 +210,9 @@ status_counts:
 |----|-------|------|-----|--------|-------------- |
 | CH-010 | Eigenmietwert-Abschaffung: Auswirkungen auf Wohneigentum in der Schweiz (Wüest Partner) | 2026 | working-paper | found | steuer_eigenmietwert, angebotspotenzial, nachfragedruck |
 | CH-012 | Mietpreis-Initiative und indirekter Gegenvorschlag — Kriterien, Uhren, Kontextwerte | 2026 | synthesis | evaluated | mietrecht_kriterium, mietrecht_durchsetzung, ctx:teuerung, vergleichsmiete_aktiv |
+| CH-013 | Restrictive rental policies: Lower rents vs. less construction in Geneva (DIW DP 2143, Ters/Kholodilin) | 2025 | working-paper | evaluated | nutzung_abbruchverbot, nutzung_umnutzungsverbot, mietrecht_kostenmiete, investitionsattraktivitaet, angebotspotenzial |
+| CH-014 | Wohnraum für Zürich und die Schweiz — Agglomerationsvergleich (Sotomo) | 2025 | commissioned-study | evaluated | bau_ersatzneubau_effizienz, angebotspotenzial, mietpreis_schutzlevel, marktfriktion |
+| CH-015 | Wohnschutzinitiative Basel-Stadt: Baugesuche (SRES im Auftrag SVIT/HEV) | 2025 | working-paper | evaluated | nutzung_abbruchverbot, mietrecht_kostenmiete, angebotspotenzial, investitionsattraktivitaet |
 
 ## Verbleibende Lücken nach Gap-Filling (Stand 2026-04-12)
 

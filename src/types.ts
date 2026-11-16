@@ -5,7 +5,7 @@
 // ============================================================
 //
 // Sotomo Wohnraumstudie ZH 2025 (Sep.):
-//   - bau_ersatzneubau_effizienz: Netto-Neubau pro Abriss (Agglomeration Zürich 2.8×, Agglomeration Lausanne 6.5×; Sotomo 2025, Abb. 9) — als E0-Parameter
+//   - bau_ersatzneubau_effizienz: neue Wohnungen pro abgerissene Wohnung, brutto (Agglomeration Zürich 2.8×, Agglomeration Lausanne 6.5×; Sotomo 2025, Abb. 9, CH-014) — als E0-Parameter
 //   Quelle: https://www.sotomo.ch/files/data/projectfile/2025/09/Sotomo-Wohnraumstudie-%E2%80%93-ZHK-2025-09.pdf
 //
 
@@ -27,7 +27,7 @@ export type CityParams = {
   // 2. Bau & Bewilligung
   bau_energievorgaben: ParamValue;
   bau_sanierungspflicht: ParamValue;
-  bau_ersatzneubau_effizienz: ParamValue; // Sotomo 2025, Abb. 9: Netto-Neubau pro Abriss (Agglomeration Zürich 2.8×, Agglomeration Lausanne 6.5×)
+  bau_ersatzneubau_effizienz: ParamValue; // Sotomo 2025, Abb. 9 (CH-014): neue Wohnungen pro abgerissene Wohnung, brutto (Agglomeration Zürich 2.8×, Agglomeration Lausanne 6.5×)
   bau_einspracherecht_dritte: ParamValue;
   bau_einspracherecht_suspensiv: ParamValue;
   bau_bewilligungsverfahren: ParamValue;

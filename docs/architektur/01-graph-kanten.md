@@ -26,7 +26,7 @@ Positiver Wert: mehr Angebot möglich. Eingehende Kanten: 23.
 | `boden_bauverpflichtung` | strengere Massnahmen gegen Baulandhortung | erhöht → mehr Angebot möglich | 0.23 / 0.23 / 0.23 | Annahme |
 | `bau_energievorgaben` | strengere Energievorgaben für Neubauten | senkt → weniger: mehr Angebot möglich | 0.18 / 0.18 / 0.18 | Annahme |
 | `bau_sanierungspflicht` | strengere Sanierungspflicht im Bestand | senkt → weniger: mehr Angebot möglich | 0.25 / 0.25 / 0.25 | Annahme |
-| `bau_ersatzneubau_effizienz` | mehr Netto-Wohnungen pro Abriss | erhöht → mehr Angebot möglich | 0.23 / 0.23 / 0.23 | Annahme |
+| `bau_ersatzneubau_effizienz` | mehr neue Wohnungen pro Abriss | erhöht → mehr Angebot möglich | 0.23 / 0.23 / 0.23 | Annahme |
 | `bau_einspracherecht_dritte` | mehr Einspracheberechtigte | senkt → weniger: mehr Angebot möglich | 0.23 / 0.23 / 0.23 | Annahme |
 | `bau_einspracherecht_suspensiv` | stärkere aufschiebende Wirkung von Einsprachen | senkt → weniger: mehr Angebot möglich | 0.30 / 0.30 / 0.30 | Annahme |
 | `bau_bewilligungsverfahren` | schnelleres, einfacheres Verfahren | erhöht → mehr Angebot möglich | 0.19 / 0.19 / 0.19 | Annahme |

@@ -238,9 +238,9 @@ function basePriceTrend(state: MarketState, context: GroupContext, group: GroupI
   const base = supplyEffect + demandEffect;
 
   // Mietschutz dämpft Preisanstieg für Mieter.
-  // Faktor 0.4: Setzung, nicht kalibriert. Sotomo 2025 (S. 27) zeigt für die
-  // Agglomeration Zürich Bestandsmieten rund 9 % unter der Miete nach
-  // Mieterwechsel (245 gegen 268 CHF/m²·a); Genf rund 33 % (DIW DP 2143, CH-005).
+  // Faktor 0.4: Setzung, nicht kalibriert. Sotomo 2025 (S. 27, CH-014) zeigt
+  // für die Agglomeration Zürich Bestandsmieten von 245 gegen 268 CHF/m²·a
+  // nach Mieterwechsel, gerechnet rund 9 % darunter; Genf rund 33 % (DIW DP 2143, CH-005).
   // Einen Vergleich geschützter mit ungeschützten Mietern liefert keine Quelle
   // im Repo.
   const protectionEffect = state.mietpreis_schutzlevel * 0.4;
