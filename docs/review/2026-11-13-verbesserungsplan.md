@@ -22,8 +22,9 @@ Branch `feat/mietrecht-regime-2026`, **nicht gepusht**. Commits seit `main`-Stan
 | `d5303f2` | Preis-Mengen-Diagramm: Referenzlinie zeigt die Baseline derselben Phase |
 | `b246c5a` | Sprint 4 (Altliegenschaften-Daten, Regime-Einheiten, Restposten) |
 | `c4cefb1` | Mietabstand-Indikator, Regel für unbelegte Angebotshebel, Schieber «Ausgleich beim Pflichtanteil» |
+| `e41c600` | `gemeinnuetzig_mindestanteil` und `gemeinnuetzig_ausgleich` je Stadt nach geltendem Recht (Abschnitt 0.3, Punkt 1) |
 
-**Uncommittet im Working Tree (2026-11-16):** der erhobene Stand von `gemeinnuetzig_ausgleich` und `gemeinnuetzig_mindestanteil` je Stadt (`data/cities/switzerland.yaml`, `src/generated/cities.ts`, `ausgleich-pflichtanteil.test.ts`, `schieber-wirkung.test.ts`) und dieser Plan. Geprüft und grün; es fehlt nur der Commit.
+Working Tree sauber (Stand 2026-11-16).
 
 **Teststand 2026-11-16:** `npx vitest run` 558 passed, 1 skipped (28 Dateien). `npx tsc -b`, `npm run lint`, `npm run build` ohne Fehler. `npx tsx scripts/calibrate.ts --dry-run` 0/567 Verletzungen.
 
