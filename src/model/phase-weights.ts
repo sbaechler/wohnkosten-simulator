@@ -410,7 +410,12 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     to: 'nachfragedruck',
     sign: +1,
     weights: [1.0, 0.8, 0.6],
-    // Zuwanderung wirkt sofort auf die Nachfrage.
+    // Zuwanderung wirkt sofort auf die Nachfrage. Richtung und kurzfristige
+    // Grösse belegt: DE-013 (382 Kreise, kausal: 1 % Zuwanderung → Mieten
+    // ≈ +1 %, Wohnungspreise bis +3 %), US-021 (IV: Mieten +1.4 %, Preise
+    // +2.2 % je 1 % der Beschäftigung, kein Mehrbau), DE-010. Dass die
+    // Wirkung über P2/P3 nachlässt, stützt nur Monras (2020, zitiert in
+    // US-021: Mieten sinken nach 5+ Jahren); die Grösse des Abbaus ist Setzung.
   },
   {
     from: 'ctx:wirtschaftskraft',
@@ -580,7 +585,8 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     to: 'verdraengungsrisiko',
     sign: +1,
     weights: [1.0, 1.0, 1.0],
-    // Zuwanderungsdruck wirkt durchgehend.
+    // Zuwanderungsdruck wirkt durchgehend. DE-013: im unteren Preissegment
+    // steigen die Preise mehr als doppelt so stark.
   },
   {
     from: 'ctx:wirtschaftskraft',
@@ -912,7 +918,9 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     to: 'eigentumsquoten_trend',
     sign: -1,
     weights: [1.0, 1.0, 1.0],
-    // Zuwanderung erhöht die Mietnachfrage.
+    // Zuwanderung erhöht die Mietnachfrage. DE-013: Wohnungspreise steigen
+    // stärker als Mieten (bis +3 % gegen ≈ +1 %), Eigentum wird schwerer
+    // erreichbar. Indirekt belegt, die Eigentumsquote selbst ist nicht gemessen.
   },
   {
     from: 'ctx:wirtschaftskraft',

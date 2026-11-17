@@ -64,6 +64,7 @@ status_counts:
 | DE-008 | Rent Control Does Not Make Housing More Affordable (Manhattan Institute) | 2020 | meta-study | found | mietrecht_kuendigungsschutz, mietrecht_anfangsmiete, angebotspotenzial |
 | DE-009 | Berlin Mietendeckel 2020–2021 — Fallstudie | 2021 | peer-reviewed | evaluated | mietrecht_anfangsmiete, mietrecht_kuendigungsschutz, angebotspotenzial |
 | DE-012 | Wohnen in der DDR. Folge 8 von „Backstage DDR“ | 2025 | gray-literature | evaluated | mietrecht_anfangsmiete, gemeinnuetzig_kraft, angebotspotenzial |
+| DE-013 | The Effect of Immigration on the German Housing Market (Unal/Hayo/Erol) | 2022 | working-paper | evaluated | ctx:zuwanderungsdruck, nachfragedruck, verdraengungsrisiko, eigentumsquoten_trend |
 
 ## AT — Österreich
 
@@ -95,6 +96,7 @@ status_counts:
 | US-018 | The Effects of Inclusionary Zoning on Local Housing Markets (Schuetz/Been/Ellen) | 2012 | peer-reviewed | evaluated | gemeinnuetzig_mindestanteil, gemeinnuetzig_baurecht, gemeinnuetzig_sozialmischung, angebotspotenzial |
 | US-019 | Why People Are Fleeing Blue Cities for Red States (Brooks) | 2023 | gray-literature | evaluated | raumplanung_zonenreserve, angebotspotenzial, nachfragedruck |
 | US-020 | Abundance and the Left (Klein / Teachout / Chakrabarti) | 2025 | gray-literature | evaluated | bau_bewilligungsverfahren, gemeinnuetzig_kraft, angebotspotenzial |
+| US-021 | Impacts of Unauthorized Immigration on U.S. Labor and Housing Markets (Wilson/Zhou, Dallas Fed WP 2607) | 2026 | working-paper | evaluated | ctx:zuwanderungsdruck, nachfragedruck, angebotspotenzial, eigentumsquoten_trend |
 
 ## CA — Kanada
 
@@ -117,6 +119,7 @@ status_counts:
 |----|-------|------|-----|--------|--------------|
 | ES-001 | Airbnb in Barcelona: Garcia-López et al. | 2020 | peer-reviewed | evaluated | nutzung_kurzzeitvermietung, nachfragedruck, aufwertungsdruck |
 | ES-002 | Barcelona STR-Regulierung — Fallstudie | 2020 | peer-reviewed | evaluated | nutzung_kurzzeitvermietung, nachfragedruck, aufwertungsdruck |
+| ES-003 | Immigration and Housing Costs: Evidence from Spain's Post-2018 Wave (Fernández/Calvo) — nur Sekundärquelle | 2026 | working-paper | found | ctx:zuwanderungsdruck, nachfragedruck, eigentumsquoten_trend |
 
 ## NL — Niederlande
 
