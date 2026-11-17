@@ -4,6 +4,9 @@
   padding: 16px;
   background: #11112a;
   overflow-y: auto;
+  /* Same thin scrollbar on every OS, independent of macOS "Show scroll bars" setting */
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.25) transparent;
 }
 
 .parameter-panel__header {
