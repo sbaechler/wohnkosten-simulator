@@ -97,6 +97,8 @@ status_counts:
 | US-019 | Why People Are Fleeing Blue Cities for Red States (Brooks) | 2023 | gray-literature | evaluated | raumplanung_zonenreserve, angebotspotenzial, nachfragedruck |
 | US-020 | Abundance and the Left (Klein / Teachout / Chakrabarti) | 2025 | gray-literature | evaluated | bau_bewilligungsverfahren, gemeinnuetzig_kraft, angebotspotenzial |
 | US-021 | Impacts of Unauthorized Immigration on U.S. Labor and Housing Markets (Wilson/Zhou, Dallas Fed WP 2607) | 2026 | working-paper | evaluated | ctx:zuwanderungsdruck, nachfragedruck, angebotspotenzial, eigentumsquoten_trend |
+| US-022 | Immigration and Housing Rents in American Cities (Saiz, JUE 61(2)) | 2007 | peer-reviewed | evaluated | ctx:zuwanderungsdruck, nachfragedruck, angebotspotenzial, verdraengungsrisiko, eigentumsquoten_trend |
+| US-023 | Immigration and Wage Dynamics: Evidence from the Mexican Peso Crisis (Monras, JPE 128(8)) | 2020 | peer-reviewed | evaluated | ctx:zuwanderungsdruck, nachfragedruck, angebotspotenzial, eigentumsquoten_trend |
 
 ## CA — Kanada
 

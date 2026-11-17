@@ -413,9 +413,10 @@ export const PHASE_WEIGHTED_EDGES: readonly PhaseEdge[] = [
     // Zuwanderung wirkt sofort auf die Nachfrage. Richtung und kurzfristige
     // Grösse belegt: DE-013 (382 Kreise, kausal: 1 % Zuwanderung → Mieten
     // ≈ +1 %, Wohnungspreise bis +3 %), US-021 (IV: Mieten +1.4 %, Preise
-    // +2.2 % je 1 % der Beschäftigung, kein Mehrbau), DE-010. Dass die
-    // Wirkung über P2/P3 nachlässt, stützt nur Monras (2020, zitiert in
-    // US-021: Mieten sinken nach 5+ Jahren); die Grösse des Abbaus ist Setzung.
+    // +2.2 % je 1 % der Beschäftigung, kein Mehrbau), DE-010, US-022
+    // (Saiz: Mieten ≈ +1 % je 1 % Bevölkerung). Der Abbau über P2/P3 ist
+    // Setzung: US-023 (Monras) zeigt ein Nachlassen nach etwa 3 Jahren, aber
+    // nur zwischen US-Regionen; US-022 findet über 14 Jahre keines.
   },
   {
     from: 'ctx:wirtschaftskraft',

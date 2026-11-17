@@ -72,12 +72,17 @@ mit tiefem Einkommen und hohem Wohnkostenanteil, bei kurzfristig fixem Angebot.
 
 ## Literatur im Paper (für P2/P3 relevant, S. 8 und 44)
 
+Wiedergabe der Autoren; am Original geprüft in US-022 und US-023.
+
 - **Saiz (2007)**, legale Zuwanderung USA 1985–1998: 1 % der Bevölkerung →
-  Mieten ≈ +1 %, Preise +2 % (OLS) bzw. gut +3 % (IV)
+  Mieten ≈ +1 %, Preise +2 % (OLS) bzw. gut +3 % (IV). US-022: Mieten bestätigt,
+  die IV-Preise von gut 3 % im Arbeitspapier nicht gefunden (höchstens 2.57)
 - **Cabral & Steingress (2026)**, 1980–2019: Mieten-Elastizität ≈ 2, Preise 2–3
-- **Monras (2020)**, Peso-Krise 1995: kurzfristig Preise hoch, **nach 5+ Jahren
-  sinken die Mieten** — billigere Bauarbeit durch zugewanderte Arbeitskräfte und
-  Wegzug Einheimischer
+- **Monras (2020)**, Peso-Krise 1995: kurzfristig Preise hoch, nach 5+ Jahren
+  sinkende Mieten durch billigere Bauarbeit und Wegzug Einheimischer. US-023
+  präzisiert: Der Mietvorsprung der Zuzugsregionen ist nach etwa 3 Jahren weg,
+  über 1990–2000 sinken Mieten und Preise dort relativ zu anderen Regionen.
+  Erklärung im Paper ist der Bausektor, nicht der Wegzug Einheimischer
 - **Howard et al. (2024)**, Ausschaffungen: kurzfristige Preisrückgänge, die sich
   rasch umkehren, weil das Angebot schrumpft
 
@@ -86,9 +91,10 @@ mit tiefem Einkommen und hohem Wohnkostenanteil, bei kurzfristig fixem Angebot.
 - Stützt `ctx:zuwanderungsdruck → nachfragedruck` (+1) mit kausaler, kurzfristiger
   Elastizität. Grössenordnung deckungsgleich mit DE-013 und Saiz (2007)
 - **Kurzfristig keine Angebotsreaktion** (Tab. 6d) → hohes P1-Gewicht berechtigt
-- Monras (2020) ist der einzige Beleg in diesem Umfeld, dass die Wirkung **langfristig
-  nachlässt** (Angebot und Wanderung passen sich an). Das stützt die Richtung des
-  Abbaus `[1.0, 0.8, 0.6]`, nicht seine Grösse
+- Zum Abbau `[1.0, 0.8, 0.6]` über die Phasen: Monras (US-023) zeigt ein Nachlassen
+  nach etwa 3 Jahren, aber nur als Unterschied zwischen US-Regionen, nicht für einen
+  nationalen Schock. Saiz (US-022) findet über 14 Jahre kein Nachlassen. Die Richtung
+  ist plausibel, die Grösse bleibt Setzung
 - Kaufpreise reagieren stärker als Mieten → passt zu `eigentumsquoten_trend` (−1)
 - Mechanismus über tiefe Einkommen stützt die Kante auf `verdraengungsrisiko`
   (indirekt, nicht gemessen)
