@@ -180,7 +180,7 @@ export function SupplyDemandChart({ context, baseline, modified, diff, phases, b
     // Liegen Werte nah beieinander, werden die Beschriftungen auseinander-
     // geschoben; der Strich auf der Achse bleibt am echten Wert.
     const spread = (values: number[], minGap: number): number[] => {
-      const order = values.map((v, i) => i).sort((a, b) => values[a] - values[b]);
+      const order = values.map((_, i) => i).sort((a, b) => values[a] - values[b]);
       const out = [...values];
       for (let k = 1; k < order.length; k++) {
         const prev = out[order[k - 1]];
